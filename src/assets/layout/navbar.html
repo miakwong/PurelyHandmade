@@ -10,8 +10,7 @@
         <nav id="menu-container">
             <a class="menu-items" href="/index.html">Home</a>
             <a class="menu-items" href="/src/views/products.html">Products</a>
-            <a class="menu-items" href="/src/views/admin/order_management.html">Orders</a>
-            <a class="menu-items" href="/src/views/admin/comment.html">Reviews</a>
+            <a class="menu-items" id="orders-menu-item" href="/src/views/admin/order_management.html" style="display: none;">Orders</a>
             <a class="menu-items" href="/src/views/about.html">Our Story</a>
         </nav>
     </div>
@@ -19,7 +18,7 @@
         <a href="/src/views/checkout/cart.html" class="menu-items" title="View Cart">
             <span style="margin-right: 5px;">🛒</span> Cart
         </a>
-        <a href="/src/views/auth/profile.html" class="menu-items" title="Your Profile">
+        <a id="account-button" href="/src/views/auth/profile.html" class="menu-items" title="Your Profile" style="display: none;">
             <span style="margin-right: 5px;">👤</span> Account
         </a>
         <a id="login-button" href="/src/views/auth/login.html" class="menu-items">
@@ -36,14 +35,23 @@
     (function() {
         const loginButton = document.getElementById('login-button');
         const logoutButton = document.getElementById('logout-button');
+        const ordersMenuItem = document.getElementById('orders-menu-item');
+        const accountButton = document.getElementById('account-button');
         
         // 从localStorage检查用户登录状态
         const currentUser = localStorage.getItem('currentUser');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
         
         if (currentUser) {
-            // 用户已登录，显示登出按钮
+            // 用户已登录，显示登出按钮和账户按钮
             loginButton.style.display = 'none';
             logoutButton.style.display = 'inline-block';
+            accountButton.style.display = 'inline-block';
+            
+            // 如果是管理员，显示Orders菜单
+            if (isAdmin) {
+                ordersMenuItem.style.display = 'inline-block';
+            }
             
             // 添加登出功能
             logoutButton.addEventListener('click', function(e) {
@@ -58,6 +66,7 @@
             // 用户未登录，显示登录按钮（默认已显示，此处确保逻辑完整）
             loginButton.style.display = 'inline-block';
             logoutButton.style.display = 'none';
+            accountButton.style.display = 'none';
         }
     })();
 </script>
