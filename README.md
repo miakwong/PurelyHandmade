@@ -2,7 +2,7 @@
 This project aims to develop a secure and user-friendly e-commerce platform where artisans can list and sell their handmade products.
 COSC 360 Project 
 
-# Due Dates: See Milestone Dates
+**Due Dates: See Milestone Dates**
 
 # Overview:
 
@@ -102,6 +102,7 @@ Develop styles for pages
 Examples of each page type in your proposed site
 Create a Git Hub repository and add instructor and TAs.
 You will submit the link to the GitHub repository
+
 **3) March 23rd, 2025 - 30% (Site should have minimal core functionality - see above for minimum functionality requirement)**
 
 Client-side security
@@ -113,6 +114,7 @@ Database functionality complete
 Core functional components operational (see baseline objectives)
 Preliminary summary document, indicating implemented functionality
 Submit a link to your repo and a PDF document that describes what you have done regarding the points listed above.
+
 **4) April 10th, 2025  – 35% (The full site)**
 
 Pages styled as per your design
