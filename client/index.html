@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/index.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+
+<!--  Top Navigation Bar -->
+<nav class="navbar navbar-light bg-light p-3">
+  <div class="container d-flex justify-content-between">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="index.html">
+      <img src="imgs/logo.jpg" alt="Logo" width="50">
+      <span class="ms-2 fs-4">Purely Homemade</span>
+    </a>
+
+    <!-- Search Bar -->
+    <form class="d-flex">
+      <input class="form-control me-2" type="search" placeholder="Search">
+      <button class="btn btn-outline-primary">🔍</button>
+    </form>
+
+    <!-- Login & Cart -->
+    <div class="d-flex align-items-center">
+      <!-- User Dropdown Menu -->
+      <div class="dropdown me-3">
+        <a href="#" class="btn btn-outline-secondary dropdown-toggle" id="userDropdown">
+          <i class="material-icons-outlined">account_circle</i>
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+          <li><a class="dropdown-item" href="auth/login.html">Login</a></li>
+          <li><a class="dropdown-item" href="auth/register.html">Register</a></li>
+        </ul>
+      </div>
+      <!-- Cart Icon -->
+      <a href="pages/cart.html" class="btn btn-outline-primary">
+        <i class="material-icons-outlined">shopping_bag</i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- 🔹 2. Main Navigation Menu -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto custom-navbar">
+        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Menu</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">New Arrivals</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">On Sale</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Our Story</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- 🔹 3. Sidebar Categories & Recommended Items -->
+<div class="container mt-4">
+  <div class="row">
+    <!-- Sidebar Categories -->
+    <aside class="col-md-3">
+      <h5>Categories</h5>
+      <ul class="list-group">
+        <li class="list-group-item"><a href="products.html?category=art" class="category-link">Art & Painting</a></li>
+        <li class="list-group-item"><a href="products.html?category=jewelry" class="category-link">Jewelry & Accessories</a></li>
+        <li class="list-group-item"><a href="products.html?category=home" class="category-link">Home & Living</a></li>
+        <li class="list-group-item"><a href="products.html?category=ceramics" class="category-link">Ceramics & Tea</a></li>
+      </ul>
+    </aside>
+
+    <!-- Recommended Items -->
+    <section class="col-md-9">
+      <h2 class="text-center"></h2>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <img src="client/imgs/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
+            <div class="card-body">
+              <h5 class="card-title">Handmade Mug</h5>
+              <a href="#" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <img src="imgs/Handwoven_1.JPG" class="card-img-top" alt="Handwoven Basket">
+            <div class="card-body">
+              <h5 class="card-title">Handwoven scarf</h5>
+              <a href="#" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <img src="imgs/Wood_1.JPG" class="card-img-top" alt="Wood Carving Art">
+            <div class="card-body">
+              <h5 class="card-title">Wood Carving Art</h5>
+              <a href="#" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- 🔹 4. Recommended Designer Section -->
+<div class="container mt-5">
+  <h2 class="text-center">Introduction of Recommended Designer</h2>
+  <div class="text-center">
+    <p>Meet our featured artist who specializes in handmade crafts.</p>
+    <a href="#" class="btn btn-dark">Shop Products</a>
+  </div>
+</div>
+
+<!-- 🔹 5. Footer -->
+<footer class="bg-light text-center text-lg-start mt-5 p-3">
+  <div class="container">
+    <div class="row">
+      <!-- Logo Section -->
+      <div class="col-md-4">
+        <img src="imgs/logo.jpg" alt="Logo" width="100">
+      </div>
+
+      <!-- Contact Information -->
+      <div class="col-md-4">
+        <p>Email: purelyhomemade@email.com</p>
+        <p>Phone: +123 456 7890</p>
+        <p>Follow Us:
+          <a href="https://www.facebook.com" target="_blank">
+            <i class="fa-brands fa-facebook fa-2x" style="color:#1877F2;"></i>
+          </a>
+          <a href="https://www.instagram.com" target="_blank">
+            <i class="fa-brands fa-instagram fa-2x" style="color:#E4405F;"></i>
+          </a>
+        </p>
+      </div>
+
+      <!-- Legal Links -->
+      <div class="col-md-4">
+        <a href="#">Terms of Service</a> |
+        <a href="#">Privacy Policy</a> |
+        <a href="#">Return Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

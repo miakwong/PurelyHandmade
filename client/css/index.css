@@ -1,0 +1,89 @@
+/* ====== General Styling ====== */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* ====== Fixed Width for Centered Content ====== */
+.container-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ====== Navigation Fixes ====== */
+.navbar-nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+/* ====== Dropdown Menu Fix ====== */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+/* ====== Sidebar Styling ====== */
+.sidebar {
+  background: white;
+  padding: 15px;
+  border: 1px solid #ddd;
+}
+
+.sidebar ul li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Remove default link color and underline */
+.category-link {
+  color: inherit;  /* Uses parent color */
+  text-decoration: none; /* Removes underline */
+  display: block; /* Makes the whole list item clickable */
+}
+
+/* Add hover effect */
+.category-link:hover {
+  color: Grey;  /* Change color on hover (Bootstrap primary blue) */
+}
+
+
+/* ====== Footer Styling ====== */
+.footer {
+  background: #222;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer a {
+  color: #ddd;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: white;
+}
+
+/* ====== Responsive Fixes ====== */
+@media (max-width: 768px) {
+  .top-nav {
+    flex-direction: column;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
