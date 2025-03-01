@@ -108,5 +108,12 @@
         <button id="closeModal">Close</button>
     </div>
 
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder" class="mt-5"></div>
+
+    <script>
+        fetch('../../assets/layout/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);
+    </script>
+
 </body>
 </html>
