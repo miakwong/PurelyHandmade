@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Comment Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./client/css/comment.css">
-    <link rel="stylesheet" href="./client/css/navbar.css"> 
-    <script defer src="./client/js/comment.js"></script>
+    <link rel="stylesheet" href="../../assets/css/comment.css">
+    <link rel="stylesheet" href="../../assets/css/navbar.css"> 
+    <script defer src="../../assets/js/comment.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
@@ -49,7 +49,7 @@
     </ul>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            fetch("./client/layout/navbar.html") 
+            fetch("../../assets /layout/navbar.html") 
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("Navbar HTML not found!");

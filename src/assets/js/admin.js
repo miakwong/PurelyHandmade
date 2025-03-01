@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // 先加载 Navbar
-    fetch("./client/layout/navbar.html") // ✅ 确保路径正确
+    fetch("../../assets/layout/navbar.html") // ✅ 确保路径正确
         .then(response => response.text())
         .then(data => {
             document.getElementById("navbar-placeholder").innerHTML = data;
