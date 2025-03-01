@@ -1,8 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // 先加载 Navbar
+    fetch("./client/layout/navbar.html") // ✅ 确保路径正确
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("navbar-placeholder").innerHTML = data;
+        })
+        .catch(error => console.error("Error loading navbar:", error));
+
+    // 运行你原来的代码
     loadUsers();
     loadOrders();
     loadComments();
 });
+
 
 function loadUsers() {
     let users = JSON.parse(localStorage.getItem("usersData")) || [
