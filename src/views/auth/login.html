@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/src/assets/css/global.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- Main Content -->
+  <div id="main-content">
+    <div class="container my-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h2 class="card-title text-center mb-4">Login</h2>
+              <form id="login-form" novalidate>
+                <div class="mb-3">
+                  <input type="text" class="form-control" id="loginIdentifier" placeholder="Username or Email address" required />
+                </div>
+                <input type="password" class="form-control mb-3" id="loginPassword" placeholder="Password" required minlength="6" />
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+              </form>
+              <div class="mt-3 text-center">
+                <p>Don't have an account? <a href="register.html">Register</a></p>
+              </div>
+              <div class="text-end mt-2">
+                <a href="#" id="forgot-password">Forgot Password?</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <script>
+    // Load navbar and footer content dynamically
+    fetch('../../assets/layout/navbar.html').then(r => r.text()).then(html => document.getElementById('navbar-placeholder').innerHTML = html);
+    fetch('../../assets/layout/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);
+
+    // Handle Login form submission
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+      // Check built-in validation (required fields)
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      const identifier = document.getElementById('loginIdentifier').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      // Function to check if the input is an email
+      function isEmail(input) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(input);
+      }
+      
+      // Get all users from localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Find the user by email or username
+      const user = users.find(u => {
+        if (isEmail(identifier)) {
+          // If input is email, check against email
+          return u.email === identifier && u.password === password;
+        } else {
+          // If input is not email, check against username
+          return u.username === identifier && u.password === password;
+        }
+      });
+      
+      if (user) {
+        // Store the current user info
+        localStorage.setItem('currentUser', JSON.stringify({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          isAdmin: user.isAdmin || false
+        }));
+        
+        // If user is admin, store that info too
+        if (user.isAdmin) {
+          localStorage.setItem('isAdmin', 'true');
+        }
+        
+        // Redirect to profile page
+        window.location.href = 'profile.html';
+      } else {
+        alert('Invalid username/email or password. Please try again.');
+      }
+    });
+
+    // Forgot Password link (for demo purposes, just an alert)
+    document.getElementById('forgot-password').addEventListener('click', function(e) {
+      e.preventDefault();
+      alert('Password reset instructions would be sent to your email.');
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

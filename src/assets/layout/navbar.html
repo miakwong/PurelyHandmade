@@ -1,20 +1,63 @@
 <!-- navbar.html -->
-<link rel="stylesheet" href="assets/css/navbar.css">
+<link rel="stylesheet" href="/src/assets/css/navbar.css">
 
 <header>
     <div id="left-menu-items">
         <nav id="logo-container">
-            <img id="logo" src="../../assets/img/logo.png" alt="Site Logo" />
-            <span id="logo-name">My Website</span>
+            <img id="logo" src="/src/assets/img/logo.png" alt="Purely Homemade Logo" />
+            <span id="logo-name">Purely Homemade</span>
         </nav>
         <nav id="menu-container">
+            <a class="menu-items" href="/index.html">Home</a>
+            <a class="menu-items" href="/src/views/products.html">Products</a>
             <a class="menu-items" href="/src/views/admin/order_management.html">Orders</a>
-            <a class="menu-items" href="/src/views/profile.html">Profile</a>
-            <a class="menu-items" href="/src/views/admin/comment.html">Comments</a>
-            <a class="menu-items" href="/src/views/admin/admin.html">Admin</a>
+            <a class="menu-items" href="/src/views/admin/comment.html">Reviews</a>
+            <a class="menu-items" href="/src/views/about.html">Our Story</a>
         </nav>
     </div>
     <div id="right-menu-items">
-        <a href="index.html" class="menu-items loggedIn">Logout</a>
+        <a href="/src/views/checkout/cart.html" class="menu-items" title="View Cart">
+            <span style="margin-right: 5px;">🛒</span> Cart
+        </a>
+        <a href="/src/views/auth/profile.html" class="menu-items" title="Your Profile">
+            <span style="margin-right: 5px;">👤</span> Account
+        </a>
+        <a id="login-button" href="/src/views/auth/login.html" class="menu-items">
+            <span style="margin-right: 5px;">🔑</span> Login
+        </a>
+        <a id="logout-button" href="#" class="menu-items" style="display: none;">
+            <span style="margin-right: 5px;">🚪</span> Logout
+        </a>
     </div>
 </header>
+
+<script>
+    // 立即执行，不等待DOMContentLoaded，因为这个脚本在DOM元素之后
+    (function() {
+        const loginButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        
+        // 从localStorage检查用户登录状态
+        const currentUser = localStorage.getItem('currentUser');
+        
+        if (currentUser) {
+            // 用户已登录，显示登出按钮
+            loginButton.style.display = 'none';
+            logoutButton.style.display = 'inline-block';
+            
+            // 添加登出功能
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除登录信息
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('isAdmin');
+                // 重定向到首页
+                window.location.href = '/index.html';
+            });
+        } else {
+            // 用户未登录，显示登录按钮（默认已显示，此处确保逻辑完整）
+            loginButton.style.display = 'inline-block';
+            logoutButton.style.display = 'none';
+        }
+    })();
+</script>
