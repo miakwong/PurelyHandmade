@@ -243,5 +243,115 @@ textarea {
   h3 {
     page-break-after: avoid;
   }
+
 }
+/* ====== General Styling ====== */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fb;
+}
+
+/* ====== User Dropdown Menu Fix ====== */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+/* ====== Fixed Width for Centered Content ====== */
+.navbar-nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+/* Footer Styling */
+.footer {
+  background: white;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-direction: column;
+}
+
+.contact-info {
+  text-align: left;
+  margin-left: -300px;
+  margin-right: 250px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 50px;
+}
+
+.footer-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: grey;
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) {
+  .sidebar {
+  display: none;
+  }
+}
+
+/*When sidebar hidden, Recommended Items wide change*/
+#recommended-items {
+  transition: width 0.3s ease-in-out;
+}
+.sidebar-hidden #recommended-items {
+  width: 100%;
+}
+
+/*Card*/
+.card-img-top {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.card .btn-primary {
+  background-color: lightgray; /* Custom color */
+  color:gray;
+  border:none;
+  border-radius: 20px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.card .btn-primary:hover {
+  background-color: whitesmoke;
+}
+
+.row {
+  row-gap: 20px;
+  justify-content: center;
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 鼠标悬停时稍微改变颜色 */
+a:hover {
+  color: darkgray;
+  text-decoration: underline;
+}
+
+
 

@@ -9,22 +9,20 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
   <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/index.css">
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-  <!-- External JavaScript -->
-  <script src="client/js/navbar.js"></script>
 <body>
 
-<!--  Top Navigation Bar -->
+<!-- Top Navigation Bar -->
 <nav class="navbar navbar-light bg-light p-3">
   <div class="container d-flex justify-content-between">
-    <!-- Logo -->
     <a class="navbar-brand d-flex align-items-center" href="index.html">
-      <img src="imgs/logo.jpg" alt="Logo" width="50">
+      <img src="img/logo.jpg" alt="Logo" width="50">
       <span class="ms-2 fs-4">Purely Homemade</span>
     </a>
 
@@ -47,7 +45,7 @@
         </ul>
       </div>
       <!-- Cart Icon -->
-      <a href="pages/cart.html" class="btn btn-outline-primary">
+      <a href="cart.html" class="btn btn-outline-primary">
         <i class="material-icons-outlined">shopping_bag</i>
       </a>
     </div>
@@ -55,66 +53,79 @@
 </nav>
 
 <!-- Main Navigation Menu -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav mx-auto custom-navbar">
-        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Menu</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">New Arrivals</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">On Sale</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Our Story</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-      </ul>
+<div class="container-wrapper">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto custom-navbar">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Designers</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="newArrivalsLink">New Arrivals</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="onSaleLink">On Sale</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Our Story</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+        </ul>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+</div>
 
-<!-- 🔹 3. Sidebar Categories & Recommended Items -->
+<!-- Sidebar Categories & Recommended Items -->
 <div class="container mt-4">
   <div class="row">
     <!-- Sidebar Categories -->
-    <aside class="col-md-3">
+    <aside id="sidebar" class="col-md-3">
       <h5>Categories</h5>
       <ul class="list-group">
-        <li class="list-group-item"><a href="products.html?category=art" class="category-link">Art & Painting</a></li>
-        <li class="list-group-item"><a href="products.html?category=jewelry" class="category-link">Jewelry & Accessories</a></li>
-        <li class="list-group-item"><a href="products.html?category=home" class="category-link">Home & Living</a></li>
-        <li class="list-group-item"><a href="products.html?category=ceramics" class="category-link">Ceramics & Tea</a></li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="art">Art & Painting</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="accessories">Jewelry & Accessories</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="home">Home & Living</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="ceramics">Ceramics & Tea</a>
+        </li>
       </ul>
     </aside>
 
-    <!-- Recommended Items -->
-    <section class="col-md-9">
+    <!-- Recommended Items / New Arrivals Section -->
+    <section id="recommended-items" class="col-md-9">
       <h2 class="text-center"></h2>
       <div class="row">
         <div class="col-md-4">
           <div class="card">
-            <img src="imgs/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
+            <img src="img/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
             <div class="card-body">
               <h5 class="card-title">Handmade Mug</h5>
-              <a href="#" class="btn btn-primary">View</a>
+              <a href="product_detail.html?name=Handmade%20Mug&category=ceramics" class="btn btn-primary">View</a>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card">
-            <img src="imgs/Handwoven_1.JPG" class="card-img-top" alt="Handwoven Basket">
+            <img src="img/Handwoven_1.JPG" class="card-img-top" alt="Handwoven Basket">
             <div class="card-body">
-              <h5 class="card-title">Handwoven scarf</h5>
-              <a href="#" class="btn btn-primary">View</a>
+              <h5 class="card-title">Handwoven Scarf</h5>
+              <a href="product_detail.html?name=Handwoven%20Scarf&category=accessories" class="btn btn-primary">View</a>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="card">
-            <img src="imgs/Wood_1.JPG" class="card-img-top" alt="Wood Carving Art">
+            <img src="img/Wood_1.JPG" class="card-img-top" alt="Wood Carving Art">
             <div class="card-body">
               <h5 class="card-title">Wood Carving Art</h5>
-              <a href="#" class="btn btn-primary">View</a>
+              <a href="product_detail.html?name=Wood%20Carving%20Art&category=home" class="btn btn-primary">View</a>
             </div>
           </div>
         </div>
@@ -128,7 +139,7 @@
   <div class="carousel-inner">
 
     <!-- Slide 1 -->
-    <div class="carousel-item active" style="background-image: url('imgs/designer1-bg.JPG');">
+    <div class="carousel-item active" style="background-image: url('img/designer1-bg.JPG');">
       <div class="carousel-overlay">
         <h2>Introduction of Recommended Designer</h2>
         <p>Meet our featured artist who specializes in handmade crafts.</p>
@@ -137,7 +148,7 @@
     </div>
 
     <!-- Slide 2 -->
-    <div class="carousel-item" style="background-image: url('imgs/designer2-bg.JPG');">
+    <div class="carousel-item" style="background-image: url('img/designer2-bg.JPG');">
       <div class="carousel-overlay">
         <h2>Meet Our New Artist</h2>
         <p>Discover exclusive handmade collections from our latest designer.</p>
@@ -146,7 +157,7 @@
     </div>
 
     <!-- Slide 3 -->
-    <div class="carousel-item" style="background-image: url('imgs/designer3-bg.JPG');">
+    <div class="carousel-item" style="background-image: url('img/designer3-bg.JPG');">
       <div class="carousel-overlay">
         <h2>Exclusive Handmade Creations</h2>
         <p>Explore a new collection of unique handmade crafts.</p>
@@ -171,14 +182,17 @@
     <div class="row">
       <!-- Logo Section -->
       <div class="col-md-4">
-        <img src="imgs/logo.jpg" alt="Logo" width="100">
+        <img src="img/logo.jpg" alt="Logo" width="110">
       </div>
 
       <!-- Contact Information -->
-      <div class="col-md-4">
-        <p>Email: purelyhomemade@email.com</p>
-        <p>Phone: +123 456 7890</p>
-        <p>Follow Us:
+      <div class="col-md-4 contact-info">
+        <p class="d-flex align-items-center gap-3">
+          <i class="material-icons-outlined">email</i>purelyhomemade@email.com</p>
+        <p class="d-flex align-items-center gap-3">
+          <i class="material-icons-outlined">phone</i>+123 456 7890</p>
+        <p class="d-flex align-items-center gap-3">
+          <i class="material-icons-outlined">mediation</i>
           <a href="https://www.facebook.com" target="_blank">
             <i class="fa-brands fa-facebook fa-2x" style="color:#1877F2;"></i>
           </a>
@@ -190,13 +204,9 @@
 
       <!-- Legal Links -->
       <div class="col-md-4">
-        <div>
+        <div class="footer-links">
           <a href="#">Terms of Service</a>
-        </div>
-        <div>
           <a href="#">Privacy Policy</a>
-        </div>
-        <div>
           <a href="#">Return Policy</a>
         </div>
       </div>
@@ -206,6 +216,9 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- External JavaScript -->
+<script src="js/product.js"></script>
 
 </body>
 </html>

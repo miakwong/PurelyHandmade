@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   const navbar = document.querySelector(".navbar");
+  const ourStoryLink = document.getElementById("ourStoryLink");
 
-  // Example: Change background color on scroll
+  // Change background color on scroll
   window.addEventListener("scroll", function () {
     if (window.scrollY > 50) {
       navbar.classList.add("scrolled");
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Example: Dynamically add a new nav item
+  // Dynamically add a new nav item
   const newNavItem = document.createElement("li");
   newNavItem.classList.add("nav-item");
 
@@ -21,4 +22,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   newNavItem.appendChild(newLink);
   document.querySelector(".custom-navbar").appendChild(newNavItem);
+
+  // Toggle Our Story section
+  if (ourStoryLink) {
+    ourStoryLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      sidebar.classList.add("d-none");
+      designerCarousel.classList.add("d-none");
+      renderProducts(products.onSale, "On Sale - Special Discount");
+    });
+  }
 });
