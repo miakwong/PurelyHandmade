@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+    <h1>Your Profile</h1>
+    <!-- Profile Update Form -->
+    <form id="profileForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" />
+        <br />
+
+        <label for="email">Email:</label>
+        <!-- Email is shown but not editable -->
+        <input type="email" id="email" name="email" disabled />
+        <br />
+
+        <button type="submit">Update Profile</button>
+    </form>
+
+    <div id="profileMessage"></div>
+
+    <!-- Link to change password (reuse password reset page) -->
+    <p><a href="password_reset.html">Change Password</a></p>
+
+    <script src="/assets/js/auth.js"></script>
+</body>
+</html>
