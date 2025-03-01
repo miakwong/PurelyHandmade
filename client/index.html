@@ -14,8 +14,9 @@
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
+  <!-- External JavaScript -->
+  <script src="client/js/navbar.js"></script>
 <body>
 
 <!--  Top Navigation Bar -->
@@ -28,8 +29,8 @@
     </a>
 
     <!-- Search Bar -->
-    <form class="d-flex">
-      <input class="form-control me-2" type="search" placeholder="Search">
+    <form class="d-flex" action="search.php" method="GET">
+      <input class="form-control me-2" type="search" placeholder="Search products...">
       <button class="btn btn-outline-primary">🔍</button>
     </form>
 
@@ -53,7 +54,7 @@
   </div>
 </nav>
 
-<!-- 🔹 2. Main Navigation Menu -->
+<!-- Main Navigation Menu -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -92,7 +93,7 @@
       <div class="row">
         <div class="col-md-4">
           <div class="card">
-            <img src="client/imgs/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
+            <img src="imgs/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
             <div class="card-body">
               <h5 class="card-title">Handmade Mug</h5>
               <a href="#" class="btn btn-primary">View</a>
@@ -122,16 +123,49 @@
   </div>
 </div>
 
-<!-- 🔹 4. Recommended Designer Section -->
-<div class="container mt-5">
-  <h2 class="text-center">Introduction of Recommended Designer</h2>
-  <div class="text-center">
-    <p>Meet our featured artist who specializes in handmade crafts.</p>
-    <a href="#" class="btn btn-dark">Shop Products</a>
+<!-- Recommended Designer Section -->
+<div id="designerCarousel" class="carousel slide">
+  <div class="carousel-inner">
+
+    <!-- Slide 1 -->
+    <div class="carousel-item active" style="background-image: url('imgs/designer1-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Introduction of Recommended Designer</h2>
+        <p>Meet our featured artist who specializes in handmade crafts.</p>
+        <a href="#" class="btn btn-light">Shop Products</a>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="carousel-item" style="background-image: url('imgs/designer2-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Meet Our New Artist</h2>
+        <p>Discover exclusive handmade collections from our latest designer.</p>
+        <a href="#" class="btn btn-light">Explore Now</a>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="carousel-item" style="background-image: url('imgs/designer3-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Exclusive Handmade Creations</h2>
+        <p>Explore a new collection of unique handmade crafts.</p>
+        <a href="#" class="btn btn-light">View Collection</a>
+      </div>
+    </div>
+
   </div>
+
+  <!-- buttons -->
+  <button class="carousel-control-prev custom-prev" type="button" data-bs-target="#designerCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+  </button>
+  <button class="carousel-control-next custom-next" type="button" data-bs-target="#designerCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  </button>
 </div>
 
-<!-- 🔹 5. Footer -->
+<!-- Footer -->
 <footer class="bg-light text-center text-lg-start mt-5 p-3">
   <div class="container">
     <div class="row">
@@ -156,9 +190,15 @@
 
       <!-- Legal Links -->
       <div class="col-md-4">
-        <a href="#">Terms of Service</a> |
-        <a href="#">Privacy Policy</a> |
-        <a href="#">Return Policy</a>
+        <div>
+          <a href="#">Terms of Service</a>
+        </div>
+        <div>
+          <a href="#">Privacy Policy</a>
+        </div>
+        <div>
+          <a href="#">Return Policy</a>
+        </div>
       </div>
     </div>
   </div>
