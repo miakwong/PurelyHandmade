@@ -3,170 +3,624 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purely Homemade</title>
+  <title>Purely Homemade - Handcrafted with Love</title>
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="src/assets/css/style.css">
   <link rel="stylesheet" href="src/assets/css/index.css">
+  <link rel="stylesheet" href="src/assets/css/navbar.css">
 
-  <!-- Google Material Icons -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 英雄区块样式 */
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('src/assets/img/hero-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 150px 0;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* 特色分类样式 */
+    .category-card {
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .category-img-container {
+      height: 200px;
+      overflow: hidden;
+    }
+    
+    .category-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .category-card:hover .category-img {
+      transform: scale(1.1);
+    }
+    
+    .category-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      padding: 20px;
+      color: white;
+    }
+    
+    /* 产品卡片样式 */
+    .product-card {
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .product-img {
+      height: 220px;
+      object-fit: cover;
+    }
+    
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      color: #0d6efd;
+      font-size: 1.1rem;
+    }
+    
+    .product-price-discount {
+      text-decoration: line-through;
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-left: 5px;
+    }
+    
+    /* 设计师展示样式 */
+    .designer-section {
+      background-color: #f8f9fa;
+      padding: 60px 0;
+      margin: 40px 0;
+    }
+    
+    .designer-card {
+      display: flex;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .designer-img {
+      width: 40%;
+      object-fit: cover;
+    }
+    
+    .designer-content {
+      width: 60%;
+      padding: 30px;
+    }
+    
+    /* 订阅区域样式 */
+    .subscribe-section {
+      background-color: #0d6efd;
+      color: white;
+      padding: 60px 0;
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .subscribe-form {
+      max-width: 500px;
+      margin: 30px auto 0;
+    }
+    
+    /* 产品定位 */
+    .product-item {
+      position: relative;
+    }
+    
+    .add-to-cart-btn {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .hero-section {
+        padding: 100px 0;
+      }
+      
+      .designer-card {
+        flex-direction: column;
+      }
+      
+      .designer-img, .designer-content {
+        width: 100%;
+      }
+      
+      .designer-img {
+        height: 250px;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <!-- Navbar Placeholder -->
 <div id="navbar-placeholder"></div>
 
-<!-- Sidebar Categories & Recommended Items -->
-<div class="container mt-4">
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Handcrafted with Love</h1>
+    <p class="hero-subtitle">Discover unique, artisan-made products that bring warmth and character to your home</p>
+    <a href="src/views/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
+  </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="container mb-5">
+  <h2 class="text-center mb-4">Shop by Category</h2>
   <div class="row">
-    <!-- Sidebar Categories -->
-    <aside id="sidebar" class="col-md-3">
-      <h5>Categories</h5>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <a href="#" class="category-link" data-category="art">Art & Painting</a>
-        </li>
-        <li class="list-group-item">
-          <a href="#" class="category-link" data-category="accessories">Jewelry & Accessories</a>
-        </li>
-        <li class="list-group-item">
-          <a href="#" class="category-link" data-category="home">Home & Living</a>
-        </li>
-        <li class="list-group-item">
-          <a href="#" class="category-link" data-category="ceramics">Ceramics & Tea</a>
-        </li>
-      </ul>
-    </aside>
-
-    <!-- Recommended Items / New Arrivals Section -->
-    <section id="recommended-items" class="col-md-9">
-      <h2 class="text-center"></h2>
-      <div class="row">
-        <div class="col-md-4">
-          <div class="card">
-            <img src="src/assets/img/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
-            <div class="card-body">
-              <h5 class="card-title">Handmade Mug</h5>
-              <a href="src/views/product/product_detail.html?name=Handmade%20Mug&category=ceramics" class="btn btn-primary">View</a>
+    <div class="col-md-3 col-sm-6">
+      <a href="src/views/product/product-list.html?category=1" class="text-decoration-none">
+        <div class="category-card">
+          <div class="category-img-container position-relative">
+            <img src="src/assets/img/category-soaps.jpg" alt="Handmade Soaps" class="category-img">
+            <div class="category-overlay">
+              <h4 class="m-0">Handmade Soaps</h4>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="src/assets/img/Handwoven_1.JPG" class="card-img-top" alt="Handwoven Basket">
-            <div class="card-body">
-              <h5 class="card-title">Handwoven Scarf</h5>
-              <a href="src/views/product/product_detail.html?name=Handwoven%20Scarf&category=accessories" class="btn btn-primary">View</a>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="src/views/product/product-list.html?category=2" class="text-decoration-none">
+        <div class="category-card">
+          <div class="category-img-container position-relative">
+            <img src="src/assets/img/category-oils.jpg" alt="Essential Oils" class="category-img">
+            <div class="category-overlay">
+              <h4 class="m-0">Essential Oils</h4>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="src/assets/img/Wood_1.JPG" class="card-img-top" alt="Wood Carving Art">
-            <div class="card-body">
-              <h5 class="card-title">Wood Carving Art</h5>
-              <a href="src/views/product/product_detail.html?name=Wood%20Carving%20Art&category=home" class="btn btn-primary">View</a>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="src/views/product/product-list.html?category=3" class="text-decoration-none">
+        <div class="category-card">
+          <div class="category-img-container position-relative">
+            <img src="src/assets/img/category-candles.jpg" alt="Candles" class="category-img">
+            <div class="category-overlay">
+              <h4 class="m-0">Candles</h4>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <a href="src/views/product/product-list.html?category=4" class="text-decoration-none">
+        <div class="category-card">
+          <div class="category-img-container position-relative">
+            <img src="src/assets/img/category-bath.jpg" alt="Bath Products" class="category-img">
+            <div class="category-overlay">
+              <h4 class="m-0">Bath Products</h4>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
   </div>
-</div>
-
-<!-- Recommended Designer Section -->
-<div id="designerCarousel" class="carousel slide">
-  <div class="carousel-inner">
-
-    <!-- Slide 1 -->
-    <div class="carousel-item active" style="background-image: url('src/assets/img/designer1-bg.JPG');">
-      <div class="carousel-overlay">
-        <h2>Introduction of Recommended Designer</h2>
-        <p>Meet our featured artist who specializes in handmade crafts.</p>
-        <a href="#" class="btn btn-light">Shop Products</a>
-      </div>
-    </div>
-
-    <!-- Slide 2 -->
-    <div class="carousel-item" style="background-image: url('src/assets/img/designer2-bg.JPG');">
-      <div class="carousel-overlay">
-        <h2>Meet Our New Artist</h2>
-        <p>Discover exclusive handmade collections from our latest designer.</p>
-        <a href="#" class="btn btn-light">Explore Now</a>
-      </div>
-    </div>
-
-    <!-- Slide 3 -->
-    <div class="carousel-item" style="background-image: url('src/assets/img/designer3-bg.JPG');">
-      <div class="carousel-overlay">
-        <h2>Exclusive Handmade Creations</h2>
-        <p>Explore a new collection of unique handmade crafts.</p>
-        <a href="#" class="btn btn-light">View Collection</a>
-      </div>
-    </div>
-
+  <div class="text-center mt-4">
+    <a href="src/views/product/product-list.html" class="btn btn-outline-primary">View All Categories</a>
   </div>
+</section>
 
-  <!-- buttons -->
-  <button class="carousel-control-prev custom-prev" type="button" data-bs-target="#designerCarousel" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-  </button>
-  <button class="carousel-control-next custom-next" type="button" data-bs-target="#designerCarousel" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-  </button>
-</div>
+<!-- New Arrivals -->
+<section class="container mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>New Arrivals</h2>
+    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+  </div>
+  <div class="row" id="new-arrivals-container">
+    <!-- Products will be loaded dynamically -->
+  </div>
+</section>
+
+<!-- Featured Designer -->
+<section class="designer-section">
+  <div class="container">
+    <div class="designer-card">
+      <img src="src/assets/img/designer-feature.jpg" alt="Featured Designer" class="designer-img">
+      <div class="designer-content">
+        <h3>Meet Our Featured Artisan</h3>
+        <h5 class="text-primary mb-3">Emma Johnson</h5>
+        <p>Emma creates handcrafted soaps and bath products using traditional methods passed down through generations. Each product is made with natural ingredients sourced from local suppliers.</p>
+        <p>Her passion for sustainability and natural wellness has led her to develop a unique line of products that are not only good for you but also for the environment.</p>
+        <a href="#" class="btn btn-outline-primary mt-3">Explore Emma's Collection</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Best Sellers -->
+<section class="container mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Best Sellers</h2>
+    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+  </div>
+  <div class="row" id="best-sellers-container">
+    <!-- Products will be loaded dynamically -->
+  </div>
+</section>
+
+<!-- Subscribe Section -->
+<section class="subscribe-section">
+  <div class="container">
+    <h2>Stay Updated</h2>
+    <p>Subscribe to our newsletter for exclusive offers and updates on new products</p>
+    <div class="subscribe-form">
+      <form class="d-flex">
+        <input type="email" class="form-control me-2" placeholder="Your email address">
+        <button type="submit" class="btn btn-light">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
 
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
+<!-- Toast通知容器 -->
+<div class="toast-container" id="toast-container"></div>
+
 <!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- External JavaScript -->
+<!-- 初始化数据脚本 -->
+<script src="src/assets/js/init-data.js"></script>
 
-<script src="src/assets/js/product.js"></script>
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // Load navbar and footer
   fetch('src/assets/layout/navbar.html')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Failed to load navbar (${response.status})`);
-            }
-            return response.text();
-          })
-          .then(html => {
-            document.getElementById('navbar-placeholder').innerHTML = html;
-            console.log('Navbar loaded successfully');
-          })
-          .catch(error => {
-            console.error('Error loading navbar:', error);
-            document.getElementById('navbar-placeholder').innerHTML =
-                    '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
-          });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load navbar (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('navbar-placeholder').innerHTML = html;
+      console.log('Navbar loaded successfully');
+    })
+    .catch(error => {
+      console.error('Error loading navbar:', error);
+      document.getElementById('navbar-placeholder').innerHTML =
+              '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
+    });
 
   fetch('src/assets/layout/footer.html')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Failed to load footer (${response.status})`);
-            }
-            return response.text();
-          })
-          .then(html => {
-            document.getElementById('footer-placeholder').innerHTML = html;
-            console.log('Footer loaded successfully');
-          })
-          .catch(error => {
-            console.error('Error loading footer:', error);
-            document.getElementById('footer-placeholder').innerHTML =
-                    '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
-          });
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load footer (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      console.log('Footer loaded successfully');
+    })
+    .catch(error => {
+      console.error('Error loading footer:', error);
+      document.getElementById('footer-placeholder').innerHTML =
+              '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+    });
+    
+  // 确保数据初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.initializeData === 'function') {
+      window.initializeData();
+    }
+    
+    // 加载新品
+    loadNewArrivals();
+    
+    // 加载畅销品
+    loadBestSellers();
+  });
+  
+  // 加载新品
+  function loadNewArrivals() {
+    const container = document.getElementById('new-arrivals-container');
+    const productsData = localStorage.getItem('products');
+    
+    if (productsData) {
+      const products = JSON.parse(productsData);
+      // 获取最新的4个产品
+      const newProducts = products.slice(0, 4);
+      
+      renderProducts(newProducts, container);
+    }
+  }
+  
+  // 加载畅销品
+  function loadBestSellers() {
+    const container = document.getElementById('best-sellers-container');
+    const productsData = localStorage.getItem('products');
+    
+    if (productsData) {
+      const products = JSON.parse(productsData);
+      // 按评分排序获取前4个
+      const bestSellers = [...products].sort((a, b) => b.rating - a.rating).slice(0, 4);
+      
+      renderProducts(bestSellers, container);
+    }
+  }
+  
+  // 渲染产品
+  function renderProducts(products, container) {
+    container.innerHTML = '';
+    
+    products.forEach(product => {
+      // 生成星级评分HTML
+      const fullStars = Math.floor(product.rating);
+      const hasHalfStar = product.rating % 1 >= 0.5;
+      
+      let starsHtml = '<span class="text-warning">';
+      for (let j = 0; j < fullStars; j++) {
+        starsHtml += '<i class="bi bi-star-fill"></i> ';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i> ';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let j = 0; j < emptyStars; j++) {
+        starsHtml += '<i class="bi bi-star"></i> ';
+      }
+      starsHtml += `<span class="text-muted ms-1">(${product.reviewCount})</span></span>`;
+      
+      // 价格显示
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
+          <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+          <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+        `;
+      } else {
+        priceHtml = `<span class="product-price">$${product.price.toFixed(2)}</span>`;
+      }
+      
+      // 创建产品卡片HTML
+      const productHtml = `
+        <div class="col-lg-3 col-md-6 col-sm-6 product-item">
+          <div class="product-card">
+            <a href="src/views/product/product_detail.html?id=${product.id}" class="text-decoration-none text-dark">
+              <img src="${product.images[0]}" class="card-img-top product-img" alt="${product.name}">
+              ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
+              <div class="card-body">
+                <h5 class="card-title">${product.name}</h5>
+                <div class="mb-2">${priceHtml}</div>
+                <div class="mb-2">${starsHtml}</div>
+                <p class="card-text text-muted">${product.description.substring(0, 60)}...</p>
+              </div>
+            </a>
+          </div>
+          <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="${product.id}">
+            <i class="bi bi-cart-plus"></i> Add to Cart
+          </button>
+        </div>
+      `;
+      
+      container.innerHTML += productHtml;
+    });
+    
+    // 添加Add to Cart按钮事件
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = parseInt(this.getAttribute('data-product-id'));
+        addToCart(productId, 1);
+      });
+    });
+  }
+  
+  // 添加到购物车
+  function addToCart(productId, quantity) {
+    const productsData = localStorage.getItem('products');
+    if (!productsData) return;
+    
+    const products = JSON.parse(productsData);
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // 获取现有购物车
+    let cart = [];
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      cart = JSON.parse(cartData);
+    }
+    
+    // 检查产品是否已在购物车中
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.onSale && product.salePrice ? product.salePrice : product.price,
+        image: product.images[0],
+        quantity: quantity
+      });
+    }
+    
+    // 保存到localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // 显示成功消息
+    showToast(`${product.name} added to your cart!`, 'success');
+    
+    // 更新导航栏购物车计数
+    updateCartCount();
+  }
+  
+  // 显示Toast通知
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) return;
+    
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.backgroundColor = '#fff';
+    toast.style.color = '#333';
+    toast.style.borderRadius = '4px';
+    toast.style.padding = '10px 15px';
+    toast.style.marginBottom = '10px';
+    toast.style.minWidth = '250px';
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.animation = 'slideIn 0.3s, fadeOut 0.5s 2.5s forwards';
+    toast.style.position = 'relative';
+    
+    if (type === 'success') {
+      toast.style.borderLeft = '4px solid #198754';
+    }
+    
+    // 添加内容
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // 添加到容器
+    toastContainer.appendChild(toast);
+    
+    // 添加关闭按钮事件
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // 自动3秒后移除
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // 更新购物车计数
+  function updateCartCount() {
+    const cartData = localStorage.getItem('cart');
+    const cartCount = document.getElementById('cart-count');
+    
+    if (!cartCount) return;
+    
+    if (cartData) {
+      const cart = JSON.parse(cartData);
+      const count = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = count;
+      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+    } else {
+      cartCount.style.display = 'none';
+    }
+  }
 </script>
+
+<style>
+  /* Toast 通知样式 */
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+</style>
 </body>
 </html>
