@@ -1,131 +1,16 @@
-/* Common variables */
-:root {
-    --primary-color: #eae2d6; /* 温暖的米色 */
-    --secondary-color: #d5c3aa; /* 浅棕色 */
-    --accent-color: #867666; /* 深棕色，用于强调 */
-    --text-color: #5e4b3e; /* 棕色文字 */
-    --light-text: #7d6b5d; /* 浅棕色文字 */
-    --border-color: #bfb1a3; /* 边框颜色 */
-    --shadow: 0 2px 8px rgba(94, 75, 62, 0.15); /* 温暖的阴影 */
-    --font-main: 'Segoe UI', 'Arial', sans-serif; /* 主字体 */
-    --font-accent: 'Georgia', serif; /* 强调字体，更有手工感 */
+/* ====== User Dropdown Menu Fix ====== */
+.dropdown:hover .dropdown-menu {
+    display: block;
 }
 
-/* Navbar styles only */
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--primary-color);
-    padding: 15px 30px;
-    color: var(--text-color);
-    box-shadow: var(--shadow);
-    font-family: var(--font-main);
-    border-bottom: 1px solid var(--border-color);
+.dropdown-toggle::after {
+    display: none !important;
 }
 
-#left-menu-items {
-    display: flex;
-    align-items: center;
-}
-
-#logo-container {
-    display: flex;
-    align-items: center;
-}
-
-#logo {
-    width: 35px; 
-    height: 35px;
-    margin-right: 10px;
-    border-radius: 50%;
-    border: 2px solid var(--secondary-color);
-    padding: 2px;
-}
-
-#logo-name {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--text-color);
-    font-family: var(--font-accent);
-    letter-spacing: 0.5px;
-}
-
-#menu-container {
-    display: flex;
-    margin-left: 30px;
-}
-
-.menu-items {
-    color: var(--text-color);
-    text-decoration: none;
-    font-size: 16px;
-    margin: 0 15px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: all 0.3s;
-    position: relative;
-}
-
-.menu-items:after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: var(--accent-color);
-    transition: width 0.3s;
-}
-
-.menu-items:hover {
-    background: var(--secondary-color); 
-    color: var(--text-color);
-}
-
-.menu-items:hover:after {
+/* ====== Fixed Width for Centered Content ====== */
+.navbar-nav {
     width: 100%;
-}
-
-#right-menu-items {
+    max-width: 1200px;
     display: flex;
-    align-items: center;
-}
-
-.loggedIn {
-    border: 1px solid var(--accent-color);
-}
-
-/* For smaller screens */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        padding: 10px;
-    }
-    
-    #left-menu-items {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    #logo-container {
-        margin-bottom: 10px;
-    }
-    
-    #menu-container {
-        margin: 10px 0;
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .menu-items {
-        margin: 0 8px;
-        padding: 6px 10px;
-    }
-    
-    #right-menu-items {
-        margin-top: 10px;
-        width: 100%;
-        justify-content: center;
-    }
+    justify-content: space-evenly;
 }

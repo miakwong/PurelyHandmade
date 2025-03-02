@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/product_detail.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Breadcrumb -->
+<div class="container mt-3">
+  <nav>
+    <ol class="breadcrumb" id="breadcrumb">
+      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+      <li class="breadcrumb-item" id="breadcrumb-category-link"><a href="#">Category</a></li>
+      <li class="breadcrumb-item active" id="breadcrumb-item">Item Name</li>
+    </ol>
+  </nav>
+</div>
+
+
+<!-- Item details section -->
+<div class="container">
+  <div class="row align-items-start">
+    <!-- Left Side: Product Images -->
+    <div class="col-md-6">
+      <div class="d-flex justify-content-start">
+        <!-- Thumbnail Images -->
+        <div class="thumbnail-column" id="thumbnail-images">
+          <img class="thumbnail-img" src="" alt="Thumbnail 1">
+          <img class="thumbnail-img" src="" alt="Thumbnail 2">
+          <img class="thumbnail-img" src="" alt="Thumbnail 3">
+        </div>
+
+        <!-- Main Image -->
+        <div class="main-image-container">
+          <img id="product-image" src="" alt="Product Image" class="img-fluid">
+        </div>
+      </div>
+
+      <!-- Customer Reviews -->
+      <div class="customer-reviews mt-5">
+        <h3>Customer Reviews</h3>
+        <div class="rating">
+          <span>⭐️⭐️⭐️⭐️☆</span> (4.5 out of 5)
+        </div>
+        <textarea class="form-control mt-3" placeholder="Write a review..."></textarea>
+        <button class="btn btn-primary mt-2">Submit Review</button>
+      </div>
+    </div>
+
+    <!-- Right Side: Product Info -->
+    <div class="col-md-6">
+      <h2 id="product-title"></h2>
+      <p id="product-price" class="fw-bold"></p>
+      <button class="btn btn-primary w-100" id="addToCart">Add to Bag</button>
+
+      <!-- Product Info Sections -->
+      <div class="product-info mt-4">
+        <button class="accordion">Description</button>
+        <div class="panel"><p id="product-description"></p></div>
+
+        <button class="accordion">Details</button>
+        <div class="panel"><p>Additional product details here...</p></div>
+
+        <button class="accordion">Shipping & Returns</button>
+        <div class="panel"><p>Return policy information...</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- External JavaScript -->
+<script src="../../assets/js/product.js"></script>
+<script src="../../assets/js/product_detail.js"></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Load navbar and footer
+  fetch('../../assets/layout/navbar.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load navbar (${response.status})`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            document.getElementById('navbar-placeholder').innerHTML = html;
+            console.log('Navbar loaded successfully');
+          })
+          .catch(error => {
+            console.error('Error loading navbar:', error);
+            document.getElementById('navbar-placeholder').innerHTML =
+                    '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
+          });
+
+  fetch('../../assets/layout/footer.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load footer (${response.status})`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            document.getElementById('footer-placeholder').innerHTML = html;
+            console.log('Footer loaded successfully');
+          })
+          .catch(error => {
+            console.error('Error loading footer:', error);
+            document.getElementById('footer-placeholder').innerHTML =
+                    '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+          });
+</script>
+</body>
+</html>

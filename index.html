@@ -3,142 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purely Homemade - Handcrafted with Love</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/src/assets/css/global.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #faf8f5;
-    }
-    .hero-section {
-      background-color: #eae2d6;
-      padding: 100px 0;
-      margin-bottom: 40px;
-      text-align: center;
-    }
-    .hero-title {
-      font-size: 3rem;
-      color: #5e4b3e;
-      margin-bottom: 20px;
-    }
-    .hero-subtitle {
-      font-size: 1.5rem;
-      color: #7d6b5d;
-      margin-bottom: 30px;
-    }
-    .cta-button {
-      background-color: #d5c3aa;
-      border: none;
-      color: #5e4b3e;
-      padding: 12px 30px;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-    .cta-button:hover {
-      background-color: #867666;
-      color: #eae2d6;
-    }
-    .featured-products {
-      margin: 60px 0;
-    }
-  </style>
+  <title>Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/assets/css/style.css">
+  <link rel="stylesheet" href="src/assets/css/index.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Navbar Placeholder -->
-  <div id="navbar-placeholder"></div>
 
-  <!-- Main Content Wrapper -->
-  <div id="main-content">
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="container">
-        <h1 class="hero-title">Welcome to Purely Homemade</h1>
-        <p class="hero-subtitle">Handcrafted products made with care and love</p>
-        <a href="src/views/products.html" class="btn cta-button">Explore Our Products</a>
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Sidebar Categories & Recommended Items -->
+<div class="container mt-4">
+  <div class="row">
+    <!-- Sidebar Categories -->
+    <aside id="sidebar" class="col-md-3">
+      <h5>Categories</h5>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="art">Art & Painting</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="accessories">Jewelry & Accessories</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="home">Home & Living</a>
+        </li>
+        <li class="list-group-item">
+          <a href="#" class="category-link" data-category="ceramics">Ceramics & Tea</a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Recommended Items / New Arrivals Section -->
+    <section id="recommended-items" class="col-md-9">
+      <h2 class="text-center"></h2>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <img src="src/assets/img/mug_1.JPG" class="card-img-top" alt="Handmade Mug">
+            <div class="card-body">
+              <h5 class="card-title">Handmade Mug</h5>
+              <a href="src/views/product/product_detail.html?name=Handmade%20Mug&category=ceramics" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <img src="src/assets/img/Handwoven_1.JPG" class="card-img-top" alt="Handwoven Basket">
+            <div class="card-body">
+              <h5 class="card-title">Handwoven Scarf</h5>
+              <a href="src/views/product/product_detail.html?name=Handwoven%20Scarf&category=accessories" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <img src="src/assets/img/Wood_1.JPG" class="card-img-top" alt="Wood Carving Art">
+            <div class="card-body">
+              <h5 class="card-title">Wood Carving Art</h5>
+              <a href="src/views/product/product_detail.html?name=Wood%20Carving%20Art&category=home" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+  </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="container">
-      <div class="row featured-products">
-        <div class="col-12 text-center mb-4">
-          <h2>Our Handcrafted Collection</h2>
-          <p>Discover our latest handmade items created with traditional techniques and modern design</p>
-        </div>
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="https://via.placeholder.com/300x200/d5c3aa/5e4b3e?text=Product+1" class="card-img-top" alt="Product 1">
-            <div class="card-body text-center">
-              <h5 class="card-title">Handmade Soap</h5>
-              <p class="card-text">Natural ingredients with essential oils</p>
-              <p class="fw-bold">$12.99</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="https://via.placeholder.com/300x200/d5c3aa/5e4b3e?text=Product+2" class="card-img-top" alt="Product 2">
-            <div class="card-body text-center">
-              <h5 class="card-title">Ceramic Mug</h5>
-              <p class="card-text">Hand-thrown and glazed pottery</p>
-              <p class="fw-bold">$24.99</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 mb-4">
-          <div class="card">
-            <img src="https://via.placeholder.com/300x200/d5c3aa/5e4b3e?text=Product+3" class="card-img-top" alt="Product 3">
-            <div class="card-body text-center">
-              <h5 class="card-title">Woven Basket</h5>
-              <p class="card-text">Sustainable materials, traditional weaving</p>
-              <p class="fw-bold">$34.99</p>
-            </div>
-          </div>
-        </div>
+<!-- Recommended Designer Section -->
+<div id="designerCarousel" class="carousel slide">
+  <div class="carousel-inner">
+
+    <!-- Slide 1 -->
+    <div class="carousel-item active" style="background-image: url('src/assets/img/designer1-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Introduction of Recommended Designer</h2>
+        <p>Meet our featured artist who specializes in handmade crafts.</p>
+        <a href="#" class="btn btn-light">Shop Products</a>
       </div>
     </div>
+
+    <!-- Slide 2 -->
+    <div class="carousel-item" style="background-image: url('src/assets/img/designer2-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Meet Our New Artist</h2>
+        <p>Discover exclusive handmade collections from our latest designer.</p>
+        <a href="#" class="btn btn-light">Explore Now</a>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="carousel-item" style="background-image: url('src/assets/img/designer3-bg.JPG');">
+      <div class="carousel-overlay">
+        <h2>Exclusive Handmade Creations</h2>
+        <p>Explore a new collection of unique handmade crafts.</p>
+        <a href="#" class="btn btn-light">View Collection</a>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Footer Placeholder -->
-  <div id="footer-placeholder"></div>
+  <!-- buttons -->
+  <button class="carousel-control-prev custom-prev" type="button" data-bs-target="#designerCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+  </button>
+  <button class="carousel-control-next custom-next" type="button" data-bs-target="#designerCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  </button>
+</div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Load navbar and footer
-    fetch('src/assets/layout/navbar.html')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load navbar (${response.status})`);
-        }
-        return response.text();
-      })
-      .then(html => {
-        document.getElementById('navbar-placeholder').innerHTML = html;
-        console.log('Navbar loaded successfully');
-      })
-      .catch(error => {
-        console.error('Error loading navbar:', error);
-        document.getElementById('navbar-placeholder').innerHTML = 
-          '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
-      });
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
 
-    fetch('src/assets/layout/footer.html')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to load footer (${response.status})`);
-        }
-        return response.text();
-      })
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-        console.log('Footer loaded successfully');
-      })
-      .catch(error => {
-        console.error('Error loading footer:', error);
-        document.getElementById('footer-placeholder').innerHTML = 
-          '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
-      });
-  </script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- External JavaScript -->
+
+<script src="src/assets/js/product.js"></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Load navbar and footer
+  fetch('src/assets/layout/navbar.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load navbar (${response.status})`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            document.getElementById('navbar-placeholder').innerHTML = html;
+            console.log('Navbar loaded successfully');
+          })
+          .catch(error => {
+            console.error('Error loading navbar:', error);
+            document.getElementById('navbar-placeholder').innerHTML =
+                    '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
+          });
+
+  fetch('src/assets/layout/footer.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load footer (${response.status})`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            document.getElementById('footer-placeholder').innerHTML = html;
+            console.log('Footer loaded successfully');
+          })
+          .catch(error => {
+            console.error('Error loading footer:', error);
+            document.getElementById('footer-placeholder').innerHTML =
+                    '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+          });
+</script>
 </body>
-</html> 
+</html>

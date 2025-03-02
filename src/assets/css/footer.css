@@ -1,133 +1,30 @@
-/* 页脚样式变量 */
-:root {
-  --footer-primary-color: #eae2d6; /* 温暖的米色 */
-  --footer-secondary-color: #d5c3aa; /* 浅棕色 */
-  --footer-accent-color: #867666; /* 深棕色，用于强调 */
-  --footer-text-color: #5e4b3e; /* 棕色文字 */
-  --footer-light-text: #7d6b5d; /* 浅棕色文字 */
-  --footer-border-color: #bfb1a3; /* 边框颜色 */
-  --footer-shadow: 0 2px 8px rgba(94, 75, 62, 0.15); /* 温暖的阴影 */
-  --footer-font-main: 'Segoe UI', 'Arial', sans-serif; /* 主字体 */
-  --footer-font-accent: 'Georgia', serif; /* 强调字体，更有手工感 */
-  --footer-height: 90px; /* 页脚高度变量 - 减小了高度 */
+/* Footer Styling */
+.footer {
+    background: white;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-direction: column;
 }
 
-/* 确保html和body占据完整高度 */
-html, body {
-  height: 100%;
-  margin: 0;
+.contact-info {
+    text-align: left;
+    margin-left: -300px;
+    margin-right: 250px;
 }
 
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* 至少占满视口高度 */
+.footer-links {
+    display: flex;
+    gap: 50px;
 }
 
-/* 主要内容区域应占用所有可用空间 */
-body > div.container, 
-main,
-#main-content {
-  flex: 1 0 auto; /* 允许内容区域增长但不收缩 */
+.footer-links a {
+    color: inherit;
+    text-decoration: none;
 }
 
-/* 页脚占位符样式 */
-#footer-placeholder {
-  display: block !important;
-  min-height: var(--footer-height); /* 预留与footer相同的空间 */
-  margin-top: auto; /* 将footer推到底部 */
+.footer-links a:hover {
+    color: grey;
 }
-
-/* 基础页脚样式 */
-footer, .ph-footer {
-  background-color: var(--footer-primary-color);
-  color: var(--footer-text-color);
-  padding: 15px 0; /* 减小内边距 */
-  box-shadow: var(--footer-shadow);
-  font-family: var(--footer-font-main);
-  text-align: center;
-  border-top: 1px solid var(--footer-border-color);
-  width: 100%;
-  position: relative;
-  z-index: 1000;
-  display: block !important; /* 强制显示 */
-  visibility: visible !important; /* 确保可见性 */
-  flex-shrink: 0; /* 防止footer收缩 */
-  height: auto; /* 改为自动高度，而不是固定高度 */
-  min-height: var(--footer-height); /* 最小高度 */
-}
-
-/* 通用容器 */
-.footer-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: block;
-}
-
-/* 底部版权区 */
-.footer-bottom {
-  padding: 5px 0; /* 减小内边距 */
-  text-align: center;
-  font-size: 14px;
-}
-
-.footer-copyright {
-  margin-bottom: 5px; /* 减小下边距 */
-  font-weight: 500;
-}
-
-.footer-legal {
-  margin-bottom: 8px; /* 减小下边距 */
-}
-
-.footer-legal a {
-  color: var(--footer-text-color);
-  text-decoration: none;
-  margin: 0 10px;
-  transition: color 0.3s;
-  position: relative;
-  font-weight: 500;
-}
-
-.footer-legal a:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 1px;
-  bottom: -2px;
-  left: 0;
-  background-color: var(--footer-accent-color);
-  transition: width 0.3s;
-}
-
-.footer-legal a:hover {
-  color: var(--footer-accent-color);
-}
-
-.footer-legal a:hover:after {
-  width: 100%;
-}
-
-.footer-signature {
-  margin-top: 8px; /* 减小上边距 */
-  font-size: 13px;
-  color: var(--footer-light-text);
-  font-style: italic;
-}
-
-/* 响应式设计 */
-@media (max-width: 600px) {
-  footer, .ph-footer {
-    padding: 10px 0; /* 进一步减小手机上的内边距 */
-  }
-  
-  .footer-bottom {
-    padding: 0;
-  }
-  
-  .footer-legal a {
-    margin: 0 5px;
-  }
-} 
