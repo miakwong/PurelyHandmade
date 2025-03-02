@@ -140,6 +140,66 @@
     .form-label {
       font-weight: 500;
     }
+
+    /* Admin functionality styles */
+    .admin-section {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .admin-section table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .admin-section th, .admin-section td {
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      text-align: left;
+    }
+
+    .admin-section th {
+      background-color: var(--bg-light);
+    }
+
+    .enable-btn {
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .disable-btn {
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .view-more-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .admin-status-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 0.25rem;
+    }
   </style>
 </head>
 <body>
@@ -175,6 +235,9 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">Security</button>
+          </li>
+          <li class="nav-item" role="presentation" id="admin-tab-container" style="display: none;">
+            <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="false">Admin Features</button>
           </li>
         </ul>
         
@@ -256,6 +319,81 @@
               </form>
             </div>
           </div>
+          
+          <!-- Admin Tab -->
+          <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="admin-tab">
+            <div class="profile-header">
+              <h4>Admin Features</h4>
+            </div>
+            
+            <!-- User Management Section -->
+            <div class="admin-section">
+              <h5>User Management</h5>
+              <div class="mb-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="user-search" placeholder="Search by ID or Email">
+                  <button class="btn btn-primary" id="search-user">Search</button>
+                </div>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="user-list">
+                  <!-- User list will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Order Management Section -->
+            <div class="admin-section">
+              <h5>Order Management</h5>
+              <div class="mb-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="order-search" placeholder="Enter Order ID">
+                  <button class="btn btn-primary" id="check-order">Search</button>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <div class="btn-group" role="group" aria-label="Order Status Filter">
+                  <button type="button" class="btn btn-outline-primary order-filter" data-status="New">New Orders <span class="badge bg-secondary" id="new-count">0</span></button>
+                  <button type="button" class="btn btn-outline-primary order-filter" data-status="Packed">Packed <span class="badge bg-secondary" id="packed-count">0</span></button>
+                  <button type="button" class="btn btn-outline-primary order-filter" data-status="InTransit">In Transit <span class="badge bg-secondary" id="transit-count">0</span></button>
+                  <button type="button" class="btn btn-outline-primary order-filter" data-status="Delivered">Delivered <span class="badge bg-secondary" id="delivered-count">0</span></button>
+                </div>
+              </div>
+              
+              <table>
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="order-list">
+                  <!-- Order list will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Comment Management Section -->
+            <div class="admin-section">
+              <h5>Comment Management</h5>
+              <ul id="comment-list" class="list-group">
+                <!-- Comment list will be populated by JavaScript -->
+              </ul>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
@@ -435,7 +573,27 @@
     loadUserProfile();
     loadUserAddresses();
     setupEventListeners();
+    initializeAdminFeatures();
   });
+
+  // Initialize admin features
+  function initializeAdminFeatures() {
+    // Check if user is admin
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    
+    if (isAdmin) {
+      // Show admin tab
+      $('#admin-tab-container').show();
+      
+      // Load admin features data
+      loadUsers();
+      loadOrders();
+      loadComments();
+      
+      // Setup admin event listeners
+      setupAdminEventListeners();
+    }
+  }
 
   // Load user profile from localStorage
   function loadUserProfile() {
@@ -866,6 +1024,246 @@
     };
     
     return countries[countryCode] || countryCode;
+  }
+
+  // Load users
+  function loadUsers() {
+    let users = JSON.parse(localStorage.getItem("usersData")) || [
+      { id: 1, name: "Alice", email: "alice@example.com", status: "Active" },
+      { id: 2, name: "Bob", email: "bob@example.com", status: "Disabled" }
+    ];
+
+    let userTable = document.getElementById("user-list");
+    userTable.innerHTML = "";
+
+    users.forEach(user => {
+      userTable.innerHTML += `
+        <tr>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.status}</td>
+          <td>
+            ${user.status === "Active" ? 
+              `<button class="disable-btn" onclick="toggleUserStatus(${user.id}, 'Disabled')">Disable</button>` :
+              `<button class="enable-btn" onclick="toggleUserStatus(${user.id}, 'Active')">Enable</button>`
+            }
+          </td>
+        </tr>`;
+    });
+
+    localStorage.setItem("usersData", JSON.stringify(users));
+  }
+
+  // Toggle user status
+  function toggleUserStatus(userId, newStatus) {
+    let users = JSON.parse(localStorage.getItem("usersData"));
+
+    let userIndex = users.findIndex(user => user.id === userId);
+    if (userIndex !== -1) {
+      users[userIndex].status = newStatus;
+      localStorage.setItem("usersData", JSON.stringify(users));
+      loadUsers();
+    }
+  }
+
+  // Load orders
+  function loadOrders() {
+    let orders = JSON.parse(localStorage.getItem("ordersData")) || [
+      { id: 101, product: "Handmade Soap", amount: "$50", orderStatus: "New" },
+      { id: 102, product: "Handmade Candle", amount: "$30", orderStatus: "Packed" },
+      { id: 103, product: "Handmade Basket", amount: "$45", orderStatus: "InTransit" },
+      { id: 104, product: "Handmade Vase", amount: "$60", orderStatus: "Delivered" }
+    ];
+
+    // Update order counts
+    document.getElementById("new-count").textContent = orders.filter(order => order.orderStatus === "New").length;
+    document.getElementById("packed-count").textContent = orders.filter(order => order.orderStatus === "Packed").length;
+    document.getElementById("transit-count").textContent = orders.filter(order => order.orderStatus === "InTransit").length;
+    document.getElementById("delivered-count").textContent = orders.filter(order => order.orderStatus === "Delivered").length;
+
+    // Render order list
+    let orderList = document.getElementById("order-list");
+    orderList.innerHTML = "";
+
+    orders.forEach(order => {
+      orderList.innerHTML += `
+        <tr>
+          <td>${order.id}</td>
+          <td>${order.product}</td>
+          <td>${order.amount}</td>
+          <td>${order.orderStatus}</td>
+          <td>
+            <div class="btn-group">
+              <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'New')">New</button>
+              <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'Packed')">Packed</button>
+              <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'InTransit')">In Transit</button>
+              <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'Delivered')">Delivered</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`;
+    });
+
+    localStorage.setItem("ordersData", JSON.stringify(orders));
+  }
+
+  // Update order status
+  function updateOrderStatus(orderId, newStatus) {
+    let orders = JSON.parse(localStorage.getItem("ordersData"));
+    
+    let orderIndex = orders.findIndex(order => order.id === orderId);
+    if (orderIndex !== -1) {
+      orders[orderIndex].orderStatus = newStatus;
+      localStorage.setItem("ordersData", JSON.stringify(orders));
+      loadOrders();
+    }
+  }
+
+  // Delete order
+  function deleteOrder(orderId) {
+    if (confirm('Are you sure you want to delete this order?')) {
+      let orders = JSON.parse(localStorage.getItem("ordersData"));
+      orders = orders.filter(order => order.id !== orderId);
+      localStorage.setItem("ordersData", JSON.stringify(orders));
+      loadOrders();
+    }
+  }
+
+  // Load comments
+  function loadComments() {
+    let comments = JSON.parse(localStorage.getItem("commentsData")) || [
+      { id: 1, author: "Lisa", rating: 5, text: "Great product, excellent quality!" },
+      { id: 2, author: "Mike", rating: 4, text: "Beautiful packaging, very thoughtful." },
+      { id: 3, author: "Sarah", rating: 5, text: "My friend loved this gift!" }
+    ];
+
+    let commentList = document.getElementById("comment-list");
+    commentList.innerHTML = "";
+
+    comments.forEach(comment => {
+      commentList.innerHTML += `
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div>
+              <strong>${comment.author}</strong>
+              <span class="text-warning">
+                ${"★".repeat(comment.rating)}${"☆".repeat(5 - comment.rating)}
+              </span>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deleteComment(${comment.id})">Delete</button>
+          </div>
+          <p class="mb-0 mt-2">${comment.text}</p>
+        </li>`;
+    });
+
+    localStorage.setItem("commentsData", JSON.stringify(comments));
+  }
+
+  // Delete comment
+  function deleteComment(commentId) {
+    if (confirm('Are you sure you want to delete this comment?')) {
+      let comments = JSON.parse(localStorage.getItem("commentsData"));
+      comments = comments.filter(comment => comment.id !== commentId);
+      localStorage.setItem("commentsData", JSON.stringify(comments));
+      loadComments();
+    }
+  }
+
+  // Setup admin event listeners
+  function setupAdminEventListeners() {
+    // User search
+    $('#search-user').click(function() {
+      const searchTerm = $('#user-search').val().trim().toLowerCase();
+      if (searchTerm) {
+        const users = JSON.parse(localStorage.getItem("usersData") || "[]");
+        // Filter users by ID or email
+        const filteredUsers = users.filter(user => 
+          user.id.toString().includes(searchTerm) || 
+          user.email.toLowerCase().includes(searchTerm)
+        );
+        
+        if (filteredUsers.length > 0) {
+          renderFilteredUsers(filteredUsers);
+        } else {
+          alert('No users found matching your search');
+        }
+      } else {
+        loadUsers(); // Reset to show all users if search is empty
+      }
+    });
+
+    // Reset user list when clearing search box
+    $('#user-search').on('input', function() {
+      if ($(this).val().trim() === '') {
+        loadUsers();
+      }
+    });
+
+    // Order search
+    $('#check-order').click(function() {
+      const orderId = parseInt($('#order-search').val());
+      if (!isNaN(orderId)) {
+        const orders = JSON.parse(localStorage.getItem("ordersData") || "[]");
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          alert(`Order ID: ${order.id}\nProduct: ${order.product}\nAmount: ${order.amount}\nStatus: ${order.orderStatus}`);
+        } else {
+          alert('Order not found');
+        }
+      } else {
+        alert('Please enter a valid Order ID');
+      }
+    });
+
+    // Order filter
+    $('.order-filter').click(function() {
+      const status = $(this).data('status');
+      const orders = JSON.parse(localStorage.getItem("ordersData") || "[]");
+      const filteredOrders = status ? orders.filter(o => o.orderStatus === status) : orders;
+      
+      let orderList = document.getElementById("order-list");
+      orderList.innerHTML = "";
+
+      filteredOrders.forEach(order => {
+        orderList.innerHTML += `
+          <tr>
+            <td>${order.id}</td>
+            <td>${order.product}</td>
+            <td>${order.amount}</td>
+            <td>${order.orderStatus}</td>
+            <td>
+              <div class="btn-group">
+                <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'New')">New</button>
+                <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'Packed')">Packed</button>
+                <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'InTransit')">In Transit</button>
+                <button class="admin-status-btn" onclick="updateOrderStatus(${order.id}, 'Delivered')">Delivered</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+    });
+  }
+
+  // Render filtered users
+  function renderFilteredUsers(users) {
+    let userTable = document.getElementById("user-list");
+    userTable.innerHTML = "";
+
+    users.forEach(user => {
+      userTable.innerHTML += `
+        <tr>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.status}</td>
+          <td>
+            ${user.status === "Active" ? 
+              `<button class="disable-btn" onclick="toggleUserStatus(${user.id}, 'Disabled')">Disable</button>` :
+              `<button class="enable-btn" onclick="toggleUserStatus(${user.id}, 'Active')">Enable</button>`
+            }
+          </td>
+        </tr>`;
+    });
   }
 </script>
 
