@@ -94,29 +94,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Thumbnails generated:", thumbnailContainer.innerHTML); // Debugging
 
-    // **监听 "Add to Cart" 按钮**
+    // "Add to Cart" **
     document.getElementById("addToCart").addEventListener("click", function () {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
       const newItem = {
         name: productName,
         price: product.price,
-        image: imgPath + product.images[0], // **确保存入图片路径**
+        image: imgPath + product.images[0], 
         quantity: 1
       };
 
-      // **检查购物车里是否已有该商品**
+     
       const existingItem = cart.find(item => item.name === newItem.name);
       if (existingItem) {
-        existingItem.quantity += 1; // **如果已存在，数量 +1**
+        existingItem.quantity += 1; 
       } else {
-        cart.push(newItem); // **否则添加新商品**
+        cart.push(newItem); 
       }
 
-      // **存入 localStorage**
       localStorage.setItem("cart", JSON.stringify(cart));
 
-      // **显示成功消息**
+      
       alert(`Added ${productName} to cart!`);
     });
 

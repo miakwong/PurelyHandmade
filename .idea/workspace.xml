@@ -4,50 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5c970dc-3bf9-4a19-9f12-c6bb7b62b2d0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/assets/css/footer.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/js/product.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/cart.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/cart.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/css/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/css/product_detail.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/css/product_detail.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Handwoven_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Handwoven_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Handwoven_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Handwoven_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Handwoven_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Handwoven_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Wood_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Wood_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Wood_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Wood_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/Wood_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/Wood_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/designer1-bg.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/designer1-bg.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/designer2-bg.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/designer2-bg.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/designer3-bg.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/designer3-bg.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/handwoven_item2_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/handwoven_item2_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/handwoven_item2_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/handwoven_item2_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/handwoven_item2_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/handwoven_item2_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/logo.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/logo.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item2_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item2_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item2_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item2_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item2_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item2_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item3_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item3_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item3_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item3_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/mug_item3_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/mug_item3_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/wood_item2_1.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/wood_item2_1.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/wood_item2_2.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/wood_item2_2.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/img/wood_item2_3.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/img/wood_item2_3.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/.Rhistory" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/js/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/cart.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/js/cart.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/js/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/product.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/product_detail.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/js/product_detail.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/js/vendor/.gitkeep" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/product_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/product/product_detail.html" afterDir="false" />
-    </list>
+    <list default="true" id="f5c970dc-3bf9-4a19-9f12-c6bb7b62b2d0" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -76,22 +33,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;JavaScript Debug.product_detail.html.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.product_detail.js.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/mia/IdeaProjects/PurelyHandmade/client/js&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.product_detail.html.executor": "Run",
+    "Node.js.product_detail.js.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/mia/IdeaProjects/PurelyHandmade",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/client/js" />
@@ -103,6 +61,21 @@
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/views/product" />
     </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="PurelyHandmade" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="PurelyHandmade" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -121,6 +94,7 @@
       <option name="presentableId" value="Default" />
       <updated>1740801590238</updated>
       <workItem from="1740801591224" duration="49284000" />
+      <workItem from="1740901832247" duration="21000" />
     </task>
     <servers />
   </component>
