@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>localStorage 诊断工具</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    pre {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .result-box {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1>localStorage 诊断工具</h1>
+    <p>使用此工具检查您的localStorage状态并解决产品显示问题</p>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h4>检查管理员状态</h4>
+      </div>
+      <div class="card-body">
+        <p>当前管理员状态: <span id="admin-status" class="badge bg-secondary">检查中...</span></p>
+        <button id="set-admin-true" class="btn btn-success">设置为管理员</button>
+        <button id="set-admin-false" class="btn btn-secondary">取消管理员</button>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h4>检查产品数据</h4>
+      </div>
+      <div class="card-body">
+        <p>产品数量: <span id="product-count" class="badge bg-secondary">检查中...</span></p>
+        <div class="result-box">
+          <h5>产品数据:</h5>
+          <pre id="products-data">检查中...</pre>
+        </div>
+        <button id="init-test-products" class="btn btn-primary">初始化测试产品</button>
+        <button id="clear-products" class="btn btn-danger">清空产品数据</button>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h4>检查设计师数据</h4>
+      </div>
+      <div class="card-body">
+        <p>设计师数量: <span id="designer-count" class="badge bg-secondary">检查中...</span></p>
+        <div class="result-box">
+          <h5>设计师数据:</h5>
+          <pre id="designers-data">检查中...</pre>
+        </div>
+        <button id="init-test-designers" class="btn btn-primary">初始化测试设计师</button>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h4>检查分类数据</h4>
+      </div>
+      <div class="card-body">
+        <p>分类数量: <span id="category-count" class="badge bg-secondary">检查中...</span></p>
+        <div class="result-box">
+          <h5>分类数据:</h5>
+          <pre id="categories-data">检查中...</pre>
+        </div>
+        <button id="init-test-categories" class="btn btn-primary">初始化测试分类</button>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      <h4>使用说明:</h4>
+      <ol>
+        <li>点击"设置为管理员"按钮确保您有管理员权限</li>
+        <li>检查是否存在产品数据，如果没有，点击"初始化测试产品"</li>
+        <li>确保分类数据存在，如果没有，点击"初始化测试分类"</li>
+        <li>完成后，返回到 <a href="src/views/auth/profile.html" class="alert-link">用户档案页面</a> 并刷新</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 检查管理员状态
+      checkAdminStatus();
+      
+      // 检查产品数据
+      checkProductsData();
+      
+      // 检查设计师数据
+      checkDesignersData();
+      
+      // 检查分类数据
+      checkCategoriesData();
+      
+      // 设置事件监听器
+      setupEventListeners();
+    });
+
+    // 检查管理员状态
+    function checkAdminStatus() {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const statusEl = document.getElementById('admin-status');
+      
+      statusEl.textContent = isAdmin ? '已启用' : '未启用';
+      statusEl.className = `badge ${isAdmin ? 'bg-success' : 'bg-danger'}`;
+    }
+
+    // 检查产品数据
+    function checkProductsData() {
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const countEl = document.getElementById('product-count');
+      const dataEl = document.getElementById('products-data');
+      
+      countEl.textContent = products.length;
+      countEl.className = `badge ${products.length > 0 ? 'bg-success' : 'bg-danger'}`;
+      
+      dataEl.textContent = products.length > 0 
+        ? JSON.stringify(products, null, 2).substring(0, 1000) + (JSON.stringify(products, null, 2).length > 1000 ? '...' : '')
+        : '没有产品数据';
+    }
+
+    // 检查设计师数据
+    function checkDesignersData() {
+      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      const countEl = document.getElementById('designer-count');
+      const dataEl = document.getElementById('designers-data');
+      
+      countEl.textContent = designers.length;
+      countEl.className = `badge ${designers.length > 0 ? 'bg-success' : 'bg-danger'}`;
+      
+      dataEl.textContent = designers.length > 0 
+        ? JSON.stringify(designers, null, 2)
+        : '没有设计师数据';
+    }
+
+    // 检查分类数据
+    function checkCategoriesData() {
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const countEl = document.getElementById('category-count');
+      const dataEl = document.getElementById('categories-data');
+      
+      countEl.textContent = categories.length;
+      countEl.className = `badge ${categories.length > 0 ? 'bg-success' : 'bg-danger'}`;
+      
+      dataEl.textContent = categories.length > 0 
+        ? JSON.stringify(categories, null, 2)
+        : '没有分类数据';
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 管理员状态按钮
+      document.getElementById('set-admin-true').addEventListener('click', function() {
+        localStorage.setItem('isAdmin', 'true');
+        checkAdminStatus();
+      });
+      
+      document.getElementById('set-admin-false').addEventListener('click', function() {
+        localStorage.setItem('isAdmin', 'false');
+        checkAdminStatus();
+      });
+      
+      // 产品数据按钮
+      document.getElementById('init-test-products').addEventListener('click', function() {
+        initTestProducts();
+        checkProductsData();
+      });
+      
+      document.getElementById('clear-products').addEventListener('click', function() {
+        if (confirm('确定要清空所有产品数据吗？')) {
+          localStorage.setItem('products', '[]');
+          checkProductsData();
+        }
+      });
+      
+      // 设计师数据按钮
+      document.getElementById('init-test-designers').addEventListener('click', function() {
+        initTestDesigners();
+        checkDesignersData();
+      });
+      
+      // 分类数据按钮
+      document.getElementById('init-test-categories').addEventListener('click', function() {
+        initTestCategories();
+        checkCategoriesData();
+      });
+    }
+
+    // 初始化测试产品
+    function initTestProducts() {
+      const testProducts = [
+        {
+          id: 1,
+          name: "手工陶瓷花瓶",
+          categoryId: 1,
+          price: 49.99,
+          stock: 15,
+          description: "手工制作的陶瓷花瓶，简约风格，适合各种场合。",
+          details: "尺寸：高20cm，直径10cm<br>材质：优质陶瓷<br>风格：简约现代<br>适用：客厅，餐厅，书房",
+          onSale: false,
+          salePrice: null,
+          images: ["../../assets/img/product1.jpg", "../../assets/img/product1-2.jpg"],
+          listingDate: new Date().toISOString(),
+          reviews: []
+        },
+        {
+          id: 2,
+          name: "手工编织篮子",
+          categoryId: 2,
+          price: 35.99,
+          stock: 8,
+          description: "手工编织的实用篮子，天然材料，环保耐用。",
+          details: "尺寸：直径30cm，高15cm<br>材质：天然藤条<br>用途：收纳，装饰，野餐<br>特点：环保，耐用，天然",
+          onSale: true,
+          salePrice: 29.99,
+          images: ["../../assets/img/product2.jpg"],
+          listingDate: new Date().toISOString(),
+          reviews: [
+            {
+              name: "张三",
+              rating: 5,
+              comment: "质量很好，非常满意！",
+              date: new Date().toISOString()
+            }
+          ]
+        },
+        {
+          id: 3,
+          name: "手工羊毛毯",
+          categoryId: 3,
+          price: 89.99,
+          stock: 5,
+          description: "纯手工编织的羊毛毯，保暖舒适，触感柔软。",
+          details: "尺寸：150cm x 200cm<br>材质：优质羊毛<br>特点：柔软，保暖，透气<br>适用：沙发，床上，露营",
+          onSale: false,
+          salePrice: null,
+          images: ["../../assets/img/product3.jpg"],
+          listingDate: new Date().toISOString(),
+          reviews: []
+        }
+      ];
+      
+      localStorage.setItem('products', JSON.stringify(testProducts));
+      alert('已成功初始化3个测试产品！');
+    }
+
+    // 初始化测试设计师
+    function initTestDesigners() {
+      const testDesigners = [
+        {
+          id: "d1",
+          name: "李明",
+          specialty: "陶瓷艺术",
+          bio: "资深陶瓷艺术家，从事陶瓷创作15年，作品曾在多个国际展览中展出。",
+          image: "../../assets/img/designer1.jpg",
+          images: ["../../assets/img/designer1.jpg"],
+          social: {
+            instagram: "https://instagram.com/limingart",
+            pinterest: "https://pinterest.com/limingart",
+            etsy: "https://etsy.com/shop/limingart"
+          }
+        },
+        {
+          id: "d2",
+          name: "王艺",
+          specialty: "手工编织",
+          bio: "专注于天然材料编织，追求传统工艺与现代设计的结合。",
+          image: "../../assets/img/designer2.jpg",
+          images: ["../../assets/img/designer2.jpg"],
+          social: {
+            instagram: "https://instagram.com/wangyi",
+            pinterest: "",
+            etsy: "https://etsy.com/shop/wangyi"
+          }
+        }
+      ];
+      
+      localStorage.setItem('designers', JSON.stringify(testDesigners));
+      alert('已成功初始化2个测试设计师！');
+    }
+
+    // 初始化测试分类
+    function initTestCategories() {
+      const testCategories = [
+        {
+          id: 1,
+          name: "陶瓷",
+          description: "手工制作的各种陶瓷产品，包括花瓶、餐具、装饰品等。",
+          image: "../../assets/img/category1.jpg"
+        },
+        {
+          id: 2,
+          name: "木制品",
+          description: "精心打造的木制工艺品，包括家具、装饰品、实用器具等。",
+          image: "../../assets/img/category2.jpg"
+        },
+        {
+          id: 3,
+          name: "纺织品",
+          description: "手工编织的各种纺织品，包括毯子、靠垫、窗帘等。",
+          image: "../../assets/img/category3.jpg"
+        }
+      ];
+      
+      localStorage.setItem('categories', JSON.stringify(testCategories));
+      alert('已成功初始化3个测试分类！');
+    }
+  </script>
+</body>
+</html> 

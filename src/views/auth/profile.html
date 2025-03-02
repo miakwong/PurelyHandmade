@@ -205,7 +205,7 @@
 <body>
 
 <!-- Navbar Placeholder -->
-<div id="navbar-placeholder"></div>
+  <div id="navbar-placeholder"></div>
 
 <div class="container my-5">
   <h1 class="mb-4">My Profile</h1>
@@ -218,7 +218,7 @@
           <img src="../../assets/img/profile.png" alt="Profile Photo" id="profile-img" class="profile-avatar">
           <div class="avatar-overlay" onclick="document.getElementById('avatar-upload').click()">
             <i class="bi bi-camera"></i>
-          </div>
+      </div>
           <input type="file" id="avatar-upload" accept="image/png, image/jpeg" onchange="updateProfilePhoto(event)" hidden>
         </div>
         <h3 id="user-full-name" class="mt-3">John Doe</h3>
@@ -326,71 +326,79 @@
               <h4>Admin Features</h4>
             </div>
             
+            <!-- Product Management Section -->
+            <div class="admin-section mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Product Management</h4>
+                <button class="btn btn-primary" onclick="resetProductForm()" data-bs-toggle="modal" data-bs-target="#productModal">
+                  <i class="bi bi-plus-circle me-1"></i> Add Product
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="productTableBody">
+                    <!-- Product rows will be dynamically added here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
             <!-- User Management Section -->
             <div class="admin-section">
-              <h5>User Management</h5>
-              <div class="mb-3">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="user-search" placeholder="Search by ID or Email">
-                  <button class="btn btn-primary" id="search-user">Search</button>
-                </div>
+              <h4>User Management</h4>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="userTableBody">
+                    <!-- User rows will be dynamically added here -->
+                  </tbody>
+                </table>
               </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="user-list">
-                  <!-- User list will be populated by JavaScript -->
-                </tbody>
-              </table>
             </div>
             
-            <!-- Order Management Section -->
+            <!-- Designer Management Section -->
             <div class="admin-section">
-              <h5>Order Management</h5>
-              <div class="mb-3">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="order-search" placeholder="Enter Order ID">
-                  <button class="btn btn-primary" id="check-order">Search</button>
-                </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Designer Management</h4>
+                <button class="btn btn-primary" onclick="resetDesignerForm()" data-bs-toggle="modal" data-bs-target="#designerModal">
+                  <i class="bi bi-plus-circle me-1"></i> Add Designer
+                </button>
               </div>
-              
-              <div class="mb-3">
-                <div class="btn-group" role="group" aria-label="Order Status Filter">
-                  <button type="button" class="btn btn-outline-primary order-filter" data-status="New">New Orders <span class="badge bg-secondary" id="new-count">0</span></button>
-                  <button type="button" class="btn btn-outline-primary order-filter" data-status="Packed">Packed <span class="badge bg-secondary" id="packed-count">0</span></button>
-                  <button type="button" class="btn btn-outline-primary order-filter" data-status="InTransit">In Transit <span class="badge bg-secondary" id="transit-count">0</span></button>
-                  <button type="button" class="btn btn-outline-primary order-filter" data-status="Delivered">Delivered <span class="badge bg-secondary" id="delivered-count">0</span></button>
-                </div>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Name</th>
+                      <th>Specialty</th>
+                      <th>Products</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="designerTableBody">
+                    <!-- Designer rows will be dynamically added here -->
+                  </tbody>
+                </table>
               </div>
-              
-              <table>
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Product</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="order-list">
-                  <!-- Order list will be populated by JavaScript -->
-                </tbody>
-              </table>
-            </div>
-            
-            <!-- Comment Management Section -->
-            <div class="admin-section">
-              <h5>Comment Management</h5>
-              <ul id="comment-list" class="list-group">
-                <!-- Comment list will be populated by JavaScript -->
-              </ul>
             </div>
           </div>
           
@@ -554,12 +562,191 @@
   </div>
 </div>
 
+<!-- Designer Modal -->
+<div class="modal fade" id="designerModal" tabindex="-1" aria-labelledby="designerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="designerModalLabel">Add New Designer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="designerForm">
+          <input type="hidden" id="designerId">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="mb-3">
+                <label for="designerName" class="form-label">Designer Name</label>
+                <input type="text" class="form-control" id="designerName" required>
+              </div>
+              <div class="mb-3">
+                <label for="designerSpecialty" class="form-label">Specialty</label>
+                <input type="text" class="form-control" id="designerSpecialty" required>
+              </div>
+              <div class="mb-3">
+                <label for="designerBio" class="form-label">Biography</label>
+                <textarea class="form-control" id="designerBio" rows="3" required></textarea>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label class="form-label">Profile Images</label>
+                <div id="designerImagesContainer">
+                  <!-- Image previews will be added here -->
+                </div>
+                <div class="d-grid mt-2">
+                  <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('designerImage').click()">
+                    <i class="bi bi-upload me-1"></i> Upload Images
+                  </button>
+                </div>
+                <input type="file" id="designerImage" accept="image/*" multiple style="display: none;" onchange="previewDesignerImages(event)">
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Social Media Links</label>
+            <div class="input-group mb-2">
+              <span class="input-group-text"><i class="bi bi-instagram"></i></span>
+              <input type="url" class="form-control" id="designerInstagram" placeholder="Instagram URL">
+            </div>
+            <div class="input-group mb-2">
+              <span class="input-group-text"><i class="bi bi-pinterest"></i></span>
+              <input type="url" class="form-control" id="designerPinterest" placeholder="Pinterest URL">
+            </div>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-shop"></i></span>
+              <input type="url" class="form-control" id="designerEtsy" placeholder="Etsy URL">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveDesigner()">Save Designer</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">Add New Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="mb-3">
+                <label for="productName" class="form-label">Product Name</label>
+                <input type="text" class="form-control" id="productName" required>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="productCategory" class="form-label">Category</label>
+                  <select class="form-select" id="productCategory" required>
+                    <option value="">Select Category</option>
+                    <option value="1">Ceramics</option>
+                    <option value="2">Wood Crafts</option>
+                    <option value="3">Textiles</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="productDesigner" class="form-label">Designer (Optional)</label>
+                  <select class="form-select" id="productDesigner">
+                    <option value="">No Designer</option>
+                    <!-- Designers will be loaded dynamically -->
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="productPrice" class="form-label">Price ($)</label>
+                  <input type="number" class="form-control" id="productPrice" min="0" step="0.01" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="productStock" class="form-label">Stock</label>
+                  <input type="number" class="form-control" id="productStock" min="0" required>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="productListingDate" class="form-label">Listing Date</label>
+                <input type="datetime-local" class="form-control" id="productListingDate">
+              </div>
+              <div class="mb-3">
+                <label for="productDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="productDescription" rows="3" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="productDetails" class="form-label">Details</label>
+                <textarea class="form-control" id="productDetails" rows="3"></textarea>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="productOnSale">
+                    <label class="form-check-label" for="productOnSale">On Sale</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="productSalePrice" class="form-label">Sale Price ($)</label>
+                  <input type="number" class="form-control" id="productSalePrice" min="0" step="0.01">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label class="form-label">Product Images</label>
+                <div id="productImagesContainer">
+                  <!-- Image previews will be added here -->
+                </div>
+                <div class="d-grid mt-2">
+                  <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('productImages').click()">
+                    <i class="bi bi-upload me-1"></i> Upload Images
+                  </button>
+                </div>
+                <input type="file" id="productImages" accept="image/*" multiple style="display: none">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Comments Modal -->
+<div class="modal fade" id="productCommentsModal" tabindex="-1" aria-labelledby="productCommentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productCommentsModalLabel">Product Comments</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="productCommentsContainer">
+          <!-- Comments will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Footer Placeholder -->
 <div id="footer-placeholder" class="mt-5"></div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<script src="../../assets/js/init-data.js"></script>
+  <script>
   // Load navbar and footer
   fetch('../../assets/layout/navbar.html').then(r => r.text()).then(html => document.getElementById('navbar-placeholder').innerHTML = html);
   fetch('../../assets/layout/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);
@@ -567,31 +754,104 @@
   // Global variables
   let userProfile = null;
   let userAddresses = [];
+  let productsLoaded = false; // 标记产品是否已加载
 
   // Initialize page
-  $(document).ready(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM content loaded, initializing page...');
+    
+    // Test localStorage access
+    try {
+      console.log('Testing localStorage access...');
+      const testProducts = JSON.parse(localStorage.getItem('products') || '[]');
+      console.log(`Found ${testProducts.length} products in localStorage during initialization`);
+      
+      const testCategories = JSON.parse(localStorage.getItem('categories') || '[]');
+      console.log(`Found ${testCategories.length} categories in localStorage during initialization`);
+
+      // 检查管理员状态
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      console.log(`Admin status from localStorage: ${isAdmin}`);
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+    }
+    
+    // 初始化数据
+    if (typeof window.initializeData === 'function') {
+      console.log('Initializing data...');
+      window.initializeData();
+    } else {
+      console.warn('initializeData function not found, skipping data initialization');
+    }
+    
+    // 加载用户配置文件
     loadUserProfile();
+    
+    // 加载用户地址
     loadUserAddresses();
-    setupEventListeners();
+    
+    // 初始化管理员功能
     initializeAdminFeatures();
+    
+    // 设置事件监听器
+    setupEventListeners();
+    
+    console.log('Page initialization complete.');
+
+    // 确保管理员面板在页面加载完成后显示
+    setTimeout(function() {
+      if (localStorage.getItem('isAdmin') === 'true') {
+        console.log('Forcing admin panel display after page load');
+        document.getElementById('admin-tab-container').style.display = 'block';
+        // 如果产品尚未加载，强制加载
+        if (!productsLoaded) {
+          console.log('Products not loaded yet, forcing product load');
+          loadProducts();
+        }
+      }
+    }, 1000);
   });
 
   // Initialize admin features
   function initializeAdminFeatures() {
+    console.log('Initializing admin features...');
     // Check if user is admin
     const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    console.log(`User is admin: ${isAdmin}`);
     
     if (isAdmin) {
-      // Show admin tab
-      $('#admin-tab-container').show();
+      // Show admin tab explicitly
+      document.getElementById('admin-tab-container').style.display = 'block';
+      console.log('Admin tab container shown');
       
       // Load admin features data
-      loadUsers();
-      loadOrders();
-      loadComments();
-      
-      // Setup admin event listeners
-      setupAdminEventListeners();
+      console.log('Loading admin data...');
+      try {
+        loadUsers();
+        console.log('Users loaded');
+        
+        loadDesigners();
+        console.log('Designers loaded');
+        
+        console.log('About to load products...');
+        loadProducts();
+        console.log('Products loaded');
+        
+        // Setup admin event listeners
+        setupAdminEventListeners();
+        console.log('Admin event listeners set up');
+      } catch (error) {
+        console.error('Error loading admin data:', error);
+        // 尝试识别和报告具体错误
+        if (error.message.includes('getElementById')) {
+          console.error('DOM元素未找到。页面结构可能已更改或尚未加载。');
+        } else if (error.message.includes('JSON')) {
+          console.error('JSON解析错误。localStorage中的数据可能已损坏。');
+        }
+      }
+    } else {
+      console.log('User is not admin, hiding admin features');
+      document.getElementById('admin-tab-container').style.display = 'none';
     }
   }
 
@@ -715,6 +975,8 @@
 
   // Setup event listeners
   function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // Profile photo upload
     $('#avatar-upload').change(updateProfilePhoto);
     
@@ -734,18 +996,42 @@
     $('#editAddressModal').on('show.bs.modal', function() {
       $(this).find('.modal-body').html($('#addAddressModal .modal-body').html());
     });
+    
+    // Add product event listeners
+    $('#productImages').change(function(event) {
+      previewProductImages(event);
+    });
+
+    // 确保产品保存按钮正确绑定事件
+    $('#saveProductBtn').click(function() {
+      console.log('Save product button clicked');
+      saveProduct();
+    });
+
+    // 添加重置表单的按钮点击处理
+    $('.btn[data-bs-toggle="modal"][data-bs-target="#productModal"]').click(function() {
+      console.log('Add product button clicked, resetting form');
+      resetProductForm();
+    });
+
+    $('#productModal').on('show.bs.modal', function() {
+      console.log('Product modal opened, loading designers...');
+      loadDesignersForProduct();
+    });
+    
+    console.log('Event listeners setup complete.');
   }
 
   // Update profile photo
-  function updateProfilePhoto(event) {
-    const file = event.target.files[0];
-    if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+      function updateProfilePhoto(event) {
+          const file = event.target.files[0];
+          if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
       if (file.size > 5 * 1024 * 1024) {
         alert("Image size should not exceed 5MB");
         return;
       }
       
-      const reader = new FileReader();
+              const reader = new FileReader();
       reader.onload = function(e) {
         const imgData = e.target.result;
         $('#profile-img').attr('src', imgData);
@@ -755,12 +1041,12 @@
           userProfile.avatar = imgData;
           localStorage.setItem('user', JSON.stringify(userProfile));
         }
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert("Please upload a valid JPG or PNG image.");
-    }
-  }
+              };
+              reader.readAsDataURL(file);
+          } else {
+              alert("Please upload a valid JPG or PNG image.");
+          }
+      }
 
   // Save profile changes
   function saveProfileChanges() {
@@ -1033,7 +1319,7 @@
       { id: 2, name: "Bob", email: "bob@example.com", status: "Disabled" }
     ];
 
-    let userTable = document.getElementById("user-list");
+    let userTable = document.getElementById("userTableBody");
     userTable.innerHTML = "";
 
     users.forEach(user => {
@@ -1247,7 +1533,7 @@
 
   // Render filtered users
   function renderFilteredUsers(users) {
-    let userTable = document.getElementById("user-list");
+    let userTable = document.getElementById("userTableBody");
     userTable.innerHTML = "";
 
     users.forEach(user => {
@@ -1265,7 +1551,624 @@
         </tr>`;
     });
   }
-</script>
+
+  // Designer management functions
+  function loadDesigners() {
+    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const tableBody = document.getElementById('designerTableBody');
+    
+    tableBody.innerHTML = designers.map(designer => {
+      const designerProducts = products.filter(p => p.designerId === designer.id);
+      return `
+        <tr>
+          <td>
+            <img src="${designer.image}" alt="${designer.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+          </td>
+          <td>${designer.name}</td>
+          <td>${designer.specialty}</td>
+          <td>${designerProducts.length} products</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-1" onclick="editDesigner('${designer.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger me-1" onclick="deleteDesigner('${designer.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+            <a href="/src/views/designer-page.html?id=${designer.id}" class="btn btn-sm btn-info" target="_blank">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function previewDesignerImages(event) {
+    const container = document.getElementById('designerImagesContainer');
+    const files = event.target.files;
+    
+    if (files.length === 0) return;
+    
+    // Clear existing previews when adding new images
+    container.innerHTML = '';
+    
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        container.innerHTML += `
+          <div class="position-relative d-inline-block me-2 mb-2">
+            <img src="${e.target.result}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+            <button type="button" class="btn-close position-absolute top-0 end-0" 
+              style="background-color: white;" onclick="this.parentElement.remove()"></button>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function resetDesignerForm() {
+    document.getElementById('designerForm').reset();
+    document.getElementById('designerId').value = '';
+    document.getElementById('designerImagesContainer').innerHTML = '';
+    document.getElementById('designerModalLabel').textContent = 'Add New Designer';
+  }
+
+  function editDesigner(id) {
+    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+    const designer = designers.find(d => d.id === id);
+    
+    if (designer) {
+      document.getElementById('designerId').value = designer.id;
+      document.getElementById('designerName').value = designer.name;
+      document.getElementById('designerSpecialty').value = designer.specialty;
+      document.getElementById('designerBio').value = designer.bio;
+      document.getElementById('designerInstagram').value = designer.social.instagram || '';
+      document.getElementById('designerPinterest').value = designer.social.pinterest || '';
+      document.getElementById('designerEtsy').value = designer.social.etsy || '';
+      
+      const container = document.getElementById('designerImagesContainer');
+      container.innerHTML = '';
+      
+      // Display main image and any additional images
+      if (designer.image) {
+        container.innerHTML += `
+          <div class="position-relative d-inline-block me-2 mb-2">
+            <img src="${designer.image}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+            <button type="button" class="btn-close position-absolute top-0 end-0" 
+              style="background-color: white;" onclick="this.parentElement.remove()"></button>
+          </div>
+        `;
+      }
+      
+      // Add additional images if they exist
+      if (designer.images && designer.images.length > 1) {
+        designer.images.slice(1).forEach(img => {
+          container.innerHTML += `
+            <div class="position-relative d-inline-block me-2 mb-2">
+              <img src="${img}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+              <button type="button" class="btn-close position-absolute top-0 end-0" 
+                style="background-color: white;" onclick="this.parentElement.remove()"></button>
+            </div>
+          `;
+        });
+      }
+      
+      document.getElementById('designerModalLabel').textContent = 'Edit Designer';
+      new bootstrap.Modal(document.getElementById('designerModal')).show();
+    }
+  }
+
+  function saveDesigner() {
+    const designerId = document.getElementById('designerId').value;
+    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+    
+    // Get all images from the container
+    const images = Array.from(document.getElementById('designerImagesContainer').children || [])
+      .map(div => div.querySelector('img').src);
+    
+    const mainImage = images.length > 0 ? images[0] : '../../assets/img/placeholder.png';
+    
+    const designer = {
+      id: designerId || `d${Date.now()}`,
+      name: document.getElementById('designerName').value,
+      specialty: document.getElementById('designerSpecialty').value,
+      bio: document.getElementById('designerBio').value,
+      image: mainImage,
+      images: images,
+      social: {
+        instagram: document.getElementById('designerInstagram').value,
+        pinterest: document.getElementById('designerPinterest').value,
+        etsy: document.getElementById('designerEtsy').value
+      }
+    };
+    
+    if (designerId) {
+      const index = designers.findIndex(d => d.id === designerId);
+      if (index !== -1) {
+        designers[index] = designer;
+      }
+    } else {
+      designers.push(designer);
+    }
+    
+    localStorage.setItem('designers', JSON.stringify(designers));
+    bootstrap.Modal.getInstance(document.getElementById('designerModal')).hide();
+    loadDesigners();
+  }
+
+  function deleteDesigner(id) {
+    if (confirm('Are you sure you want to delete this designer? This will not delete their products.')) {
+      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      const filteredDesigners = designers.filter(d => d.id !== id);
+      localStorage.setItem('designers', JSON.stringify(filteredDesigners));
+      loadDesigners();
+    }
+  }
+
+  // Product management functions
+  function loadProducts() {
+    console.log('Loading products...');
+    try {
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      console.log(`Found ${products.length} products in localStorage`);
+      
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      console.log(`Found ${categories.length} categories in localStorage`);
+      
+      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      console.log(`Found ${designers.length} designers in localStorage`);
+      
+      const tableBody = document.getElementById('productTableBody');
+      if (!tableBody) {
+        console.error('productTableBody element not found! DOM may not be fully loaded.');
+        // 尝试延迟后再次加载
+        setTimeout(function() {
+          const retryTableBody = document.getElementById('productTableBody');
+          if (retryTableBody) {
+            console.log('Found productTableBody on retry');
+            fillProductTable(retryTableBody, products, categories, designers);
+          } else {
+            console.error('productTableBody still not found after retry');
+          }
+        }, 1000);
+        return;
+      }
+      
+      fillProductTable(tableBody, products, categories, designers);
+      productsLoaded = true;
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  }
+
+  // 将填充表格功能独立为函数，方便复用
+  function fillProductTable(tableBody, products, categories, designers) {
+    tableBody.innerHTML = '';  // 清空表格
+    console.log(`Filling table with ${products.length} products`);
+    
+    if (products.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" class="text-center">没有找到产品</td></tr>';
+      return;
+    }
+    
+    products.forEach(product => {
+      console.log(`Processing product: ${product.name}, format:`, product);
+      
+      // 兼容两种数据格式
+      let categoryName = 'Unknown';
+      if (product.categoryId) {
+        // 第一种格式：使用categoryId关联categories数组
+        const category = categories.find(c => c.id === product.categoryId);
+        if (category) {
+          categoryName = category.name;
+        }
+      } else if (product.category) {
+        // 第二种格式：直接使用category字段
+        categoryName = product.category;
+      }
+      
+      const designer = product.designerId ? designers.find(d => d.id === product.designerId) : null;
+      
+      // 兼容两种图片格式
+      let mainImage = '../../assets/img/placeholder.png';
+      if (product.images && product.images.length > 0) {
+        mainImage = product.images[0];
+      }
+      
+      // 检查是否是新品（上架时间在一个月内）
+      const isNew = product.listingDate && 
+        (new Date().getTime() - new Date(product.listingDate).getTime()) <= 30 * 24 * 60 * 60 * 1000;
+      
+      // 兼容不同的价格格式
+      const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+      const salePrice = product.salePrice || (product.onSale ? price * 0.9 : null);
+      const stock = product.stock || 10; // 如果没有库存信息，默认为10
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>
+          <img src="${mainImage}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover;">
+        </td>
+        <td>
+          ${product.name}
+          ${isNew ? '<span class="badge bg-info ms-1">New</span>' : ''}
+        </td>
+        <td>${categoryName}</td>
+        <td>$${price.toFixed(2)}${product.onSale ? `<br><span class="text-danger">Sale: $${salePrice.toFixed(2)}</span>` : ''}</td>
+        <td>${stock}</td>
+        <td>
+          ${product.onSale ? '<span class="badge bg-danger">On Sale</span>' : '<span class="badge bg-success">Regular</span>'}
+          <br>
+          <small class="text-muted">Listed: ${product.listingDate ? new Date(product.listingDate).toLocaleDateString() : 'N/A'}</small>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-primary me-1" onclick="editProduct('${product.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger me-1" onclick="deleteProduct('${product.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-info" onclick="viewProductComments('${product.id}')">
+              <i class="bi bi-chat-dots"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  function loadDesignersForProduct() {
+    console.log('Loading designers for product dropdown');
+    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+    const select = document.getElementById('productDesigner');
+    
+    if (!select) {
+      console.error('productDesigner select element not found');
+      return;
+    }
+    
+    select.innerHTML = '<option value="">Select Designer</option>' + 
+      designers.map(designer => `
+        <option value="${designer.id}">${designer.name} (${designer.specialty})</option>
+      `).join('');
+    
+    console.log(`Loaded ${designers.length} designers into dropdown`);
+  }
+
+  function previewProductImages(event) {
+    const container = document.getElementById('productImagesContainer');
+    const files = event.target.files;
+    
+    if (!container) {
+      console.error('productImagesContainer element not found');
+      return;
+    }
+    
+    container.innerHTML = '';
+    
+    if (files.length === 0) {
+      console.log('No files selected for preview');
+      return;
+    }
+    
+    console.log(`Previewing ${files.length} product images`);
+    
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        container.innerHTML += `
+          <div class="position-relative d-inline-block me-2 mb-2">
+            <img src="${e.target.result}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover;">
+            <button type="button" class="btn-close position-absolute top-0 end-0" 
+              style="background-color: white;" onclick="this.parentElement.remove()"></button>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function resetProductForm() {
+    console.log('Resetting product form');
+    document.getElementById('productForm').reset();
+    document.getElementById('productId').value = '';
+    document.getElementById('productImagesContainer').innerHTML = '';
+    document.getElementById('productModalLabel').textContent = 'Add New Product';
+    loadDesignersForProduct();
+  }
+
+  function editProduct(id) {
+    console.log(`Editing product with ID: ${id}`);
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === parseInt(id) || p.id === id);
+    
+    if (product) {
+      document.getElementById('productId').value = product.id;
+      document.getElementById('productName').value = product.name;
+      
+      // 兼容两种分类格式
+      if (product.categoryId) {
+        document.getElementById('productCategory').value = product.categoryId;
+      } else if (product.category) {
+        // 尝试根据分类名称找到分类ID
+        const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+        const category = categories.find(c => c.name === product.category);
+        if (category) {
+          document.getElementById('productCategory').value = category.id;
+        }
+      }
+      
+      document.getElementById('productDesigner').value = product.designerId || '';
+      document.getElementById('productPrice').value = product.price;
+      document.getElementById('productStock').value = product.stock || 10;
+      document.getElementById('productDescription').value = product.description;
+      
+      // 兼容不同的details格式
+      const details = product.details || product.description || '';
+      document.getElementById('productDetails').value = details.replace ? details.replace(/<br>/g, '\n') : details;
+      
+      document.getElementById('productOnSale').checked = product.onSale || false;
+      document.getElementById('productSalePrice').value = product.salePrice || '';
+      
+      // 设置上架时间
+      if (product.listingDate) {
+        const date = new Date(product.listingDate);
+        const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16);
+        document.getElementById('productListingDate').value = localDateTime;
+      } else {
+        document.getElementById('productListingDate').value = '';
+      }
+      
+      const container = document.getElementById('productImagesContainer');
+      container.innerHTML = '';
+      
+      // 兼容不同的图片格式
+      if (product.images && product.images.length > 0) {
+        container.innerHTML = product.images.map(image => `
+          <div class="position-relative d-inline-block me-2 mb-2">
+            <img src="${image}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover;">
+            <button type="button" class="btn-close position-absolute top-0 end-0" 
+              style="background-color: white;" onclick="this.parentElement.remove()"></button>
+          </div>
+        `).join('');
+      }
+      
+      document.getElementById('productModalLabel').textContent = 'Edit Product';
+      loadDesignersForProduct();
+      
+      console.log('Opening product modal for editing');
+      new bootstrap.Modal(document.getElementById('productModal')).show();
+    } else {
+      console.error(`Product with ID ${id} not found`);
+    }
+  }
+
+  function saveProduct() {
+    console.log('Saving product...');
+    const productId = document.getElementById('productId').value;
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    try {
+      // 获取表单数据
+      const productName = document.getElementById('productName').value;
+      const productCategory = document.getElementById('productCategory').value;
+      const productPrice = document.getElementById('productPrice').value;
+      
+      if (!productName || !productCategory || !productPrice) {
+        console.error('Missing required product fields');
+        alert('请填写所有必填字段：商品名称、分类和价格');
+        return;
+      }
+      
+      console.log(`Collecting data for product: ${productName}`);
+      
+      const imagesContainer = document.getElementById('productImagesContainer');
+      if (!imagesContainer) {
+        console.error('productImagesContainer not found');
+        return;
+      }
+      
+      const images = Array.from(imagesContainer.querySelectorAll('img')).map(img => img.src);
+      console.log(`Found ${images.length} images for product`);
+      
+      const designerId = document.getElementById('productDesigner').value;
+      
+      // 获取上架时间，如果没有设置则使用当前时间
+      const listingDateInput = document.getElementById('productListingDate').value;
+      const listingDate = listingDateInput ? new Date(listingDateInput).toISOString() 
+        : productId ? (products.find(p => p.id === parseInt(productId) || p.id === productId)?.listingDate || new Date().toISOString())
+        : new Date().toISOString();
+      
+      // 为新产品生成唯一ID
+      let newId;
+      if (productId) {
+        newId = parseInt(productId) || productId;
+      } else {
+        // 生成唯一ID的更可靠方法
+        const numericIds = products
+          .map(p => typeof p.id === 'number' ? p.id : parseInt(p.id))
+          .filter(id => !isNaN(id));
+        
+        newId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
+      }
+      
+      console.log(`Using product ID: ${newId}`);
+      
+      // 获取分类信息
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const selectedCategory = categories.find(c => c.id === parseInt(productCategory));
+      
+      const product = {
+        id: newId,
+        name: productName,
+        categoryId: parseInt(productCategory),
+        category: selectedCategory ? selectedCategory.name : null, // 同时存储分类名称，兼容两种格式
+        designerId: designerId || null,
+        price: parseFloat(productPrice),
+        stock: parseInt(document.getElementById('productStock').value) || 0,
+        description: document.getElementById('productDescription').value,
+        details: document.getElementById('productDetails').value.replace(/\n/g, '<br>'),
+        onSale: document.getElementById('productOnSale').checked,
+        salePrice: document.getElementById('productSalePrice').value ? 
+          parseFloat(document.getElementById('productSalePrice').value) : null,
+        images: images.length > 0 ? images : ['../../assets/img/placeholder.png'], // 确保至少有一张默认图片
+        listingDate: listingDate,
+        reviews: productId ? 
+          (products.find(p => p.id === parseInt(productId) || p.id === productId)?.reviews || []) : []
+      };
+      
+      console.log(`Prepared product data:`, JSON.stringify(product, null, 2));
+      
+      if (productId) {
+        console.log(`Updating existing product with ID: ${productId}`);
+        const index = products.findIndex(p => p.id === parseInt(productId) || p.id === productId);
+        if (index !== -1) {
+          products[index] = product;
+        } else {
+          console.error(`Product with ID ${productId} not found for update`);
+          products.push(product);
+        }
+      } else {
+        console.log('Adding new product');
+        products.push(product);
+      }
+      
+      // 存储前打印最终产品列表
+      console.log(`Saving products to localStorage, total: ${products.length}`);
+      
+      localStorage.setItem('products', JSON.stringify(products));
+      console.log(`Successfully saved product. Total products: ${products.length}`);
+      
+      // 关闭模态窗口
+      const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+      if (modal) {
+        modal.hide();
+      } else {
+        console.error('Could not find modal instance');
+        document.getElementById('productModal').classList.remove('show');
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+      }
+      
+      // 重新加载产品列表
+      loadProducts();
+      
+      alert('商品已成功保存！');
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('保存商品时出错: ' + error.message);
+    }
+  }
+
+  function deleteProduct(id) {
+    console.log(`Attempting to delete product with ID: ${id}`);
+    if (confirm('确定要删除这个商品吗？')) {
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const filteredProducts = products.filter(p => p.id !== parseInt(id) && p.id !== id);
+      
+      if (filteredProducts.length < products.length) {
+        localStorage.setItem('products', JSON.stringify(filteredProducts));
+        console.log(`Product deleted. Remaining products: ${filteredProducts.length}`);
+        loadProducts();
+      } else {
+        console.error(`No product found with ID ${id} to delete`);
+      }
+    }
+  }
+
+  // 添加缺失的viewProductComments函数
+  function viewProductComments(productId) {
+    console.log(`Viewing comments for product with ID: ${productId}`);
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === parseInt(productId) || p.id === productId);
+    
+    if (product) {
+      const container = document.getElementById('productCommentsContainer');
+      const reviews = product.reviews || [];
+      
+      container.innerHTML = `
+        <h6 class="mb-3">Comments for "${product.name}"</h6>
+        ${reviews.length === 0 ? '<p class="text-muted">No comments yet.</p>' : ''}
+        <div class="list-group">
+          ${reviews.map(review => `
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">${review.name}</h6>
+                  <div class="text-warning mb-1">
+                    ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}
+                  </div>
+                </div>
+                <div>
+                  <button class="btn btn-sm btn-primary me-1" onclick="editComment('${productId}', '${review.name}')">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteComment('${productId}', '${review.name}')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <p class="mb-1">${review.comment}</p>
+              <small class="text-muted">${new Date(review.date).toLocaleDateString()}</small>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      new bootstrap.Modal(document.getElementById('productCommentsModal')).show();
+    }
+  }
+
+  // 添加评论编辑功能
+  function editComment(productId, reviewerName) {
+    console.log(`Editing comment for product ${productId} by ${reviewerName}`);
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === parseInt(productId) || p.id === productId);
+    
+    if (product) {
+      const review = product.reviews.find(r => r.name === reviewerName);
+      if (review) {
+        const newComment = prompt('Edit comment:', review.comment);
+        if (newComment !== null) {
+          review.comment = newComment;
+          localStorage.setItem('products', JSON.stringify(products));
+          viewProductComments(productId);
+        }
+      }
+    }
+  }
+
+  // 添加评论删除功能
+  function deleteComment(productId, reviewerName) {
+    console.log(`Deleting comment for product ${productId} by ${reviewerName}`);
+    if (confirm('Are you sure you want to delete this comment?')) {
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const product = products.find(p => p.id === parseInt(productId) || p.id === productId);
+      
+      if (product) {
+        product.reviews = product.reviews.filter(r => r.name !== reviewerName);
+        localStorage.setItem('products', JSON.stringify(products));
+        viewProductComments(productId);
+      }
+    }
+  }
+
+  // 确保全局函数可访问
+  window.editProduct = editProduct;
+  window.deleteProduct = deleteProduct;
+  window.viewProductComments = viewProductComments;
+  window.resetProductForm = resetProductForm;
+  window.saveProduct = saveProduct;
+  window.editComment = editComment;
+  window.deleteComment = deleteComment;
+  </script>
 
 </body>
 </html>
