@@ -2,6 +2,16 @@
 This project aims to develop a secure and user-friendly e-commerce platform where artisans can list and sell their handmade products.
 COSC 360 Project 
 
+## Admin Login Instructions
+
+To access the admin panel, use the following credentials:
+
+- **Username:** `admin`
+- **Password:** `admin123`
+
+Simply enter these credentials on the **login page** (`login.html`) to access the admin dashboard.
+
+
 **Due Dates: See Milestone Dates**
 
 # Overview:
