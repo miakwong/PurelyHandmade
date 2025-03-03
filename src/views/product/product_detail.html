@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* 产品详情页样式 */
+    /* Product Detail Page Styles */
     #product-carousel .carousel-item {
       height: 400px;
       background-color: #f8f9fa;
@@ -73,7 +73,7 @@
       padding: 15px 0;
     }
     
-    /* 社交分享按钮样式 */
+    /* Social Share Button Styles */
     .social-share a {
       color: #6c757d;
       font-size: 1.2rem;
@@ -84,7 +84,7 @@
       color: #0d6efd;
     }
     
-    /* 产品卡片样式 */
+    /* Product Card Styles */
     .product-card {
       border-radius: 10px;
       overflow: hidden;
@@ -130,7 +130,7 @@
       font-size: 0.9rem;
     }
     
-    /* 客户评论样式 */
+    /* Customer Reviews Styles */
     .customer-reviews {
       background-color: #f8f9fa;
       border-radius: 10px;
@@ -150,7 +150,7 @@
       margin-bottom: 10px;
     }
     
-    /* 愿望清单按钮样式 */
+    /* Wishlist Button Styles */
     #wishlist-btn {
       transition: all 0.3s;
     }
@@ -161,12 +161,12 @@
       border-color: #dc3545;
     }
     
-    /* 相关产品部分样式 */
+    /* Related Products Section Styles */
     .related-products {
       padding: 20px 0;
     }
     
-    /* 吐司通知容器 */
+    /* Toast Notification Container */
     .toast-container {
       position: fixed;
       bottom: 20px;
@@ -299,7 +299,7 @@
   </div>
 </div>
 
-<!-- Toast通知容器 -->
+<!-- Toast Notification Container -->
 <div class="toast-container" id="toast-container"></div>
 
 <!-- Footer Placeholder -->
@@ -313,16 +313,16 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // 初始化数据
+    // Initialize data
     if (typeof window.initializeData === 'function') {
       window.initializeData();
     }
     
-    // 获取URL参数中的产品ID
+    // Get product ID from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const productId = parseInt(urlParams.get('id') || 0);
     
-    // 获取产品数据
+    // Get product data
     const productsData = localStorage.getItem('products');
     let product;
     
@@ -331,7 +331,7 @@
       product = products.find(p => p.id === productId);
     }
     
-    // 如果找不到产品，显示错误并重定向
+    // If product not found, show error and redirect
     if (!product) {
       showError('The product you are looking for could not be found.');
       setTimeout(() => {
@@ -340,34 +340,34 @@
       return;
     }
     
-    // 渲染产品详情
+    // Render product details
     renderProductDetails(product);
     
-    // 加载相关产品
+    // Load related products
     loadRelatedProducts(product);
     
-    // 设置手风琴面板的事件监听器
+    // Setup accordion panel event listeners
     setupAccordion();
     
-    // 设置数量控制器
+    // Setup quantity controls
     setupQuantityControls();
     
-    // 添加购物车按钮事件
+    // Add to cart button event
     document.getElementById('add-to-cart').addEventListener('click', function() {
       const quantity = parseInt(document.getElementById('product-quantity').value);
       addToCart(product, quantity);
     });
     
-    // 添加愿望清单按钮事件
+    // Add wishlist button event
     document.getElementById('wishlist-btn').addEventListener('click', function() {
       toggleWishlist(product);
     });
     
-    // 添加社交分享按钮事件
+    // Add social sharing button events
     setupSocialSharing(product);
   });
   
-  // 设置手风琴面板
+  // Setup accordion panels
   function setupAccordion() {
     const acc = document.getElementsByClassName("accordion");
     for (let i = 0; i < acc.length; i++) {
@@ -381,14 +381,14 @@
         }
       });
       
-      // 默认打开第一个面板
+      // Open first panel by default
       if (i === 0) {
         acc[i].click();
       }
     }
   }
   
-  // 设置数量控制器
+  // Setup quantity controls
   function setupQuantityControls() {
     const quantityInput = document.getElementById('product-quantity');
     const decreaseBtn = document.getElementById('decrease-quantity');
@@ -414,23 +414,23 @@
     });
   }
   
-  // 渲染产品详情
+  // Render product details
   function renderProductDetails(product) {
-    // 处理可能为空的字段
+    // Handle potentially empty fields
     const productName = product.name || 'Unnamed Product';
     const productDescription = product.description || 'No description available';
     const productPrice = parseFloat(product.price) || 0;
     const productSalePrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : (product.onSale ? productPrice * 0.9 : null);
     const stock = product.stock || 0;
     
-    // 设置页面标题
+    // Set page title
     document.title = `${productName} - Purely Homemade`;
     
-    // 设置产品名称
+    // Set product name
     document.getElementById('product-title').textContent = productName;
     document.getElementById('breadcrumb-product').textContent = productName;
     
-    // 设置产品库存状态
+    // Set product stock status
     const productStatus = document.getElementById('product-status');
     if (stock > 10) {
       productStatus.innerHTML = '<span class="badge bg-success">In Stock</span>';
@@ -440,7 +440,7 @@
       productStatus.innerHTML = '<span class="badge bg-danger">Out of Stock</span>';
     }
     
-    // 设置产品评分
+    // Set product rating
     const rating = product.rating || 0;
     const reviewCount = product.reviews ? product.reviews.length : 0;
     const ratingContainer = document.getElementById('product-rating');
@@ -461,7 +461,7 @@
     starsHtml += `<span class="text-muted ms-2">(${reviewCount})</span>`;
     ratingContainer.innerHTML = starsHtml;
     
-    // 设置价格显示
+    // Set price display
     if (product.onSale && productSalePrice) {
       document.getElementById('product-price').textContent = `$${productSalePrice.toFixed(2)}`;
       document.getElementById('product-original-price').textContent = `$${productPrice.toFixed(2)}`;
@@ -470,10 +470,10 @@
       document.getElementById('product-original-price').textContent = '';
     }
     
-    // 设置产品描述
+    // Set product description
     document.getElementById('product-description').textContent = productDescription;
     
-    // 设置产品详情
+    // Set product details
     const detailsContainer = document.getElementById('product-details');
     const details = product.details || 'No details available';
     
@@ -488,11 +488,11 @@
       detailsContainer.innerHTML = detailsHtml;
     }
     
-    // 设置产品图片轮播
+    // Set product image carousel
     const carouselContainer = document.getElementById('carousel-images');
     carouselContainer.innerHTML = '';
     
-    // 处理产品图片
+    // Handle product images
     let productImages = [];
     if (Array.isArray(product.images) && product.images.length > 0) {
       productImages = product.images;
@@ -502,7 +502,7 @@
       productImages = ['https://via.placeholder.com/500?text=No+Image+Available'];
     }
     
-    // 创建轮播项
+    // Create carousel items
     productImages.forEach((image, index) => {
       const carouselItem = document.createElement('div');
       carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
@@ -510,24 +510,24 @@
       carouselContainer.appendChild(carouselItem);
     });
     
-    // 设置类别面包屑
+    // Set category breadcrumb
     const categoriesData = localStorage.getItem('categories');
     if (categoriesData && product.categoryId) {
       const categories = JSON.parse(categoriesData);
       const category = categories.find(c => c.id === product.categoryId);
       if (category) {
-        document.getElementById('breadcrumb-category-link').innerHTML = `<a href="./product-list.html?category=${category.id}">${category.name}</a>`;
+        document.getElementById('breadcrumb-category-link').innerHTML = `<a href="./category-page.html?id=${category.id}">${category.name}</a>`;
       }
     }
     
-    // 加载产品评论
+    // Load product reviews
     loadReviews(product);
     
-    // 检查产品是否在愿望清单中
+    // Check if product is in wishlist
     checkWishlist(product.id);
   }
   
-  // 加载产品评论
+  // Load product reviews
   function loadReviews(product) {
     const reviewsContainer = document.getElementById('reviews-container');
     const reviewCountEl = document.getElementById('review-count');
@@ -581,38 +581,38 @@
     reviewsContainer.innerHTML = reviewsHtml;
   }
   
-  // 加载相关产品
+  // Load related products
   function loadRelatedProducts(product) {
     const productsData = localStorage.getItem('products');
     if (!productsData) return;
     
     const products = JSON.parse(productsData);
-    // 查找同一类别的产品，但不包括当前产品
+    // Find products in the same category, excluding current product
     const categoryId = product.categoryId || 0;
     let relatedProducts = products.filter(p => p.categoryId === categoryId && p.id !== product.id);
     
-    // 如果同一类别中没有足够的产品，添加一些其他产品
+    // If not enough products in the same category, add some other products
     if (relatedProducts.length < 4) {
       const otherProducts = products.filter(p => p.id !== product.id && p.categoryId !== categoryId);
       relatedProducts = relatedProducts.concat(otherProducts.slice(0, 4 - relatedProducts.length));
     }
     
-    // 限制最多显示4个相关产品
+    // Limit to max 4 related products
     relatedProducts = relatedProducts.slice(0, 4);
     
-    // 渲染相关产品
+    // Render related products
     const container = document.getElementById('related-products-container');
     if (!container) return;
     
     container.innerHTML = '';
     
     relatedProducts.forEach(relatedProduct => {
-      // 处理可能为空的字段
+      // Handle potentially empty fields
       const name = relatedProduct.name || 'Unnamed Product';
       const price = parseFloat(relatedProduct.price) || 0;
       const salePrice = relatedProduct.onSale && relatedProduct.salePrice ? parseFloat(relatedProduct.salePrice) : (relatedProduct.onSale ? price * 0.9 : null);
       
-      // 获取产品图片
+      // Get product image
       let imageSrc = 'https://via.placeholder.com/180';
       if (Array.isArray(relatedProduct.images) && relatedProduct.images.length > 0) {
         imageSrc = relatedProduct.images[0];
@@ -620,7 +620,7 @@
         imageSrc = relatedProduct.image;
       }
       
-      // 生成价格HTML
+      // Generate price HTML
       let priceHtml;
       if (relatedProduct.onSale && salePrice) {
         priceHtml = `
@@ -631,7 +631,7 @@
         priceHtml = `<span class="product-price">$${price.toFixed(2)}</span>`;
       }
       
-      // 生成产品卡片HTML
+      // Generate product card HTML
       const productHtml = `
         <div class="col-6 col-md-3">
           <div class="product-card">
@@ -653,7 +653,7 @@
       container.innerHTML += productHtml;
     });
     
-    // 添加相关产品的"添加到购物车"按钮事件
+    // Add related products' "Add to Cart" button events
     document.querySelectorAll('.add-to-cart-related').forEach(button => {
       button.addEventListener('click', function(e) {
         e.preventDefault();
@@ -667,28 +667,28 @@
     });
   }
   
-  // 添加到购物车
+  // Add to cart
   function addToCart(product, quantity) {
     if (!product) return;
     
-    // 验证数量
+    // Validate quantity
     quantity = parseInt(quantity);
     if (isNaN(quantity) || quantity < 1) {
       quantity = 1;
     }
     
-    // 获取现有购物车
+    // Get existing cart
     let cart = [];
     const cartData = localStorage.getItem('cart');
     if (cartData) {
       cart = JSON.parse(cartData);
     }
     
-    // 计算最终价格
+    // Calculate final price
     const price = parseFloat(product.price) || 0;
     const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
     
-    // 处理图片URL
+    // Handle image URL
     let imageUrl = 'https://via.placeholder.com/80';
     if (product.image) {
       imageUrl = product.image;
@@ -696,12 +696,12 @@
       imageUrl = product.images[0];
     }
     
-    // 检查产品是否已在购物车中
+    // Check if product is already in cart
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
       existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
-      // 安全处理产品描述
+      // Safely handle product description
       let description = 'No description available';
       if (product.description) {
         description = product.description.substring(0, 100);
@@ -721,17 +721,17 @@
       });
     }
     
-    // 保存到localStorage
+    // Save to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // 显示成功消息
+    // Show success message
     showToast(`${product.name || 'Product'} added to your cart!`, 'success');
     
-    // 更新导航栏购物车计数
+    // Update navbar cart count
     updateCartCount();
   }
   
-  // 更新购物车计数
+  // Update cart count
   function updateCartCount() {
     const cartData = localStorage.getItem('cart');
     const cartCount = document.getElementById('cart-count');
@@ -748,7 +748,7 @@
     }
   }
   
-  // 处理愿望清单
+  // Handle wishlist
   function toggleWishlist(product) {
     if (!product) return;
     
@@ -762,13 +762,13 @@
     const isInWishlist = wishlist.some(item => item.id === productId);
     
     if (isInWishlist) {
-      // 从愿望清单中移除
+      // Remove from wishlist
       wishlist = wishlist.filter(item => item.id !== productId);
       document.getElementById('wishlist-btn').classList.remove('active');
       showToast(`${product.name} removed from wishlist`, 'info');
     } else {
-      // 添加到愿望清单
-      // 处理图片URL
+      // Add to wishlist
+      // Handle image URL
       let imageUrl = 'https://via.placeholder.com/80';
       if (product.image) {
         imageUrl = product.image;
@@ -776,7 +776,7 @@
         imageUrl = product.images[0];
       }
       
-      // 计算价格
+      // Calculate price
       const price = parseFloat(product.price) || 0;
       const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
       
@@ -795,7 +795,7 @@
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }
   
-  // 检查产品是否在愿望清单中
+  // Check if product is in wishlist
   function checkWishlist(productId) {
     const wishlistData = localStorage.getItem('wishlist');
     if (wishlistData) {
@@ -808,7 +808,7 @@
     }
   }
   
-  // 设置社交分享功能
+  // Setup social sharing functionality
   function setupSocialSharing(product) {
     const productUrl = encodeURIComponent(window.location.href);
     const productName = encodeURIComponent(product.name || 'Purely Homemade Product');
@@ -816,15 +816,15 @@
     
     const shareLinks = document.querySelectorAll('.social-share a');
     
-    // Facebook分享
+    // Facebook share
     shareLinks[0].href = `https://www.facebook.com/sharer/sharer.php?u=${productUrl}`;
     shareLinks[0].target = '_blank';
     
-    // Twitter分享
+    // Twitter share
     shareLinks[1].href = `https://twitter.com/intent/tweet?text=${productDesc}&url=${productUrl}`;
     shareLinks[1].target = '_blank';
     
-    // Pinterest分享
+    // Pinterest share
     let imageUrl = '';
     if (Array.isArray(product.images) && product.images.length > 0) {
       imageUrl = encodeURIComponent(product.images[0]);
@@ -834,7 +834,7 @@
     shareLinks[2].href = `https://pinterest.com/pin/create/button/?url=${productUrl}&media=${imageUrl}&description=${productDesc}`;
     shareLinks[2].target = '_blank';
     
-    // 复制链接
+    // Copy link
     shareLinks[3].addEventListener('click', function(e) {
       e.preventDefault();
       navigator.clipboard.writeText(window.location.href).then(() => {
@@ -845,14 +845,14 @@
     });
   }
   
-  // 显示错误信息
+  // Show error message
   function showError(message) {
     showToast(message, 'error');
   }
   
-  // 显示Toast通知
+  // Show toast notification
   function showToast(message, type = 'success') {
-    // 确保有toast容器
+    // Ensure toast container exists
     let toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
       toastContainer = document.createElement('div');
@@ -861,7 +861,7 @@
       document.body.appendChild(toastContainer);
     }
     
-    // 创建toast元素
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.style.backgroundColor = '#fff';
@@ -876,7 +876,7 @@
     toast.style.animation = 'slideIn 0.3s, fadeOut 0.5s 2.5s forwards';
     toast.style.position = 'relative';
     
-    // 设置toast边框颜色
+    // Set toast border color
     if (type === 'success') {
       toast.style.borderLeft = '4px solid #198754';
     } else if (type === 'error') {
@@ -885,22 +885,22 @@
       toast.style.borderLeft = '4px solid #0dcaf0';
     }
     
-    // 添加内容
+    // Add content
     toast.innerHTML = `
       <div style="flex: 1; padding-right: 10px;">${message}</div>
       <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
-    // 添加到容器
+    // Add to container
     toastContainer.appendChild(toast);
     
-    // 添加关闭按钮事件
+    // Add close button event
     const closeBtn = toast.querySelector('div:last-child');
     closeBtn.addEventListener('click', function() {
       toast.remove();
     });
     
-    // 自动3秒后移除
+    // Auto remove after 3 seconds
     setTimeout(() => {
       toast.remove();
     }, 3000);
