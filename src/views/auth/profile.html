@@ -780,6 +780,14 @@
               <input type="url" class="form-control" id="designerEtsy" placeholder="Etsy URL">
             </div>
           </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="designerFeatured">
+              <label class="form-check-label" for="designerFeatured">
+                Set as Featured Designer
+              </label>
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -1923,9 +1931,10 @@
             <button class="btn btn-sm btn-danger me-1" onclick="deleteDesigner('${designer.id}')">
               <i class="bi bi-trash"></i>
             </button>
-            <a href="/src/views/designer-page.html?id=${designer.id}" class="btn btn-sm btn-info" target="_blank">
+            <a href="/src/views/designer/designer-page.html?id=${designer.id}" class="btn btn-sm btn-info me-1" target="_blank">
               <i class="bi bi-eye"></i>
             </a>
+            ${designer.featured ? '<span class="badge bg-success"><i class="bi bi-star-fill"></i> Featured</span>' : ''}
           </td>
         </tr>
       `;
@@ -1972,9 +1981,10 @@
       document.getElementById('designerName').value = designer.name;
       document.getElementById('designerSpecialty').value = designer.specialty;
       document.getElementById('designerBio').value = designer.bio;
-      document.getElementById('designerInstagram').value = designer.social.instagram || '';
-      document.getElementById('designerPinterest').value = designer.social.pinterest || '';
-      document.getElementById('designerEtsy').value = designer.social.etsy || '';
+      document.getElementById('designerInstagram').value = designer.social?.instagram || '';
+      document.getElementById('designerPinterest').value = designer.social?.pinterest || '';
+      document.getElementById('designerEtsy').value = designer.social?.etsy || '';
+      document.getElementById('designerFeatured').checked = designer.featured || false;
       
       const container = document.getElementById('designerImagesContainer');
       container.innerHTML = '';
@@ -2025,6 +2035,7 @@
       bio: document.getElementById('designerBio').value,
       image: mainImage,
       images: images,
+      featured: document.getElementById('designerFeatured').checked,
       social: {
         instagram: document.getElementById('designerInstagram').value,
         pinterest: document.getElementById('designerPinterest').value,

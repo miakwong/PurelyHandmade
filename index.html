@@ -200,18 +200,68 @@
       padding: 30px;
     }
     
-    /* 订阅区域样式 */
-    .subscribe-section {
-      background-color: #0d6efd;
-      color: white;
+    /* 设计师卡片样式 */
+    .featured-designers-section {
       padding: 60px 0;
-      text-align: center;
-      margin: 40px 0;
+      background-color: #f8f9fa;
     }
     
-    .subscribe-form {
-      max-width: 500px;
-      margin: 30px auto 0;
+    .designer-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .designer-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .designer-card-img {
+      border: 5px solid #f8f9fa;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s;
+    }
+    
+    .designer-card:hover .designer-card-img {
+      transform: scale(1.05);
+    }
+    
+    .section-header h2 {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    
+    .section-header h2:after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background-color: #0d6efd;
+      margin: 10px auto 0;
+    }
+    
+    .social-links-container {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .social-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    .social-link:hover {
+      transform: translateY(-3px);
+      background-color: #e9ecef;
     }
     
     /* 响应式调整 */
@@ -239,6 +289,10 @@
       .designer-img {
         height: 250px;
       }
+      
+      .featured-designers-section {
+        padding: 40px 0;
+      }
     }
   </style>
 </head>
@@ -252,7 +306,7 @@
   <div class="hero-content">
     <h1 class="hero-title">Handcrafted with Love</h1>
     <p class="hero-subtitle">Discover unique, artisan-made products that bring warmth and character to your home</p>
-    <a href="src/views/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
+    <a href="src/views/designer/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
   </div>
 </section>
 
@@ -284,18 +338,24 @@
   </div>
 </section>
 
-<!-- Featured Designer -->
-<section class="designer-section">
+<!-- Featured Designers -->
+<section class="featured-designers-section my-5">
   <div class="container">
-    <div class="designer-card">
-      <img src="src/assets/img/designer-feature.jpg" alt="Featured Designer" class="designer-img">
-      <div class="designer-content">
-        <h3>Meet Our Featured Artisan</h3>
-        <h5 class="text-primary mb-3">Emma Johnson</h5>
-        <p>Emma creates handcrafted soaps and bath products using traditional methods passed down through generations. Each product is made with natural ingredients sourced from local suppliers.</p>
-        <p>Her passion for sustainability and natural wellness has led her to develop a unique line of products that are not only good for you but also for the environment.</p>
-        <a href="#" class="btn btn-outline-primary mt-3">Explore Emma's Collection</a>
+    <div class="section-header text-center mb-4">
+      <h2>Meet Our Featured Artisans</h2>
+      <p class="text-muted">Discover the talented featured designers behind our unique products</p>
+    </div>
+    <div class="row" id="designers-container">
+      <!-- Designer cards will be dynamically loaded here -->
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading our talented artisans...</p>
       </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="src/views/designer/designers.html" class="btn btn-outline-primary">View All Artisans</a>
     </div>
   </div>
 </section>
@@ -413,6 +473,9 @@
     
     // 加载分类
     loadFeaturedCategories();
+    
+    // 加载设计师
+    loadDesigners();
   });
   
   // 加载精选分类
@@ -720,6 +783,100 @@
       cartCount.style.display = count > 0 ? 'inline-block' : 'none';
     } else {
       cartCount.style.display = 'none';
+    }
+  }
+  
+  // 加载设计师
+  function loadDesigners() {
+    const container = document.getElementById('designers-container');
+    const designersData = localStorage.getItem('designers');
+    
+    if (!container) return;
+    
+    if (designersData) {
+      try {
+        const designers = JSON.parse(designersData);
+        
+        // 过滤出featured的设计师
+        const featuredDesigners = designers.filter(designer => designer.featured);
+        
+        if (featuredDesigners.length === 0) {
+          container.innerHTML = `
+            <div class="col-12 text-center py-4">
+              <p class="text-muted">No featured artisans available at the moment</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // 清空容器
+        container.innerHTML = '';
+        
+        // 最多显示4个设计师
+        const displayDesigners = featuredDesigners.slice(0, 4);
+        
+        // 生成设计师卡片
+        displayDesigners.forEach(designer => {
+          // 设置默认图片
+          const designerImage = designer.image || 'src/assets/img/designer-feature.jpg';
+          
+          // 生成社交媒体图标HTML
+          let socialIconsHtml = '';
+          if (designer.social) {
+            if (designer.social.instagram) {
+              socialIconsHtml += `<a href="${designer.social.instagram}" target="_blank" class="me-2 text-dark"><i class="bi bi-instagram"></i></a>`;
+            }
+            if (designer.social.pinterest) {
+              socialIconsHtml += `<a href="${designer.social.pinterest}" target="_blank" class="me-2 text-dark"><i class="bi bi-pinterest"></i></a>`;
+            }
+            if (designer.social.etsy) {
+              socialIconsHtml += `<a href="${designer.social.etsy}" target="_blank" class="me-2 text-dark"><i class="bi bi-shop"></i></a>`;
+            }
+          }
+          
+          // 截断过长的简介
+          const shortenedBio = designer.bio 
+            ? (designer.bio.length > 120 ? designer.bio.substring(0, 120) + '...' : designer.bio)
+            : 'No bio available';
+          
+          // 生成设计师卡片HTML - 移除按钮，整个卡片可点击
+          const designerCard = `
+            <div class="col-lg-3 col-md-6 mb-4">
+              <a href="src/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
+                <div class="card designer-card h-100 shadow-sm">
+                  <div class="text-center pt-4">
+                    <img src="${designerImage}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
+                  </div>
+                  <div class="card-body text-center">
+                    <h5 class="card-title">${designer.name}</h5>
+                    <p class="text-primary mb-2">${designer.specialty || 'Artisan'}</p>
+                    <p class="card-text small">${shortenedBio}</p>
+                    <div class="mt-3 mb-3 social-links-container">
+                      ${socialIconsHtml.replace(/class="me-2 text-dark"/g, 'class="me-2 text-dark social-link" onclick="event.stopPropagation()"')}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          `;
+          
+          container.innerHTML += designerCard;
+        });
+        
+      } catch (error) {
+        console.error('Error loading designers:', error);
+        container.innerHTML = `
+          <div class="col-12 text-center py-4">
+            <p class="text-danger">Error loading artisans</p>
+          </div>
+        `;
+      }
+    } else {
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No artisans available</p>
+        </div>
+      `;
     }
   }
 </script>
