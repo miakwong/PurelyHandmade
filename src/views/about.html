@@ -444,53 +444,13 @@
 <!-- 初始化数据脚本 -->
 <script src="../assets/js/init-data.js"></script>
 
-<script>
-  // Load navbar and footer
-  fetch('../assets/layout/navbar.html')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to load navbar (${response.status})`);
-      }
-      return response.text();
-    })
-    .then(html => {
-      document.getElementById('navbar-placeholder').innerHTML = html;
-      console.log('Navbar loaded successfully');
-      
-      // Update cart count after navbar is loaded
-      if (typeof updateCartCount === 'function') {
-        updateCartCount();
-      }
-    })
-    .catch(error => {
-      console.error('Error loading navbar:', error);
-      document.getElementById('navbar-placeholder').innerHTML =
-        '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
-    });
+<!-- Navbar Handler -->
+<script src="../assets/js/navbar-handler.js"></script>
 
-  fetch('../assets/layout/footer.html')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to load footer (${response.status})`);
-      }
-      return response.text();
-    })
-    .then(html => {
-      document.getElementById('footer-placeholder').innerHTML = html;
-      console.log('Footer loaded successfully');
-    })
-    .catch(error => {
-      console.error('Error loading footer:', error);
-      document.getElementById('footer-placeholder').innerHTML =
-        '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
-    });
-    
-  // 确保数据初始化
+<script>
+  // DOM content loaded event for any page-specific initialization
   document.addEventListener('DOMContentLoaded', function() {
-    // 初始化数据
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
-    }
+    // Page-specific initialization here
   });
 </script>
 </body>

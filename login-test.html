@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Profile Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .btn {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .btn-primary {
+      background-color: #2196F3;
+    }
+    .btn-warning {
+      background-color: #ff9800;
+    }
+    .btn-danger {
+      background-color: #f44336;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .test-controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    .section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Login & Profile Test Tool</h1>
+    
+    <div class="section">
+      <h2>Login Test</h2>
+      <div class="test-controls">
+        <button id="run-login-test" class="btn btn-primary">Run Login Test</button>
+        <button id="check-login-results" class="btn">Check Login Results</button>
+        <button id="clear-login-results" class="btn btn-danger">Clear Login Results</button>
+      </div>
+      
+      <div id="login-results">
+        <h3>Login Test Results</h3>
+        <pre id="login-results-output">No results yet. Run the login test and check results.</pre>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Profile Test</h2>
+      <div class="test-controls">
+        <button id="run-profile-test" class="btn btn-warning">Run Profile Test</button>
+        <button id="check-profile-results" class="btn">Check Profile Results</button>
+        <button id="clear-profile-results" class="btn btn-danger">Clear Profile Results</button>
+      </div>
+      
+      <div id="profile-results">
+        <h3>Profile Test Results</h3>
+        <pre id="profile-results-output">No results yet. Run the profile test and check results.</pre>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Debug Information</h2>
+      <button id="refresh-debug" class="btn">Refresh Debug Info</button>
+      
+      <h3>Current User Status</h3>
+      <pre id="user-status">Checking...</pre>
+      
+      <h3>Local Storage Contents</h3>
+      <pre id="storage-info">Checking...</pre>
+    </div>
+  </div>
+  
+  <script>
+    // Helper functions to display information
+    function updateUserStatus() {
+      const userStatusElement = document.getElementById('user-status');
+      const currentUser = localStorage.getItem('currentUser');
+      
+      if (currentUser) {
+        userStatusElement.textContent = `Logged in: ${currentUser}`;
+      } else {
+        userStatusElement.textContent = 'Not logged in';
+      }
+    }
+    
+    function updateStorageInfo() {
+      const storageElement = document.getElementById('storage-info');
+      let storageContent = '';
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        let value = localStorage.getItem(key);
+        
+        // Truncate very long values
+        if (value.length > 200) {
+          value = value.substring(0, 200) + '... (truncated)';
+        }
+        
+        storageContent += `${key}: ${value}\n\n`;
+      }
+      
+      storageElement.textContent = storageContent || 'No data in localStorage';
+    }
+    
+    // Function to run the login test
+    function runLoginTest() {
+      const resultsOutput = document.getElementById('login-results-output');
+      
+      resultsOutput.textContent = 'Opening login page and running test...';
+      
+      // Open the login page in a new window
+      const loginWindow = window.open('src/views/auth/login.html', 'loginTest', 'width=800,height=600');
+      
+      // Inject our test script
+      setTimeout(() => {
+        try {
+          loginWindow.document.head.appendChild(
+            Object.assign(document.createElement('script'), {
+              src: '/test-login.js'
+            })
+          );
+          resultsOutput.textContent = 'Test script injected. Click "Run Login Test" button in the test window or click "Check Login Results" here to see results.';
+        } catch (error) {
+          resultsOutput.textContent = `Error injecting test script: ${error.message}`;
+        }
+      }, 1500);
+    }
+    
+    // Function to run the profile test
+    function runProfileTest() {
+      const resultsOutput = document.getElementById('profile-results-output');
+      
+      resultsOutput.textContent = 'Opening profile page and running test...';
+      
+      // Open the profile page in a new window
+      const profileWindow = window.open('src/views/auth/profile.html', 'profileTest', 'width=1000,height=800');
+      
+      // Inject our test script
+      setTimeout(() => {
+        try {
+          profileWindow.document.head.appendChild(
+            Object.assign(document.createElement('script'), {
+              src: '/test-profile.js'
+            })
+          );
+          resultsOutput.textContent = 'Test script injected into profile page. Click "Check Profile Results" to see results.';
+        } catch (error) {
+          resultsOutput.textContent = `Error injecting test script: ${error.message}`;
+        }
+      }, 1500);
+    }
+    
+    // Function to check login test results
+    function checkLoginResults() {
+      const resultsOutput = document.getElementById('login-results-output');
+      const interceptedAlerts = localStorage.getItem('interceptedAlerts');
+      
+      if (interceptedAlerts) {
+        try {
+          const alerts = JSON.parse(interceptedAlerts);
+          if (alerts.length > 0) {
+            resultsOutput.textContent = `Found ${alerts.length} alert(s):\n\n` + 
+              alerts.map(a => `${a.time}: "${a.message}"\nStack: ${a.stack}`).join('\n\n');
+          } else {
+            resultsOutput.textContent = 'No alerts were intercepted during login.';
+          }
+        } catch (error) {
+          resultsOutput.textContent = `Error parsing alert data: ${error.message}`;
+        }
+      } else {
+        resultsOutput.textContent = 'No test results found. Run the login test first.';
+      }
+      
+      // Update debug info
+      updateUserStatus();
+      updateStorageInfo();
+    }
+    
+    // Function to check profile test results
+    function checkProfileResults() {
+      const resultsOutput = document.getElementById('profile-results-output');
+      const interceptedAlerts = localStorage.getItem('interceptedProfileAlerts');
+      const pageLoadInfo = localStorage.getItem('profilePageLoad');
+      const initFunctions = localStorage.getItem('profileInitFunctions');
+      
+      let output = '';
+      
+      if (pageLoadInfo) {
+        try {
+          const loadInfo = JSON.parse(pageLoadInfo);
+          output += `Page loaded at: ${loadInfo.time}\n`;
+          output += `URL: ${loadInfo.url}\n`;
+          output += `Referrer: ${loadInfo.referrer || 'None'}\n\n`;
+        } catch (error) {
+          output += `Error parsing page load info: ${error.message}\n\n`;
+        }
+      }
+      
+      if (initFunctions) {
+        try {
+          const funcs = JSON.parse(initFunctions);
+          output += `Initialization functions called (${funcs.length}):\n`;
+          output += funcs.map(f => `- ${f.name} at ${f.time}`).join('\n') + '\n\n';
+        } catch (error) {
+          output += `Error parsing initialization functions: ${error.message}\n\n`;
+        }
+      }
+      
+      if (interceptedAlerts) {
+        try {
+          const alerts = JSON.parse(interceptedAlerts);
+          if (alerts.length > 0) {
+            output += `Found ${alerts.length} alert(s):\n`;
+            output += alerts.map(a => `- ${a.time}: "${a.message}"`).join('\n');
+          } else {
+            output += 'No alerts were intercepted during profile page load.';
+          }
+        } catch (error) {
+          output += `Error parsing alert data: ${error.message}`;
+        }
+      } else {
+        output += 'No alert data found. Run the profile test first.';
+      }
+      
+      resultsOutput.textContent = output;
+      
+      // Update debug info
+      updateUserStatus();
+      updateStorageInfo();
+    }
+    
+    // Function to clear login test results
+    function clearLoginResults() {
+      localStorage.removeItem('interceptedAlerts');
+      document.getElementById('login-results-output').textContent = 'Login results cleared. Run the test again.';
+      
+      // Update debug info
+      updateUserStatus();
+      updateStorageInfo();
+    }
+    
+    // Function to clear profile test results
+    function clearProfileResults() {
+      localStorage.removeItem('interceptedProfileAlerts');
+      localStorage.removeItem('profilePageLoad');
+      localStorage.removeItem('profileInitFunctions');
+      document.getElementById('profile-results-output').textContent = 'Profile results cleared. Run the test again.';
+      
+      // Update debug info
+      updateUserStatus();
+      updateStorageInfo();
+    }
+    
+    // Set up event listeners
+    document.getElementById('run-login-test').addEventListener('click', runLoginTest);
+    document.getElementById('check-login-results').addEventListener('click', checkLoginResults);
+    document.getElementById('clear-login-results').addEventListener('click', clearLoginResults);
+    
+    document.getElementById('run-profile-test').addEventListener('click', runProfileTest);
+    document.getElementById('check-profile-results').addEventListener('click', checkProfileResults);
+    document.getElementById('clear-profile-results').addEventListener('click', clearProfileResults);
+    
+    document.getElementById('refresh-debug').addEventListener('click', function() {
+      updateUserStatus();
+      updateStorageInfo();
+    });
+    
+    // Initialize debug info
+    updateUserStatus();
+    updateStorageInfo();
+  </script>
+</body>
+</html> 

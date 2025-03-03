@@ -865,17 +865,45 @@
       cart = JSON.parse(cartData);
     }
     
+    // 计算最终价格，确保不会出现NaN
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    
+    // 处理图片URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
     // 检查产品是否已在购物车中
     const existingItem = cart.find(item => item.id === productId);
     if (existingItem) {
-      existingItem.quantity += quantity;
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
+      // 安全处理产品描述
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      } else if (product.details) {
+        description = product.details.substring(0, 100);
+        if (product.details.length > 100) {
+          description += '...';
+        }
+      }
+      
       cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.onSale && product.salePrice ? product.salePrice : product.price,
-        image: product.images[0],
-        quantity: quantity
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
       });
     }
     
@@ -883,7 +911,7 @@
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // 显示成功消息
-    showToast(`${product.name} added to your cart!`, 'success');
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
     
     // 更新导航栏购物车计数
     updateCartCount();

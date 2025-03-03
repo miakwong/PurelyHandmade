@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Cart Data</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+    button { padding: 10px 15px; margin-right: 10px; cursor: pointer; }
+    .result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>测试购物车数据处理</h1>
+  
+  <div>
+    <button id="testNormalProduct">测试正常商品</button>
+    <button id="testEmptyProduct">测试空值商品</button>
+    <button id="testMixedProducts">测试混合商品</button>
+    <button id="checkCart">查看当前购物车</button>
+    <button id="clearCart">清空购物车</button>
+    <button id="goToCart">前往购物车页面</button>
+  </div>
+  
+  <div class="result">
+    <h3>结果：</h3>
+    <pre id="result"></pre>
+  </div>
+  
+  <script src="src/assets/js/init-data.js"></script>
+  <script>
+    document.getElementById('testNormalProduct').addEventListener('click', function() {
+      // 从localStorage中获取产品数据
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const normalProduct = products.find(p => p.id === 1); // 获取ID为1的正常商品
+      
+      if (!normalProduct) {
+        document.getElementById('result').textContent = '错误：找不到ID为1的正常商品!';
+        return;
+      }
+      
+      // 添加到购物车
+      addToCart(normalProduct);
+      
+      document.getElementById('result').textContent = 
+        '已将正常商品添加到购物车:\n' + JSON.stringify(normalProduct, null, 2);
+    });
+    
+    document.getElementById('testEmptyProduct').addEventListener('click', function() {
+      // 从localStorage中获取产品数据
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const emptyProduct = products.find(p => p.id === 8); // 获取ID为8的空值商品
+      
+      if (!emptyProduct) {
+        document.getElementById('result').textContent = '错误：找不到ID为8的空值商品!';
+        return;
+      }
+      
+      // 添加到购物车
+      addToCart(emptyProduct);
+      
+      document.getElementById('result').textContent = 
+        '已将空值商品添加到购物车:\n' + JSON.stringify(emptyProduct, null, 2);
+    });
+    
+    document.getElementById('testMixedProducts').addEventListener('click', function() {
+      // 从localStorage中获取产品数据
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      
+      // 获取一个正常商品和一个空值商品
+      const normalProduct = products.find(p => p.id === 1);
+      const emptyProduct = products.find(p => p.id === 8);
+      
+      if (!normalProduct || !emptyProduct) {
+        document.getElementById('result').textContent = '错误：找不到测试所需的商品!';
+        return;
+      }
+      
+      // 添加到购物车
+      addToCart(normalProduct);
+      addToCart(emptyProduct);
+      
+      // 创建一个自定义的异常商品
+      const customProduct = {
+        id: 99,
+        name: null,
+        price: "invalid",
+        images: null,
+        description: undefined,
+        categoryId: "123abc",
+        onSale: "yes"
+      };
+      
+      // 添加自定义异常商品到购物车
+      addToCart(customProduct);
+      
+      document.getElementById('result').textContent = 
+        '已将多种商品添加到购物车，包括正常商品、空值商品和异常格式商品。';
+    });
+    
+    document.getElementById('checkCart').addEventListener('click', function() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      document.getElementById('result').textContent = 
+        '当前购物车内容:\n' + JSON.stringify(cart, null, 2);
+    });
+    
+    document.getElementById('clearCart').addEventListener('click', function() {
+      localStorage.setItem('cart', '[]');
+      document.getElementById('result').textContent = '购物车已清空';
+    });
+    
+    document.getElementById('goToCart').addEventListener('click', function() {
+      window.location.href = 'src/views/checkout/cart.html';
+    });
+    
+    // 添加到购物车的函数 - 与网站的购物车逻辑相同
+    function addToCart(product) {
+      // 获取现有购物车
+      let cart = [];
+      const cartData = localStorage.getItem('cart');
+      if (cartData) {
+        cart = JSON.parse(cartData);
+      }
+      
+      // 计算最终价格
+      const finalPrice = product.onSale ? (product.salePrice || (product.price * 0.9)) : (product.price || 0);
+      
+      // 处理图片URL
+      let imageUrl = 'https://via.placeholder.com/80';
+      if (product.image) {
+        imageUrl = product.image;
+      } else if (Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0];
+      }
+      
+      // 检查产品是否已在购物车中
+      const existingItem = cart.find(item => item.id === product.id);
+      if (existingItem) {
+        existingItem.quantity = (parseInt(existingItem.quantity) || 0) + 1;
+      } else {
+        // 添加新商品到购物车
+        cart.push({
+          id: product.id || 0,
+          name: product.name || 'Unnamed Product',
+          price: finalPrice,
+          image: imageUrl,
+          quantity: 1,
+          description: product.description || product.details || 'No description available',
+          categoryId: product.categoryId || null
+        });
+      }
+      
+      // 保存到localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  </script>
+</body>
+</html>
