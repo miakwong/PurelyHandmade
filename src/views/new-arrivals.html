@@ -228,54 +228,12 @@
 <!-- 初始化数据脚本 -->
 <script src="../assets/js/init-data.js"></script>
 
-<script>
-  // Load navbar and footer
-  fetch('../assets/layout/navbar.html')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to load navbar (${response.status})`);
-      }
-      return response.text();
-    })
-    .then(html => {
-      document.getElementById('navbar-placeholder').innerHTML = html;
-      console.log('Navbar loaded successfully');
-      
-      // Update cart count after navbar is loaded
-      if (typeof updateCartCount === 'function') {
-        updateCartCount();
-      }
-    })
-    .catch(error => {
-      console.error('Error loading navbar:', error);
-      document.getElementById('navbar-placeholder').innerHTML =
-        '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
-    });
+<!-- Navbar Handler -->
+<script src="../assets/js/navbar-handler.js"></script>
 
-  fetch('../assets/layout/footer.html')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to load footer (${response.status})`);
-      }
-      return response.text();
-    })
-    .then(html => {
-      document.getElementById('footer-placeholder').innerHTML = html;
-      console.log('Footer loaded successfully');
-    })
-    .catch(error => {
-      console.error('Error loading footer:', error);
-      document.getElementById('footer-placeholder').innerHTML =
-        '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
-    });
-    
-  // 确保数据初始化
+<script>
+  // DOM content loaded event for page-specific initialization
   document.addEventListener('DOMContentLoaded', function() {
-    // 初始化数据
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
-    }
-    
     // Load new arrivals
     loadNewArrivals();
   });
@@ -401,17 +359,45 @@
       cart = JSON.parse(cartData);
     }
     
+    // 计算最终价格，确保不会出现NaN
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    
+    // 处理图片URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
     // 检查产品是否已在购物车中
     const existingItem = cart.find(item => item.id === productId);
     if (existingItem) {
-      existingItem.quantity += quantity;
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
+      // 安全处理产品描述
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      } else if (product.details) {
+        description = product.details.substring(0, 100);
+        if (product.details.length > 100) {
+          description += '...';
+        }
+      }
+      
       cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.onSale && product.salePrice ? product.salePrice : product.price,
-        image: product.images[0],
-        quantity: quantity
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
       });
     }
     
@@ -419,7 +405,7 @@
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // 显示成功消息
-    showToast(`${product.name} added to your cart!`, 'success');
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
     
     // 更新导航栏购物车计数
     if (typeof updateCartCount === 'function') {

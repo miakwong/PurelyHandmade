@@ -340,6 +340,35 @@
       if (typeof updateCartCount === 'function') {
         updateCartCount();
       }
+      
+      // Update authentication button state after navbar is loaded
+      setTimeout(() => {
+        console.log('Checking for updateAuthButton availability');
+        if (typeof updateAuthButton === 'function') {
+          console.log('Updating auth button state');
+          updateAuthButton();
+        } else {
+          console.log('updateAuthButton function not available, using fallback');
+          // Fallback: Manually update login/logout buttons
+          const currentUser = localStorage.getItem('currentUser');
+          const loginButton = document.querySelector('.nav-button[href*="login.html"]');
+          const logoutButton = document.querySelector('.nav-button#logout-button');
+          
+          if (loginButton && logoutButton) {
+            if (currentUser) {
+              loginButton.style.display = 'none';
+              logoutButton.style.display = 'block';
+              console.log('User is logged in, showing logout button');
+            } else {
+              loginButton.style.display = 'block';
+              logoutButton.style.display = 'none';
+              console.log('User is not logged in, showing login button');
+            }
+          } else {
+            console.warn('Could not find login/logout buttons in navbar');
+          }
+        }
+      }, 300);
     })
     .catch(error => {
       console.error('Error loading navbar:', error);
@@ -422,8 +451,8 @@
     
     const products = JSON.parse(productsData);
     
-    // 获取所有促销产品
-    const saleProducts = products.filter(product => product.onSale === true && product.salePrice);
+    // 获取所有促销产品 - 只检查onSale标志
+    const saleProducts = products.filter(product => product.onSale === true);
     
     if (saleProducts.length === 0) {
       productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
@@ -468,12 +497,15 @@
     }
     starsHtml += '</div>';
     
+    // 如果没有明确的salePrice, 则使用默认折扣 (10%)
+    const salePrice = product.salePrice || (product.price * 0.9);
+    
     // 计算折扣百分比
-    const discountPercent = Math.round((1 - (product.salePrice / product.price)) * 100);
+    const discountPercent = Math.round((1 - (salePrice / product.price)) * 100);
     
     // 价格显示
     const priceHTML = `
-      <span class="price">$${product.salePrice.toFixed(2)}</span>
+      <span class="price">$${salePrice.toFixed(2)}</span>
       <span class="original-price">$${product.price.toFixed(2)}</span>
     `;
     
@@ -485,7 +517,7 @@
             <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
           </a>
           <div class="card-body">
-            <h5 class="card-title">${product.name}</h5>
+            <h5 class="card-title"><a href="product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">${product.name}</a></h5>
             <div class="mb-2">${priceHTML}</div>
             ${starsHtml}
             <p class="card-text text-truncate">${product.description}</p>
@@ -514,17 +546,47 @@
       cart = JSON.parse(cartData);
     }
     
+    // 计算最终价格 - 考虑是否有明确的salePrice
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale 
+      ? (parseFloat(product.salePrice) || price * 0.9) 
+      : price;
+    
+    // 处理图片URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
     // 检查产品是否已在购物车中
     const existingItem = cart.find(item => item.id === productId);
     if (existingItem) {
-      existingItem.quantity += quantity;
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
+      // 安全处理产品描述
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      } else if (product.details) {
+        description = product.details.substring(0, 100);
+        if (product.details.length > 100) {
+          description += '...';
+        }
+      }
+      
       cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.onSale && product.salePrice ? product.salePrice : product.price,
-        image: product.images[0],
-        quantity: quantity
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
       });
     }
     
@@ -532,7 +594,7 @@
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // 显示成功消息
-    showToast(`${product.name} added to your cart!`, 'success');
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
     
     // 更新导航栏购物车计数
     if (typeof updateCartCount === 'function') {

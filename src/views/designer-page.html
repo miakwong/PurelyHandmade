@@ -116,18 +116,13 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Navbar Handler -->
+<script src="../assets/js/navbar-handler.js"></script>
+
 <!-- Custom JS -->
 <script>
-    // Load navbar and footer
-    fetch('../assets/layout/navbar.html')
-        .then(response => response.text())
-        .then(html => document.getElementById('navbar-placeholder').innerHTML = html)
-        .catch(error => console.error('Error loading navbar:', error));
-
-    fetch('../assets/layout/footer.html')
-        .then(response => response.text())
-        .then(html => document.getElementById('footer-placeholder').innerHTML = html)
-        .catch(error => console.error('Error loading footer:', error));
+    // DOM content loaded event for page-specific initialization
+    document.addEventListener('DOMContentLoaded', loadDesignerData);
 
     // Get designer ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -170,47 +165,131 @@
             }
 
             // Load designer's products
-            loadDesignerProducts(designer);
+            renderDesignerProducts(JSON.parse(localStorage.getItem('products') || '[]'), designer.id);
         } else {
             document.body.innerHTML = '<div class="container mt-5"><div class="alert alert-danger">Designer not found</div></div>';
         }
     }
 
-    // Load designer's products
-    function loadDesignerProducts(designer) {
-        const products = JSON.parse(localStorage.getItem('products') || '[]');
-        const designerProducts = products.filter(p => p.designerId === designer.id);
+    function renderDesignerProducts(products, designerId) {
+        // 根据设计师ID筛选产品
+        const designerProducts = products.filter(p => p.designerId == designerId);
         
+        // 获取容器
         const productsContainer = document.getElementById('productsContainer');
-        productsContainer.innerHTML = designerProducts.map(product => `
-            <div class="col-md-4 mb-4">
-                <div class="card product-card">
-                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.name}">
-                    ${product.isNew ? '<span class="badge-new">New</span>' : ''}
-                    ${product.onSale ? '<span class="badge-sale">Sale</span>' : ''}
-                    <div class="card-body">
-                        <h5 class="card-title">${product.name}</h5>
-                        <p class="card-text">${product.description}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                ${product.onSale 
-                                    ? `<span class="text-decoration-line-through">$${product.price}</span>
-                                       <span class="text-danger ms-2">$${product.salePrice}</span>`
-                                    : `<span>$${product.price}</span>`
+        productsContainer.innerHTML = '';
+        
+        if (designerProducts.length === 0) {
+            productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products available from this designer.</p></div>';
+            return;
+        }
+        
+        // 添加产品卡片
+        designerProducts.forEach(product => {
+            // 处理可能为空的字段
+            const name = product.name || 'Unnamed Product';
+            const description = product.description || product.details || 'No description available';
+            const price = parseFloat(product.price) || 0;
+            const salePrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : (product.onSale ? price * 0.9 : null);
+            
+            // 处理图片
+            let imageUrl = 'https://via.placeholder.com/300';
+            if (Array.isArray(product.images) && product.images.length > 0) {
+                imageUrl = product.images[0];
+            } else if (product.image) {
+                imageUrl = product.image;
+            }
+            
+            const cardHTML = `
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card product-card">
+                        <img src="${imageUrl}" class="card-img-top product-image" alt="${name}">
+                        <div class="card-body">
+                            ${product.onSale ? '<span class="badge-sale">Sale</span>' : ''}
+                            <h5 class="card-title">${name}</h5>
+                            <p class="card-text">${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                ${product.onSale
+                                ? `<span class="text-decoration-line-through">$${price.toFixed(2)}</span>
+                                <span class="text-danger ms-2">$${salePrice.toFixed(2)}</span>`
+                                : `<span>$${price.toFixed(2)}</span>`
                                 }
                             </div>
-                            <button class="btn btn-primary btn-sm" onclick="addToCart('${product.id}')">Add to Cart</button>
+                            <button class="btn btn-primary w-100 add-to-cart" data-product-id="${product.id}">Add to Cart</button>
                         </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            
+            productsContainer.innerHTML += cardHTML;
+        });
+        
+        // 添加购物车事件监听
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                addToCart(productId);
+            });
+        });
     }
-
-    // Add to cart function
+    
     function addToCart(productId) {
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        cart.push(productId);
+        const productsData = localStorage.getItem('products');
+        if (!productsData) return;
+        
+        const products = JSON.parse(productsData);
+        const product = products.find(p => p.id == productId);
+        if (!product) return;
+        
+        // 获取现有购物车
+        let cart = [];
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          cart = JSON.parse(cartData);
+        }
+        
+        // 计算最终价格
+        const price = parseFloat(product.price) || 0;
+        const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+        
+        // 处理图片URL
+        let imageUrl = 'https://via.placeholder.com/80';
+        if (product.image) {
+          imageUrl = product.image;
+        } else if (Array.isArray(product.images) && product.images.length > 0) {
+          imageUrl = product.images[0];
+        }
+        
+        // 检查产品是否已在购物车中
+        const existingItem = cart.find(item => item.id == productId);
+        if (existingItem) {
+          existingItem.quantity = (parseInt(existingItem.quantity) || 0) + 1;
+        } else {
+          // 安全处理产品描述
+          let description = 'No description available';
+          if (product.description) {
+            description = product.description.substring(0, 100);
+            if (product.description.length > 100) {
+              description += '...';
+            }
+          } else if (product.details) {
+            description = product.details.substring(0, 100);
+            if (product.details.length > 100) {
+              description += '...';
+            }
+          }
+          
+          cart.push({
+            id: product.id || 0,
+            name: product.name || 'Unnamed Product',
+            price: finalPrice,
+            image: imageUrl,
+            quantity: 1,
+            description: description,
+            categoryId: product.categoryId || null
+          });
+        }
+        
         localStorage.setItem('cart', JSON.stringify(cart));
         
         // Show success message or update cart count
@@ -218,9 +297,6 @@
             updateCartCount();
         }
     }
-
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', loadDesignerData);
 </script>
 
 </body>

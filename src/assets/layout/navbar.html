@@ -1,106 +1,525 @@
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <link rel="stylesheet" href="/src/assets/css/navbar.css">
+  <!-- 添加Alert拦截器，确保在所有页面上替换Alert为Toast -->
+  <script src="/src/assets/js/no-alerts.js"></script>
+  <!-- Ensure navbar styles are loaded correctly -->
+  <style>
+    /* Basic navbar styles - inline to ensure proper loading */
+    .navbar-container {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .navbar {
+      background-color: var(--primary-color, #eae2d6); 
+      box-shadow: 0 2px 10px rgba(94, 75, 62, 0.15);
+      padding: 0.75rem 1rem;
+    }
+    
+    .navbar-brand {
+      color: var(--text-color, #5e4b3e) !important;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    
+    .navbar-brand img {
+      border: 2px solid var(--border-color, #bfb1a3);
+      border-radius: 50%;
+      transition: transform 0.3s;
+      margin-right: 10px;
+    }
+    
+    .navbar-brand:hover img {
+      transform: scale(1.05);
+    }
+    
+    .navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .nav-button {
+      background-color: transparent;
+      border: 1px solid var(--accent-color, #867666);
+      color: var(--accent-color, #867666);
+      border-radius: 4px;
+      padding: 8px 15px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    
+    /* 移除所有 hover 效果和不必要的过渡 */
+    .nav-button:hover, .nav-button:active, .nav-button:focus {
+      background-color: transparent;
+      color: var(--accent-color, #867666);
+      text-decoration: none;
+      border: 1px solid var(--accent-color, #867666);
+    }
+    
+    .cart-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      font-size: 0.7rem;
+      background-color: #dc3545;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Mobile menu styles */
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-color, #5e4b3e);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    /* Lower navigation */
+    .lower-nav {
+      background-color: var(--accent-color, #867666);
+      padding: 0.5rem 0;
+    }
+    
+    .lower-nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .lower-nav li {
+      margin: 0 15px;
+    }
+    
+    .lower-nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 0;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .lower-nav a:hover {
+      color: var(--primary-color, #eae2d6);
+    }
+    
+    .lower-nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary-color, #eae2d6);
+      transition: width 0.3s;
+    }
+    
+    .lower-nav a:hover::after {
+      width: 100%;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .navbar-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 1rem;
+        display: none;
+      }
+      
+      .nav-links.show {
+        display: flex;
+      }
+      
+      .nav-button {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .lower-nav ul {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .lower-nav li {
+        margin: 5px 0;
+      }
+    }
+    
+    .btn-position-relative {
+      position: relative;
+    }
+  </style>
 </head>
-<!-- Top Navigation Bar -->
-<nav class="navbar navbar-light bg-light p-3">
-  <div class="container d-flex justify-content-between">
-    <a class="navbar-brand d-flex align-items-center" href="../../../index.html">
-      <img src="/src/assets/img/logo.jpg" alt="Logo" width="50">
-      <span class="ms-2 fs-4">Purely Homemade</span>
-    </a>
-
-    <!-- Search Bar -->
-    <form class="d-flex" action="search.php" method="GET">
-      <input class="form-control me-2" type="search" placeholder="Search products...">
-      <button class="btn btn-outline-primary">🔍</button>
-    </form>
-
-    <!-- Login & Cart -->
-    <div class="d-flex align-items-center">
-      <!-- User Dropdown Menu -->
-      <div class="dropdown me-3">
-        <a href="#" class="btn btn-outline-secondary dropdown-toggle" id="userDropdown">
-          <i class="material-icons-outlined">account_circle</i>
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="userDropdown">
-          <li><a class="dropdown-item" href="/src/views/auth/login.html" id="login-link">Login</a></li>
-          <li><a class="dropdown-item" href="/src/views/auth/register.html" id="register-link">Register</a></li>
+<body>
+  <div class="navbar-container">
+    <!-- Main Navbar -->
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-content">
+          <!-- Logo and Brand Name -->
+          <a class="navbar-brand" href="/index.html">
+            <img src="/src/assets/img/logo.jpg" alt="Purely Homemade Logo" width="50">
+            <span>Purely Homemade</span>
+          </a>
+          
+          <!-- Mobile Menu Toggle -->
+          <button class="mobile-toggle" id="mobile-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          
+          <!-- Navigation Buttons -->
+          <div class="nav-links" id="nav-links">
+            <!-- Cart Button -->
+            <a href="/src/views/checkout/cart.html" class="nav-button btn-position-relative" id="cart-button">
+              <i class="material-icons-outlined">shopping_cart</i>
+              <span>Cart</span>
+              <span class="cart-count" id="cart-count">0</span>
+            </a>
+            
+            <!-- Profile Button -->
+            <a href="/src/views/auth/profile.html" class="nav-button" id="profile-button">
+              <i class="material-icons-outlined">person</i>
+              <span>Profile</span>
+            </a>
+            
+            <!-- Login/Logout Button -->
+            <a href="/src/views/auth/login.html" class="nav-button" id="login-button">
+              <i class="material-icons-outlined">login</i>
+              <span>Login</span>
+            </a>
+            
+            <a href="#" class="nav-button" id="logout-button" style="display: none;">
+              <i class="material-icons-outlined">logout</i>
+              <span>Logout</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Lower Navigation Menu -->
+    <div class="lower-nav">
+      <div class="container">
+        <ul>
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/src/views/new-arrivals.html">New Arrivals</a></li>
+          <li><a href="/src/views/on-sale.html">On Sale</a></li>
+          <li><a href="/src/views/designers.html">Designers</a></li>
+          <li><a href="/src/views/our-story.html">Our Story</a></li>
+          <li><a href="/src/views/about.html">About Us</a></li>
         </ul>
       </div>
-      <!-- Cart Icon -->
-      <a href="/src/views/checkout/cart.html" class="btn btn-outline-primary" id="cart-link">
-        <i class="material-icons-outlined">shopping_bag</i>
-      </a>
     </div>
   </div>
-</nav>
-
-<!-- Main Navigation Menu -->
-<div class="container-wrapper">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav w-100 d-flex justify-content-around">
-          <li class="nav-item"><a class="nav-link" href="../../../index.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="/src/views/designers.html">Designers</a></li>
-          <li class="nav-item">
-            <a class="nav-link" href="/src/views/new-arrivals.html">New Arrivals</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/src/views/on-sale.html">On Sale</a></li>
-          <li class="nav-item"><a class="nav-link" href="/src/views/our-story.html">Our Story</a></li>
-          <li class="nav-item"><a class="nav-link" href="/src/views/about.html">About</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-</div>
-
-<script>
-
-  (function() {
-    const loginButton = document.getElementById('login-button');
-    const logoutButton = document.getElementById('logout-button');
-    const ordersMenuItem = document.getElementById('orders-menu-item');
-    const accountButton = document.getElementById('account-button');
-
-
-    const currentUser = localStorage.getItem('currentUser');
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-
-    if (currentUser) {
-
-      loginButton.style.display = 'none';
-      logoutButton.style.display = 'inline-block';
-      accountButton.style.display = 'inline-block';
-
-
-      if (isAdmin) {
-        ordersMenuItem.style.display = 'inline-block';
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Navbar loaded successfully');
+      
+      // Setup mobile toggle button
+      const mobileToggle = document.getElementById('mobile-toggle');
+      const navLinks = document.getElementById('nav-links');
+      
+      if (mobileToggle && navLinks) {
+        mobileToggle.addEventListener('click', function() {
+          navLinks.classList.toggle('show');
+        });
       }
-
-
-      logoutButton.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('isAdmin');
-
-        window.location.href = '/index.html';
-      });
-    } else {
-
-      loginButton.style.display = 'inline-block';
-      logoutButton.style.display = 'none';
-      accountButton.style.display = 'none';
+      
+      // 立即尝试更新按钮状态
+      updateAuthButton();
+      updateCartCount();
+      
+      // 确保DOM完全加载后再次初始化状态
+      setTimeout(() => {
+        console.log('Delayed navbar initialization');
+        updateAuthButton();
+        updateCartCount();
+      }, 300);
+      
+      // 再次确认状态（防止某些情况下状态未正确反映）
+      setTimeout(() => {
+        console.log('Final navbar status check');
+        updateAuthButton();
+      }, 1000);
+    });
+    
+    // 初始化时立即尝试更新一次
+    window.addEventListener('load', function() {
+      console.log('Window loaded, initializing navbar');
+      updateAuthButton();
+      updateCartCount();
+    });
+    
+    // 监听localStorage变化
+    window.addEventListener('storage', function(e) {
+      console.log('Storage changed:', e.key);
+      // 如果currentUser发生变化，更新登录/登出按钮
+      if (e.key === 'currentUser') {
+        console.log('User login status changed');
+        updateAuthButton();
+      }
+      // 如果cart发生变化，更新购物车数量
+      if (e.key === 'cart') {
+        console.log('Cart updated');
+        updateCartCount();
+      }
+    });
+    
+    // Update authentication button based on login status
+    function updateAuthButton() {
+      const loginButton = document.getElementById('login-button');
+      const logoutButton = document.getElementById('logout-button');
+      
+      if (!loginButton || !logoutButton) {
+        console.error('Auth buttons not found');
+        return;
+      }
+      
+      try {
+        // 检查用户是否已登录
+        const currentUserStr = localStorage.getItem('currentUser');
+        console.log('Current user data:', currentUserStr);
+        
+        if (currentUserStr && currentUserStr !== 'null' && currentUserStr !== 'undefined') {
+          // 添加额外的验证，确保用户数据有效
+          let isValidUserData = false;
+          let username = '未知用户';
+          
+          try {
+            const currentUser = JSON.parse(currentUserStr);
+            username = currentUser.username || '用户';
+            isValidUserData = currentUser && 
+                              typeof currentUser === 'object' && 
+                              (currentUser.id || currentUser.username || currentUser.email);
+            
+            console.log('User validation check:', isValidUserData ? 'PASS' : 'FAIL');
+            console.log('User is logged in:', username);
+          } catch (e) {
+            console.error('Invalid user data format', e);
+          }
+          
+          // 确认有效的用户数据才显示登出按钮
+          if (isValidUserData) {
+            // 用户已登录 - 显示logout按钮
+            loginButton.style.display = 'none';
+            logoutButton.style.display = 'flex';
+            
+            // 绑定登出事件
+            logoutButton.onclick = function(e) {
+              e.preventDefault();
+              console.log('Logout clicked');
+              
+              // 移除用户数据
+              localStorage.removeItem('currentUser');
+              localStorage.removeItem('isAdmin');
+              
+              // 手动触发一个storage事件，以便其他页面能够检测到变化
+              try {
+                window.dispatchEvent(new StorageEvent('storage', {
+                  key: 'currentUser',
+                  newValue: null,
+                  url: window.location.href
+                }));
+                console.log('Storage event dispatched for logout');
+              } catch (err) {
+                console.error('Error dispatching storage event:', err);
+              }
+              
+              // 显示登出消息
+              showNotification('Successfully logged out');
+              
+              // 更新按钮状态
+              loginButton.style.display = 'flex';
+              logoutButton.style.display = 'none';
+              
+              // 重新加载页面
+              setTimeout(() => {
+                window.location.href = '/index.html';
+              }, 1000);
+            };
+          } else {
+            // 用户数据无效，视为未登录
+            console.log('User data invalid, treating as logged out');
+            loginButton.style.display = 'flex';
+            logoutButton.style.display = 'none';
+          }
+        } else {
+          // 用户未登录 - 显示login按钮
+          console.log('User is not logged in');
+          loginButton.style.display = 'flex';
+          logoutButton.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error in updateAuthButton:', error);
+        
+        // 出错时的回退策略，直接检查本页面当前URL判断
+        try {
+          console.log('Using fallback logout detection');
+          const isProfilePage = window.location.href.includes('/profile.html');
+          
+          if (isProfilePage) {
+            // 如果在profile页面，则认为用户已登录
+            console.log('On profile page, showing logout button');
+            loginButton.style.display = 'none';
+            logoutButton.style.display = 'flex';
+            
+            // 检查登出按钮是否有点击事件
+            if (!logoutButton.onclick) {
+              logoutButton.onclick = function(e) {
+                e.preventDefault();
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('isAdmin');
+                alert('已成功登出!');
+                window.location.href = '/index.html';
+              };
+            }
+          } else {
+            loginButton.style.display = 'flex';
+            logoutButton.style.display = 'none';
+          }
+        } catch (fallbackError) {
+          console.error('Even fallback failed:', fallbackError);
+          // 最终回退，确保至少一个按钮可见
+          loginButton.style.display = 'flex';
+        }
+      }
     }
-  })();
-</script>
+    
+    // Update cart count indicator
+    function updateCartCount() {
+      const cartCount = document.getElementById('cart-count');
+      
+      if (!cartCount) {
+        console.error('Cart count element not found');
+        return;
+      }
+      
+      try {
+        // Get cart items from localStorage
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        if (cart.length > 0) {
+          // Update count and make visible
+          cartCount.textContent = cart.length;
+          cartCount.style.display = 'flex';
+        } else {
+          // Hide count if cart is empty
+          cartCount.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error updating cart count:', error);
+        cartCount.style.display = 'none';
+      }
+    }
+    
+    // Utility function to show notifications
+    function showNotification(message, type = 'info') {
+      if (typeof window.showToast === 'function') {
+        window.showToast(message, type);
+      } else {
+        console.log('Notification:', message);
+        // 创建一个简单的原生toast
+        createToast(message, type);
+      }
+    }
+    
+    // 创建一个简单的原生toast通知
+    function createToast(message, type = 'info') {
+      // 先检查是否已经有toast容器
+      let toastContainer = document.querySelector('.toast-container');
+      
+      // 如果没有，创建一个
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '1060';
+        document.body.appendChild(toastContainer);
+      }
+      
+      // 创建toast元素
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center text-white bg-${type} border-0`;
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.style.minWidth = '250px';
+      
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"></button>
+        </div>
+      `;
+      
+      // 添加到容器
+      toastContainer.appendChild(toast);
+      
+      // 为关闭按钮添加事件
+      const closeBtn = toast.querySelector('.btn-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          toast.remove();
+        });
+      }
+      
+      // 自动关闭
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
