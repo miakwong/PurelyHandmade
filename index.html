@@ -259,54 +259,13 @@
 <!-- Featured Categories -->
 <section class="container mb-5">
   <h2 class="text-center mb-4">Shop by Category</h2>
-  <div class="row">
-    <div class="col-md-3 col-sm-6">
-      <a href="src/views/product/category-page.html?id=1" class="text-decoration-none">
-        <div class="category-card">
-          <div class="category-img-container position-relative">
-            <img src="src/assets/img/category-soaps.jpg" alt="Handmade Soaps" class="category-img">
-            <div class="category-overlay">
-              <h4 class="m-0">Handmade Soaps</h4>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <a href="src/views/product/category-page.html?id=2" class="text-decoration-none">
-        <div class="category-card">
-          <div class="category-img-container position-relative">
-            <img src="src/assets/img/category-oils.jpg" alt="Essential Oils" class="category-img">
-            <div class="category-overlay">
-              <h4 class="m-0">Essential Oils</h4>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <a href="src/views/product/category-page.html?id=3" class="text-decoration-none">
-        <div class="category-card">
-          <div class="category-img-container position-relative">
-            <img src="src/assets/img/category-candles.jpg" alt="Candles" class="category-img">
-            <div class="category-overlay">
-              <h4 class="m-0">Candles</h4>
-            </div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3 col-sm-6">
-      <a href="src/views/product/category-page.html?id=4" class="text-decoration-none">
-        <div class="category-card">
-          <div class="category-img-container position-relative">
-            <img src="src/assets/img/category-bath.jpg" alt="Bath Products" class="category-img">
-            <div class="category-overlay">
-              <h4 class="m-0">Bath Products</h4>
-            </div>
-          </div>
-        </div>
-      </a>
+  <div class="row" id="category-cards-container">
+    <!-- Categories will be loaded dynamically -->
+    <div class="col-12 text-center py-4" id="categories-loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading categories...</p>
     </div>
   </div>
   <div class="text-center mt-4">
@@ -451,7 +410,89 @@
     
     // 加载畅销品
     loadBestSellers();
+    
+    // 加载分类
+    loadFeaturedCategories();
   });
+  
+  // 加载精选分类
+  function loadFeaturedCategories() {
+    const container = document.getElementById('category-cards-container');
+    const loadingElement = document.getElementById('categories-loading');
+    const categoriesData = localStorage.getItem('categories');
+    
+    if (categoriesData) {
+      const categories = JSON.parse(categoriesData);
+      
+      // Hide loading indicator
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+      
+      if (categories.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center">
+            <p class="text-muted">No categories available</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort categories - featured ones first, then alphabetically
+      const sortedCategories = [...categories].sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      // Take up to 6 categories to display
+      const displayCategories = sortedCategories.slice(0, 6);
+      let categoriesHtml = '';
+      
+      // Default category images if none provided
+      const defaultImages = [
+        'src/assets/img/category-soaps.jpg',
+        'src/assets/img/category-oils.jpg',
+        'src/assets/img/category-candles.jpg',
+        'src/assets/img/category-bath.jpg',
+        'src/assets/img/category-placeholder.jpg',
+        'src/assets/img/category-placeholder.jpg'
+      ];
+      
+      displayCategories.forEach((category, index) => {
+        const imageUrl = category.image || defaultImages[index % defaultImages.length];
+        
+        categoriesHtml += `
+          <div class="col-md-4 col-sm-6 mb-4">
+            <a href="src/views/product/category-page.html?id=${category.id}" class="text-decoration-none">
+              <div class="category-card">
+                <div class="category-img-container position-relative">
+                  <img src="${imageUrl}" alt="${category.name}" class="category-img">
+                  <div class="category-overlay">
+                    <h4 class="m-0">${category.name}</h4>
+                    ${category.featured ? '<span class="badge bg-primary mt-2">Featured</span>' : ''}
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = categoriesHtml;
+    } else {
+      // Show message if no categories data is found
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+      
+      container.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted">No categories available</p>
+        </div>
+      `;
+    }
+  }
   
   // 加载新品
   function loadNewArrivals() {
