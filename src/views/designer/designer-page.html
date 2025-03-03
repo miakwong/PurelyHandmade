@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designer Profile - Purely Homemade</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../src/assets/css/style.css">
+    <link rel="stylesheet" href="../../../src/assets/css/navbar.css">
+
+    <style>
+        /* Core Styles */
+        .designer-header {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+            margin-bottom: 30px;
+        }
+        
+        .designer-image {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .designer-name {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .designer-specialty {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .designer-bio {
+            max-width: 800px;
+            margin: 0 auto 25px;
+            line-height: 1.6;
+        }
+        
+        /* Social Links */
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 8px;
+            color: white;
+            transition: transform 0.2s;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-3px);
+        }
+        
+        .instagram {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+        }
+        
+        .pinterest {
+            background-color: #e60023;
+        }
+        
+        .etsy {
+            background-color: #F56400;
+        }
+        
+        /* Navigation */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #495057;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        
+        .back-link:hover {
+            color: #0d6efd;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        /* Products */
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: #0d6efd;
+            margin: 10px auto 0;
+        }
+        
+        .product-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        
+        .product-image {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        /* Loading & Error States */
+        .loading-container, .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            text-align: center;
+        }
+        
+        .spinner-container {
+            margin-bottom: 15px;
+        }
+
+        /* Enhanced Social Links Styling */
+        .social-links-container {
+            margin: 25px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .social-links-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .social-links-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .social-link-item {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 50px;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #212529;
+        }
+        
+        .social-link-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .social-icon i {
+            font-size: 1.1rem;
+        }
+        
+        .social-text {
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        
+        .instagram-bg {
+            background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+            color: white;
+        }
+        
+        .pinterest-bg {
+            background-color: #e60023;
+            color: white;
+        }
+        
+        .etsy-bg {
+            background-color: #F56400;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Loading Container -->
+<div id="loading-container" class="loading-container">
+    <div class="spinner-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    <p class="text-secondary">Loading designer information...</p>
+</div>
+
+<!-- Designer Content Container -->
+<div id="designer-content" style="display: none;">
+    <div class="container">
+        <!-- Navigation -->
+        <a href="designers.html" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to All Designers
+        </a>
+        
+        <!-- Designer Header -->
+        <header class="designer-header text-center">
+            <img id="designerImage" class="designer-image" alt="Designer">
+            <h1 id="designerName" class="designer-name"></h1>
+            <p id="designerSpecialty" class="designer-specialty"></p>
+            <p id="designerBio" class="designer-bio"></p>
+            
+            <!-- Enhanced Social Links -->
+            <div class="social-links-container">
+                <h3 class="social-links-title">Connect with <span id="designerNameSocial"></span></h3>
+                <div class="social-links-row" id="socialLinksContainer">
+                    <!-- Social links will be added here dynamically -->
+                </div>
+            </div>
+            
+            <!-- Original social links (hidden, keeping for backward compatibility) -->
+            <div class="social-links" style="display: none;">
+                <a id="instagramLink" href="#" target="_blank" class="instagram"><i class="fab fa-instagram"></i></a>
+                <a id="pinterestLink" href="#" target="_blank" class="pinterest"><i class="fab fa-pinterest"></i></a>
+                <a id="etsyLink" href="#" target="_blank" class="etsy"><i class="fab fa-etsy"></i></a>
+            </div>
+        </header>
+        
+        <!-- Products Section -->
+        <section class="mb-5">
+            <h2 class="section-title">Products by <span id="designerNameProducts"></span></h2>
+            <div id="productsContainer" class="row g-4"></div>
+            
+            <div class="text-center mt-4">
+                <a href="../product/product-list.html" class="btn btn-outline-primary">View All Products</a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Error Container -->
+<div id="error-container" class="error-container" style="display: none;">
+    <div class="mb-3">
+        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+    </div>
+    <h2>Designer Not Found</h2>
+    <p class="text-muted mb-3">We couldn't find the designer you're looking for.</p>
+    <a href="designers.html" class="btn btn-primary">Browse All Designers</a>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 加载导航栏和页脚
+        loadNavbarAndFooter();
+        
+        // 加载设计师数据
+        loadDesignerData();
+    });
+
+    // 加载导航栏和页脚
+    function loadNavbarAndFooter() {
+        // 加载导航栏
+        fetch('../../../src/assets/layout/navbar.html')
+            .then(response => response.ok ? response.text() : Promise.reject('Failed to load navbar'))
+            .then(html => {
+                document.getElementById('navbar-placeholder').innerHTML = html;
+                setTimeout(function() {
+                    updateCartCount();
+                    updateAuthButtonState();
+                }, 200);
+            })
+            .catch(error => {
+                console.error('Error loading navbar:', error);
+                document.getElementById('navbar-placeholder').innerHTML =
+                    '<div class="alert alert-danger m-3">Failed to load navigation bar.</div>';
+            });
+        
+        // 加载页脚
+        fetch('../../../src/assets/layout/footer.html')
+            .then(response => response.ok ? response.text() : Promise.reject('Failed to load footer'))
+            .then(html => {
+                document.getElementById('footer-placeholder').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading footer:', error);
+                document.getElementById('footer-placeholder').innerHTML =
+                    '<div class="alert alert-danger m-3">Failed to load footer.</div>';
+            });
+    }
+    
+    // 更新购物车数量
+    function updateCartCount() {
+        const cartData = localStorage.getItem('cart');
+        const cartCount = document.querySelector('#cart-count');
+        
+        if (!cartCount) return;
+        
+        if (cartData) {
+            try {
+                const cart = JSON.parse(cartData);
+                const count = cart.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0);
+                cartCount.textContent = count;
+                cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+            } catch (error) {
+                cartCount.style.display = 'none';
+            }
+        } else {
+            cartCount.style.display = 'none';
+        }
+    }
+    
+    // 更新登录/注销按钮状态
+    function updateAuthButtonState() {
+        const currentUser = localStorage.getItem('currentUser');
+        const loginButton = document.querySelector('.nav-button[href*="login.html"]');
+        const logoutButton = document.querySelector('.nav-button#logout-button');
+        const profileLink = document.querySelector('.nav-button[href*="profile.html"]');
+        
+        if (!loginButton || !logoutButton) return;
+        
+        if (currentUser) {
+            loginButton.style.display = 'none';
+            logoutButton.style.display = 'block';
+            if (profileLink) profileLink.style.display = 'block';
+            
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('currentUser');
+                alert('Successfully logged out');
+                window.location.href = '../index.html';
+            });
+        } else {
+            loginButton.style.display = 'block';
+            logoutButton.style.display = 'none';
+            if (profileLink) profileLink.style.display = 'none';
+        }
+    }
+
+    // 获取URL中的设计师ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const designerId = urlParams.get('id');
+
+    // 加载设计师数据
+    function loadDesignerData() {
+        try {
+            const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+            const designer = designers.find(d => d.id === designerId);
+            
+            if (designer) {
+                // 隐藏加载状态，显示内容
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('designer-content').style.display = 'block';
+                
+                // 设置页面标题
+                document.title = `${designer.name} - Purely Homemade`;
+                
+                // 设置设计师信息
+                document.getElementById('designerImage').src = designer.image || '../../../src/assets/img/designers/placeholder.jpg';
+                document.getElementById('designerImage').alt = designer.name;
+                document.getElementById('designerName').textContent = designer.name;
+                document.getElementById('designerNameProducts').textContent = designer.name;
+                document.getElementById('designerNameSocial').textContent = designer.name;
+                document.getElementById('designerSpecialty').textContent = designer.specialty || 'Artisan';
+                document.getElementById('designerBio').textContent = designer.bio || 'No bio available';
+                
+                // Set up social media links
+                const socialLinksContainer = document.getElementById('socialLinksContainer');
+                socialLinksContainer.innerHTML = '';
+                
+                // Original social link elements (for backward compatibility)
+                const instagramLink = document.getElementById('instagramLink');
+                const pinterestLink = document.getElementById('pinterestLink');
+                const etsyLink = document.getElementById('etsyLink');
+                
+                // Flag to check if any social links exist
+                let hasSocialLinks = false;
+                
+                // Ensure social object exists
+                if (designer.social) {
+                    if (designer.social.instagram) {
+                        // Set original link for backward compatibility
+                        instagramLink.href = designer.social.instagram;
+                        
+                        // Create enhanced link
+                        const instagramElement = document.createElement('a');
+                        instagramElement.href = designer.social.instagram;
+                        instagramElement.target = '_blank';
+                        instagramElement.className = 'social-link-item';
+                        instagramElement.innerHTML = `
+                            <span class="social-icon instagram-bg"><i class="fab fa-instagram"></i></span>
+                            <span class="social-text">Instagram</span>
+                        `;
+                        socialLinksContainer.appendChild(instagramElement);
+                        hasSocialLinks = true;
+                    } else {
+                        instagramLink.style.display = 'none';
+                    }
+                    
+                    if (designer.social.pinterest) {
+                        // Set original link for backward compatibility
+                        pinterestLink.href = designer.social.pinterest;
+                        
+                        // Create enhanced link
+                        const pinterestElement = document.createElement('a');
+                        pinterestElement.href = designer.social.pinterest;
+                        pinterestElement.target = '_blank';
+                        pinterestElement.className = 'social-link-item';
+                        pinterestElement.innerHTML = `
+                            <span class="social-icon pinterest-bg"><i class="fab fa-pinterest"></i></span>
+                            <span class="social-text">Pinterest</span>
+                        `;
+                        socialLinksContainer.appendChild(pinterestElement);
+                        hasSocialLinks = true;
+                    } else {
+                        pinterestLink.style.display = 'none';
+                    }
+                    
+                    if (designer.social.etsy) {
+                        // Set original link for backward compatibility
+                        etsyLink.href = designer.social.etsy;
+                        
+                        // Create enhanced link
+                        const etsyElement = document.createElement('a');
+                        etsyElement.href = designer.social.etsy;
+                        etsyElement.target = '_blank';
+                        etsyElement.className = 'social-link-item';
+                        etsyElement.innerHTML = `
+                            <span class="social-icon etsy-bg"><i class="fab fa-etsy"></i></span>
+                            <span class="social-text">Etsy Shop</span>
+                        `;
+                        socialLinksContainer.appendChild(etsyElement);
+                        hasSocialLinks = true;
+                    } else {
+                        etsyLink.style.display = 'none';
+                    }
+                } else {
+                    instagramLink.style.display = 'none';
+                    pinterestLink.style.display = 'none';
+                    etsyLink.style.display = 'none';
+                }
+                
+                // Hide the social links container if no social links exist
+                if (!hasSocialLinks) {
+                    document.querySelector('.social-links-container').style.display = 'none';
+                } else {
+                    document.querySelector('.social-links-container').style.display = 'block';
+                }
+
+                // 加载设计师的产品
+                renderDesignerProducts(JSON.parse(localStorage.getItem('products') || '[]'), designer.id);
+            } else {
+                // 显示错误页面
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('error-container').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading designer data:', error);
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+        }
+    }
+
+    // 渲染设计师产品
+    function renderDesignerProducts(products, designerId) {
+        // 根据设计师ID筛选产品
+        const designerProducts = products.filter(p => p.designerId == designerId);
+        
+        // 获取容器
+        const productsContainer = document.getElementById('productsContainer');
+        productsContainer.innerHTML = '';
+        
+        if (designerProducts.length === 0) {
+            productsContainer.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info py-3 text-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No products available from this designer yet.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // 获取最多6个产品显示
+        const displayProducts = designerProducts.slice(0, 6);
+        
+        // 添加产品卡片
+        displayProducts.forEach(product => {
+            // 处理可能为空的字段
+            const name = product.name || 'Unnamed Product';
+            const description = product.description || product.details || 'No description available';
+            const price = parseFloat(product.price) || 0;
+            const salePrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : null;
+            
+            // 处理图片
+            let imageUrl = '../../../src/assets/img/products/placeholder.jpg';
+            if (Array.isArray(product.images) && product.images.length > 0) {
+                imageUrl = product.images[0];
+            } else if (product.image) {
+                imageUrl = product.image;
+            }
+            
+            const cardHTML = `
+                <div class="col-lg-4 col-md-6">
+                    <div class="card product-card h-100">
+                        <img src="${imageUrl}" class="card-img-top product-image" alt="${name}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${name}</h5>
+                            <p class="card-text flex-grow-1">${description.substring(0, 80)}${description.length > 80 ? '...' : ''}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                ${product.onSale && salePrice
+                                ? `<div>
+                                    <span class="text-decoration-line-through text-muted">$${price.toFixed(2)}</span>
+                                    <span class="text-danger ms-2 fw-bold">$${salePrice.toFixed(2)}</span>
+                                </div>`
+                                : `<span class="fw-bold">$${price.toFixed(2)}</span>`
+                                }
+                                <span class="badge ${product.stock > 5 ? 'bg-success' : (product.stock > 0 ? 'bg-warning' : 'bg-danger')}">
+                                    ${product.stock > 5 ? 'In Stock' : (product.stock > 0 ? 'Low Stock' : 'Out of Stock')}
+                                </span>
+                            </div>
+                            <button class="btn btn-primary w-100 add-to-cart" data-product-id="${product.id}" ${product.stock <= 0 ? 'disabled' : ''}>
+                                ${product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            productsContainer.innerHTML += cardHTML;
+        });
+        
+        // 添加购物车事件监听
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                addToCart(productId);
+            });
+        });
+    }
+    
+    // 添加产品到购物车
+    function addToCart(productId) {
+        const productsData = localStorage.getItem('products');
+        if (!productsData) return;
+        
+        const products = JSON.parse(productsData);
+        const product = products.find(p => p.id == productId);
+        if (!product) return;
+        
+        // 获取现有购物车
+        let cart = [];
+        const cartData = localStorage.getItem('cart');
+        if (cartData) {
+          cart = JSON.parse(cartData);
+        }
+        
+        // 计算最终价格
+        const price = parseFloat(product.price) || 0;
+        const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+        
+        // 处理图片URL
+        let imageUrl = '../../../src/assets/img/products/placeholder.jpg';
+        if (product.image) {
+          imageUrl = product.image;
+        } else if (Array.isArray(product.images) && product.images.length > 0) {
+          imageUrl = product.images[0];
+        }
+        
+        // 检查产品是否已在购物车中
+        const existingItem = cart.find(item => item.id == productId);
+        if (existingItem) {
+          existingItem.quantity = (parseInt(existingItem.quantity) || 0) + 1;
+        } else {
+          // 安全处理产品描述
+          const description = (product.description || product.details || 'No description available').substring(0, 100);
+          
+          cart.push({
+            id: product.id || 0,
+            name: product.name || 'Unnamed Product',
+            price: finalPrice,
+            image: imageUrl,
+            quantity: 1,
+            description: description,
+            categoryId: product.categoryId || null,
+            designerId: product.designerId || null
+          });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // 显示成功消息并更新购物车数量
+        showAddToCartToast(product.name);
+        updateCartCount();
+    }
+    
+    // 显示添加到购物车的成功提示
+    function showAddToCartToast(productName) {
+        const toastHTML = `
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-check-circle me-2"></i>
+                            ${productName} has been added to your cart.
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 添加toast到body
+        const toastContainer = document.createElement('div');
+        toastContainer.innerHTML = toastHTML;
+        document.body.appendChild(toastContainer.firstChild);
+        
+        // 显示toast
+        const toastElement = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+        toast.show();
+        
+        // 隐藏后移除toast
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            this.parentNode.remove();
+        });
+    }
+</script>
+
+</body>
+</html> 
