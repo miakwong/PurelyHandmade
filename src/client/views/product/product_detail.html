@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purely Homemade - Product Detail</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/product_detail.css">
+  <link rel="stylesheet" href="../../assets/css/navbar.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Product Detail Page Styles */
+    #product-carousel .carousel-item {
+      height: 400px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    #product-carousel .carousel-item img {
+      object-fit: contain;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .product-info .accordion {
+      background-color: #f8f9fa;
+      color: #212529;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      outline: none;
+      transition: 0.4s;
+      margin-bottom: 2px;
+      font-weight: 500;
+      position: relative;
+      border-radius: 4px;
+    }
+    
+    .product-info .accordion:after {
+      content: '\002B';
+      color: #777;
+      font-weight: bold;
+      float: right;
+    }
+    
+    .product-info .active:after {
+      content: "\2212";
+    }
+    
+    .product-info .panel {
+      padding: 0 18px;
+      background-color: white;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+      margin-bottom: 10px;
+    }
+    
+    .product-info .panel p {
+      padding: 15px 0;
+    }
+    
+    /* Social Share Button Styles */
+    .social-share a {
+      color: #6c757d;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+    
+    .social-share a:hover {
+      color: #0d6efd;
+    }
+    
+    /* Product Card Styles */
+    .product-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      height: 100%;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .product-card img {
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .product-price {
+      font-weight: bold;
+      color: #0d6efd;
+      font-size: 1.1rem;
+    }
+    
+    .product-price-discount {
+      color: #6c757d;
+      text-decoration: line-through;
+      margin-left: 10px;
+      font-size: 0.9rem;
+    }
+    
+    /* Customer Reviews Styles */
+    .customer-reviews {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 25px;
+    }
+    
+    .review-card {
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .rating {
+      color: #ffc107;
+      margin-bottom: 10px;
+    }
+    
+    /* Wishlist Button Styles */
+    #wishlist-btn {
+      transition: all 0.3s;
+    }
+    
+    #wishlist-btn.active {
+      background-color: #dc3545;
+      color: white;
+      border-color: #dc3545;
+    }
+    
+    /* Related Products Section Styles */
+    .related-products {
+      padding: 20px 0;
+    }
+    
+    /* Toast Notification Container */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Breadcrumb -->
+<div class="container mt-3">
+  <nav>
+    <ol class="breadcrumb" id="breadcrumb">
+      <li class="breadcrumb-item"><a href="../../../index.html">Home</a></li>
+      <li class="breadcrumb-item" id="breadcrumb-category-link"><a href="#">Category</a></li>
+      <li class="breadcrumb-item active" id="breadcrumb-product">Item Name</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Product Detail Section -->
+<div class="container mb-5">
+  <div class="row">
+    <!-- Product Images -->
+    <div class="col-md-6">
+      <div id="product-carousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner" id="carousel-images">
+          <!-- Images loaded dynamically -->
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#product-carousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#product-carousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-md-6">
+      <div id="product-status" class="mb-2">
+        <!-- Product status (in stock, low stock, etc) will be set here -->
+      </div>
+      <h1 id="product-title" class="mb-2"></h1>
+      <div class="rating mb-3" id="product-rating">
+        <!-- Rating stars added here -->
+      </div>
+      
+      <div id="product-price-container" class="mb-3">
+        <span id="product-price" class="fw-bold fs-4"></span>
+        <span id="product-original-price" class="text-decoration-line-through text-muted ms-2"></span>
+      </div>
+
+      <div class="d-flex align-items-center mb-4">
+        <div class="input-group" style="width: 120px;">
+          <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">-</button>
+          <input type="text" class="form-control text-center" id="product-quantity" value="1">
+          <button class="btn btn-outline-secondary" type="button" id="increase-quantity">+</button>
+        </div>
+        <button class="btn btn-primary ms-3" id="add-to-cart"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button>
+        <button class="btn btn-outline-secondary ms-2" id="wishlist-btn"><i class="bi bi-heart"></i></button>
+      </div>
+
+      <div class="social-share mb-4">
+        <span>Share:</span>
+        <a href="#" class="ms-2"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="ms-2"><i class="bi bi-twitter"></i></a>
+        <a href="#" class="ms-2"><i class="bi bi-pinterest"></i></a>
+        <a href="#" class="ms-2"><i class="bi bi-link-45deg"></i></a>
+      </div>
+
+      <div class="product-info">
+        <button class="accordion">Description</button>
+        <div class="panel"><p id="product-description"></p></div>
+
+        <button class="accordion">Details</button>
+        <div class="panel" id="product-details">
+          <!-- Product details loaded dynamically -->
+        </div>
+
+        <button class="accordion">Shipping & Returns</button>
+        <div class="panel">
+          <p>Free shipping on orders over $50. Returns accepted within 30 days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Customer Reviews -->
+  <div class="customer-reviews mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Customer Reviews</h3>
+      <span id="review-count">(0 reviews)</span>
+    </div>
+    <div id="reviews-container">
+      <!-- Reviews will be loaded dynamically -->
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <div class="related-products mt-5">
+    <h3 class="mb-4">You May Also Like</h3>
+    <div class="row" id="related-products-container">
+      <!-- Related products will be loaded dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/assets/js/init-data.js"></script>
+<script src="/src/client/js/product-navbar-handler.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize data
+    if (typeof window.initializeData === 'function') {
+      window.initializeData();
+    }
+    
+    // Get product ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = parseInt(urlParams.get('id') || 0);
+    
+    // Get product data
+    const productsData = localStorage.getItem('products');
+    let product;
+    
+    if (productsData) {
+      const products = JSON.parse(productsData);
+      product = products.find(p => p.id === productId);
+    }
+    
+    // If product not found, show error and redirect
+    if (!product) {
+      showError('The product you are looking for could not be found.');
+      setTimeout(() => {
+        window.location.href = '../../../index.html';
+      }, 3000);
+      return;
+    }
+    
+    // Render product details
+    renderProductDetails(product);
+    
+    // Load related products
+    loadRelatedProducts(product);
+    
+    // Setup accordion panel event listeners
+    setupAccordion();
+    
+    // Setup quantity controls
+    setupQuantityControls();
+    
+    // Add to cart button event
+    document.getElementById('add-to-cart').addEventListener('click', function() {
+      const quantity = parseInt(document.getElementById('product-quantity').value);
+      addToCart(product, quantity);
+    });
+    
+    // Add wishlist button event
+    document.getElementById('wishlist-btn').addEventListener('click', function() {
+      toggleWishlist(product);
+    });
+    
+    // Add social sharing button events
+    setupSocialSharing(product);
+
+    // New script to update breadcrumb based on entry point
+    const designerId = urlParams.get('designer');
+    if (designerId) {
+      let designers = [];
+      try {
+        designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      } catch(e) {
+        console.error('Error loading designers data:', e);
+      }
+      const designerObj = designers.find(d => d.id === designerId);
+      const productTitleEl = document.getElementById('product-title');
+      const productTitle = productTitleEl ? productTitleEl.innerText : 'Product Details';
+      const breadcrumbEl = document.getElementById('breadcrumb');
+      if (breadcrumbEl) {
+        if (designerObj) {
+          breadcrumbEl.innerHTML = `<li class="breadcrumb-item"><a href="http://localhost:8000/index.html">Home</a></li> <li class="breadcrumb-item"><a href=\"http://localhost:8000/src/views/designer/designer-page.html?id=${designerObj.id}\">${designerObj.name}'s Collection</a></li> <li class="breadcrumb-item active">${productTitle}</li>`;
+        } else {
+          breadcrumbEl.innerHTML = `<li class="breadcrumb-item"><a href="http://localhost:8000/index.html">Home</a></li> <li class="breadcrumb-item">Designer Collection</li> <li class="breadcrumb-item active">${productTitle}</li>`;
+        }
+      }
+    }
+  });
+  
+  // Setup accordion panels
+  function setupAccordion() {
+    const acc = document.getElementsByClassName("accordion");
+    for (let i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        const panel = this.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+      
+      // Open first panel by default
+      if (i === 0) {
+        acc[i].click();
+      }
+    }
+  }
+  
+  // Setup quantity controls
+  function setupQuantityControls() {
+    const quantityInput = document.getElementById('product-quantity');
+    const decreaseBtn = document.getElementById('decrease-quantity');
+    const increaseBtn = document.getElementById('increase-quantity');
+    
+    decreaseBtn.addEventListener('click', function() {
+      let value = parseInt(quantityInput.value);
+      if (value > 1) {
+        quantityInput.value = value - 1;
+      }
+    });
+    
+    increaseBtn.addEventListener('click', function() {
+      let value = parseInt(quantityInput.value);
+      quantityInput.value = value + 1;
+    });
+    
+    quantityInput.addEventListener('change', function() {
+      let value = parseInt(this.value);
+      if (isNaN(value) || value < 1) {
+        this.value = 1;
+      }
+    });
+  }
+  
+  // Render product details
+  function renderProductDetails(product) {
+    // Handle potentially empty fields
+    const productName = product.name || 'Unnamed Product';
+    const productDescription = product.description || 'No description available';
+    const productPrice = parseFloat(product.price) || 0;
+    const productSalePrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : (product.onSale ? productPrice * 0.9 : null);
+    const stock = product.stock || 0;
+    
+    // Set page title
+    document.title = `${productName} - Purely Homemade`;
+    
+    // Set product name
+    document.getElementById('product-title').textContent = productName;
+    document.getElementById('breadcrumb-product').textContent = productName;
+    
+    // Set product stock status
+    const productStatus = document.getElementById('product-status');
+    if (stock > 10) {
+      productStatus.innerHTML = '<span class="badge bg-success">In Stock</span>';
+    } else if (stock > 0) {
+      productStatus.innerHTML = '<span class="badge bg-warning text-dark">Low Stock</span>';
+    } else {
+      productStatus.innerHTML = '<span class="badge bg-danger">Out of Stock</span>';
+    }
+    
+    // Set product rating
+    const rating = product.rating || 0;
+    const reviewCount = product.reviews ? product.reviews.length : 0;
+    const ratingContainer = document.getElementById('product-rating');
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    let starsHtml = '';
+    for (let i = 0; i < fullStars; i++) {
+      starsHtml += '<i class="bi bi-star-fill"></i> ';
+    }
+    if (hasHalfStar) {
+      starsHtml += '<i class="bi bi-star-half"></i> ';
+    }
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      starsHtml += '<i class="bi bi-star"></i> ';
+    }
+    starsHtml += `<span class="text-muted ms-2">(${reviewCount})</span>`;
+    ratingContainer.innerHTML = starsHtml;
+    
+    // Set price display
+    if (product.onSale && productSalePrice) {
+      document.getElementById('product-price').textContent = `$${productSalePrice.toFixed(2)}`;
+      document.getElementById('product-original-price').textContent = `$${productPrice.toFixed(2)}`;
+    } else {
+      document.getElementById('product-price').textContent = `$${productPrice.toFixed(2)}`;
+      document.getElementById('product-original-price').textContent = '';
+    }
+    
+    // Set product description
+    document.getElementById('product-description').textContent = productDescription;
+    
+    // Set product details
+    const detailsContainer = document.getElementById('product-details');
+    const details = product.details || 'No details available';
+    
+    if (typeof details === 'string') {
+      detailsContainer.innerHTML = `<p>${details}</p>`;
+    } else if (typeof details === 'object') {
+      let detailsHtml = '<ul class="list-group list-group-flush">';
+      for (const key in details) {
+        detailsHtml += `<li class="list-group-item"><strong>${key}:</strong> ${details[key]}</li>`;
+      }
+      detailsHtml += '</ul>';
+      detailsContainer.innerHTML = detailsHtml;
+    }
+    
+    // Set product image carousel
+    const carouselContainer = document.getElementById('carousel-images');
+    carouselContainer.innerHTML = '';
+    
+    // Handle product images
+    let productImages = [];
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      productImages = product.images;
+    } else if (product.image) {
+      productImages = [product.image];
+    } else {
+      productImages = ['https://via.placeholder.com/500?text=No+Image+Available'];
+    }
+    
+    // Create carousel items
+    productImages.forEach((image, index) => {
+      const carouselItem = document.createElement('div');
+      carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+      carouselItem.innerHTML = `<img src="${image}" class="d-block w-100" alt="${productName} Image ${index + 1}">`;
+      carouselContainer.appendChild(carouselItem);
+    });
+    
+    // Set category breadcrumb
+    const categoriesData = localStorage.getItem('categories');
+    if (categoriesData && product.categoryId) {
+      const categories = JSON.parse(categoriesData);
+      const category = categories.find(c => c.id === product.categoryId);
+      if (category) {
+        document.getElementById('breadcrumb-category-link').innerHTML = `<a href="./category-page.html?id=${category.id}">${category.name}</a>`;
+      }
+    }
+    
+    // Load product reviews
+    loadReviews(product);
+    
+    // Check if product is in wishlist
+    checkWishlist(product.id);
+  }
+  
+  // Load product reviews
+  function loadReviews(product) {
+    const reviewsContainer = document.getElementById('reviews-container');
+    const reviewCountEl = document.getElementById('review-count');
+    let reviews = [];
+    
+    if (product.reviews && Array.isArray(product.reviews)) {
+      reviews = product.reviews;
+    }
+    
+    reviewCountEl.textContent = `(${reviews.length} reviews)`;
+    
+    if (reviews.length === 0) {
+      reviewsContainer.innerHTML = '<div class="alert alert-light">No reviews yet. Be the first to review this product!</div>';
+      return;
+    }
+    
+    let reviewsHtml = '';
+    reviews.forEach(review => {
+      const rating = review.rating || 0;
+      const fullStars = Math.floor(rating);
+      const hasHalfStar = rating % 1 >= 0.5;
+      
+      let starsHtml = '<div class="rating">';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="bi bi-star-fill"></i> ';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i> ';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="bi bi-star"></i> ';
+      }
+      starsHtml += '</div>';
+      
+      const reviewDate = review.date ? new Date(review.date).toLocaleDateString() : 'Unknown date';
+      
+      reviewsHtml += `
+        <div class="review-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5>${review.userName || 'Anonymous'}</h5>
+            <small class="text-muted">${reviewDate}</small>
+          </div>
+          ${starsHtml}
+          <h6>${review.title || 'Review'}</h6>
+          <p>${review.content || 'No comment provided.'}</p>
+        </div>
+      `;
+    });
+    
+    reviewsContainer.innerHTML = reviewsHtml;
+  }
+  
+  // Load related products
+  function loadRelatedProducts(product) {
+    const productsData = localStorage.getItem('products');
+    if (!productsData) return;
+    
+    const products = JSON.parse(productsData);
+    // Find products in the same category, excluding current product
+    const categoryId = product.categoryId || 0;
+    let relatedProducts = products.filter(p => p.categoryId === categoryId && p.id !== product.id);
+    
+    // If not enough products in the same category, add some other products
+    if (relatedProducts.length < 4) {
+      const otherProducts = products.filter(p => p.id !== product.id && p.categoryId !== categoryId);
+      relatedProducts = relatedProducts.concat(otherProducts.slice(0, 4 - relatedProducts.length));
+    }
+    
+    // Limit to max 4 related products
+    relatedProducts = relatedProducts.slice(0, 4);
+    
+    // Render related products
+    const container = document.getElementById('related-products-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    relatedProducts.forEach(relatedProduct => {
+      // Handle potentially empty fields
+      const name = relatedProduct.name || 'Unnamed Product';
+      const price = parseFloat(relatedProduct.price) || 0;
+      const salePrice = relatedProduct.onSale && relatedProduct.salePrice ? parseFloat(relatedProduct.salePrice) : (relatedProduct.onSale ? price * 0.9 : null);
+      
+      // Get product image
+      let imageSrc = 'https://via.placeholder.com/180';
+      if (Array.isArray(relatedProduct.images) && relatedProduct.images.length > 0) {
+        imageSrc = relatedProduct.images[0];
+      } else if (relatedProduct.image) {
+        imageSrc = relatedProduct.image;
+      }
+      
+      // Generate price HTML
+      let priceHtml;
+      if (relatedProduct.onSale && salePrice) {
+        priceHtml = `
+          <span class="product-price">$${salePrice.toFixed(2)}</span>
+          <span class="product-price-discount">$${price.toFixed(2)}</span>
+        `;
+      } else {
+        priceHtml = `<span class="product-price">$${price.toFixed(2)}</span>`;
+      }
+      
+      // Generate product card HTML
+      const productHtml = `
+        <div class="col-6 col-md-3">
+          <div class="product-card">
+            ${relatedProduct.onSale ? '<span class="product-badge">SALE</span>' : ''}
+            <a href="product_detail.html?id=${relatedProduct.id}" class="text-decoration-none text-dark">
+              <img src="${imageSrc}" class="card-img-top" alt="${name}">
+              <div class="card-body">
+                <h5 class="card-title">${name}</h5>
+                <div class="mb-2">${priceHtml}</div>
+                <button class="btn btn-outline-primary btn-sm w-100 add-to-cart-related" data-product-id="${relatedProduct.id}">
+                  <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+              </div>
+            </a>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += productHtml;
+    });
+    
+    // Add related products' "Add to Cart" button events
+    document.querySelectorAll('.add-to-cart-related').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const productId = parseInt(this.getAttribute('data-product-id'));
+        const product = relatedProducts.find(p => p.id === productId);
+        if (product) {
+          addToCart(product, 1);
+        }
+      });
+    });
+  }
+  
+  // Add to cart
+  function addToCart(product, quantity) {
+    if (!product) return;
+    
+    // Validate quantity
+    quantity = parseInt(quantity);
+    if (isNaN(quantity) || quantity < 1) {
+      quantity = 1;
+    }
+    
+    // Get existing cart
+    let cart = [];
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      cart = JSON.parse(cartData);
+    }
+    
+    // Calculate final price
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    
+    // Handle image URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
+    // Check if product is already in cart
+    const existingItem = cart.find(item => item.id === product.id);
+    if (existingItem) {
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+    } else {
+      // Safely handle product description
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      }
+      
+      cart.push({
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice || 0,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
+      });
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Show success message
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+    
+    // Update navbar cart count
+    updateCartCount();
+  }
+  
+  // Update cart count
+  function updateCartCount() {
+    const cartData = localStorage.getItem('cart');
+    const cartCount = document.getElementById('cart-count');
+    
+    if (!cartCount) return;
+    
+    if (cartData) {
+      const cart = JSON.parse(cartData);
+      const count = cart.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0);
+      cartCount.textContent = count;
+      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+    } else {
+      cartCount.style.display = 'none';
+    }
+  }
+  
+  // Handle wishlist
+  function toggleWishlist(product) {
+    if (!product) return;
+    
+    let wishlist = [];
+    const wishlistData = localStorage.getItem('wishlist');
+    if (wishlistData) {
+      wishlist = JSON.parse(wishlistData);
+    }
+    
+    const productId = product.id;
+    const isInWishlist = wishlist.some(item => item.id === productId);
+    
+    if (isInWishlist) {
+      // Remove from wishlist
+      wishlist = wishlist.filter(item => item.id !== productId);
+      document.getElementById('wishlist-btn').classList.remove('active');
+      showToast(`${product.name} removed from wishlist`, 'info');
+    } else {
+      // Add to wishlist
+      // Handle image URL
+      let imageUrl = 'https://via.placeholder.com/80';
+      if (product.image) {
+        imageUrl = product.image;
+      } else if (Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0];
+      }
+      
+      // Calculate price
+      const price = parseFloat(product.price) || 0;
+      const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+      
+      wishlist.push({
+        id: productId,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        categoryId: product.categoryId || null
+      });
+      
+      document.getElementById('wishlist-btn').classList.add('active');
+      showToast(`${product.name} added to wishlist`, 'success');
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }
+  
+  // Check if product is in wishlist
+  function checkWishlist(productId) {
+    const wishlistData = localStorage.getItem('wishlist');
+    if (wishlistData) {
+      const wishlist = JSON.parse(wishlistData);
+      const isInWishlist = wishlist.some(item => item.id === productId);
+      
+      if (isInWishlist) {
+        document.getElementById('wishlist-btn').classList.add('active');
+      }
+    }
+  }
+  
+  // Setup social sharing functionality
+  function setupSocialSharing(product) {
+    const productUrl = encodeURIComponent(window.location.href);
+    const productName = encodeURIComponent(product.name || 'Purely Homemade Product');
+    const productDesc = encodeURIComponent(product.description || 'Check out this amazing product from Purely Homemade!');
+    
+    const shareLinks = document.querySelectorAll('.social-share a');
+    
+    // Facebook share
+    shareLinks[0].href = `https://www.facebook.com/sharer/sharer.php?u=${productUrl}`;
+    shareLinks[0].target = '_blank';
+    
+    // Twitter share
+    shareLinks[1].href = `https://twitter.com/intent/tweet?text=${productDesc}&url=${productUrl}`;
+    shareLinks[1].target = '_blank';
+    
+    // Pinterest share
+    let imageUrl = '';
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = encodeURIComponent(product.images[0]);
+    } else if (product.image) {
+      imageUrl = encodeURIComponent(product.image);
+    }
+    shareLinks[2].href = `https://pinterest.com/pin/create/button/?url=${productUrl}&media=${imageUrl}&description=${productDesc}`;
+    shareLinks[2].target = '_blank';
+    
+    // Copy link
+    shareLinks[3].addEventListener('click', function(e) {
+      e.preventDefault();
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+      }).catch(err => {
+        console.error('Could not copy link: ', err);
+      });
+    });
+  }
+  
+  // Show error message
+  function showError(message) {
+    showToast(message, 'error');
+  }
+  
+  // Show toast notification
+  function showToast(message, type = 'success') {
+    // Ensure toast container exists
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toast-container';
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.backgroundColor = '#fff';
+    toast.style.color = '#333';
+    toast.style.borderRadius = '4px';
+    toast.style.padding = '10px 15px';
+    toast.style.marginBottom = '10px';
+    toast.style.minWidth = '250px';
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.animation = 'slideIn 0.3s, fadeOut 0.5s 2.5s forwards';
+    toast.style.position = 'relative';
+    
+    // Set toast border color
+    if (type === 'success') {
+      toast.style.borderLeft = '4px solid #198754';
+    } else if (type === 'error') {
+      toast.style.borderLeft = '4px solid #dc3545';
+    } else if (type === 'info') {
+      toast.style.borderLeft = '4px solid #0dcaf0';
+    }
+    
+    // Add content
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Add close button event
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+</script>
+
+</body>
+</html> 

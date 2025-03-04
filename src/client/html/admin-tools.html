@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin & Testing Tools</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/src/client/css/">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    pre {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .result-box {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .btn-admin {
+      background-color: #6f42c1;
+      color: white;
+    }
+    .btn-admin:hover {
+      background-color: #5a32a3;
+      color: white;
+    }
+    .tab-content {
+      padding: 20px;
+      border: 1px solid #dee2e6;
+      border-top: none;
+      border-radius: 0 0 .25rem .25rem;
+    }
+    .nav-tabs .nav-link {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">管理员与测试工具集</h1>
+    
+    <!-- 导航标签页 -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="localStorage-tab" data-bs-toggle="tab" data-bs-target="#localStorage" type="button" role="tab" aria-controls="localStorage" aria-selected="true">本地存储工具</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="create-admin-tab" data-bs-toggle="tab" data-bs-target="#create-admin" type="button" role="tab" aria-controls="create-admin" aria-selected="false">创建管理员</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="test-cart-tab" data-bs-toggle="tab" data-bs-target="#test-cart" type="button" role="tab" aria-controls="test-cart" aria-selected="false">购物车测试</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="test-login-tab" data-bs-toggle="tab" data-bs-target="#test-login" type="button" role="tab" aria-controls="test-login" aria-selected="false">登录测试</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="test-profile-tab" data-bs-toggle="tab" data-bs-target="#test-profile" type="button" role="tab" aria-controls="test-profile" aria-selected="false">个人资料测试</button>
+      </li>
+    </ul>
+    
+    <!-- 标签页内容 -->
+    <div class="tab-content" id="adminTabsContent">
+      <!-- 本地存储工具标签页 -->
+      <div class="tab-pane fade show active" id="localStorage" role="tabpanel" aria-labelledby="localStorage-tab">
+        <h2>localStorage 诊断工具</h2>
+        <p>使用此工具检查您的localStorage状态并解决产品显示问题</p>
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>检查管理员状态</h4>
+          </div>
+          <div class="card-body">
+            <p>当前管理员状态: <span id="admin-status" class="badge bg-secondary">检查中...</span></p>
+            <button id="set-admin-true" class="btn btn-success">设为管理员</button>
+            <button id="set-admin-false" class="btn btn-secondary">移除管理员</button>
+          </div>
+        </div>
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>localStorage内容</h4>
+          </div>
+          <div class="card-body">
+            <button id="refresh-storage" class="btn btn-primary">刷新</button>
+            <button id="clear-storage" class="btn btn-danger">清空所有数据</button>
+            <div class="result-box">
+              <pre id="storage-content">加载中...</pre>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>商品数据</h4>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <button id="init-products" class="btn btn-warning">初始化商品数据</button>
+              <button id="clear-products" class="btn btn-danger">删除商品数据</button>
+              <button id="edit-products" class="btn btn-primary">编辑商品数据</button>
+              <button id="refresh-products-view" class="btn btn-info">刷新显示</button>
+            </div>
+            <div class="mt-2" id="products-editor" style="display: none;">
+              <textarea class="form-control mb-2" id="products-json" rows="6"></textarea>
+              <button id="save-products" class="btn btn-success">保存修改</button>
+              <button id="cancel-products" class="btn btn-secondary">取消</button>
+            </div>
+            <div id="products-status" class="mt-2"></div>
+            <div class="mt-3">
+              <h5>当前商品数据：</h5>
+              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                <pre id="products-data-view" style="margin: 0;">加载中...</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>设计师数据</h4>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <button id="init-designers" class="btn btn-warning">初始化设计师数据</button>
+              <button id="clear-designers" class="btn btn-danger">删除设计师数据</button>
+              <button id="edit-designers" class="btn btn-primary">编辑设计师数据</button>
+              <button id="refresh-designers-view" class="btn btn-info">刷新显示</button>
+            </div>
+            <div class="mt-2" id="designers-editor" style="display: none;">
+              <textarea class="form-control mb-2" id="designers-json" rows="6"></textarea>
+              <button id="save-designers" class="btn btn-success">保存修改</button>
+              <button id="cancel-designers" class="btn btn-secondary">取消</button>
+            </div>
+            <div id="designers-status" class="mt-2"></div>
+            <div class="mt-3">
+              <h5>当前设计师数据：</h5>
+              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                <pre id="designers-data-view" style="margin: 0;">加载中...</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>类别数据</h4>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <button id="init-categories" class="btn btn-warning">初始化类别数据</button>
+              <button id="clear-categories" class="btn btn-danger">删除类别数据</button>
+              <button id="edit-categories" class="btn btn-primary">编辑类别数据</button>
+              <button id="refresh-categories-view" class="btn btn-info">刷新显示</button>
+            </div>
+            <div class="mt-2" id="categories-editor" style="display: none;">
+              <textarea class="form-control mb-2" id="categories-json" rows="6"></textarea>
+              <button id="save-categories" class="btn btn-success">保存修改</button>
+              <button id="cancel-categories" class="btn btn-secondary">取消</button>
+            </div>
+            <div id="categories-status" class="mt-2"></div>
+            <div class="mt-3">
+              <h5>当前类别数据：</h5>
+              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                <pre id="categories-data-view" style="margin: 0;">加载中...</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 创建管理员标签页 -->
+      <div class="tab-pane fade" id="create-admin" role="tabpanel" aria-labelledby="create-admin-tab">
+        <h2 class="mb-4">创建管理员用户</h2>
+        
+        <div class="mb-4">
+          <p>请填写管理员账户信息：</p>
+          
+          <form id="admin-form">
+            <div class="mb-3">
+              <label for="username" class="form-label">用户名</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">电子邮箱</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">密码</label>
+              <input type="password" class="form-control" id="password" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">确认密码</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-admin">创建管理员账户</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="alert alert-info">
+          <h5>注意事项：</h5>
+          <ul>
+            <li>管理员账户具有所有权限</li>
+            <li>请妥善保管密码</li>
+            <li>创建完成后可以直接登录使用</li>
+          </ul>
+        </div>
+        
+        <div class="card mt-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">用户数据</h4>
+            <div>
+              <button id="refresh-users-view" class="btn btn-info btn-sm">刷新显示</button>
+              <button id="clear-users" class="btn btn-danger btn-sm">删除所有用户</button>
+              <button id="edit-users" class="btn btn-primary btn-sm">编辑用户数据</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="users-status" class="mb-3"></div>
+            <div class="mt-2" id="users-editor" style="display: none;">
+              <textarea class="form-control mb-2" id="users-json" rows="6"></textarea>
+              <button id="save-users" class="btn btn-success">保存修改</button>
+              <button id="cancel-users" class="btn btn-secondary">取消</button>
+            </div>
+            <div class="mt-2">
+              <h5>当前用户数据：</h5>
+              <div class="border rounded p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+                <pre id="users-data-view" style="margin: 0;">加载中...</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 购物车测试标签页 -->
+      <div class="tab-pane fade" id="test-cart" role="tabpanel" aria-labelledby="test-cart-tab">
+        <h2>测试购物车数据处理</h2>
+        
+        <div class="mb-3">
+          <button id="testNormalProduct" class="btn btn-primary">测试正常商品</button>
+          <button id="testEmptyProduct" class="btn btn-primary">测试空值商品</button>
+          <button id="testMixedProducts" class="btn btn-primary">测试混合商品</button>
+          <button id="checkCart" class="btn btn-info">查看当前购物车</button>
+          <button id="clearCart" class="btn btn-danger">清空购物车</button>
+          <button id="goToCart" class="btn btn-success">前往购物车页面</button>
+        </div>
+        
+        <div class="result-box">
+          <h4>结果：</h4>
+          <pre id="cart-result">请点击上方按钮执行测试</pre>
+        </div>
+      </div>
+      
+      <!-- 登录测试标签页 -->
+      <div class="tab-pane fade" id="test-login" role="tabpanel" aria-labelledby="test-login-tab">
+        <h2>登录测试工具</h2>
+        
+        <div class="mb-3">
+          <h4>测试登录功能</h4>
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="test-username" class="col-form-label">用户名:</label>
+            </div>
+            <div class="col-auto">
+              <input type="text" id="test-username" class="form-control" value="admin">
+            </div>
+          </div>
+          
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label for="test-password" class="col-form-label">密码:</label>
+            </div>
+            <div class="col-auto">
+              <input type="password" id="test-password" class="form-control" value="admin123">
+            </div>
+          </div>
+          
+          <button id="run-login-test" class="btn btn-primary">执行本地登录测试</button>
+          <button id="run-login-page-test" class="btn btn-primary">执行登录页面测试</button>
+          <button id="view-login-alerts" class="btn btn-info">查看捕获的弹窗</button>
+          <button id="clear-login-test" class="btn btn-secondary">清除测试数据</button>
+        </div>
+        
+        <div class="result-box">
+          <h4>测试结果：</h4>
+          <pre id="login-result">等待测试...</pre>
+        </div>
+      </div>
+      
+      <!-- 个人资料测试标签页 -->
+      <div class="tab-pane fade" id="test-profile" role="tabpanel" aria-labelledby="test-profile-tab">
+        <h2>个人资料页面测试</h2>
+        
+        <div class="mb-3">
+          <button id="run-profile-test" class="btn btn-primary">测试个人资料页面</button>
+          <button id="view-profile-alerts" class="btn btn-info">查看捕获的弹窗</button>
+          <button id="check-profile-data" class="btn btn-success">检查个人资料数据</button>
+          <button id="clear-profile-test" class="btn btn-secondary">清除测试数据</button>
+        </div>
+        
+        <div class="result-box">
+          <h4>测试结果：</h4>
+          <pre id="profile-result">等待测试...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载脚本 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/src/client/js/init-data.js"></script>
+  <script src="/src/client/js/test-login.js"></script>
+  <script src="/src/client/js/test-profile.js"></script>
+  
+  <script>
+    // localStorage 功能
+    document.addEventListener('DOMContentLoaded', function() {
+      // 检查管理员状态
+      function checkAdminStatus() {
+        try {
+          const user = JSON.parse(localStorage.getItem('currentUser'));
+          const adminStatus = document.getElementById('admin-status');
+          
+          if (user && user.isAdmin) {
+            adminStatus.textContent = '是管理员';
+            adminStatus.className = 'badge bg-success';
+          } else {
+            adminStatus.textContent = '非管理员';
+            adminStatus.className = 'badge bg-secondary';
+          }
+        } catch (e) {
+          console.error('检查管理员状态出错:', e);
+        }
+      }
+      
+      // 设置管理员状态
+      document.getElementById('set-admin-true').addEventListener('click', function() {
+        try {
+          let user = JSON.parse(localStorage.getItem('currentUser')) || {};
+          user.isAdmin = true;
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          checkAdminStatus();
+          alert('已设置为管理员！');
+        } catch (e) {
+          console.error('设置管理员状态出错:', e);
+        }
+      });
+      
+      document.getElementById('set-admin-false').addEventListener('click', function() {
+        try {
+          let user = JSON.parse(localStorage.getItem('currentUser')) || {};
+          user.isAdmin = false;
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          checkAdminStatus();
+          alert('已移除管理员权限！');
+        } catch (e) {
+          console.error('设置管理员状态出错:', e);
+        }
+      });
+      
+      // 刷新localStorage内容
+      function refreshStorage() {
+        const storageContent = document.getElementById('storage-content');
+        
+        try {
+          const storageItems = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            storageItems[key] = localStorage.getItem(key);
+          }
+          
+          storageContent.textContent = JSON.stringify(storageItems, null, 2);
+        } catch (e) {
+          storageContent.textContent = '获取localStorage内容出错: ' + e.message;
+        }
+      }
+      
+      document.getElementById('refresh-storage').addEventListener('click', refreshStorage);
+      
+      // 清空localStorage
+      document.getElementById('clear-storage').addEventListener('click', function() {
+        if (confirm('确定要清空所有localStorage数据吗？这将删除所有本地存储的数据！')) {
+          localStorage.clear();
+          refreshStorage();
+          checkAdminStatus();
+          alert('localStorage已清空！');
+        }
+      });
+      
+      // 初始化商品数据
+      document.getElementById('init-products').addEventListener('click', function() {
+        try {
+          if (typeof initializeProductData === 'function') {
+            initializeProductData();
+            refreshStorage();
+            document.getElementById('products-status').innerHTML = '<div class="alert alert-success">商品数据已初始化!</div>';
+            setTimeout(() => { document.getElementById('products-status').innerHTML = ''; }, 3000);
+            updateProductsView();
+          } else {
+            const testProducts = [
+              { id: 'p1', name: '手工编织篮', description: '精美手工编织的收纳篮', price: 299, image: '/src/client/img/products/basket.jpg', designerId: 'd1', categoryId: 'c2', stock: 15 },
+              { id: 'p2', name: '手工陶瓷花瓶', description: '手工制作的陶瓷花瓶，每个都独一无二', price: 399, image: '/src/client/img/products/vase.jpg', designerId: 'd2', categoryId: 'c2', stock: 8 },
+              { id: 'p3', name: '手工木质茶几', description: '精心手工制作的实木茶几', price: 1299, image: '/src/client/img/products/table.jpg', designerId: 'd3', categoryId: 'c1', stock: 5 }
+            ];
+            localStorage.setItem('products', JSON.stringify(testProducts));
+            refreshStorage();
+            document.getElementById('products-status').innerHTML = '<div class="alert alert-success">商品数据已初始化!</div>';
+            setTimeout(() => { document.getElementById('products-status').innerHTML = ''; }, 3000);
+            updateProductsView();
+          }
+        } catch (e) {
+          console.error('初始化商品数据出错:', e);
+          document.getElementById('products-status').innerHTML = `<div class="alert alert-danger">初始化商品数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 清除产品数据
+      document.getElementById('clear-products').addEventListener('click', function() {
+        try {
+          localStorage.removeItem('products');
+          refreshStorage();
+          document.getElementById('products-status').innerHTML = '<div class="alert alert-success">商品数据已删除!</div>';
+          setTimeout(() => { document.getElementById('products-status').innerHTML = ''; }, 3000);
+          updateProductsView();
+        } catch (e) {
+          console.error('清除产品数据出错:', e);
+          document.getElementById('products-status').innerHTML = `<div class="alert alert-danger">清除产品数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 编辑产品数据
+      document.getElementById('edit-products').addEventListener('click', function() {
+        try {
+          const products = JSON.parse(localStorage.getItem('products') || '[]');
+          document.getElementById('products-json').value = JSON.stringify(products, null, 2);
+          document.getElementById('products-editor').style.display = 'block';
+        } catch (e) {
+          console.error('加载产品数据出错:', e);
+          document.getElementById('products-status').innerHTML = `<div class="alert alert-danger">加载产品数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 保存编辑后的产品数据
+      document.getElementById('save-products').addEventListener('click', function() {
+        try {
+          const productsJson = document.getElementById('products-json').value;
+          const products = JSON.parse(productsJson);
+          localStorage.setItem('products', JSON.stringify(products));
+          document.getElementById('products-editor').style.display = 'none';
+          refreshStorage();
+          document.getElementById('products-status').innerHTML = '<div class="alert alert-success">商品数据已保存!</div>';
+          setTimeout(() => { document.getElementById('products-status').innerHTML = ''; }, 3000);
+          updateProductsView();
+        } catch (e) {
+          console.error('保存产品数据出错:', e);
+          document.getElementById('products-status').innerHTML = `<div class="alert alert-danger">保存产品数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 取消编辑产品数据
+      document.getElementById('cancel-products').addEventListener('click', function() {
+        document.getElementById('products-editor').style.display = 'none';
+      });
+      
+      // 初始化设计师数据
+      document.getElementById('init-designers').addEventListener('click', function() {
+        try {
+          const testDesigners = [
+            { id: 'd1', name: '王小明', bio: '专注于传统工艺现代化设计', image: '/src/client/img/designers/designer1.jpg' },
+            { id: 'd2', name: '李芳', bio: '追求极简主义与实用性的完美结合', image: '/src/client/img/designers/designer2.jpg' },
+            { id: 'd3', name: '张伟', bio: '擅长将东方元素融入现代家居设计', image: '/src/client/img/designers/designer3.jpg' }
+          ];
+          localStorage.setItem('designers', JSON.stringify(testDesigners));
+          refreshStorage();
+          document.getElementById('designers-status').innerHTML = '<div class="alert alert-success">设计师数据已初始化!</div>';
+          setTimeout(() => { document.getElementById('designers-status').innerHTML = ''; }, 3000);
+          updateDesignersView();
+        } catch (e) {
+          console.error('初始化设计师数据出错:', e);
+          document.getElementById('designers-status').innerHTML = `<div class="alert alert-danger">初始化设计师数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 清除设计师数据
+      document.getElementById('clear-designers').addEventListener('click', function() {
+        try {
+          localStorage.removeItem('designers');
+          refreshStorage();
+          document.getElementById('designers-status').innerHTML = '<div class="alert alert-success">设计师数据已删除!</div>';
+          setTimeout(() => { document.getElementById('designers-status').innerHTML = ''; }, 3000);
+          updateDesignersView();
+        } catch (e) {
+          console.error('清除设计师数据出错:', e);
+          document.getElementById('designers-status').innerHTML = `<div class="alert alert-danger">清除设计师数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 编辑设计师数据
+      document.getElementById('edit-designers').addEventListener('click', function() {
+        try {
+          const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+          document.getElementById('designers-json').value = JSON.stringify(designers, null, 2);
+          document.getElementById('designers-editor').style.display = 'block';
+        } catch (e) {
+          console.error('加载设计师数据出错:', e);
+          document.getElementById('designers-status').innerHTML = `<div class="alert alert-danger">加载设计师数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 保存编辑后的设计师数据
+      document.getElementById('save-designers').addEventListener('click', function() {
+        try {
+          const designersJson = document.getElementById('designers-json').value;
+          const designers = JSON.parse(designersJson);
+          localStorage.setItem('designers', JSON.stringify(designers));
+          document.getElementById('designers-editor').style.display = 'none';
+          refreshStorage();
+          document.getElementById('designers-status').innerHTML = '<div class="alert alert-success">设计师数据已保存!</div>';
+          setTimeout(() => { document.getElementById('designers-status').innerHTML = ''; }, 3000);
+          updateDesignersView();
+        } catch (e) {
+          console.error('保存设计师数据出错:', e);
+          document.getElementById('designers-status').innerHTML = `<div class="alert alert-danger">保存设计师数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 取消编辑设计师数据
+      document.getElementById('cancel-designers').addEventListener('click', function() {
+        document.getElementById('designers-editor').style.display = 'none';
+      });
+      
+      // 初始化类别数据
+      document.getElementById('init-categories').addEventListener('click', function() {
+        try {
+          const testCategories = [
+            { id: 'c1', name: '家具', description: '手工制作的精美家具', image: '/src/client/img/categories/furniture.jpg' },
+            { id: 'c2', name: '装饰品', description: '为您的家增添温馨的手工装饰', image: '/src/client/img/categories/decor.jpg' },
+            { id: 'c3', name: '厨房用品', description: '实用美观的厨房手工艺品', image: '/src/client/img/categories/kitchen.jpg' }
+          ];
+          localStorage.setItem('categories', JSON.stringify(testCategories));
+          refreshStorage();
+          document.getElementById('categories-status').innerHTML = '<div class="alert alert-success">类别数据已初始化!</div>';
+          setTimeout(() => { document.getElementById('categories-status').innerHTML = ''; }, 3000);
+          updateCategoriesView();
+        } catch (e) {
+          console.error('初始化类别数据出错:', e);
+          document.getElementById('categories-status').innerHTML = `<div class="alert alert-danger">初始化类别数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 清除类别数据
+      document.getElementById('clear-categories').addEventListener('click', function() {
+        try {
+          localStorage.removeItem('categories');
+          refreshStorage();
+          document.getElementById('categories-status').innerHTML = '<div class="alert alert-success">类别数据已删除!</div>';
+          setTimeout(() => { document.getElementById('categories-status').innerHTML = ''; }, 3000);
+          updateCategoriesView();
+        } catch (e) {
+          console.error('清除类别数据出错:', e);
+          document.getElementById('categories-status').innerHTML = `<div class="alert alert-danger">清除类别数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 编辑类别数据
+      document.getElementById('edit-categories').addEventListener('click', function() {
+        try {
+          const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+          document.getElementById('categories-json').value = JSON.stringify(categories, null, 2);
+          document.getElementById('categories-editor').style.display = 'block';
+        } catch (e) {
+          console.error('加载类别数据出错:', e);
+          document.getElementById('categories-status').innerHTML = `<div class="alert alert-danger">加载类别数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 保存编辑后的类别数据
+      document.getElementById('save-categories').addEventListener('click', function() {
+        try {
+          const categoriesJson = document.getElementById('categories-json').value;
+          const categories = JSON.parse(categoriesJson);
+          localStorage.setItem('categories', JSON.stringify(categories));
+          document.getElementById('categories-editor').style.display = 'none';
+          refreshStorage();
+          document.getElementById('categories-status').innerHTML = '<div class="alert alert-success">类别数据已保存!</div>';
+          setTimeout(() => { document.getElementById('categories-status').innerHTML = ''; }, 3000);
+          updateCategoriesView();
+        } catch (e) {
+          console.error('保存类别数据出错:', e);
+          document.getElementById('categories-status').innerHTML = `<div class="alert alert-danger">保存类别数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 取消编辑类别数据
+      document.getElementById('cancel-categories').addEventListener('click', function() {
+        document.getElementById('categories-editor').style.display = 'none';
+      });
+      
+      // 创建管理员账户
+      document.getElementById('admin-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+          alert('两次输入的密码不一致！');
+          return;
+        }
+        
+        try {
+          // 读取现有用户数据
+          const users = JSON.parse(localStorage.getItem('users')) || [];
+          
+          // 检查用户名是否已存在
+          if (users.some(user => user.username === username)) {
+            alert('用户名已存在！');
+            return;
+          }
+          
+          // 创建新管理员
+          const newAdmin = {
+            id: Date.now().toString(),
+            username,
+            email,
+            password, // 实际应用中应加密
+            isAdmin: true,
+            createdAt: new Date().toISOString()
+          };
+          
+          // 保存到localStorage
+          users.push(newAdmin);
+          localStorage.setItem('users', JSON.stringify(users));
+          
+          alert('管理员账户创建成功！');
+          this.reset();
+          refreshStorage();
+          updateUsersView(); // 更新用户数据显示
+        } catch (e) {
+          console.error('创建管理员账户出错:', e);
+          alert('创建管理员账户出错: ' + e.message);
+        }
+      });
+      
+      // 用户数据管理功能
+      function updateUsersView() {
+        try {
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const usersDataView = document.getElementById('users-data-view');
+          
+          if (users.length > 0) {
+            // 创建一个不显示密码的版本用于显示
+            const safeUsers = users.map(user => {
+              const { password, ...safeUser } = user; // 解构移除密码
+              return { ...safeUser, password: '******' }; // 添加星号密码用于显示
+            });
+            
+            usersDataView.textContent = JSON.stringify(safeUsers, null, 2);
+          } else {
+            usersDataView.textContent = '没有用户数据';
+          }
+        } catch (e) {
+          document.getElementById('users-data-view').textContent = '加载用户数据时出错: ' + e.message;
+        }
+      }
+      
+      // 刷新用户数据显示
+      document.getElementById('refresh-users-view').addEventListener('click', updateUsersView);
+      
+      // 清除所有用户数据
+      document.getElementById('clear-users').addEventListener('click', function() {
+        if (confirm('确定要删除所有用户数据吗？此操作不可恢复！')) {
+          try {
+            localStorage.removeItem('users');
+            localStorage.removeItem('currentUser'); // 同时清除当前登录用户
+            refreshStorage();
+            document.getElementById('users-status').innerHTML = '<div class="alert alert-success">所有用户数据已删除!</div>';
+            setTimeout(() => { document.getElementById('users-status').innerHTML = ''; }, 3000);
+            updateUsersView();
+            checkAdminStatus(); // 更新管理员状态显示
+          } catch (e) {
+            console.error('清除用户数据出错:', e);
+            document.getElementById('users-status').innerHTML = `<div class="alert alert-danger">清除用户数据出错: ${e.message}</div>`;
+          }
+        }
+      });
+      
+      // 编辑用户数据
+      document.getElementById('edit-users').addEventListener('click', function() {
+        try {
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          document.getElementById('users-json').value = JSON.stringify(users, null, 2);
+          document.getElementById('users-editor').style.display = 'block';
+        } catch (e) {
+          console.error('加载用户数据出错:', e);
+          document.getElementById('users-status').innerHTML = `<div class="alert alert-danger">加载用户数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 保存编辑后的用户数据
+      document.getElementById('save-users').addEventListener('click', function() {
+        try {
+          const usersJson = document.getElementById('users-json').value;
+          const users = JSON.parse(usersJson);
+          localStorage.setItem('users', JSON.stringify(users));
+          document.getElementById('users-editor').style.display = 'none';
+          refreshStorage();
+          document.getElementById('users-status').innerHTML = '<div class="alert alert-success">用户数据已保存!</div>';
+          setTimeout(() => { document.getElementById('users-status').innerHTML = ''; }, 3000);
+          updateUsersView();
+          checkAdminStatus(); // 更新管理员状态显示
+        } catch (e) {
+          console.error('保存用户数据出错:', e);
+          document.getElementById('users-status').innerHTML = `<div class="alert alert-danger">保存用户数据出错: ${e.message}</div>`;
+        }
+      });
+      
+      // 取消编辑用户数据
+      document.getElementById('cancel-users').addEventListener('click', function() {
+        document.getElementById('users-editor').style.display = 'none';
+      });
+      
+      // 购物车测试功能
+      document.getElementById('testNormalProduct').addEventListener('click', function() {
+        try {
+          // 从localStorage中获取产品数据
+          const products = JSON.parse(localStorage.getItem('products') || '[]');
+          
+          if (products.length === 0) {
+            document.getElementById('cart-result').textContent = '没有找到产品数据，请先初始化商品数据';
+            return;
+          }
+          
+          // 选择第一个产品添加到购物车
+          const product = products[0];
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          
+          cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+            image: product.image
+          });
+          
+          localStorage.setItem('cart', JSON.stringify(cart));
+          document.getElementById('cart-result').textContent = '已添加商品:\n' + JSON.stringify(product, null, 2) + '\n\n当前购物车:\n' + JSON.stringify(cart, null, 2);
+        } catch (e) {
+          document.getElementById('cart-result').textContent = '测试出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('testEmptyProduct').addEventListener('click', function() {
+        try {
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          
+          // 添加空值商品
+          cart.push({
+            id: 'empty-test',
+            name: '',
+            price: null,
+            quantity: 1,
+            image: null
+          });
+          
+          localStorage.setItem('cart', JSON.stringify(cart));
+          document.getElementById('cart-result').textContent = '已添加空值商品:\n' + JSON.stringify(cart, null, 2);
+        } catch (e) {
+          document.getElementById('cart-result').textContent = '测试出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('testMixedProducts').addEventListener('click', function() {
+        try {
+          const products = JSON.parse(localStorage.getItem('products') || '[]');
+          
+          if (products.length < 2) {
+            document.getElementById('cart-result').textContent = '产品数据不足，请先初始化商品数据';
+            return;
+          }
+          
+          const cart = [];
+          
+          // 添加正常商品
+          cart.push({
+            id: products[0].id,
+            name: products[0].name,
+            price: products[0].price,
+            quantity: 2,
+            image: products[0].image
+          });
+          
+          // 添加部分属性为空的商品
+          cart.push({
+            id: products[1].id,
+            name: products[1].name,
+            price: '',
+            quantity: 1,
+            image: null
+          });
+          
+          localStorage.setItem('cart', JSON.stringify(cart));
+          document.getElementById('cart-result').textContent = '已添加混合商品:\n' + JSON.stringify(cart, null, 2);
+        } catch (e) {
+          document.getElementById('cart-result').textContent = '测试出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('checkCart').addEventListener('click', function() {
+        try {
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          document.getElementById('cart-result').textContent = '当前购物车:\n' + JSON.stringify(cart, null, 2);
+        } catch (e) {
+          document.getElementById('cart-result').textContent = '检查购物车出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('clearCart').addEventListener('click', function() {
+        localStorage.setItem('cart', '[]');
+        document.getElementById('cart-result').textContent = '购物车已清空';
+      });
+      
+      document.getElementById('goToCart').addEventListener('click', function() {
+        window.location.href = 'src/views/cart.html';
+      });
+      
+      // 登录测试功能
+      document.getElementById('run-login-test').addEventListener('click', function() {
+        const username = document.getElementById('test-username').value.trim();
+        const password = document.getElementById('test-password').value;
+        
+        try {
+          // 清除之前的测试结果
+          localStorage.removeItem('interceptedAlerts');
+          
+          // 获取用户数据
+          let users = JSON.parse(localStorage.getItem('users') || '[]');
+          
+          // 如果没有用户，创建一些测试用户
+          if (users.length === 0) {
+            users = [
+              {
+                id: 1,
+                username: 'admin',
+                password: 'admin123',
+                email: 'admin@example.com',
+                firstName: '管理员',
+                lastName: '用户',
+                role: 'admin',
+                createdAt: new Date().toISOString(),
+                isAdmin: true
+              },
+              {
+                id: 2,
+                username: 'test',
+                password: 'test123',
+                email: 'test@example.com',
+                firstName: '测试',
+                lastName: '用户',
+                role: 'user',
+                createdAt: new Date().toISOString(),
+                isAdmin: false
+              }
+            ];
+            
+            // 保存测试用户
+            localStorage.setItem('users', JSON.stringify(users));
+          }
+          
+          const user = users.find(u => u.username === username && u.password === password);
+          
+          if (user) {
+            // 登录成功
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            document.getElementById('login-result').textContent = '登录成功:\n' + JSON.stringify(user, null, 2);
+            checkAdminStatus();
+          } else {
+            // 登录失败
+            document.getElementById('login-result').textContent = '登录失败: 用户名或密码错误';
+            alert('用户名或密码错误');
+          }
+        } catch (e) {
+          document.getElementById('login-result').textContent = '登录测试出错: ' + e.message;
+        }
+      });
+      
+      // 新增：登录页面测试
+      document.getElementById('run-login-page-test').addEventListener('click', function() {
+        try {
+          document.getElementById('login-result').textContent = '正在打开登录页面并注入测试脚本...';
+          
+          // 在新窗口中打开登录页面
+          const loginWindow = window.open('src/views/auth/login.html', 'loginTest', 'width=1000,height=800');
+          
+          // 注入测试脚本
+          setTimeout(() => {
+            try {
+              loginWindow.document.head.appendChild(
+                Object.assign(document.createElement('script'), {
+                  src: '/src/client/js/test-login.js'
+                })
+              );
+              document.getElementById('login-result').textContent = '测试脚本已注入到登录页面。请在打开的窗口中使用测试按钮，然后返回此页面点击"查看捕获的弹窗"。';
+            } catch (error) {
+              document.getElementById('login-result').textContent = `注入测试脚本出错: ${error.message}`;
+            }
+          }, 1500);
+        } catch (e) {
+          document.getElementById('login-result').textContent = '登录页面测试出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('view-login-alerts').addEventListener('click', function() {
+        try {
+          const alerts = JSON.parse(localStorage.getItem('interceptedAlerts') || '[]');
+          document.getElementById('login-result').textContent = '捕获的弹窗:\n' + JSON.stringify(alerts, null, 2);
+        } catch (e) {
+          document.getElementById('login-result').textContent = '查看弹窗出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('clear-login-test').addEventListener('click', function() {
+        localStorage.removeItem('interceptedAlerts');
+        document.getElementById('login-result').textContent = '测试数据已清除';
+      });
+      
+      // 个人资料测试功能
+      document.getElementById('run-profile-test').addEventListener('click', function() {
+        try {
+          // 确保用户已登录
+          const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+          
+          if (!currentUser) {
+            document.getElementById('profile-result').textContent = '请先登录再测试个人资料页面';
+            return;
+          }
+          
+          document.getElementById('profile-result').textContent = '正在打开个人资料页面并注入测试脚本...';
+          
+          // 在新窗口中打开个人资料页面
+          const profileWindow = window.open('src/views/auth/profile.html', 'profileTest', 'width=1000,height=800');
+          
+          // 注入测试脚本
+          setTimeout(() => {
+            try {
+              profileWindow.document.head.appendChild(
+                Object.assign(document.createElement('script'), {
+                  src: '/src/client/js/test-profile.js'
+                })
+              );
+              document.getElementById('profile-result').textContent = '测试脚本已注入到个人资料页面。点击"检查个人资料数据"查看结果。';
+            } catch (error) {
+              document.getElementById('profile-result').textContent = `注入测试脚本出错: ${error.message}`;
+            }
+          }, 1500);
+          
+          // 记录页面加载
+          const pageLoadInfo = {
+            time: new Date().toISOString(),
+            url: 'profile-test',
+            userInfo: currentUser.username,
+            isAdmin: currentUser.isAdmin
+          };
+          
+          localStorage.setItem('profilePageLoad', JSON.stringify(pageLoadInfo));
+        } catch (e) {
+          document.getElementById('profile-result').textContent = '个人资料测试出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('view-profile-alerts').addEventListener('click', function() {
+        try {
+          const alerts = JSON.parse(localStorage.getItem('interceptedProfileAlerts') || '[]');
+          document.getElementById('profile-result').textContent = '个人资料页面捕获的弹窗:\n' + JSON.stringify(alerts, null, 2);
+        } catch (e) {
+          document.getElementById('profile-result').textContent = '查看弹窗出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('check-profile-data').addEventListener('click', function() {
+        try {
+          const pageLoad = JSON.parse(localStorage.getItem('profilePageLoad') || '{}');
+          document.getElementById('profile-result').textContent = '个人资料页面加载信息:\n' + JSON.stringify(pageLoad, null, 2);
+        } catch (e) {
+          document.getElementById('profile-result').textContent = '检查个人资料数据出错: ' + e.message;
+        }
+      });
+      
+      document.getElementById('clear-profile-test').addEventListener('click', function() {
+        localStorage.removeItem('interceptedProfileAlerts');
+        localStorage.removeItem('profilePageLoad');
+        document.getElementById('profile-result').textContent = '个人资料测试数据已清除';
+      });
+      
+      // 页面加载时初始化数据显示
+      checkAdminStatus();
+      refreshStorage();
+      
+      // 初始化数据显示
+      updateProductsView();
+      updateDesignersView();
+      updateCategoriesView();
+      updateUsersView(); // 添加用户数据显示初始化
+    });
+    
+    // 添加数据显示功能
+    function updateProductsView() {
+      try {
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        document.getElementById('products-data-view').textContent = 
+          products.length > 0 
+            ? JSON.stringify(products, null, 2)
+            : '没有商品数据';
+      } catch (e) {
+        document.getElementById('products-data-view').textContent = '加载商品数据时出错: ' + e.message;
+      }
+    }
+    
+    function updateDesignersView() {
+      try {
+        const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+        document.getElementById('designers-data-view').textContent = 
+          designers.length > 0 
+            ? JSON.stringify(designers, null, 2)
+            : '没有设计师数据';
+      } catch (e) {
+        document.getElementById('designers-data-view').textContent = '加载设计师数据时出错: ' + e.message;
+      }
+    }
+    
+    function updateCategoriesView() {
+      try {
+        const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+        document.getElementById('categories-data-view').textContent = 
+          categories.length > 0 
+            ? JSON.stringify(categories, null, 2)
+            : '没有类别数据';
+      } catch (e) {
+        document.getElementById('categories-data-view').textContent = '加载类别数据时出错: ' + e.message;
+      }
+    }
+    
+    // 刷新按钮事件监听器
+    document.getElementById('refresh-products-view').addEventListener('click', updateProductsView);
+    document.getElementById('refresh-designers-view').addEventListener('click', updateDesignersView);
+    document.getElementById('refresh-categories-view').addEventListener('click', updateCategoriesView);
+  </script>
+</body>
+</html> 
