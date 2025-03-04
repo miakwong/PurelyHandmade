@@ -14,6 +14,7 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/src/client/css/style.css">
   <link rel="stylesheet" href="/src/client/css/navbar.css">
+  <link rel="stylesheet" href="/src/client/css/global.css">
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
@@ -335,8 +336,7 @@
       // 生成特色设计
       let featuredHTML = '';
       designers.forEach(designer => {
-        featuredHTML += `
-          <div class="col-md-4 mb-4">
+        featuredHTML += `          <div class="col-md-4 mb-4">
             <h4>${designer.name}'s Collection</h4>
             <p class="mb-3">${designer.collectionDescription || 'Discover ' + designer.name + '\'s collection of handcrafted pieces. Each item is carefully created with attention to detail and functionality.'}</p>
             <div class="mt-3">

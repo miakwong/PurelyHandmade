@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // 先加载 Navbar
-    fetch("../../assets/layout/navbar.html") // ✅ 确保路径正确
+    fetch("/src/client/assets/layout/navbar.html") // Updated to absolute path
         .then(response => response.text())
         .then(data => {
             document.getElementById("navbar-placeholder").innerHTML = data;
