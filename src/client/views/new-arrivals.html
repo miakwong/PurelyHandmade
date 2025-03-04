@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Arrivals - Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/src/client/css/style.css">
+  <link rel="stylesheet" href="/src/client/css/navbar.css">
+  <link rel="stylesheet" href="/src/client/css/global.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .section-title {
+      position: relative;
+      margin-bottom: 50px;
+      text-align: center;
+    }
+    
+    .section-title:after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 3px;
+      background-color: #0d6efd;
+      margin: 15px auto 0;
+    }
+    
+    .product-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      height: 100%;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-img-top {
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .price {
+      font-weight: bold;
+      color: #0d6efd;
+      font-size: 1.1rem;
+    }
+    
+    .original-price {
+      color: #6c757d;
+      text-decoration: line-through;
+      margin-left: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .rating {
+      margin-bottom: 15px;
+    }
+    
+    .badge-sale {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .badge-new {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #28a745;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .add-to-cart-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s;
+      opacity: 0;
+    }
+    
+    .product-card:hover .add-to-cart-btn {
+      opacity: 1;
+    }
+    
+    .add-to-cart-btn:hover {
+      background-color: #0b5ed7;
+      transform: scale(1.1);
+    }
+    
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    
+    .toast {
+      animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Hero Section -->
+<div class="container-fluid bg-light py-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h1 class="display-4 fw-bold">New Arrivals</h1>
+        <p class="lead">Discover our latest handcrafted treasures, fresh from our artisans' studios.</p>
+        <p>Each piece is unique, made with care and passion by our talented makers.</p>
+      </div>
+      <div class="col-md-6 text-center">
+        <img src="/src/client/img/logo.jpg" class="img-fluid rounded" alt="New Arrivals" style="max-height: 250px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Products Section -->
+<div class="container mt-5">
+  <h2 class="section-title">Just Added</h2>
+  
+  <div class="row" id="new-products-container">
+    <!-- Products will be loaded dynamically -->
+    <div class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading new arrivals...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Newsletter Section -->
+<div class="container-fluid bg-light py-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <h3>Stay Updated with New Arrivals</h3>
+        <p class="mb-4">Subscribe to our newsletter to be the first to know about our newest handcrafted products.</p>
+        <div class="input-group mb-3">
+          <input type="email" class="form-control" placeholder="Your email address">
+          <button class="btn btn-primary" type="button">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast通知容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 初始化数据脚本 -->
+<script src="/src/client/js/init-data.js"></script>
+
+<!-- Navbar Handler -->
+<script src="/src/client/js/navbar-handler.js"></script>
+
+<script>
+  // DOM content loaded event for page-specific initialization
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load new arrivals
+    loadNewArrivals();
+  });
+  
+  // 加载新上架产品
+  function loadNewArrivals() {
+    const productsContainer = document.getElementById('new-products-container');
+    
+    // 从 localStorage 获取产品数据
+    const productsData = localStorage.getItem('products');
+    if (!productsData) {
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products found. Please check back later.</p></div>';
+      return;
+    }
+    
+    const products = JSON.parse(productsData);
+    
+    // 计算一个月前的日期
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    // 筛选一个月内上架的产品
+    const newArrivals = products.filter(product => {
+      const listingDate = new Date(product.listingDate);
+      return listingDate >= oneMonthAgo;
+    });
+    
+    // 按上架日期降序排序（最新的在前）
+    newArrivals.sort((a, b) => new Date(b.listingDate) - new Date(a.listingDate));
+    
+    if (newArrivals.length === 0) {
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p>No new arrivals found. Please check back later for our latest products.</p></div>';
+      return;
+    }
+    
+    // 清空产品容器
+    productsContainer.innerHTML = '';
+    
+    // 显示产品
+    newArrivals.forEach(product => {
+      const productHTML = createProductCard(product);
+      productsContainer.innerHTML += productHTML;
+    });
+    
+    // 添加"添加到购物车"按钮事件
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = parseInt(this.getAttribute('data-id'));
+        addToCart(productId, 1);
+      });
+    });
+  }
+  
+  // 创建产品卡片HTML
+  function createProductCard(product) {
+    // 生成星级评分HTML
+    const fullStars = Math.floor(product.rating || 0);
+    const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+    
+    let starsHtml = '<div class="rating text-warning">';
+    for (let i = 0; i < fullStars; i++) {
+      starsHtml += '<i class="bi bi-star-fill"></i> ';
+    }
+    if (hasHalfStar) {
+      starsHtml += '<i class="bi bi-star-half"></i> ';
+    }
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      starsHtml += '<i class="bi bi-star"></i> ';
+    }
+    starsHtml += '</div>';
+    
+    // 价格显示
+    const priceHTML = product.onSale && product.salePrice 
+      ? `<span class="price">$${product.salePrice.toFixed(2)}</span>
+         <span class="original-price">$${product.price.toFixed(2)}</span>`
+      : `<span class="price">$${product.price.toFixed(2)}</span>`;
+    
+    // 计算上架天数
+    const listingDate = new Date(product.listingDate);
+    const today = new Date();
+    const daysListed = Math.floor((today - listingDate) / (1000 * 60 * 60 * 24));
+    const newBadge = daysListed <= 7 ? '<span class="badge-new">NEW</span>' : '';
+    const saleBadge = product.onSale ? '<span class="badge-sale">SALE</span>' : '';
+    
+    return `
+      <div class="col-md-4 col-lg-3 mb-4">
+        <div class="product-card">
+          ${newBadge}
+          ${saleBadge}
+          <a href="product/product_detail.html?id=${product.id}">
+            <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${product.name}</h5>
+            <div class="mb-2">${priceHTML}</div>
+            ${starsHtml}
+            <p class="card-text text-truncate">${product.description}</p>
+            <small class="text-muted">Listed ${daysListed} days ago</small>
+            <a href="#" class="add-to-cart-btn" data-id="${product.id}">
+              <i class="bi bi-cart-plus"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // 添加到购物车
+  function addToCart(productId, quantity) {
+    const productsData = localStorage.getItem('products');
+    if (!productsData) return;
+    
+    const products = JSON.parse(productsData);
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // 获取现有购物车
+    let cart = [];
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      cart = JSON.parse(cartData);
+    }
+    
+    // 计算最终价格，确保不会出现NaN
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    
+    // 处理图片URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
+    // 检查产品是否已在购物车中
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+    } else {
+      // 安全处理产品描述
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      } else if (product.details) {
+        description = product.details.substring(0, 100);
+        if (product.details.length > 100) {
+          description += '...';
+        }
+      }
+      
+      cart.push({
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
+      });
+    }
+    
+    // 保存到localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // 显示成功消息
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+    
+    // 更新导航栏购物车计数
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    }
+  }
+  
+  // 显示Toast通知
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) return;
+    
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.backgroundColor = '#fff';
+    toast.style.color = '#333';
+    toast.style.borderRadius = '4px';
+    toast.style.padding = '10px 15px';
+    toast.style.marginBottom = '10px';
+    toast.style.minWidth = '250px';
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.position = 'relative';
+    
+    if (type === 'success') {
+      toast.style.borderLeft = '4px solid #198754';
+    } else if (type === 'error') {
+      toast.style.borderLeft = '4px solid #dc3545';
+    }
+    
+    // 添加内容
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // 添加到容器
+    toastContainer.appendChild(toast);
+    
+    // 添加关闭按钮事件
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // 自动3秒后移除
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // 更新购物车计数函数
+  function updateCartCount() {
+    const cartData = localStorage.getItem('cart');
+    const cartCount = document.getElementById('cart-count');
+    
+    if (!cartCount) return;
+    
+    if (cartData) {
+      const cart = JSON.parse(cartData);
+      const count = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = count;
+      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+    } else {
+      cartCount.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html> 

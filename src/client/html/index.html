@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purely Homemade - Handcrafted with Love</title>
+  
+  <!-- 加载alert拦截器，在页面最早期执行 -->
+  <script src="/src/client/js/no-alerts.js"></script>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/src/client/css/style.css">
+  <link rel="stylesheet" href="/src/client/css/index.css">
+  <link rel="stylesheet" href="/src/client/css/navbar.css">
+  <link rel="stylesheet" href="/src/client/css/global.css">
+
+  <style>
+    /* 英雄区块样式 */
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/client/img/hero-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 150px 0;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* 特色分类样式 */
+    .category-card {
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .category-img-container {
+      height: 200px;
+      overflow: hidden;
+    }
+    
+    .category-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .category-card:hover .category-img {
+      transform: scale(1.1);
+    }
+    
+    .category-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      padding: 20px;
+      color: white;
+    }
+    
+    /* 产品卡片样式 - 更新为与new-arrivals页面一致 */
+    .product-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      height: 100%;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .product-img {
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .product-price {
+      font-weight: bold;
+      color: #0d6efd;
+      font-size: 1.1rem;
+    }
+    
+    .product-price-discount {
+      color: #6c757d;
+      text-decoration: line-through;
+      margin-left: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .rating {
+      margin-bottom: 15px;
+    }
+    
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .add-to-cart-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s;
+      opacity: 0;
+    }
+    
+    .product-card:hover .add-to-cart-btn {
+      opacity: 1;
+    }
+    
+    .add-to-cart-btn:hover {
+      background-color: #0b5ed7;
+      transform: scale(1.1);
+    }
+    
+    /* 设计师展示样式 */
+    .designer-section {
+      background-color: #f8f9fa;
+      padding: 60px 0;
+      margin: 40px 0;
+    }
+    
+    .designer-card {
+      display: flex;
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .designer-img {
+      width: 40%;
+      object-fit: cover;
+    }
+    
+    .designer-content {
+      width: 60%;
+      padding: 30px;
+    }
+    
+    /* 设计师卡片样式 */
+    .featured-designers-section {
+      padding: 60px 0;
+      background-color: #f8f9fa;
+    }
+    
+    .designer-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .designer-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .designer-card-img {
+      border: 5px solid #f8f9fa;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s;
+    }
+    
+    .designer-card:hover .designer-card-img {
+      transform: scale(1.05);
+    }
+    
+    .section-header h2 {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    
+    .section-header h2:after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background-color: #0d6efd;
+      margin: 10px auto 0;
+    }
+    
+    .social-links-container {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .social-link {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    .social-link:hover {
+      transform: translateY(-3px);
+      background-color: #e9ecef;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .hero-section {
+        padding: 100px 0;
+      }
+      
+      .designer-card {
+        flex-direction: column;
+      }
+      
+      .designer-img, .designer-content {
+        width: 100%;
+      }
+      
+      .designer-img {
+        height: 250px;
+      }
+      
+      .featured-designers-section {
+        padding: 40px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Handcrafted with Love</h1>
+    <p class="hero-subtitle">Discover unique, artisan-made products that bring warmth and character to your home</p>
+    <a href="src/views/designer/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
+  </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="container mb-5">
+  <h2 class="text-center mb-4">Shop by Category</h2>
+  <div class="row" id="category-cards-container">
+    <!-- Categories will be loaded dynamically -->
+    <div class="col-12 text-center py-4" id="categories-loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading categories...</p>
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <a href="src/views/product/category-list.html" class="btn btn-outline-primary">View All Categories</a>
+  </div>
+</section>
+
+<!-- New Arrivals -->
+<section class="container mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>New Arrivals</h2>
+    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+  </div>
+  <div class="row" id="new-arrivals-container">
+    <!-- Products will be loaded dynamically -->
+  </div>
+</section>
+
+<!-- Featured Designers -->
+<section class="featured-designers-section my-5">
+  <div class="container">
+    <div class="section-header text-center mb-4">
+      <h2>Meet Our Featured Artisans</h2>
+      <p class="text-muted">Discover the talented featured designers behind our unique products</p>
+    </div>
+    <div class="row" id="designers-container">
+      <!-- Designer cards will be dynamically loaded here -->
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading our talented artisans...</p>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="src/views/designer/designers.html" class="btn btn-outline-primary">View All Artisans</a>
+    </div>
+  </div>
+</section>
+
+<!-- Best Sellers -->
+<section class="container mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Best Sellers</h2>
+    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+  </div>
+  <div class="row" id="best-sellers-container">
+    <!-- Products will be loaded dynamically -->
+  </div>
+</section>
+
+<!-- Subscribe Section -->
+<section class="subscribe-section">
+  <div class="container">
+    <h2>Stay Updated</h2>
+    <p>Subscribe to our newsletter for exclusive offers and updates on new products</p>
+    <div class="subscribe-form">
+      <form class="d-flex">
+        <input type="email" class="form-control me-2" placeholder="Your email address">
+        <button type="submit" class="btn btn-light">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast通知容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 初始化数据脚本 -->
+<script src="/src/client/js/init-data.js"></script>
+
+<script>
+  // Load navbar and footer
+  fetch('/src/client/assets/layout/navbar.html')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load navbar (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('navbar-placeholder').innerHTML = html;
+      console.log('Navbar loaded successfully');
+      
+      // 导航栏加载完成后，确保更新登录状态
+      setTimeout(() => {
+        if (typeof updateAuthButton === 'function') {
+          updateAuthButton();
+        }
+      }, 100);
+      
+      // 加载商品后更新购物车计数
+      if (typeof updateCartCount === 'function') {
+        updateCartCount();
+      }
+    })
+    .catch(error => {
+      console.error('Error loading navbar:', error);
+      document.getElementById('navbar-placeholder').innerHTML = '<div class="alert alert-danger">Failed to load navigation. Please refresh the page.</div>';
+    });
+
+  fetch('/src/client/assets/layout/footer.html')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load footer (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      console.log('Footer loaded successfully');
+    })
+    .catch(error => {
+      console.error('Error loading footer:', error);
+      document.getElementById('footer-placeholder').innerHTML =
+              '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+    });
+    
+  // 确保数据初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.initializeData === 'function') {
+      window.initializeData();
+    }
+    
+    // 加载新品
+    loadNewArrivals();
+    
+    // 加载畅销品
+    loadBestSellers();
+    
+    // 加载分类
+    loadFeaturedCategories();
+    
+    // 加载设计师
+    loadDesigners();
+  });
+  
+  // 加载精选分类
+  function loadFeaturedCategories() {
+    const container = document.getElementById('category-cards-container');
+    const loadingElement = document.getElementById('categories-loading');
+    const categoriesData = localStorage.getItem('categories');
+    
+    if (categoriesData) {
+      const categories = JSON.parse(categoriesData);
+      
+      // Hide loading indicator
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+      
+      if (categories.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center">
+            <p class="text-muted">No categories available</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort categories - featured ones first, then alphabetically
+      const sortedCategories = [...categories].sort((a, b) => {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      // Take up to 6 categories to display
+      const displayCategories = sortedCategories.slice(0, 6);
+      let categoriesHtml = '';
+      
+      // Default category images if none provided
+      const defaultImages = [
+        '/src/client/img/category-soaps.jpg',
+        '/src/client/img/category-oils.jpg',
+        '/src/client/img/category-candles.jpg',
+        '/src/client/img/category-bath.jpg',
+        '/src/client/img/category-placeholder.jpg',
+        '/src/client/img/category-placeholder.jpg'
+      ];
+      
+      displayCategories.forEach((category, index) => {
+        const imageUrl = category.image || defaultImages[index % defaultImages.length];
+        
+        categoriesHtml += `
+          <div class="col-md-4 col-sm-6 mb-4">
+            <a href="src/views/product/category-page.html?id=${category.id}" class="text-decoration-none">
+              <div class="category-card">
+                <div class="category-img-container position-relative">
+                  <img src="${imageUrl}" alt="${category.name}" class="category-img">
+                  <div class="category-overlay">
+                    <h4 class="m-0">${category.name}</h4>
+                    ${category.featured ? '<span class="badge bg-primary mt-2">Featured</span>' : ''}
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = categoriesHtml;
+    } else {
+      // Show message if no categories data is found
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+      
+      container.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted">No categories available</p>
+        </div>
+      `;
+    }
+  }
+  
+  // 加载新品
+  function loadNewArrivals() {
+    const container = document.getElementById('new-arrivals-container');
+    const productsData = localStorage.getItem('products');
+    
+    if (productsData) {
+      const products = JSON.parse(productsData);
+      // 获取最新的4个产品
+      const newProducts = products.slice(0, 4);
+      
+      renderProducts(newProducts, container);
+    }
+  }
+  
+  // 加载畅销品
+  function loadBestSellers() {
+    const container = document.getElementById('best-sellers-container');
+    const productsData = localStorage.getItem('products');
+    
+    if (productsData) {
+      const products = JSON.parse(productsData);
+      // 按评分排序获取前4个
+      const bestSellers = [...products].sort((a, b) => b.rating - a.rating).slice(0, 4);
+      
+      renderProducts(bestSellers, container);
+    }
+  }
+  
+  // 渲染产品
+  function renderProducts(products, container) {
+    container.innerHTML = '';
+    
+    // Get a unique identifier for this container to avoid duplicate event listeners
+    const containerId = container.id;
+    
+    products.forEach(product => {
+      // 生成星级评分HTML
+      const fullStars = Math.floor(product.rating || 0);
+      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+      
+      let starsHtml = '<div class="rating text-warning">';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="bi bi-star-fill"></i> ';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i> ';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="bi bi-star"></i> ';
+      }
+      starsHtml += `<span class="text-muted ms-1">(${product.reviewCount || 0})</span></div>`;
+      
+      // 价格显示
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
+          <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+          <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+        `;
+      } else {
+        priceHtml = `<span class="product-price">$${product.price.toFixed(2)}</span>`;
+      }
+      
+      // 创建产品卡片HTML，添加唯一类名来区分不同容器的按钮
+      const productHtml = `
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+          <div class="product-card">
+            ${product.onSale ? '<span class="product-badge">SALE</span>' : ''}
+            <a href="src/views/product/product_detail.html?id=${product.id}" class="text-decoration-none text-dark">
+              <img src="${product.images[0]}" class="card-img-top product-img" alt="${product.name}">
+              <div class="card-body">
+                <h5 class="card-title">${product.name}</h5>
+                <div class="mb-2">${priceHtml}</div>
+                ${starsHtml}
+                <p class="card-text text-truncate">${product.description || 'No description available'}</p>
+              </div>
+            </a>
+            <a href="#" class="add-to-cart-btn ${containerId}-cart-btn" data-product-id="${product.id}">
+              <i class="bi bi-cart-plus"></i>
+            </a>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += productHtml;
+    });
+    
+    // 添加Add to Cart按钮事件，只为当前容器中的按钮添加事件监听器
+    document.querySelectorAll(`.${containerId}-cart-btn`).forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = parseInt(this.getAttribute('data-product-id'));
+        addToCart(productId, 1);
+      });
+    });
+  }
+  
+  // 添加到购物车
+  function addToCart(productId, quantity) {
+    const productsData = localStorage.getItem('products');
+    if (!productsData) return;
+    
+    const products = JSON.parse(productsData);
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // 获取现有购物车
+    let cart = [];
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      cart = JSON.parse(cartData);
+    }
+    
+    // 计算最终价格，确保不会出现NaN
+    const price = parseFloat(product.price) || 0;
+    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    
+    // 处理图片URL
+    let imageUrl = 'https://via.placeholder.com/80';
+    if (product.image) {
+      imageUrl = product.image;
+    } else if (Array.isArray(product.images) && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
+    
+    // 检查产品是否已在购物车中
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+    } else {
+      // 安全处理产品描述
+      let description = 'No description available';
+      if (product.description) {
+        description = product.description.substring(0, 100);
+        if (product.description.length > 100) {
+          description += '...';
+        }
+      } else if (product.details) {
+        description = product.details.substring(0, 100);
+        if (product.details.length > 100) {
+          description += '...';
+        }
+      }
+      
+      cart.push({
+        id: product.id || 0,
+        name: product.name || 'Unnamed Product',
+        price: finalPrice,
+        image: imageUrl,
+        quantity: quantity || 1,
+        description: description,
+        categoryId: product.categoryId || null
+      });
+    }
+    
+    // 保存到localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // 显示成功消息
+    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+    
+    // 更新导航栏购物车计数
+    updateCartCount();
+  }
+  
+  // 显示Toast通知
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) return;
+    
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.backgroundColor = '#fff';
+    toast.style.color = '#333';
+    toast.style.borderRadius = '4px';
+    toast.style.padding = '10px 15px';
+    toast.style.marginBottom = '10px';
+    toast.style.minWidth = '250px';
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.animation = 'slideIn 0.3s, fadeOut 0.5s 2.5s forwards';
+    toast.style.position = 'relative';
+    
+    if (type === 'success') {
+      toast.style.borderLeft = '4px solid #198754';
+    }
+    
+    // 添加内容
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // 添加到容器
+    toastContainer.appendChild(toast);
+    
+    // 添加关闭按钮事件
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // 自动3秒后移除
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // 更新购物车计数
+  function updateCartCount() {
+    const cartData = localStorage.getItem('cart');
+    const cartCount = document.getElementById('cart-count');
+    
+    if (!cartCount) return;
+    
+    if (cartData) {
+      const cart = JSON.parse(cartData);
+      const count = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = count;
+      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+    } else {
+      cartCount.style.display = 'none';
+    }
+  }
+  
+  // 加载设计师
+  function loadDesigners() {
+    const container = document.getElementById('designers-container');
+    const designersData = localStorage.getItem('designers');
+    
+    if (!container) return;
+    
+    if (designersData) {
+      try {
+        const designers = JSON.parse(designersData);
+        
+        // 过滤出featured的设计师
+        const featuredDesigners = designers.filter(designer => designer.featured);
+        
+        if (featuredDesigners.length === 0) {
+          container.innerHTML = `
+            <div class="col-12 text-center py-4">
+              <p class="text-muted">No featured artisans available at the moment</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // 清空容器
+        container.innerHTML = '';
+        
+        // 最多显示4个设计师
+        const displayDesigners = featuredDesigners.slice(0, 4);
+        
+        // 生成设计师卡片
+        displayDesigners.forEach(designer => {
+          // 设置默认图片
+          const designerImage = designer.image || '/src/client/img/designer-feature.jpg';
+          
+          // 生成社交媒体图标HTML
+          let socialIconsHtml = '';
+          if (designer.social) {
+            if (designer.social.instagram) {
+              socialIconsHtml += `<a href="${designer.social.instagram}" target="_blank" class="me-2 text-dark"><i class="bi bi-instagram"></i></a>`;
+            }
+            if (designer.social.pinterest) {
+              socialIconsHtml += `<a href="${designer.social.pinterest}" target="_blank" class="me-2 text-dark"><i class="bi bi-pinterest"></i></a>`;
+            }
+            if (designer.social.etsy) {
+              socialIconsHtml += `<a href="${designer.social.etsy}" target="_blank" class="me-2 text-dark"><i class="bi bi-shop"></i></a>`;
+            }
+          }
+          
+          // 截断过长的简介
+          const shortenedBio = designer.bio 
+            ? (designer.bio.length > 120 ? designer.bio.substring(0, 120) + '...' : designer.bio)
+            : 'No bio available';
+          
+          // 生成设计师卡片HTML - 移除按钮，整个卡片可点击
+          const designerCard = `
+            <div class="col-lg-3 col-md-6 mb-4">
+              <a href="src/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
+                <div class="card designer-card h-100 shadow-sm">
+                  <div class="text-center pt-4">
+                    <img src="${designerImage}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
+                  </div>
+                  <div class="card-body text-center">
+                    <h5 class="card-title">${designer.name}</h5>
+                    <p class="text-primary mb-2">${designer.specialty || 'Artisan'}</p>
+                    <p class="card-text small">${shortenedBio}</p>
+                    <div class="mt-3 mb-3 social-links-container">
+                      ${socialIconsHtml.replace(/class="me-2 text-dark"/g, 'class="me-2 text-dark social-link" onclick="event.stopPropagation()"')}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          `;
+          
+          container.innerHTML += designerCard;
+        });
+        
+      } catch (error) {
+        console.error('Error loading designers:', error);
+        container.innerHTML = `
+          <div class="col-12 text-center py-4">
+            <p class="text-danger">Error loading artisans</p>
+          </div>
+        `;
+      }
+    } else {
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No artisans available</p>
+        </div>
+      `;
+    }
+  }
+</script>
+
+<style>
+  /* Toast 通知样式 */
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+</style>
+</body>
+</html>

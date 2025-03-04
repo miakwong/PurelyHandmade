@@ -1,0 +1,31 @@
+# 启用重写引擎
+RewriteEngine On
+
+# 确保请求不是已存在的文件或目录
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# 将所有请求交给入口文件处理
+RewriteRule ^(.*)$ src/server/index.php [QSA,L]
+
+# PHP设置
+php_flag display_errors on
+php_value error_reporting E_ALL
+
+# 设置默认字符集
+AddDefaultCharset UTF-8
+
+# 禁止访问敏感文件
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 禁止访问PHP错误日志
+<Files error_log>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 定义默认文档
+DirectoryIndex src/server/index.php 
