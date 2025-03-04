@@ -365,6 +365,28 @@
     
     // Add social sharing button events
     setupSocialSharing(product);
+
+    // New script to update breadcrumb based on entry point
+    const designerId = urlParams.get('designer');
+    if (designerId) {
+      let designers = [];
+      try {
+        designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      } catch(e) {
+        console.error('Error loading designers data:', e);
+      }
+      const designerObj = designers.find(d => d.id === designerId);
+      const productTitleEl = document.getElementById('product-title');
+      const productTitle = productTitleEl ? productTitleEl.innerText : 'Product Details';
+      const breadcrumbEl = document.getElementById('breadcrumb');
+      if (breadcrumbEl) {
+        if (designerObj) {
+          breadcrumbEl.innerHTML = `<li class="breadcrumb-item"><a href="http://localhost:8000/index.html">Home</a></li> <li class="breadcrumb-item"><a href=\"http://localhost:8000/src/views/designer/designer-page.html?id=${designerObj.id}\">${designerObj.name}'s Collection</a></li> <li class="breadcrumb-item active">${productTitle}</li>`;
+        } else {
+          breadcrumbEl.innerHTML = `<li class="breadcrumb-item"><a href="http://localhost:8000/index.html">Home</a></li> <li class="breadcrumb-item">Designer Collection</li> <li class="breadcrumb-item active">${productTitle}</li>`;
+        }
+      }
+    }
   });
   
   // Setup accordion panels
