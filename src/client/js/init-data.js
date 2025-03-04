@@ -149,7 +149,7 @@ window.initializeData = function() {
       listingDate: '2024-03-10T08:50:30.000Z',
       reviews: [
         { name: 'Emily R.', rating: 5, comment: 'This wall hanging is even more beautiful in person! The craftsmanship is incredible.', date: '2023-10-25' },
-        { name: 'Thomas N.', rating: 4, comment: 'Love the natural colors and texture. It's the perfect addition to my living room.', date: '2023-09-18' }
+        { name: 'Thomas N.', rating: 4, comment: 'Love the natural colors and texture. It\'s the perfect addition to my living room.', date: '2023-09-18' }
       ]
     },
     {

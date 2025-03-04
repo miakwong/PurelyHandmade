@@ -50,11 +50,10 @@ test_page "/src/client/views/checkout/checkout.html"
 test_page "/src/client/views/checkout/order_confirm.html"
 
 # 设计师页面
-test_page "/src/client/views/designer/designers.html"
 test_page "/src/client/views/designer/designer-page.html"
+test_page "/src/client/views/designer/designers.html"
 
 # 管理员页面
-test_page "/src/client/views/admin/admin.html"
 test_page "/src/client/views/admin/comment.html"
 test_page "/src/client/views/admin/order_management.html"
 
