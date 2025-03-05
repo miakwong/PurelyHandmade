@@ -1,86 +1,277 @@
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #fef9f8;
-    margin: 0;
-    padding: 20px;
-    text-align: center;
+/* Admin Features CSS - Consistent styling for admin functionality across the application */
+
+:root {
+  --primary-color: #eae2d6;
+  --secondary-color: #e1d7c6;
+  --accent-color: #867666;
+  --text-color: #5e4b3e;
+  --border-color: #bfb1a3;
+  --shadow: 0 4px 6px rgba(94, 75, 62, 0.1);
+  --border-radius: 8px;
+  --primary-light: rgba(134, 118, 102, 0.25);
+  --text-muted: #6c757d;
+  --bg-light: #f8f9fa;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --warning-color: #ffc107;
+  --button-color: #0d6efd;
+  --button-hover: #0b5ed7;
 }
 
+/* Admin Section Container */
 .admin-section {
-    margin: 30px auto;
-    width: 80%;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 15px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+.admin-section h4 {
+  margin-bottom: 1.25rem;
+  color: var(--text-color);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
+/* Tables */
+.admin-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
 }
 
-th {
-    background-color: #f4f4f4;
+.admin-section th, 
+.admin-section td {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: middle;
 }
 
-button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    font-size: 14px;
+.admin-section th {
+  background-color: var(--bg-light);
+  font-weight: 600;
+  color: var(--text-color);
 }
 
-.enable-btn {
-    background-color: rgb(157, 228, 157);
-    color: white;
+.admin-section tr:hover {
+  background-color: rgba(234, 226, 214, 0.2);
 }
 
-.enable-btn:hover {
-    background-color: rgb(94, 136, 94);
-   
+/* Table Responsive Container */
+.table-responsive {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.disable-btn {
-    background-color: rgb(238, 165, 165);
-    color: white;
+/* Status Badges */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 0.85em;
 }
 
-.disable-btn:hover {
-    background-color: rgb(156, 105, 105);
-}
-.order-select {
-    padding: 5px;
-    border-radius: 5px;
+.badge-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: var(--success-color);
+  border: 1px solid rgba(40, 167, 69, 0.2);
 }
 
-.delete-btn {
-    background-color: rgb(249, 209, 134);
-    color: white;
+.badge-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(220, 53, 69, 0.2);
 }
 
-.delete-btn:hover {
-    background-color: rgb(183, 155, 102);
-}
-.view-more-btn {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 8px 15px;
-    background-color: rgb(237, 151, 237);
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: 0.3s;
+.badge-info {
+  background-color: rgba(23, 162, 184, 0.1);
+  color: var(--info-color);
+  border: 1px solid rgba(23, 162, 184, 0.2);
 }
 
-.view-more-btn:hover {
-    background-color: #816099;
+.badge-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: var(--warning-color);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+/* Button styles */
+.admin-btn {
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.admin-btn-primary {
+  background-color: var(--button-color);
+  color: white;
+}
+
+.admin-btn-primary:hover {
+  background-color: var(--button-hover);
+}
+
+.admin-btn-warning {
+  background-color: var(--warning-color);
+  color: #212529;
+}
+
+.admin-btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.admin-btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.admin-btn-danger:hover {
+  background-color: #c82333;
+}
+
+.admin-btn-success {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.admin-btn-success:hover {
+  background-color: #138496;
+}
+
+/* Form controls */
+.admin-form-group {
+  margin-bottom: 1rem;
+}
+
+.admin-form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: var(--text-color);
+}
+
+.admin-form-control {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.admin-form-control:focus {
+  border-color: var(--accent-color);
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(134, 118, 102, 0.25);
+}
+
+/* Product/image previews */
+.product-image-small {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.product-preview {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.product-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+/* Filter section */
+.filter-section {
+  background-color: var(--bg-light);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.filter-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+/* Modal customization */
+.admin-modal .modal-header {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-modal .modal-footer {
+  background-color: var(--bg-light);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Empty state message */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--border-color);
+}
+
+/* Confirmation dialog */
+.confirm-dialog {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.confirm-dialog .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--warning-color);
+}
+
+.confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }

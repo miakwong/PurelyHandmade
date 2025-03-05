@@ -31,8 +31,8 @@ function loadUsers() {
                 <td>${user.status}</td>
                 <td>
                     ${user.status === "Active" ? 
-                        `<button class="disable-btn" onclick="toggleUserStatus(${user.id}, 'Disabled')">Disable</button>` :
-                        `<button class="enable-btn" onclick="toggleUserStatus(${user.id}, 'Active')">Enable</button>`
+                        `<button class="admin-btn admin-btn-danger" onclick="toggleUserStatus(${user.id}, 'Disabled')">Disable</button>` :
+                        `<button class="admin-btn admin-btn-success" onclick="toggleUserStatus(${user.id}, 'Active')">Enable</button>`
                     }
                 </td>
             </tr>`;
@@ -68,13 +68,13 @@ function loadOrders() {
                 <td>${order.user}</td>
                 <td>${order.amount}</td>
                 <td>
-                    <select class="order-select" onchange="updateOrderStatus(${order.id}, this.value)">
+                    <select class="admin-form-control" onchange="updateOrderStatus(${order.id}, this.value)">
                         <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>Processing</option>
                         <option value="Completed" ${order.status === "Completed" ? "selected" : ""}>Completed</option>
                         <option value="Cancelled" ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
                     </select>
                 </td>
-                <td><button class="delete-btn" onclick="deleteOrder(${order.id})">Delete</button></td>
+                <td><button class="admin-btn admin-btn-danger" onclick="deleteOrder(${order.id})">Delete</button></td>
             </tr>`;
     });
 
@@ -111,7 +111,7 @@ function loadComments() {
         commentList.innerHTML += `
             <li>
                 <strong>${comment.user}:</strong> ${comment.text}
-                <button class="delete-btn" onclick="deleteComment(${comment.id})">Delete</button>
+                <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteComment(${comment.id})">Delete</button>
             </li>`;
     });
 
