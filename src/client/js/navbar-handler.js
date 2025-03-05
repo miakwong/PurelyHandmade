@@ -4,7 +4,7 @@
 
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch('/src/client/assets/layout/navbar.html')
+  fetch('/src/client/views/layout/navbar.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -87,7 +87,7 @@ function loadNavbar() {
 
 // Load the footer
 function loadFooter() {
-  fetch('/src/client/assets/layout/footer.html')
+  fetch('/src/client/views/layout/footer.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);

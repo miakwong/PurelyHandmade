@@ -226,6 +226,27 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Debug Script -->
+<script>
+  // Log any errors to the console
+  window.onerror = function(message, source, lineno, colno, error) {
+    console.error('JavaScript Error:', message, 'at', source, 'line', lineno, 'column', colno);
+    console.error('Error object:', error);
+    
+    // Create a visible error message on the page
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger m-3';
+    errorDiv.innerHTML = `<strong>JavaScript Error:</strong> ${message}<br>
+                          <small>at ${source} line ${lineno} column ${colno}</small>`;
+    document.body.prepend(errorDiv);
+    
+    return false; // Let the default error handler run as well
+  };
+  
+  // Log when scripts are loaded
+  console.log('Debug script loaded');
+</script>
+
 <!-- 初始化数据脚本 -->
 <script src="/src/client/js/init-data.js"></script>
 
@@ -233,18 +254,39 @@
 <script src="/src/client/js/navbar-handler.js"></script>
 
 <script>
+  console.log('Script block starting...');
+  
   // DOM content loaded event for page-specific initialization
   document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired');
+    
+    // Ensure data is initialized
+    if (typeof window.initializeData === 'function') {
+      console.log('Calling initializeData function');
+      window.initializeData();
+    } else {
+      console.warn('initializeData function not found');
+    }
+    
     // Load new arrivals
+    console.log('Calling loadNewArrivals function');
     loadNewArrivals();
   });
   
   // 加载新上架产品
   function loadNewArrivals() {
+    console.log('loadNewArrivals function called');
     const productsContainer = document.getElementById('new-products-container');
+    
+    if (!productsContainer) {
+      console.error('Products container not found!');
+      return;
+    }
     
     // 从 localStorage 获取产品数据
     const productsData = localStorage.getItem('products');
+    console.log('Products data from localStorage:', productsData ? 'Found' : 'Not found');
+    
     if (!productsData) {
       productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products found. Please check back later.</p></div>';
       return;
@@ -252,27 +294,34 @@
     
     try {
       const products = JSON.parse(productsData);
+      console.log('Parsed products:', products.length, 'products found');
       
       // 计算一个月前的日期
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      console.log('One month ago date:', oneMonthAgo.toISOString());
       
       // 筛选一个月内上架的产品，并排除空产品
       const newArrivals = products.filter(product => {
         // 排除没有名称或图片的产品
         if (!product.name || !product.images || product.images.length === 0) {
+          console.log('Excluding product due to missing name or images:', product.id);
           return false;
         }
         
         // 检查上架日期
         const listingDate = new Date(product.listingDate);
+        console.log(`Product ${product.id} listing date:`, product.listingDate, 'parsed as', listingDate);
         return !isNaN(listingDate) && listingDate >= oneMonthAgo;
       });
+      
+      console.log('Filtered new arrivals:', newArrivals.length, 'products');
       
       // 按上架日期降序排序（最新的在前）
       newArrivals.sort((a, b) => new Date(b.listingDate) - new Date(a.listingDate));
       
       if (newArrivals.length === 0) {
+        console.log('No new arrivals found after filtering');
         productsContainer.innerHTML = '<div class="col-12 text-center"><p>No new arrivals found. Please check back later for our latest products.</p></div>';
         return;
       }
@@ -285,15 +334,19 @@
         if (product.reviews && product.reviews.length > 0) {
           const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
           product.rating = totalRating / product.reviews.length;
+          console.log(`Product ${product.id} rating:`, product.rating);
         } else {
           product.rating = 0;
+          console.log(`Product ${product.id} has no reviews, rating set to 0`);
         }
       });
       
       // 显示产品
+      console.log('Displaying products...');
       newArrivals.forEach(product => {
         const productHTML = createProductCard(product);
         productsContainer.innerHTML += productHTML;
+        console.log(`Added product ${product.id} to container`);
       });
       
       // 添加"添加到购物车"按钮事件
@@ -304,6 +357,8 @@
           addToCart(productId, 1);
         });
       });
+      
+      console.log('New arrivals loaded successfully');
     } catch (error) {
       console.error('Error loading new arrivals:', error);
       productsContainer.innerHTML = '<div class="col-12 text-center"><p>Error loading products. Please try again later.</p></div>';
@@ -312,57 +367,74 @@
   
   // 创建产品卡片HTML
   function createProductCard(product) {
-    // 生成星级评分HTML
-    const fullStars = Math.floor(product.rating || 0);
-    const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+    console.log('Creating product card for:', product.id, product.name);
     
-    let starsHtml = '<div class="rating text-warning">';
-    for (let i = 0; i < fullStars; i++) {
-      starsHtml += '<i class="bi bi-star-fill"></i> ';
-    }
-    if (hasHalfStar) {
-      starsHtml += '<i class="bi bi-star-half"></i> ';
-    }
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-      starsHtml += '<i class="bi bi-star"></i> ';
-    }
-    starsHtml += '</div>';
-    
-    // 价格显示
-    const priceHTML = product.onSale && product.salePrice 
-      ? `<span class="price">$${product.salePrice.toFixed(2)}</span>
-         <span class="original-price">$${product.price.toFixed(2)}</span>`
-      : `<span class="price">$${product.price.toFixed(2)}</span>`;
-    
-    // 计算上架天数
-    const listingDate = new Date(product.listingDate);
-    const today = new Date();
-    const daysListed = Math.floor((today - listingDate) / (1000 * 60 * 60 * 24));
-    const newBadge = daysListed <= 7 ? '<span class="badge-new">NEW</span>' : '';
-    const saleBadge = product.onSale ? '<span class="badge-sale">SALE</span>' : '';
-    
-    return `
-      <div class="col-md-4 col-lg-3 mb-4">
-        <div class="product-card">
-          ${newBadge}
-          ${saleBadge}
-          <a href="/src/client/views/product/product_detail.html?id=${product.id}">
-            <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
-          </a>
-          <div class="card-body">
-            <h5 class="card-title">${product.name}</h5>
-            <div class="mb-2">${priceHTML}</div>
-            ${starsHtml}
-            <p class="card-text text-truncate">${product.description}</p>
-            <small class="text-muted">Listed ${daysListed} days ago</small>
-            <a href="#" class="add-to-cart-btn" data-id="${product.id}">
-              <i class="bi bi-cart-plus"></i>
+    try {
+      // 生成星级评分HTML
+      const fullStars = Math.floor(product.rating || 0);
+      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+      
+      let starsHtml = '<div class="rating text-warning">';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="bi bi-star-fill"></i> ';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i> ';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="bi bi-star"></i> ';
+      }
+      starsHtml += '</div>';
+      
+      // 价格显示
+      const priceHTML = product.onSale && product.salePrice 
+        ? `<span class="price">$${product.salePrice.toFixed(2)}</span>
+           <span class="original-price">$${product.price.toFixed(2)}</span>`
+        : `<span class="price">$${product.price.toFixed(2)}</span>`;
+      
+      // 计算上架天数
+      const listingDate = new Date(product.listingDate);
+      const today = new Date();
+      const daysListed = Math.floor((today - listingDate) / (1000 * 60 * 60 * 24));
+      const newBadge = daysListed <= 7 ? '<span class="badge-new">NEW</span>' : '';
+      const saleBadge = product.onSale ? '<span class="badge-sale">SALE</span>' : '';
+      
+      console.log(`Product ${product.id} image:`, product.images[0]);
+      
+      const cardHTML = `
+        <div class="col-md-4 col-lg-3 mb-4">
+          <div class="product-card">
+            ${newBadge}
+            ${saleBadge}
+            <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+              <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
             </a>
+            <div class="card-body">
+              <h5 class="card-title">${product.name}</h5>
+              <div class="mb-2">${priceHTML}</div>
+              ${starsHtml}
+              <p class="card-text text-truncate">${product.description}</p>
+              <small class="text-muted">Listed ${daysListed} days ago</small>
+              <a href="#" class="add-to-cart-btn" data-id="${product.id}">
+                <i class="bi bi-cart-plus"></i>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
+      
+      return cardHTML;
+    } catch (error) {
+      console.error(`Error creating product card for product ${product.id}:`, error);
+      return `
+        <div class="col-md-4 col-lg-3 mb-4">
+          <div class="alert alert-danger">
+            Error displaying product: ${product.name || 'Unknown product'}
+          </div>
+        </div>
+      `;
+    }
   }
   
   // 添加到购物车
