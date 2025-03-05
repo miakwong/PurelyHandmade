@@ -375,29 +375,29 @@
               <!-- 添加产品过滤选项 -->
               <div class="row mb-3">
                 <div class="col-md-3">
-                  <label for="filterCategory" class="form-label">按功能筛选:</label>
+                  <label for="filterCategory" class="form-label">Filter by Category:</label>
                   <select class="form-select" id="filterCategory" onchange="filterProducts()">
-                    <option value="">全部分类</option>
+                    <option value="">All Categories</option>
                     <!-- 分类选项将通过JavaScript动态加载 -->
                   </select>
                 </div>
                 <div class="col-md-3">
-                  <label for="filterDesigner" class="form-label">按设计师筛选:</label>
+                  <label for="filterDesigner" class="form-label">Filter by Designer:</label>
                   <select class="form-select" id="filterDesigner" onchange="filterProducts()">
-                    <option value="">全部设计师</option>
+                    <option value="">All Designers</option>
                     <!-- 设计师选项将通过JavaScript动态加载 -->
                   </select>
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">销售状态:</label>
+                  <label class="form-label">Sale Status:</label>
                   <div class="form-check pt-2">
                     <input class="form-check-input" type="checkbox" id="filterOnSale" onchange="filterProducts()">
-                    <label class="form-check-label" for="filterOnSale">仅显示特价商品</label>
+                    <label class="form-check-label" for="filterOnSale">Show only sale items</label>
                   </div>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
                   <button class="admin-btn admin-btn-outline" onclick="resetFilters()">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> 重置筛选
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                   </button>
                 </div>
               </div>
@@ -1996,7 +1996,7 @@
     const categoryFilter = document.getElementById('filterCategory');
     if (categoryFilter) {
       // 清空现有选项，保留第一个"全部分类"选项
-      categoryFilter.innerHTML = '<option value="">全部分类</option>';
+      categoryFilter.innerHTML = '<option value="">All Categories</option>';
       
       // 添加分类选项
       categories.forEach(category => {
@@ -2008,7 +2008,7 @@
     const designerFilter = document.getElementById('filterDesigner');
     if (designerFilter) {
       // 清空现有选项，保留第一个"全部设计师"选项
-      designerFilter.innerHTML = '<option value="">全部设计师</option>';
+      designerFilter.innerHTML = '<option value="">All Designers</option>';
       
       // 添加设计师选项
       designers.forEach(designer => {
@@ -2061,7 +2061,7 @@
       filteredProducts = filteredProducts.filter(product => product.onSale === true);
     }
     
-    console.log(`筛选结果: ${filteredProducts.length} 个产品`);
+    console.log(`Filter results: ${filteredProducts.length} products`);
     
     // 更新表格
     const tableBody = document.getElementById('productTableBody');
@@ -2089,7 +2089,7 @@
     console.log(`Filling table with ${products.length} products`);
     
     if (products.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="7" class="text-center">没有找到产品</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
       return;
     }
     
