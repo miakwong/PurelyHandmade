@@ -306,7 +306,7 @@
   <div class="hero-content">
     <h1 class="hero-title">Handcrafted with Love</h1>
     <p class="hero-subtitle">Discover unique, artisan-made products that bring warmth and character to your home</p>
-    <a href="src/views/designer/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
+    <a href="/src/client/views/designer/designers.html" class="btn btn-light btn-lg">Explore Our Collections</a>
   </div>
 </section>
 
@@ -323,7 +323,7 @@
     </div>
   </div>
   <div class="text-center mt-4">
-    <a href="src/views/product/category-list.html" class="btn btn-outline-primary">View All Categories</a>
+    <a href="/src/client/views/product/category-list.html" class="btn btn-outline-primary">View All Categories</a>
   </div>
 </section>
 
@@ -331,7 +331,7 @@
 <section class="container mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>New Arrivals</h2>
-    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+    <a href="/src/client/views/new-arrivals.html" class="btn btn-link">View All</a>
   </div>
   <div class="row" id="new-arrivals-container">
     <!-- Products will be loaded dynamically -->
@@ -344,6 +344,9 @@
     <div class="section-header text-center mb-4">
       <h2>Meet Our Featured Artisans</h2>
       <p class="text-muted">Discover the talented featured designers behind our unique products</p>
+      <div class="mt-3">
+        <a href="/src/client/views/designer/designers.html" class="btn btn-outline-primary">View All Artisans</a>
+      </div>
     </div>
     <div class="row" id="designers-container">
       <!-- Designer cards will be dynamically loaded here -->
@@ -354,9 +357,6 @@
         <p class="mt-2 text-muted">Loading our talented artisans...</p>
       </div>
     </div>
-    <div class="text-center mt-3">
-      <a href="src/views/designer/designers.html" class="btn btn-outline-primary">View All Artisans</a>
-    </div>
   </div>
 </section>
 
@@ -364,7 +364,7 @@
 <section class="container mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Best Sellers</h2>
-    <a href="src/views/product/product-list.html" class="btn btn-link">View All</a>
+    <a href="/src/client/views/product/product-list.html" class="btn btn-link">View All</a>
   </div>
   <div class="row" id="best-sellers-container">
     <!-- Products will be loaded dynamically -->
@@ -513,7 +513,7 @@
         
         categoriesHtml += `
           <div class="col-md-4 col-sm-6 mb-4">
-            <a href="src/views/product/category-page.html?id=${category.id}" class="text-decoration-none">
+            <a href="/src/client/views/product/category-page.html?id=${category.id}" class="text-decoration-none">
               <div class="category-card">
                 <div class="category-img-container position-relative">
                   <img src="${imageUrl}" alt="${category.name}" class="category-img">
@@ -612,7 +612,7 @@
         <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
           <div class="product-card">
             ${product.onSale ? '<span class="product-badge">SALE</span>' : ''}
-            <a href="src/views/product/product_detail.html?id=${product.id}" class="text-decoration-none text-dark">
+            <a href="/src/client/views/product/product_detail.html?id=${product.id}" class="text-decoration-none text-dark">
               <img src="${product.images[0]}" class="card-img-top product-img" alt="${product.name}">
               <div class="card-body">
                 <h5 class="card-title">${product.name}</h5>
@@ -804,7 +804,7 @@
         // 生成设计师卡片
         displayDesigners.forEach(designer => {
           // 设置默认图片
-          const designerImage = designer.image || '/src/client/img/designer-feature.jpg';
+          const designerImage = designer.image || '/src/client/img/designer1-bg.JPG';
           
           // 生成社交媒体图标HTML
           let socialIconsHtml = '';
@@ -828,7 +828,7 @@
           // 生成设计师卡片HTML - 移除按钮，整个卡片可点击
           const designerCard = `
             <div class="col-lg-3 col-md-6 mb-4">
-              <a href="src/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
+              <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
                 <div class="card designer-card h-100 shadow-sm">
                   <div class="text-center pt-4">
                     <img src="${designerImage}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
