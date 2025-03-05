@@ -1,11 +1,11 @@
 /**
  * Product Navbar Handler - Standardizes navbar loading and authentication for product pages
- * Uses absolute paths to access assets
+ * Uses relative paths to access assets
  */
 
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch('/src/client/assets/layout/navbar.html')
+  fetch('../../assets/layout/navbar.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -88,7 +88,7 @@ function loadNavbar() {
 
 // Load the footer
 function loadFooter() {
-  fetch('/src/client/assets/layout/footer.html')
+  fetch('../../assets/layout/footer.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);

@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/src/client/assets/css/style.css">
-  <link rel="stylesheet" href="/src/client/assets/css/navbar.css">
-  <link rel="stylesheet" href="/src/client/css/global.css">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/navbar.css">
+  <link rel="stylesheet" href="../../css/global.css">
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
@@ -57,6 +57,17 @@
   <!-- Navbar Placeholder -->
   <div id="navbar-placeholder"></div>
 
+  <!-- Breadcrumb -->
+  <div class="container mt-3">
+    <nav>
+      <ol class="breadcrumb" id="breadcrumb">
+        <li class="breadcrumb-item"><a href="../../html/index.html">Home</a></li>
+        <li class="breadcrumb-item"><a href="designers.html">Designers</a></li>
+        <li class="breadcrumb-item active" id="designer-name">Designer</li>
+      </ol>
+    </nav>
+  </div>
+
   <!-- Main Content -->
   <div class="container mt-5">
     <div id="designer-info" class="mb-5">
@@ -79,23 +90,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
   <!-- Init Data Script -->
-  <script src="/src/client/js/init-data.js"></script>
+  <script src="../../js/init-data.js"></script>
+  <script src="../../js/product-navbar-handler.js"></script>
 
   <script>
     // Load navbar and footer
-    fetch('/src/client/assets/layout/navbar.html')
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('navbar-placeholder').innerHTML = html;
-      })
-      .catch(error => console.error('Error loading navbar:', error));
-
-    fetch('/src/client/assets/layout/footer.html')
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('footer-placeholder').innerHTML = html;
-      })
-      .catch(error => console.error('Error loading footer:', error));
+    loadNavbar();
+    loadFooter();
 
     // Utility to show toast notifications
     function showToast(message, type = 'info') {
@@ -155,6 +156,9 @@
         <p>${designer.bio || 'No biography available.'}</p>
       `;
       
+      // Update breadcrumb with designer name
+      document.getElementById('designer-name').textContent = designer.name;
+      
       // Set header for products section
       document.getElementById('products-header').innerText = designer.name + "'s Products";
 
@@ -163,19 +167,19 @@
         {
           id: '1',
           name: 'Handcrafted Vase',
-          image: '/src/client/assets/img/products/vase.jpg',
+          image: '../../img/products/vase.jpg',
           description: 'A beautifully handcrafted vase perfect for any home decor.'
         },
         {
           id: '2',
           name: 'Ceramic Bowl',
-          image: '/src/client/assets/img/products/bowl.jpg',
+          image: '../../img/products/bowl.jpg',
           description: 'A unique ceramic bowl that blends functionality with art.'
         },
         {
           id: '3',
           name: 'Artisan Lamp',
-          image: '/src/client/assets/img/products/lamp.jpg',
+          image: '../../img/products/lamp.jpg',
           description: 'An elegant lamp that showcases traditional craftsmanship.'
         }
       ];
@@ -186,7 +190,7 @@
       sampleProducts.forEach(product => {
         productsHTML += `
           <div class="col-md-4">
-            <a href="http://localhost:8000/src/client/views/product/product_detail.html?id=${product.id}&designer=${designer.id}" class="text-decoration-none text-dark">
+            <a href="../product/product_detail.html?id=${product.id}&designer=${designer.id}" class="text-decoration-none text-dark">
               <div class="product-card">
                 <img src="${product.image}" alt="${product.name}" class="product-img">
                 <div class="product-body">
