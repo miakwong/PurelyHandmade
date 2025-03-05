@@ -1,5 +1,24 @@
 // Initialize product data in localStorage
 window.initializeData = function() {
+  console.log('Initializing data...');
+  
+  // Get today's date for recent listings
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const twoDaysAgo = new Date(today);
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  
+  const threeDaysAgo = new Date(today);
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+  
+  const fiveDaysAgo = new Date(today);
+  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+  
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  
   // Categories
   const categories = [
     { id: 1, name: 'Ceramics', slug: 'ceramics', description: 'Handcrafted ceramic items' },
@@ -64,7 +83,7 @@ window.initializeData = function() {
       onSale: false,
       salePrice: null,
       images: ['/src/client/img/mug_1.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_3.JPG'],
-      listingDate: '2024-03-15T10:30:00.000Z',
+      listingDate: yesterday.toISOString(),
       reviews: [
         { name: 'Jane D.', rating: 5, comment: 'Beautiful mug, love the craftsmanship!', date: '2023-10-15' },
         { name: 'Michael R.', rating: 4, comment: 'Great quality and unique design.', date: '2023-09-20' }
@@ -82,7 +101,7 @@ window.initializeData = function() {
       onSale: true,
       salePrice: 79.99,
       images: ['/src/client/img/mug_item2_1.JPG', '/src/client/img/mug_item2_2.JPG', '/src/client/img/mug_item2_3.JPG'],
-      listingDate: '2024-03-20T14:15:30.000Z',
+      listingDate: today.toISOString(),
       reviews: [
         { name: 'Sarah T.', rating: 5, comment: 'These mugs are stunning! Perfect size and feel great in the hand.', date: '2023-11-05' }
       ]
@@ -99,7 +118,7 @@ window.initializeData = function() {
       onSale: false,
       salePrice: null,
       images: ['/src/client/img/mug_3.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_1.JPG'],
-      listingDate: '2024-02-15T09:45:22.000Z',
+      listingDate: twoDaysAgo.toISOString(),
       reviews: []
     },
     {
@@ -114,7 +133,7 @@ window.initializeData = function() {
       onSale: false,
       salePrice: null,
       images: ['/src/client/img/Wood_1.JPG', '/src/client/img/Wood_2.JPG', '/src/client/img/Wood_3.JPG'],
-      listingDate: '2024-03-25T11:20:45.000Z',
+      listingDate: threeDaysAgo.toISOString(),
       reviews: [
         { name: 'Robert J.', rating: 5, comment: 'Stunning piece of art. The craftsmanship is exceptional.', date: '2023-10-10' },
         { name: 'Lisa M.', rating: 4, comment: 'Beautiful grain patterns and excellent finish.', date: '2023-09-05' }
@@ -132,7 +151,7 @@ window.initializeData = function() {
       onSale: true,
       salePrice: 69.99,
       images: ['/src/client/img/wood_item2_1.JPG', '/src/client/img/wood_item2_2.JPG', '/src/client/img/wood_item2_3.JPG'],
-      listingDate: '2024-01-15T16:35:10.000Z',
+      listingDate: fiveDaysAgo.toISOString(),
       reviews: [
         { name: 'David K.', rating: 5, comment: 'This bowl is simply beautiful! The craftsmanship is outstanding.', date: '2023-11-15' }
       ]
@@ -149,7 +168,7 @@ window.initializeData = function() {
       onSale: false,
       salePrice: null,
       images: ['/src/client/img/Handwoven_1.JPG', '/src/client/img/Handwoven_2.JPG', '/src/client/img/Handwoven_3.JPG'],
-      listingDate: '2024-03-10T08:50:30.000Z',
+      listingDate: threeDaysAgo.toISOString(),
       reviews: [
         { name: 'Emily R.', rating: 5, comment: 'This wall hanging is even more beautiful in person! The craftsmanship is incredible.', date: '2023-10-25' },
         { name: 'Thomas N.', rating: 4, comment: 'Love the natural colors and texture. It\'s the perfect addition to my living room.', date: '2023-09-18' }
@@ -167,7 +186,7 @@ window.initializeData = function() {
       onSale: true,
       salePrice: 59.99,
       images: ['/src/client/img/handwoven_item2_1.JPG', '/src/client/img/handwoven_item2_2.JPG', '/src/client/img/handwoven_item2_3.JPG'],
-      listingDate: '2024-03-01T13:40:15.000Z',
+      listingDate: sevenDaysAgo.toISOString(),
       reviews: [
         { name: 'Jennifer L.', rating: 5, comment: 'These baskets are beautiful and well-made. Perfect for organizing my space!', date: '2023-11-08' }
       ]
@@ -185,7 +204,7 @@ window.initializeData = function() {
       onSale: false,
       salePrice: null,
       images: [],
-      listingDate: "2025-03-02T20:36:13.890Z",
+      listingDate: today.toISOString(),
       reviews: []
     }
   ];
@@ -201,8 +220,47 @@ window.initializeData = function() {
     designers.length, 'designers.'
   );
   
+  // Verify data was stored correctly
+  try {
+    const storedProducts = localStorage.getItem('products');
+    const storedCategories = localStorage.getItem('categories');
+    const storedDesigners = localStorage.getItem('designers');
+    
+    console.log('Verification - Products in localStorage:', storedProducts ? 'Found' : 'Not found');
+    console.log('Verification - Categories in localStorage:', storedCategories ? 'Found' : 'Not found');
+    console.log('Verification - Designers in localStorage:', storedDesigners ? 'Found' : 'Not found');
+    
+    // Check if products can be parsed
+    if (storedProducts) {
+      const parsedProducts = JSON.parse(storedProducts);
+      console.log('Verification - Parsed products count:', parsedProducts.length);
+      
+      // Check for products with listing dates in the last month
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      
+      const recentProducts = parsedProducts.filter(product => {
+        if (!product.name || !product.images || product.images.length === 0) {
+          return false;
+        }
+        const listingDate = new Date(product.listingDate);
+        return !isNaN(listingDate) && listingDate >= oneMonthAgo;
+      });
+      
+      console.log('Verification - Products from last month:', recentProducts.length);
+      if (recentProducts.length > 0) {
+        console.log('Verification - Recent product names:', recentProducts.map(p => p.name).join(', '));
+      } else {
+        console.warn('Verification - No recent products found! Date comparison may be incorrect.');
+      }
+    }
+  } catch (error) {
+    console.error('Verification error:', error);
+  }
+  
   return { products, categories, designers };
 };
 
 // Call initialization function
-window.initializeData(); 
+window.initializeData();
+console.log('init-data.js script completed'); 
