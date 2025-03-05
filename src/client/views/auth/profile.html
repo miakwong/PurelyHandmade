@@ -26,12 +26,12 @@
       --primary-light: rgba(134, 118, 102, 0.25);
       --text-muted: #6c757d;
       --bg-light: #f8f9fa;
-      --success-color: #198754;
-      --danger-color: #dc3545;
+      --success-color: #5a8c70;
+      --danger-color: #a95e5e;
       
-      /* 添加按钮色彩变量，保持按钮等元素的视觉效果 */
-      --button-color: #0d6efd;
-      --button-hover: #0b5ed7;
+      /* 更新按钮色彩变量，使用admin.css中定义的颜色 */
+      --button-color: #867666;
+      --button-hover: #6f6255;
     }
     
     /* 其他profile页面特定样式保持不变 */
@@ -364,9 +364,11 @@
             <!-- Product Management Section -->
             <div class="admin-section mb-4">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>Product Management</h4>
-                <button class="btn btn-primary" onclick="resetProductForm()" data-bs-toggle="modal" data-bs-target="#productModal">
-                  <i class="bi bi-plus-circle me-1"></i> Add Product
+                <h4 class="mb-0">
+                  <i class="bi bi-box-seam me-2 text-primary"></i>Product Management
+                </h4>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="resetProductForm()" data-bs-toggle="modal" data-bs-target="#productModal">
+                  <i class="bi bi-plus-lg me-2"></i>Add Product
                 </button>
               </div>
               
@@ -394,7 +396,7 @@
                   </div>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                  <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                  <button class="admin-btn admin-btn-outline" onclick="resetFilters()">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> 重置筛选
                   </button>
                 </div>
@@ -422,7 +424,11 @@
             
             <!-- User Management Section -->
             <div class="admin-section">
-              <h4>User Management</h4>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                  <i class="bi bi-people me-2 text-primary"></i>User Management
+                </h4>
+              </div>
               <div class="table-responsive">
                 <table class="table">
                   <thead>
@@ -445,9 +451,11 @@
             <!-- Designer Management Section -->
             <div class="admin-section">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>Designer Management</h4>
-                <button class="btn btn-primary" onclick="resetDesignerForm()" data-bs-toggle="modal" data-bs-target="#designerModal">
-                  <i class="bi bi-plus-circle me-1"></i> Add Designer
+                <h4 class="mb-0">
+                  <i class="bi bi-person-badge me-2 text-primary"></i>Designer Management
+                </h4>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="resetDesignerForm()" data-bs-toggle="modal" data-bs-target="#designerModal">
+                  <i class="bi bi-plus-lg me-2"></i>Add Designer
                 </button>
               </div>
               <div class="table-responsive">
@@ -710,7 +718,7 @@
                   <!-- Image previews will be added here -->
                 </div>
                 <div class="d-grid mt-2">
-                  <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('designerImage').click()">
+                  <button type="button" class="admin-btn admin-btn-outline" onclick="document.getElementById('designerImage').click()">
                     <i class="bi bi-upload me-1"></i> Upload Images
                   </button>
                 </div>
@@ -744,8 +752,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveDesigner()">Save Designer</button>
+        <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="admin-btn admin-btn-primary" onclick="saveDesigner()">Save Designer</button>
       </div>
     </div>
   </div>
@@ -831,7 +839,7 @@
                   <!-- Image previews will be added here -->
                 </div>
                 <div class="d-grid mt-2">
-                  <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('productImages').click()">
+                  <button type="button" class="admin-btn admin-btn-outline" onclick="document.getElementById('productImages').click()">
                     <i class="bi bi-upload me-1"></i> Upload Images
                   </button>
                 </div>
@@ -842,8 +850,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
+        <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="admin-btn admin-btn-primary" id="saveProductBtn" onclick="saveProduct()">Save Product</button>
       </div>
     </div>
   </div>
@@ -1149,15 +1157,15 @@
           <div>${getCountryName(address.country)}</div>
           
           <div class="address-actions">
-            <button class="btn btn-sm btn-outline-primary edit-address" data-index="${index}">
+            <button class="admin-btn admin-btn-outline admin-btn-sm edit-address" data-index="${index}">
               <i class="bi bi-pencil"></i> Edit
             </button>
             ${!address.isDefault ? `
-              <button class="btn btn-sm btn-outline-success set-default" data-index="${index}">
-                Set as Default
+              <button class="admin-btn admin-btn-outline-success admin-btn-sm set-default" data-index="${index}">
+                <i class="bi bi-check-lg"></i> Set as Default
               </button>
             ` : ''}
-            <button class="btn btn-sm btn-outline-danger delete-address" data-index="${index}">
+            <button class="admin-btn admin-btn-outline-danger admin-btn-sm delete-address" data-index="${index}">
               <i class="bi bi-trash"></i> Delete
             </button>
           </div>
@@ -1630,7 +1638,7 @@
               <button class="admin-btn admin-btn-primary" onclick="updateOrderStatus(${order.id}, 'Packed')">Packed</button>
               <button class="admin-btn admin-btn-primary" onclick="updateOrderStatus(${order.id}, 'InTransit')">In Transit</button>
               <button class="admin-btn admin-btn-primary" onclick="updateOrderStatus(${order.id}, 'Delivered')">Delivered</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})">Delete</button>
+              <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteOrder(${order.id})">Delete</button>
             </div>
           </td>
         </tr>`;
@@ -1683,7 +1691,7 @@
               </span>
             </div>
             <div>
-              <button class="btn btn-sm btn-danger" onclick="deleteComment(${comment.id})">Delete</button>
+              <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteComment(${comment.id})">Delete</button>
             </div>
           </div>
           <p class="mb-0 mt-2">${comment.text}</p>
@@ -1799,13 +1807,13 @@
           <td>${designer.specialty}</td>
           <td>${designerProducts.length} products</td>
           <td>
-            <button class="btn btn-sm btn-primary me-1" onclick="editDesigner('${designer.id}')">
+            <button class="admin-btn admin-btn-primary admin-btn-sm me-1" onclick="editDesigner('${designer.id}')">
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-danger me-1" onclick="deleteDesigner('${designer.id}')">
+            <button class="admin-btn admin-btn-danger admin-btn-sm me-1" onclick="deleteDesigner('${designer.id}')">
               <i class="bi bi-trash"></i>
             </button>
-            <a href="/src/views/designer/designer-page.html?id=${designer.id}" class="btn btn-sm btn-info me-1" target="_blank">
+            <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="admin-btn admin-btn-info admin-btn-sm me-1" target="_blank">
               <i class="bi bi-eye"></i>
             </a>
             ${designer.featured ? '<span class="badge bg-success"><i class="bi bi-star-fill"></i> Featured</span>' : ''}
@@ -2137,13 +2145,13 @@
         </td>
         <td>
           <div class="btn-group">
-            <button class="btn btn-sm btn-primary me-1" onclick="editProduct('${product.id}')">
+            <button class="admin-btn admin-btn-primary admin-btn-sm me-1" onclick="editProduct('${product.id}')">
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-danger me-1" onclick="deleteProduct('${product.id}')">
+            <button class="admin-btn admin-btn-danger admin-btn-sm me-1" onclick="deleteProduct('${product.id}')">
               <i class="bi bi-trash"></i>
             </button>
-            <button class="btn btn-sm btn-info" onclick="viewProductComments('${product.id}')">
+            <button class="admin-btn admin-btn-info admin-btn-sm" onclick="viewProductComments('${product.id}')">
               <i class="bi bi-chat-dots"></i>
             </button>
           </div>
@@ -2471,10 +2479,10 @@
                   </div>
                 </div>
                 <div>
-                  <button class="btn btn-sm btn-primary me-1" onclick="editComment('${productId}', '${review.name}')">
+                  <button class="admin-btn admin-btn-primary admin-btn-sm me-1" onclick="editComment('${productId}', '${review.name}')">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button class="btn btn-sm btn-danger" onclick="deleteComment('${productId}', '${review.name}')">
+                  <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteComment('${productId}', '${review.name}')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>

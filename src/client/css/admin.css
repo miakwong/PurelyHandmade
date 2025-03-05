@@ -11,12 +11,12 @@
   --primary-light: rgba(134, 118, 102, 0.25);
   --text-muted: #6c757d;
   --bg-light: #f8f9fa;
-  --success-color: #198754;
-  --danger-color: #dc3545;
-  --info-color: #17a2b8;
-  --warning-color: #ffc107;
-  --button-color: #0d6efd;
-  --button-hover: #0b5ed7;
+  --success-color: #5a8c70;
+  --danger-color: #a95e5e;
+  --info-color: #5e8ca9;
+  --warning-color: #c9aa71;
+  --button-color: #867666;
+  --button-hover: #6f6255;
 }
 
 /* Admin Section Container */
@@ -80,78 +80,124 @@
 }
 
 .badge-success {
-  background-color: rgba(40, 167, 69, 0.1);
-  color: var(--success-color);
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  background-color: rgba(90, 140, 112, 0.15) !important;
+  color: var(--success-color) !important;
+  border: 1px solid rgba(90, 140, 112, 0.3) !important;
 }
 
 .badge-danger {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: var(--danger-color);
-  border: 1px solid rgba(220, 53, 69, 0.2);
+  background-color: rgba(169, 94, 94, 0.15) !important;
+  color: var(--danger-color) !important;
+  border: 1px solid rgba(169, 94, 94, 0.3) !important;
 }
 
 .badge-info {
-  background-color: rgba(23, 162, 184, 0.1);
-  color: var(--info-color);
-  border: 1px solid rgba(23, 162, 184, 0.2);
+  background-color: rgba(94, 140, 169, 0.15) !important;
+  color: var(--info-color) !important;
+  border: 1px solid rgba(94, 140, 169, 0.3) !important;
 }
 
 .badge-warning {
-  background-color: rgba(255, 193, 7, 0.1);
-  color: var(--warning-color);
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  background-color: rgba(201, 170, 113, 0.15) !important;
+  color: var(--warning-color) !important;
+  border: 1px solid rgba(201, 170, 113, 0.3) !important;
+}
+
+.badge-primary {
+  background-color: rgba(134, 118, 102, 0.15) !important;
+  color: var(--button-color) !important;
+  border: 1px solid rgba(134, 118, 102, 0.3) !important;
+}
+
+.badge-secondary {
+  background-color: rgba(225, 215, 198, 0.4);
+  color: var(--text-color);
+  border: 1px solid rgba(225, 215, 198, 0.6);
 }
 
 /* Button styles */
 .admin-btn {
-  padding: 0.375rem 0.75rem;
-  border-radius: var(--border-radius);
-  font-weight: 500;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
+  padding: 0.375rem 0.75rem !important;
+  border-radius: var(--border-radius) !important;
+  font-weight: 500 !important;
+  transition: all 0.3s !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .admin-btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.875rem !important;
 }
 
 .admin-btn-primary {
-  background-color: var(--button-color);
-  color: white;
+  background-color: var(--button-color) !important;
+  color: white !important;
 }
 
 .admin-btn-primary:hover {
-  background-color: var(--button-hover);
+  background-color: var(--button-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
+}
+
+.admin-btn-secondary {
+  background-color: var(--secondary-color) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.admin-btn-secondary:hover {
+  background-color: #d9cebf !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
 }
 
 .admin-btn-warning {
-  background-color: var(--warning-color);
-  color: #212529;
+  background-color: var(--warning-color) !important;
+  color: white !important;
 }
 
 .admin-btn-warning:hover {
-  background-color: #e0a800;
+  background-color: #b0945f !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
 }
 
 .admin-btn-danger {
-  background-color: var(--danger-color);
-  color: white;
+  background-color: var(--danger-color) !important;
+  color: white !important;
 }
 
 .admin-btn-danger:hover {
-  background-color: #c82333;
+  background-color: #94514e !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
 }
 
 .admin-btn-success {
-  background-color: var(--success-color);
-  color: white;
+  background-color: var(--success-color) !important;
+  color: white !important;
 }
 
 .admin-btn-success:hover {
-  background-color: #138496;
+  background-color: #4d7a62 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
+}
+
+.admin-btn-outline {
+  background-color: transparent !important;
+  border: 1px solid var(--button-color) !important;
+  color: var(--button-color) !important;
+}
+
+.admin-btn-outline:hover {
+  background-color: var(--primary-light) !important;
+  color: var(--text-color) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Form controls */
@@ -182,9 +228,8 @@
 }
 
 .admin-form-control:focus {
-  border-color: var(--accent-color);
-  outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(134, 118, 102, 0.25);
+  border-color: var(--button-color);
+  box-shadow: 0 0 0 0.25rem var(--primary-light);
 }
 
 /* Product/image previews */
@@ -223,15 +268,37 @@
 }
 
 /* Modal customization */
+.admin-modal .modal-content {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  border: none;
+  overflow: hidden;
+}
+
 .admin-modal .modal-header {
-  background-color: var(--primary-color);
-  color: var(--text-color);
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--primary-color) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.admin-modal .modal-title {
+  font-weight: 600 !important;
+  color: var(--text-color) !important;
+}
+
+.admin-modal .modal-body {
+  padding: 1.5rem;
 }
 
 .admin-modal .modal-footer {
-  background-color: var(--bg-light);
-  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-light) !important;
+  border-top: 1px solid var(--border-color) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.admin-modal .btn-close:focus {
+  box-shadow: 0 0 0 0.25rem var(--primary-light);
 }
 
 /* Action buttons container */
@@ -251,7 +318,19 @@
 .empty-state i {
   font-size: 3rem;
   margin-bottom: 1rem;
-  color: var(--border-color);
+  color: var(--secondary-color);
+}
+
+.empty-state-icon {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  background-color: var(--primary-light);
+  border-radius: 50%;
+  color: var(--accent-color);
 }
 
 /* Confirmation dialog */
