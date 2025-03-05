@@ -14,7 +14,8 @@ window.initializeData = function() {
       name: 'Emma Thompson',
       specialty: 'Ceramic Artist',
       bio: 'Emma brings 15 years of ceramic artistry to our collection. Her handcrafted mugs and bowls are known for their delicate glazes and functional design.',
-      image: '../assets/img/designer1.jpg',
+      image: '/src/client/img/designer1-bg.JPG',
+      featured: true,
       social: {
         instagram: 'https://instagram.com/emmathompsonceramics',
         pinterest: 'https://pinterest.com/emmathompsonceramics',
@@ -26,7 +27,8 @@ window.initializeData = function() {
       name: 'Michael Chen',
       specialty: 'Wood Craftsman',
       bio: "Michael's hand-carved wooden pieces showcase the natural beauty of sustainable hardwoods. Each piece tells a story through its grain patterns and careful detailing.",
-      image: '../assets/img/designer2.jpg',
+      image: '/src/client/img/designer2-bg.JPG',
+      featured: true,
       social: {
         instagram: 'https://instagram.com/michaelchenwoodcraft',
         pinterest: 'https://pinterest.com/michaelchenwoodcraft',
@@ -38,7 +40,8 @@ window.initializeData = function() {
       name: 'Sophia Williams',
       specialty: 'Textile Artist',
       bio: 'Sophia weaves natural fibers into stunning textiles using traditional techniques. Her passion for sustainable materials shines through in every handwoven piece.',
-      image: '../assets/img/designer3.jpg',
+      image: '/src/client/img/designer3-bg.JPG',
+      featured: true,
       social: {
         instagram: 'https://instagram.com/sophiawilliamstextiles',
         pinterest: 'https://pinterest.com/sophiawilliamstextiles',
@@ -60,7 +63,7 @@ window.initializeData = function() {
       details: 'Material: Ceramic<br>Size: 4" height x 3" diameter<br>Capacity: 300ml<br>Care: Dishwasher safe',
       onSale: false,
       salePrice: null,
-      images: ['src/assets/img/mug_1.JPG', 'src/assets/img/mug_2.JPG', 'src/assets/img/mug_3.JPG'],
+      images: ['/src/client/img/mug_1.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_3.JPG'],
       listingDate: '2024-03-15T10:30:00.000Z',
       reviews: [
         { name: 'Jane D.', rating: 5, comment: 'Beautiful mug, love the craftsmanship!', date: '2023-10-15' },
@@ -78,7 +81,7 @@ window.initializeData = function() {
       details: 'Material: Ceramic<br>Size: 4" height x 3" diameter<br>Capacity: 300ml<br>Care: Dishwasher safe<br>Set includes: 4 mugs',
       onSale: true,
       salePrice: 79.99,
-      images: ['src/assets/img/mug_item2_1.JPG', 'src/assets/img/mug_item2_2.JPG', 'src/assets/img/mug_item2_3.JPG'],
+      images: ['/src/client/img/mug_item2_1.JPG', '/src/client/img/mug_item2_2.JPG', '/src/client/img/mug_item2_3.JPG'],
       listingDate: '2024-03-20T14:15:30.000Z',
       reviews: [
         { name: 'Sarah T.', rating: 5, comment: 'These mugs are stunning! Perfect size and feel great in the hand.', date: '2023-11-05' }
@@ -95,7 +98,7 @@ window.initializeData = function() {
       details: 'Material: Ceramic<br>Cup Size: 3" height x 2.5" diameter<br>Capacity: 200ml<br>Care: Hand wash recommended<br>Set includes: 4 cups, 4 saucers',
       onSale: false,
       salePrice: null,
-      images: ['src/assets/img/mug_3.JPG', 'src/assets/img/mug_2.JPG', 'src/assets/img/mug_1.JPG'],
+      images: ['/src/client/img/mug_3.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_1.JPG'],
       listingDate: '2024-02-15T09:45:22.000Z',
       reviews: []
     },
@@ -110,7 +113,7 @@ window.initializeData = function() {
       details: 'Material: Solid oak<br>Size: 12" height x 6" width x 6" depth<br>Finish: Natural oil<br>Care: Dust regularly, avoid direct sunlight',
       onSale: false,
       salePrice: null,
-      images: ['src/assets/img/Wood_1.JPG', 'src/assets/img/Wood_2.JPG', 'src/assets/img/Wood_3.JPG'],
+      images: ['/src/client/img/Wood_1.JPG', '/src/client/img/Wood_2.JPG', '/src/client/img/Wood_3.JPG'],
       listingDate: '2024-03-25T11:20:45.000Z',
       reviews: [
         { name: 'Robert J.', rating: 5, comment: 'Stunning piece of art. The craftsmanship is exceptional.', date: '2023-10-10' },
@@ -128,7 +131,7 @@ window.initializeData = function() {
       details: 'Material: Maple wood<br>Size: 4" height x 10" diameter<br>Finish: Food-safe mineral oil<br>Care: Hand wash only, dry thoroughly',
       onSale: true,
       salePrice: 69.99,
-      images: ['src/assets/img/wood_item2_1.JPG', 'src/assets/img/wood_item2_2.JPG', 'src/assets/img/wood_item2_3.JPG'],
+      images: ['/src/client/img/wood_item2_1.JPG', '/src/client/img/wood_item2_2.JPG', '/src/client/img/wood_item2_3.JPG'],
       listingDate: '2024-01-15T16:35:10.000Z',
       reviews: [
         { name: 'David K.', rating: 5, comment: 'This bowl is simply beautiful! The craftsmanship is outstanding.', date: '2023-11-15' }
@@ -145,7 +148,7 @@ window.initializeData = function() {
       details: 'Material: Cotton and wool blend<br>Size: 24" x 36"<br>Colors: Natural dyes<br>Hanging: Wooden dowel included<br>Care: Spot clean only',
       onSale: false,
       salePrice: null,
-      images: ['src/assets/img/Handwoven_1.JPG', 'src/assets/img/Handwoven_2.JPG', 'src/assets/img/Handwoven_3.JPG'],
+      images: ['/src/client/img/Handwoven_1.JPG', '/src/client/img/Handwoven_2.JPG', '/src/client/img/Handwoven_3.JPG'],
       listingDate: '2024-03-10T08:50:30.000Z',
       reviews: [
         { name: 'Emily R.', rating: 5, comment: 'This wall hanging is even more beautiful in person! The craftsmanship is incredible.', date: '2023-10-25' },
@@ -163,7 +166,7 @@ window.initializeData = function() {
       details: 'Material: Natural seagrass<br>Sizes: Small (6" diameter), Medium (8" diameter), Large (10" diameter)<br>Finish: Natural<br>Care: Dust regularly, avoid moisture',
       onSale: true,
       salePrice: 59.99,
-      images: ['src/assets/img/handwoven_item2_1.JPG', 'src/assets/img/handwoven_item2_2.JPG', 'src/assets/img/handwoven_item2_3.JPG'],
+      images: ['/src/client/img/handwoven_item2_1.JPG', '/src/client/img/handwoven_item2_2.JPG', '/src/client/img/handwoven_item2_3.JPG'],
       listingDate: '2024-03-01T13:40:15.000Z',
       reviews: [
         { name: 'Jennifer L.', rating: 5, comment: 'These baskets are beautiful and well-made. Perfect for organizing my space!', date: '2023-11-08' }
