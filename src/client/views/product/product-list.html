@@ -774,6 +774,14 @@
     
     // 应用筛选
     filteredProducts = products.filter(product => {
+      // 过滤掉缺少必要字段的产品
+      if (!product.name || 
+          (product.onSale && !product.salePrice) || 
+          (!product.price) || 
+          (!product.images || !Array.isArray(product.images) || product.images.length === 0)) {
+        return false;
+      }
+      
       // 分类筛选
       if (filterCriteria.categories.length > 0 && !filterCriteria.categories.includes(product.categoryId)) {
         return false;
@@ -891,7 +899,7 @@
       for (let j = 0; j < emptyStars; j++) {
         starsHtml += '<i class="bi bi-star"></i>';
       }
-      starsHtml += `<span class="text-muted ms-2">(${product.reviewCount})</span></div>`;
+      starsHtml += '</div>';
       
       // 价格显示
       let priceHtml = '';
@@ -902,8 +910,10 @@
             <span class="product-price-discount">$${product.price.toFixed(2)}</span>
           </div>
         `;
-      } else {
+      } else if (product.price) {
         priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
+      } else {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
       }
       
       // 创建产品卡片HTML
@@ -912,7 +922,7 @@
           <div class="product-card">
             <div class="product-img-wrapper">
               <a href="product_detail.html?id=${product.id}">
-                <img src="${product.images[0]}" class="product-img" alt="${product.name}">
+                <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
               </a>
             </div>
@@ -922,7 +932,7 @@
               </a>
               ${priceHtml}
               ${starsHtml}
-              <p class="product-desc">${product.description.substring(0, 80)}...</p>
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
               <button class="add-to-cart-btn" data-product-id="${product.id}">
                 <i class="bi bi-cart-plus me-2"></i> Add to Cart
               </button>
