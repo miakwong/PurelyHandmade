@@ -21,6 +21,11 @@
   <link rel="stylesheet" href="/src/client/css/navbar.css">
   <link rel="stylesheet" href="/src/client/css/global.css">
 
+  <!-- Make sure Bootstrap Icons are loaded -->
+  <style>
+    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css");
+  </style>
+
   <style>
     /* 全局样式变量 */
     :root {
@@ -221,6 +226,14 @@
       z-index: 2;
     }
     
+    .product-badge.stock-badge {
+      background-color: #ffc107;
+      color: #212529;
+      top: 15px;
+      right: 15px;
+      left: auto;
+    }
+    
     .product-card-body {
       padding: 1.5rem;
       display: flex;
@@ -266,6 +279,28 @@
       color: #FFD700;
       font-size: 0.9rem;
       margin-right: 2px;
+    }
+    
+    /* Add stronger styling for stars */
+    .product-rating .bi-star-fill {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star-half {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star {
+      color: #d1d1d1;
+      text-shadow: 0 0 1px rgba(0,0,0,0.1);
+    }
+    
+    .rating-text {
+      margin-left: 5px;
+      font-size: 0.8rem;
+      color: #6c757d;
     }
     
     .product-desc {
@@ -439,6 +474,11 @@
 
 <!-- 主内容区 -->
 <main>
+  <!-- Test Bootstrap Icons Loading -->
+  <div class="container-custom mt-2 mb-2 text-center">
+    <p><i class="bi bi-star-fill" style="color: gold; font-size: 24px;"></i> <span>Bootstrap Icons Test</span></p>
+  </div>
+  
   <!-- 面包屑导航 -->
   <div class="container-custom">
     <nav aria-label="breadcrumb" class="modern-breadcrumb">
@@ -884,9 +924,14 @@
     const productsToShow = filteredProducts.slice(startIndex, endIndex);
     
     productsToShow.forEach(product => {
+      // Debug log for rating data
+      console.log(`Product ${product.name} - Rating: ${product.rating}`);
+      
       // 生成星级评分HTML
-      const fullStars = Math.floor(product.rating);
-      const hasHalfStar = product.rating % 1 >= 0.5;
+      const fullStars = Math.floor(product.rating || 0);
+      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+      
+      console.log(`Star breakdown - Full stars: ${fullStars}, Half star: ${hasHalfStar}, Empty stars: ${5 - fullStars - (hasHalfStar ? 1 : 0)}`);
       
       let starsHtml = '<div class="product-rating">';
       for (let j = 0; j < fullStars; j++) {
@@ -899,7 +944,12 @@
       for (let j = 0; j < emptyStars; j++) {
         starsHtml += '<i class="bi bi-star"></i>';
       }
+      // Add text rating for clarity
+      starsHtml += `<span class="rating-text">(${product.rating ? product.rating.toFixed(1) : '0.0'})</span>`;
       starsHtml += '</div>';
+      
+      // Log the generated HTML for verification
+      console.log('Generated stars HTML:', starsHtml);
       
       // 价格显示
       let priceHtml = '';
@@ -924,6 +974,7 @@
               <a href="product_detail.html?id=${product.id}">
                 <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
+                ${product.stock && product.stock <= 5 ? '<div class="product-badge stock-badge">Low Stock</div>' : ''}
               </a>
             </div>
             <div class="product-card-body">
@@ -933,7 +984,7 @@
               ${priceHtml}
               ${starsHtml}
               <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
-              <button class="add-to-cart-btn" data-product-id="${product.id}">
+              <button class="add-to-cart-btn" data-product-id="${product.id}" onclick="addToCart('${product.id}', 1); return false;">
                 <i class="bi bi-cart-plus me-2"></i> Add to Cart
               </button>
             </div>
@@ -942,15 +993,6 @@
       `;
       
       productsContainer.innerHTML += productHtml;
-    });
-    
-    // 添加Add to Cart按钮事件
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const productId = parseInt(this.getAttribute('data-product-id'));
-        addToCart(productId, 1);
-      });
     });
   }
   
@@ -1129,23 +1171,59 @@
   
   // 添加到购物车
   function addToCart(productId, quantity) {
+    console.log('addToCart called with productId:', productId, 'type:', typeof productId);
+    
     const productsData = localStorage.getItem('products');
-    if (!productsData) return;
+    if (!productsData) {
+      console.error('No products data found in localStorage');
+      showToast('Error loading products', 'error');
+      return;
+    }
     
     const products = JSON.parse(productsData);
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+    
+    // Try to match by both string and number comparisons
+    let product = products.find(p => p.id === productId);
+    
+    // If not found, try parsing as integer
+    if (!product && !isNaN(parseInt(productId))) {
+      const numericId = parseInt(productId);
+      console.log('Trying numeric ID:', numericId);
+      product = products.find(p => p.id === numericId);
+    }
+    
+    // If still not found, try string comparison
+    if (!product) {
+      const stringId = String(productId);
+      console.log('Trying string ID:', stringId);
+      product = products.find(p => String(p.id) === stringId);
+    }
+    
+    if (!product) {
+      console.error('Product not found with ID:', productId);
+      showToast('Product not found', 'error');
+      return;
+    }
+    
+    console.log('Found product to add to cart:', product);
     
     // 获取现有购物车
     let cart = [];
     const cartData = localStorage.getItem('cart');
     if (cartData) {
-      cart = JSON.parse(cartData);
+      try {
+        cart = JSON.parse(cartData);
+        console.log('Existing cart:', cart);
+      } catch (e) {
+        console.error('Error parsing cart data:', e);
+        showToast('Error loading cart data', 'error');
+      }
     }
     
     // 计算最终价格，确保不会出现NaN
     const price = parseFloat(product.price) || 0;
     const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    console.log('Calculated price:', finalPrice);
     
     // 处理图片URL
     let imageUrl = 'https://via.placeholder.com/80';
@@ -1156,10 +1234,19 @@
     }
     
     // 检查产品是否已在购物车中
-    const existingItem = cart.find(item => item.id === productId);
+    const existingItem = cart.find(item => {
+      const itemMatch = (item.id === product.id) || 
+                       (parseInt(item.id) === parseInt(product.id)) || 
+                       (String(item.id) === String(product.id));
+      console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
+      return itemMatch;
+    });
+    
     if (existingItem) {
+      console.log('Product already in cart, updating quantity');
       existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
+      console.log('Adding new product to cart');
       // 安全处理产品描述
       let description = 'No description available';
       if (product.description) {
@@ -1186,6 +1273,7 @@
     }
     
     // 保存到localStorage
+    console.log('Saving updated cart to localStorage:', cart);
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // 显示成功消息
