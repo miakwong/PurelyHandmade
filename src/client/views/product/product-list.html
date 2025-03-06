@@ -36,10 +36,12 @@
     
     body {
       font-family: var(--body-font);
+      color: var(--text-color);
     }
     
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--header-font);
+      color: var(--text-color);
     }
     
     /* 自定义容器宽度 */
@@ -59,6 +61,7 @@
       color: var(--accent-color);
       text-decoration: none;
       transition: var(--transition-smooth);
+      font-family: var(--body-font);
     }
     
     .modern-breadcrumb .breadcrumb-item a:hover {
@@ -67,6 +70,7 @@
     
     .modern-breadcrumb .breadcrumb-item.active {
       font-weight: 500;
+      font-family: var(--body-font);
     }
     
     /* 页面标题 */
@@ -75,6 +79,8 @@
       margin-bottom: 2rem;
       position: relative;
       display: inline-block;
+      font-family: var(--header-font);
+      color: var(--text-color);
     }
     
     .page-title:after {
@@ -96,6 +102,7 @@
       position: sticky;
       top: 20px;
       z-index: 10;
+      font-family: var(--body-font);
     }
     
     .filter-sidebar h4 {
@@ -103,6 +110,8 @@
       margin-bottom: 1.5rem;
       padding-bottom: 0.75rem;
       border-bottom: 1px solid var(--border-color);
+      font-family: var(--header-font);
+      color: var(--text-color);
     }
     
     .filter-group {
@@ -119,6 +128,8 @@
       font-size: 1.1rem;
       transition: var(--transition-smooth);
       padding: 0.25rem 0;
+      font-family: var(--body-font);
+      color: var(--text-color);
     }
     
     .filter-group-title:hover {
@@ -133,6 +144,7 @@
       padding-left: 0.5rem;
       transition: all 0.3s ease-out;
       pointer-events: none;
+      font-family: var(--body-font);
     }
     
     .filter-group-content.show {
@@ -148,6 +160,7 @@
       align-items: center;
       gap: 0.75rem;
       margin-bottom: 1rem;
+      font-family: var(--body-font);
     }
     
     .price-range-inputs .input-group {
@@ -158,6 +171,7 @@
       border-radius: 8px;
       padding: 0.5rem;
       font-size: 0.9rem;
+      font-family: var(--body-font);
     }
     
     .form-check {
@@ -167,6 +181,8 @@
     .form-check-label {
       cursor: pointer;
       transition: color 0.2s;
+      font-family: var(--body-font);
+      color: var(--text-color);
     }
     
     .form-check-input:checked ~ .form-check-label {
@@ -224,6 +240,7 @@
       font-weight: 600;
       letter-spacing: 0.5px;
       z-index: 2;
+      font-family: var(--body-font);
     }
     
     .product-badge.stock-badge {
@@ -239,6 +256,7 @@
       display: flex;
       flex-direction: column;
       height: calc(100% - 240px);
+      font-family: var(--body-font);
     }
     
     .product-title {
@@ -246,25 +264,30 @@
       margin-bottom: 0.5rem;
       font-weight: 600;
       line-height: 1.4;
+      font-family: var(--header-font);
+      color: var(--text-color);
     }
     
     .product-price-wrapper {
       margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
+      font-family: var(--body-font);
     }
     
     .product-price {
       font-weight: 600;
       color: var(--accent-color);
       font-size: 1.2rem;
+      font-family: var(--body-font);
     }
     
     .product-price-discount {
       text-decoration: line-through;
-      color: #6c757d;
+      color: var(--light-text);
       font-size: 0.9rem;
       margin-left: 0.5rem;
+      font-family: var(--body-font);
     }
     
     .product-rating {
@@ -281,7 +304,7 @@
       margin-right: 2px;
     }
     
-    /* Add stronger styling for stars */
+    /* 添加更强的星级样式 */
     .product-rating .bi-star-fill {
       color: #FFD700;
       text-shadow: 0 0 1px rgba(0,0,0,0.3);
@@ -301,6 +324,7 @@
       margin-left: 5px;
       font-size: 0.8rem;
       color: #6c757d;
+      font-family: var(--body-font);
     }
     
     .product-desc {
@@ -308,18 +332,22 @@
       color: var(--light-text);
       font-size: 0.9rem;
       flex-grow: 1;
+      font-family: var(--body-font);
     }
     
     .add-to-cart-btn {
-      position: relative;
       width: 100%;
       border-radius: 30px;
-      padding: 0.6rem 1.5rem;
+      padding: 0.75rem 1.25rem;
       font-weight: 500;
       background-color: var(--accent-color);
       border: none;
+      color: white;
       transition: var(--transition-smooth);
-      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--body-font);
     }
     
     .add-to-cart-btn:hover {
@@ -327,52 +355,45 @@
       transform: translateY(-2px);
     }
     
-    /* 筛选和排序工具栏 */
     .product-toolbar {
-      background-color: var(--card-background);
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 2rem;
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
       justify-content: space-between;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-family: var(--body-font);
     }
     
     .sort-select,
     .products-per-page-select {
-      border-radius: 8px;
-      padding: 0.5rem 2rem 0.5rem 1rem;
-      background-color: var(--background-color);
+      padding: 0.375rem 1.5rem 0.375rem 0.75rem;
       border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-position: right 0.75rem center;
+      background-size: 16px 12px;
       font-size: 0.9rem;
+      font-family: var(--body-font);
     }
     
-    .sort-select:focus,
-    .products-per-page-select:focus {
-      border-color: var(--accent-color);
-      box-shadow: none;
-    }
-    
-    /* 分页设计 */
+    /* 分页控件 */
     .modern-pagination {
       margin-top: 3rem;
     }
     
-    .modern-pagination .page-item .page-link {
+    .modern-pagination .page-link {
       border: none;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      margin: 0 5px;
+      padding: 0.75rem 1rem;
+      margin: 0 0.25rem;
+      border-radius: 8px;
       color: var(--text-color);
-      font-weight: 500;
-      background-color: var(--background-color);
       transition: var(--transition-smooth);
+      font-family: var(--body-font);
+    }
+    
+    .modern-pagination .page-link:hover {
+      background-color: var(--primary-color);
+      color: var(--text-color);
     }
     
     .modern-pagination .page-item.active .page-link {
@@ -380,14 +401,8 @@
       color: white;
     }
     
-    .modern-pagination .page-item .page-link:hover {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-    }
-    
     .modern-pagination .page-item.disabled .page-link {
-      opacity: 0.5;
-      background-color: var(--background-color);
+      color: var(--border-color);
     }
     
     /* Toast通知样式 */
@@ -429,6 +444,7 @@
       display: flex;
       align-items: center;
       animation: slideUpIn 0.3s, fadeOut 0.5s 2.5s forwards;
+      font-family: var(--body-font);
     }
     
     .modern-toast.success {

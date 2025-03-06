@@ -1,14 +1,15 @@
-
 /* ====== Sidebar Styling ====== */
 .sidebar {
   background: white;
   padding: 15px;
   border: 1px solid #ddd;
+  font-family: var(--body-font);
 }
 
 .sidebar ul li {
   padding: 8px;
   border-bottom: 1px solid #eee;
+  font-family: var(--body-font);
 }
 
 #designerCarousel {
@@ -48,6 +49,12 @@
   background: rgba(0, 0, 0, 0.5); /* 文字背景，增强可读性 */
   padding: 20px;
   border-radius: 10px;
+  font-family: var(--body-font);
+}
+
+.carousel-overlay h2, 
+.carousel-overlay h3 {
+  font-family: var(--header-font);
 }
 
 .custom-prev, .custom-next {
@@ -92,6 +99,7 @@
   font-size: 14px;
   font-weight: bold;
   border-radius: 5px;
+  font-family: var(--body-font);
 }
 
 

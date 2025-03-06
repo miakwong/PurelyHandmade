@@ -13,6 +13,7 @@
     max-width: 1200px;
     display: flex;
     justify-content: space-evenly;
+    font-family: var(--body-font);
 }
 
 /* 导航栏样式 */
@@ -25,6 +26,7 @@
 .navbar-brand {
   color: var(--text-color) !important;
   font-weight: 600;
+  font-family: var(--header-font);
 }
 
 .navbar-brand img {
@@ -48,6 +50,7 @@
   padding: 0.75rem 1rem;
   transition: all 0.3s;
   text-align: center;
+  font-family: var(--body-font);
 }
 
 .navbar-dark .nav-link:hover,
@@ -65,6 +68,7 @@
 .dropdown-item {
   color: var(--text-color);
   transition: all 0.3s;
+  font-family: var(--body-font);
 }
 
 .dropdown-item:hover, 
@@ -81,6 +85,7 @@
   border-color: var(--border-color);
   border-radius: var(--border-radius);
   transition: all 0.3s;
+  font-family: var(--body-font);
 }
 
 .form-control:focus {
@@ -92,6 +97,7 @@
 #cart-count {
   font-size: 0.65rem;
   padding: 0.25em 0.5em;
+  font-family: var(--body-font);
 }
 
 /* 移动菜单 */
