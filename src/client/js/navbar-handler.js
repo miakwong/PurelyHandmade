@@ -4,7 +4,7 @@
 
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch('/src/client/views/layout/navbar.html')
+  fetch('/src/client/assets/layout/navbar.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -33,6 +33,7 @@ function loadNavbar() {
           const loginButton = document.getElementById('login-button');
           const registerButton = document.getElementById('register-button');
           const profileButton = document.getElementById('profile-button');
+          const orderHistoryButton = document.getElementById('order-history-button');
           const logoutButton = document.getElementById('logout-button');
           const adminButton = document.getElementById('admin-button');
           
@@ -42,6 +43,7 @@ function loadNavbar() {
               loginButton.style.display = 'none';
               registerButton.style.display = 'none';
               if (profileButton) profileButton.style.display = 'block';
+              if (orderHistoryButton) orderHistoryButton.style.display = 'block';
               if (logoutButton) {
                 logoutButton.style.display = 'block';
                 logoutButton.addEventListener('click', function(e) {
@@ -67,6 +69,7 @@ function loadNavbar() {
               loginButton.style.display = 'block';
               registerButton.style.display = 'block';
               if (profileButton) profileButton.style.display = 'none';
+              if (orderHistoryButton) orderHistoryButton.style.display = 'none';
               if (logoutButton) logoutButton.style.display = 'none';
               if (adminButton) adminButton.style.display = 'none';
               
@@ -87,7 +90,7 @@ function loadNavbar() {
 
 // Load the footer
 function loadFooter() {
-  fetch('/src/client/views/layout/footer.html')
+  fetch('/src/client/assets/layout/footer.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);

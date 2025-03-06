@@ -29,66 +29,100 @@
       background-color: #f8f9fa;
       padding: 30px 0;
       margin-bottom: 40px;
+      border-bottom: 1px solid #e9ecef;
     }
     
     .order-card {
-      border-radius: 10px;
-      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      border: none;
       overflow: hidden;
       transition: transform 0.3s, box-shadow 0.3s;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      max-width: 850px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #ffffff;
     }
     
     .order-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
     }
     
     .order-header {
       background-color: #f8f9fa;
       border-bottom: 1px solid #e9ecef;
-      padding: 15px 20px;
+      padding: 18px 22px;
+      position: relative;
+    }
+    
+    .order-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(13, 110, 253, 0.5), transparent);
     }
     
     .order-body {
-      padding: 20px;
+      padding: 22px;
+      background-color: #ffffff;
     }
     
     .order-footer {
       background-color: #f8f9fa;
       border-top: 1px solid #e9ecef;
-      padding: 15px 20px;
+      padding: 16px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+    }
+    
+    .order-footer::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(13, 110, 253, 0.5), transparent);
     }
     
     .order-status {
       display: inline-block;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 30px;
       font-size: 14px;
       font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
     
     .status-processing {
       background-color: #cff4fc;
       color: #055160;
+      border-left: 3px solid #0dcaf0;
     }
     
     .status-shipped {
       background-color: #d1e7dd;
       color: #0f5132;
+      border-left: 3px solid #20c997;
     }
     
     .status-delivered {
       background-color: #d1e7dd;
       color: #0f5132;
+      border-left: 3px solid #198754;
     }
     
     .status-cancelled {
       background-color: #f8d7da;
       color: #842029;
+      border-left: 3px solid #dc3545;
     }
     
     .order-date {
@@ -104,14 +138,23 @@
       display: flex;
       align-items: center;
       margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      transition: background-color 0.2s;
+    }
+    
+    .product-item:hover {
+      background-color: #f2f2f2;
     }
     
     .product-image {
       width: 60px;
       height: 60px;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 8px;
       margin-right: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
     .product-details {
@@ -121,6 +164,7 @@
     .product-name {
       font-weight: 500;
       margin-bottom: 5px;
+      color: #333;
     }
     
     .product-qty {
@@ -131,29 +175,47 @@
     .empty-state {
       text-align: center;
       padding: 50px 20px;
+      background-color: #f8f9fa;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     }
     
     .empty-icon {
       font-size: 60px;
-      color: #dee2e6;
+      color: #adb5bd;
       margin-bottom: 20px;
     }
     
     .filter-section {
       margin-bottom: 30px;
+      background-color: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      max-width: 850px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .nav-pills .nav-link {
       color: #495057;
       border-radius: 5px;
-      padding: 10px 15px;
+      padding: 8px 15px;
       margin-right: 10px;
       font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .nav-pills .nav-link:hover {
+      background-color: #f8f9fa;
     }
     
     .nav-pills .nav-link.active {
       background-color: #0d6efd;
       color: #fff;
+      box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
     }
     
     @media (max-width: 767.98px) {
@@ -165,6 +227,16 @@
       .order-footer .btn {
         margin-top: 10px;
         width: 100%;
+      }
+      
+      .filter-section .nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+      
+      .filter-section .nav-item {
+        flex-shrink: 0;
       }
     }
   </style>
@@ -391,38 +463,40 @@
       document.getElementById('navbar-placeholder').innerHTML = html;
       console.log('Navbar loaded successfully');
       
-      // 导航栏加载完成后，确保更新登录状态
+      // Update auth state after navbar is loaded
       setTimeout(() => {
         console.log('Checking for updateAuthButton availability');
         
-        // 尝试使用全局函数
+        // Try using global function
         if (typeof window.updateAuthButton === 'function') {
           console.log('Updating auth button state using window.updateAuthButton');
           window.updateAuthButton();
         }
-        // 尝试使用局部函数
+        // Try using local function
         else if (typeof updateAuthButton === 'function') {
           console.log('Updating auth button state using updateAuthButton');
           updateAuthButton();
         }
-        // 使用备用实现
+        // Use fallback implementation
         else {
           console.log('updateAuthButton function not available, using fallback');
-          // 定义一个备用的updateAuthButton函数
+          // Define a fallback updateAuthButton function
           window.updateAuthButton = function() {
             const currentUser = localStorage.getItem('currentUser');
             const loginButton = document.getElementById('login-button');
             const registerButton = document.getElementById('register-button');
             const profileButton = document.getElementById('profile-button');
+            const orderHistoryButton = document.getElementById('order-history-button');
             const logoutButton = document.getElementById('logout-button');
             
             console.log('Update Auth Button fallback called, currentUser:', currentUser ? 'exists' : 'not found');
             
             if (currentUser) {
-              // 用户已登录
+              // User is logged in
               if (loginButton) loginButton.style.display = 'none';
               if (registerButton) registerButton.style.display = 'none';
               if (profileButton) profileButton.style.display = 'block';
+              if (orderHistoryButton) orderHistoryButton.style.display = 'block';
               if (logoutButton) {
                 logoutButton.style.display = 'block';
                 logoutButton.addEventListener('click', function(e) {
@@ -432,20 +506,21 @@
                 });
               }
             } else {
-              // 用户未登录
+              // User is not logged in
               if (loginButton) loginButton.style.display = 'block';
               if (registerButton) registerButton.style.display = 'block';
               if (profileButton) profileButton.style.display = 'none';
+              if (orderHistoryButton) orderHistoryButton.style.display = 'none';
               if (logoutButton) logoutButton.style.display = 'none';
             }
           };
           
-          // 调用备用函数
+          // Call the fallback function
           window.updateAuthButton();
         }
       }, 300);
       
-      // 更新购物车数量
+      // Update cart count
       if (typeof updateCartCount === 'function') {
         updateCartCount();
       }
@@ -472,11 +547,11 @@
               '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
     });
   
-  // 在文档完全加载后再次尝试调用更新身份验证状态和购物车
+  // When document is fully loaded, try calling update auth state and cart again
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded: Document fully loaded, checking auth and cart state');
     
-    // 添加额外的延迟来确保导航栏已完全加载并且身份验证状态得到正确更新
+    // Add extra delay to ensure navbar is fully loaded and auth state is properly updated
     setTimeout(() => {
       console.log('Document fully loaded, updating auth state again');
       if (typeof window.updateAuthButton === 'function') {
@@ -487,40 +562,51 @@
         window.updateCartCount();
       }
       
-      // 检查用户是否登录
+      // Check if user is logged in
       checkUserLogin();
       
-      // 初始化过滤器
+      // Initialize filters
       initializeFilters();
     }, 500);
   });
   
-  // 检查用户是否登录
+  // Check if user is logged in
   function checkUserLogin() {
     const currentUser = localStorage.getItem('currentUser');
     
     if (!currentUser) {
-      // 用户未登录，显示提示并重定向
-      showToast('请登录以查看您的订单历史', 'error');
+      // User is not logged in, show message and redirect
+      showToast('Please login to view your order history', 'error');
       
-      // 3秒后重定向到登录页面
+      // After 3 seconds, redirect to login page
       setTimeout(() => {
         window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.href);
       }, 3000);
     } else {
-      // 用户已登录，加载订单数据
+      // User is logged in, load order data
       loadOrderHistory();
     }
   }
   
-  // 加载订单历史
+  // Load order history
   function loadOrderHistory() {
-    // 在实际应用中，这里会从localStorage或服务器获取订单数据
-    // 这里使用示例数据
+    // In a real application, this would fetch order data from localStorage or server
+    // Here using example data
     
-    // 如果没有订单，显示空状态
-    // const hasOrders = false; // 设置为false以测试空状态
-    const hasOrders = true; // 当前示例有订单
+    // Check if there are any orders in localStorage
+    let userOrders = [];
+    try {
+      // Try to get orders from localStorage
+      const userData = JSON.parse(localStorage.getItem('currentUser'));
+      if (userData && userData.orders) {
+        userOrders = userData.orders;
+      }
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+    }
+    
+    // For demo, we'll use the hardcoded orders if userOrders is empty
+    const hasOrders = document.querySelectorAll('.order-card').length > 0 || userOrders.length > 0;
     
     if (!hasOrders) {
       document.getElementById('orders-container').style.display = 'none';
@@ -528,88 +614,99 @@
     }
   }
   
-  // 初始化过滤器
+  // Initialize filters
   function initializeFilters() {
-    // 状态过滤
+    // Status filtering
     document.querySelectorAll('.nav-pills .nav-link').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
         
-        // 更新活动状态
+        // Update active state
         document.querySelectorAll('.nav-pills .nav-link').forEach(el => {
           el.classList.remove('active');
         });
         this.classList.add('active');
         
-        // 获取过滤值
+        // Get filter value
         const filter = this.getAttribute('data-filter');
         
-        // 过滤订单
+        // Filter orders
         filterOrders(filter);
       });
     });
     
-    // 排序
+    // Sorting
     document.getElementById('orderSort').addEventListener('change', function() {
       sortOrders(this.value);
     });
   }
   
-  // 过滤订单
+  // Filter orders
   function filterOrders(status) {
+    console.log("Filtering orders with status:", status);
     const orderCards = document.querySelectorAll('.order-card');
+    console.log("Total order cards found:", orderCards.length);
+    
+    let visibleCount = 0;
     
     orderCards.forEach(card => {
-      if (status === 'all' || card.getAttribute('data-status') === status) {
+      const cardStatus = card.getAttribute('data-status');
+      console.log("Card status:", cardStatus, "Comparing with:", status);
+      
+      if (status === 'all' || cardStatus === status) {
         card.style.display = 'block';
+        visibleCount++;
+        console.log("Showing card, visible count now:", visibleCount);
       } else {
         card.style.display = 'none';
+        console.log("Hiding card");
       }
     });
     
-    // 检查是否有可见的订单
-    const visibleOrders = document.querySelectorAll('.order-card[style="display: block"]');
+    console.log("Final visible count:", visibleCount);
     
-    if (visibleOrders.length === 0) {
-      showToast(`没有${getStatusText(status)}订单`, 'info');
+    // Only show toast if truly no visible orders AND not showing 'all'
+    if (visibleCount === 0 && status !== 'all') {
+      console.log("Showing 'no orders' toast for status:", status);
+      showToast(`No ${getStatusText(status)} orders found`, 'info');
     }
   }
   
-  // 根据状态值获取状态文本
+  // Get status text based on status value
   function getStatusText(status) {
     switch(status) {
-      case 'processing': return '处理中的';
-      case 'shipped': return '已发货的';
-      case 'delivered': return '已送达的';
-      case 'cancelled': return '已取消的';
+      case 'processing': return 'processing';
+      case 'shipped': return 'shipped';
+      case 'delivered': return 'delivered';
+      case 'cancelled': return 'cancelled';
       default: return '';
     }
   }
   
-  // 排序订单
+  // Sort orders
   function sortOrders(sortBy) {
     const ordersContainer = document.getElementById('orders-container');
     const orderCards = Array.from(ordersContainer.querySelectorAll('.order-card'));
     
-    // 根据排序值排序
+    // Sort based on sort value
     orderCards.sort((a, b) => {
       if (sortBy === 'date-desc') {
-        // 按日期降序（最新优先）
+        // Sort by date descending (newest first)
         const dateA = a.querySelector('.order-date').textContent.replace('Placed on ', '');
         const dateB = b.querySelector('.order-date').textContent.replace('Placed on ', '');
         return new Date(dateB) - new Date(dateA);
       } else if (sortBy === 'date-asc') {
-        // 按日期升序（最旧优先）
+        // Sort by date ascending (oldest first)
         const dateA = a.querySelector('.order-date').textContent.replace('Placed on ', '');
         const dateB = b.querySelector('.order-date').textContent.replace('Placed on ', '');
         return new Date(dateA) - new Date(dateB);
       } else if (sortBy === 'price-desc') {
-        // 按价格降序（最高优先）
+        // Sort by price descending (highest first)
         const priceA = parseFloat(a.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
         const priceB = parseFloat(b.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
         return priceB - priceA;
       } else if (sortBy === 'price-asc') {
-        // 按价格升序（最低优先）
+        // Sort by price ascending (lowest first)
         const priceA = parseFloat(a.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
         const priceB = parseFloat(b.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
         return priceA - priceB;
@@ -617,19 +714,19 @@
       return 0;
     });
     
-    // 重新添加排序后的订单卡片
+    // Reappend sorted order cards
     orderCards.forEach(card => {
       ordersContainer.appendChild(card);
     });
   }
   
-  // 显示Toast通知
+  // Show toast notification
   function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toast-container');
     
     if (!toastContainer) return;
     
-    // 创建toast元素
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.style.backgroundColor = '#fff';
@@ -651,22 +748,22 @@
       toast.style.borderLeft = '4px solid #0dcaf0';
     }
     
-    // 添加内容
+    // Add content
     toast.innerHTML = `
       <div style="flex: 1; padding-right: 10px;">${message}</div>
       <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
-    // 添加到容器
+    // Add to container
     toastContainer.appendChild(toast);
     
-    // 添加关闭按钮事件
+    // Add close button event
     const closeBtn = toast.querySelector('div:last-child');
     closeBtn.addEventListener('click', function() {
       toast.remove();
     });
     
-    // 自动3秒后移除
+    // Auto remove after 3 seconds
     setTimeout(() => {
       toast.remove();
     }, 3000);
