@@ -189,6 +189,28 @@
       margin-right: 2px;
     }
     
+    /* Add stronger styling for stars */
+    .product-rating .bi-star-fill {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star-half {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star {
+      color: #d1d1d1;
+      text-shadow: 0 0 1px rgba(0,0,0,0.1);
+    }
+    
+    .rating-text {
+      margin-left: 5px;
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+    
     .product-badge {
       position: absolute;
       top: 15px;
@@ -666,6 +688,9 @@
       const fullStars = Math.floor(product.rating || 0);
       const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
       
+      console.log(`Product ${product.name} - Rating: ${product.rating}`);
+      console.log(`Star breakdown - Full stars: ${fullStars}, Half star: ${hasHalfStar}, Empty stars: ${5 - fullStars - (hasHalfStar ? 1 : 0)}`);
+      
       let starsHtml = '<div class="product-rating">';
       for (let i = 0; i < fullStars; i++) {
         starsHtml += '<i class="bi bi-star-fill"></i>';
@@ -677,6 +702,8 @@
       for (let i = 0; i < emptyStars; i++) {
         starsHtml += '<i class="bi bi-star"></i>';
       }
+      // Add text rating for clarity
+      starsHtml += `<span class="rating-text">(${product.rating ? product.rating.toFixed(1) : '0.0'})</span>`;
       starsHtml += '</div>';
       
       // 价格显示

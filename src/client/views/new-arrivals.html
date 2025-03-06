@@ -36,100 +36,154 @@
       margin: 15px auto 0;
     }
     
+    /* 产品卡片设计 - 使用product-list.html中的样式 */
     .product-card {
-      border-radius: 10px;
+      border: none;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
       height: 100%;
-      position: relative;
+      background-color: var(--card-background, #fff);
     }
     
     .product-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     }
     
-    .card-img-top {
-      height: 250px;
+    .product-img-wrapper {
+      position: relative;
+      overflow: hidden;
+      height: 240px;
+    }
+    
+    .product-img {
+      height: 100%;
+      width: 100%;
       object-fit: cover;
+      transition: transform 0.8s ease;
     }
     
-    .card-body {
-      padding: 20px;
+    .product-card:hover .product-img {
+      transform: scale(1.05);
     }
     
-    .card-title {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      color: #333;
+    .product-card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 240px);
     }
     
-    .price {
-      font-weight: bold;
-      color: #0d6efd;
+    .product-title {
       font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      line-height: 1.4;
     }
     
-    .original-price {
-      color: #6c757d;
+    .product-price-wrapper {
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      color: var(--accent-color, #d9534f);
+      font-size: 1.2rem;
+    }
+    
+    .product-price-discount {
       text-decoration: line-through;
-      margin-left: 10px;
+      color: #6c757d;
       font-size: 0.9rem;
+      margin-left: 0.5rem;
     }
     
-    .rating {
-      margin-bottom: 15px;
+    .product-desc {
+      margin-bottom: 1rem;
+      color: var(--light-text, #6c757d);
+      font-size: 0.9rem;
+      flex-grow: 1;
     }
     
-    .badge-sale {
+    .product-badge {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: #dc3545;
+      top: 15px;
+      left: 15px;
+      background-color: var(--accent-color, #d9534f);
       color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
       font-weight: 600;
+      letter-spacing: 0.5px;
+      z-index: 2;
     }
     
-    .badge-new {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: #28a745;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
+    .product-badge.stock-badge {
+      background-color: #ffc107;
+      color: #212529;
+      top: 15px;
+      right: 15px;
+      left: auto;
+    }
+    
+    .product-rating {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .product-rating .bi-star-fill,
+    .product-rating .bi-star-half,
+    .product-rating .bi-star {
+      color: #FFD700;
+      font-size: 0.9rem;
+      margin-right: 2px;
+    }
+    
+    /* Add stronger styling for stars */
+    .product-rating .bi-star-fill {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star-half {
+      color: #FFD700;
+      text-shadow: 0 0 1px rgba(0,0,0,0.3);
+    }
+    
+    .product-rating .bi-star {
+      color: #d1d1d1;
+      text-shadow: 0 0 1px rgba(0,0,0,0.1);
+    }
+    
+    .rating-text {
+      margin-left: 5px;
+      font-size: 0.8rem;
+      color: #6c757d;
     }
     
     .add-to-cart-btn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #0d6efd;
+      position: relative;
+      width: 100%;
+      border-radius: 30px;
+      padding: 0.6rem 1.5rem;
+      font-weight: 500;
+      background-color: var(--accent-color, #d9534f);
+      border: none;
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s;
-      opacity: 0;
-    }
-    
-    .product-card:hover .add-to-cart-btn {
-      opacity: 1;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      margin-top: auto;
     }
     
     .add-to-cart-btn:hover {
-      background-color: #0b5ed7;
-      transform: scale(1.1);
+      background-color: var(--text-color, #333);
+      transform: translateY(-2px);
     }
     
     .toast-container {
@@ -161,6 +215,48 @@
     
     .toast {
       animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+    }
+
+    /* Modern Toast Styles */
+    @keyframes slideUpIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    
+    .modern-toast {
+      background-color: var(--card-background, #fff);
+      color: var(--text-color, #333);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      min-width: 300px;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      animation: slideUpIn 0.3s, fadeOut 0.5s 2.5s forwards;
+    }
+    
+    .modern-toast.success {
+      border-left: 4px solid #198754;
+    }
+    
+    .modern-toast.error {
+      border-left: 4px solid #dc3545;
     }
   </style>
 </head>
@@ -220,7 +316,7 @@
 <div id="footer-placeholder"></div>
 
 <!-- Toast通知容器 -->
-<div class="toast-container" id="toast-container"></div>
+<div class="modern-toast-container" id="toast-container"></div>
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -374,51 +470,67 @@
       const fullStars = Math.floor(product.rating || 0);
       const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
       
-      let starsHtml = '<div class="rating text-warning">';
+      console.log(`Product ${product.name} - Rating: ${product.rating}`);
+      console.log(`Star breakdown - Full stars: ${fullStars}, Half star: ${hasHalfStar}, Empty stars: ${5 - fullStars - (hasHalfStar ? 1 : 0)}`);
+      
+      let starsHtml = '<div class="product-rating">';
       for (let i = 0; i < fullStars; i++) {
-        starsHtml += '<i class="bi bi-star-fill"></i> ';
+        starsHtml += '<i class="bi bi-star-fill"></i>';
       }
       if (hasHalfStar) {
-        starsHtml += '<i class="bi bi-star-half"></i> ';
+        starsHtml += '<i class="bi bi-star-half"></i>';
       }
       const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
       for (let i = 0; i < emptyStars; i++) {
-        starsHtml += '<i class="bi bi-star"></i> ';
+        starsHtml += '<i class="bi bi-star"></i>';
       }
+      // Add text rating for clarity
+      starsHtml += `<span class="rating-text">(${product.rating ? product.rating.toFixed(1) : '0.0'})</span>`;
       starsHtml += '</div>';
       
       // 价格显示
-      const priceHTML = product.onSale && product.salePrice 
-        ? `<span class="price">$${product.salePrice.toFixed(2)}</span>
-           <span class="original-price">$${product.price.toFixed(2)}</span>`
-        : `<span class="price">$${product.price.toFixed(2)}</span>`;
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
+          <div class="product-price-wrapper">
+            <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+            <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+          </div>
+        `;
+      } else if (product.price) {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
+      } else {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
+      }
       
       // 计算上架天数
       const listingDate = new Date(product.listingDate);
       const today = new Date();
       const daysListed = Math.floor((today - listingDate) / (1000 * 60 * 60 * 24));
-      const newBadge = daysListed <= 7 ? '<span class="badge-new">NEW</span>' : '';
-      const saleBadge = product.onSale ? '<span class="badge-sale">SALE</span>' : '';
       
       console.log(`Product ${product.id} image:`, product.images[0]);
       
       const cardHTML = `
-        <div class="col-md-4 col-lg-3 mb-4">
+        <div class="col-md-6 col-lg-4 mb-4">
           <div class="product-card">
-            ${newBadge}
-            ${saleBadge}
-            <a href="/src/client/views/product/product_detail.html?id=${product.id}">
-              <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
-            </a>
-            <div class="card-body">
-              <h5 class="card-title">${product.name}</h5>
-              <div class="mb-2">${priceHTML}</div>
-              ${starsHtml}
-              <p class="card-text text-truncate">${product.description}</p>
-              <small class="text-muted">Listed ${daysListed} days ago</small>
-              <a href="#" class="add-to-cart-btn" data-id="${product.id}">
-                <i class="bi bi-cart-plus"></i>
+            <div class="product-img-wrapper">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+                <img src="${product.images[0]}" class="product-img" alt="${product.name}">
+                ${daysListed <= 7 ? '<div class="product-badge">NEW</div>' : ''}
+                ${product.onSale ? `<div class="product-badge" style="left: ${daysListed <= 7 ? '80px' : '15px'}">Sale</div>` : ''}
+                ${product.stock && product.stock <= 5 ? '<div class="product-badge stock-badge">Low Stock</div>' : ''}
               </a>
+            </div>
+            <div class="product-card-body">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                <h2 class="product-title">${product.name}</h2>
+              </a>
+              ${priceHtml}
+              ${starsHtml}
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
+              <button class="add-to-cart-btn" data-id="${product.id}">
+                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+              </button>
             </div>
           </div>
         </div>
@@ -428,7 +540,7 @@
     } catch (error) {
       console.error(`Error creating product card for product ${product.id}:`, error);
       return `
-        <div class="col-md-4 col-lg-3 mb-4">
+        <div class="col-md-6 col-lg-4 mb-4">
           <div class="alert alert-danger">
             Error displaying product: ${product.name || 'Unknown product'}
           </div>
@@ -518,27 +630,14 @@
     
     // 创建toast元素
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.style.backgroundColor = '#fff';
-    toast.style.color = '#333';
-    toast.style.borderRadius = '4px';
-    toast.style.padding = '10px 15px';
-    toast.style.marginBottom = '10px';
-    toast.style.minWidth = '250px';
-    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.position = 'relative';
-    
-    if (type === 'success') {
-      toast.style.borderLeft = '4px solid #198754';
-    } else if (type === 'error') {
-      toast.style.borderLeft = '4px solid #dc3545';
-    }
+    toast.className = `modern-toast ${type}`;
     
     // 添加内容
     toast.innerHTML = `
-      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="flex: 1; padding-right: 10px;">
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+            ${message}
+      </div>
       <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
