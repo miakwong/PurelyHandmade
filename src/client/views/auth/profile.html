@@ -1577,6 +1577,9 @@
       // Also update 'user' for backwards compatibility with older code
       localStorage.setItem('user', JSON.stringify(userProfile));
       
+      // Add a flag to indicate profile was just updated (will be used after page refresh)
+      sessionStorage.setItem('profileJustUpdated', 'true');
+      
       // Get users array if it exists
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const userIndex = users.findIndex(u => u.id === userProfile.id);
@@ -1587,16 +1590,17 @@
         localStorage.setItem('users', JSON.stringify(users));
       }
       
-      // No need to call loadUserProfile here since we're going to refresh the page
-      // This prevents double toast messages
+      // Update display
+      loadUserProfile();
       
-      // Show success message and refresh page
-      showToast('Profile updated successfully! Refreshing page...', 'success');
+      // Instead of trying to close the modal, refresh page with a success parameter
+      showToast('Profile updated successfully!', 'success');
       console.log('Profile updated successfully, will refresh page in 1.5 seconds');
       
-      // Give time for toast to be visible, then refresh
+      
+      // Give time for toast to be visible, then refresh with a parameter
       setTimeout(function() {
-        window.location.reload();
+        window.location.href = window.location.pathname + '?status=profile_updated';
       }, 1500);
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -1682,9 +1686,9 @@
     // Instead of using jQuery modal hide, use page refresh
     showToast('Address saved successfully! Refreshing page...', 'success');
     
-    // Give time for toast to be visible, then refresh
+    // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
-      window.location.reload();
+      window.location.href = window.location.pathname + '?status=address_saved';
     }, 1500);
   }
 
@@ -1743,9 +1747,9 @@
     // Use toast and page refresh instead of alert
     showToast('Default address updated successfully! Refreshing page...', 'success');
     
-    // Give time for toast to be visible, then refresh
+    // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
-      window.location.reload();
+      window.location.href = window.location.pathname + '?status=address_updated';
     }, 1500);
   }
 
@@ -1786,9 +1790,9 @@
     // Use toast and page refresh instead of alert
     showToast('Address deleted successfully! Refreshing page...', 'success');
     
-    // Give time for toast to be visible, then refresh
+    // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
-      window.location.reload();
+      window.location.href = window.location.pathname + '?status=address_deleted';
     }, 1500);
   }
 
@@ -1865,7 +1869,7 @@
         
         // Refresh page after short delay
         setTimeout(function() {
-          window.location.reload();
+          window.location.href = window.location.pathname + '?status=password_changed';
         }, 1500);
       }
     } catch (error) {
@@ -3699,8 +3703,25 @@
 
   // Initialize everything when DOM content is loaded
   document.addEventListener('DOMContentLoaded', function() {
-    // Load user profile data first
-    loadUserProfile();
+    // Check URL parameters to see if we just updated the profile
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    
+    if (status === 'profile_updated') {
+      // Clean up the URL by removing the parameter without triggering a page reload
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // We've already shown the success message before page refresh, no need to show anything
+      console.log('Page loaded after profile update, not showing duplicate message');
+      
+      // Just load the profile data
+      loadUserProfile();
+    } else {
+      // Normal page load
+      console.log('Normal page load, loading user profile');
+      loadUserProfile();
+    }
     
     // Initialize admin features if the user is an admin
     if (isAdmin()) {
@@ -3751,6 +3772,16 @@
 
 // Add the showToast helper function at the end of your javascript
 function showToast(message, type = 'primary') {
+  // Prevent duplicate toasts with the same message within a short time
+  const existingToasts = document.querySelectorAll('.toast');
+  for (let i = 0; i < existingToasts.length; i++) {
+    const toastBody = existingToasts[i].querySelector('.toast-body');
+    if (toastBody && toastBody.textContent.trim() === message.trim()) {
+      console.log('Preventing duplicate toast:', message);
+      return; // Don't show duplicate toast
+    }
+  }
+  
   // Get toast container
   const toastContainer = document.querySelector('.toast-container');
   
