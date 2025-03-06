@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order History - Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/src/client/css/style.css">
+  <link rel="stylesheet" href="/src/client/css/navbar.css">
+  <link rel="stylesheet" href="/src/client/css/global.css">
+
+  <style>
+    .order-container {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    
+    .page-header {
+      background-color: #f8f9fa;
+      padding: 30px 0;
+      margin-bottom: 40px;
+    }
+    
+    .order-card {
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 20px;
+    }
+    
+    .order-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .order-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 20px;
+    }
+    
+    .order-body {
+      padding: 20px;
+    }
+    
+    .order-footer {
+      background-color: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .order-status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .status-processing {
+      background-color: #cff4fc;
+      color: #055160;
+    }
+    
+    .status-shipped {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    .status-delivered {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    .status-cancelled {
+      background-color: #f8d7da;
+      color: #842029;
+    }
+    
+    .order-date {
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .product-list {
+      margin-bottom: 20px;
+    }
+    
+    .product-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .product-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-right: 15px;
+    }
+    
+    .product-details {
+      flex: 1;
+    }
+    
+    .product-name {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .product-qty {
+      font-size: 14px;
+      color: #6c757d;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+    }
+    
+    .empty-icon {
+      font-size: 60px;
+      color: #dee2e6;
+      margin-bottom: 20px;
+    }
+    
+    .filter-section {
+      margin-bottom: 30px;
+    }
+    
+    .nav-pills .nav-link {
+      color: #495057;
+      border-radius: 5px;
+      padding: 10px 15px;
+      margin-right: 10px;
+      font-weight: 500;
+    }
+    
+    .nav-pills .nav-link.active {
+      background-color: #0d6efd;
+      color: #fff;
+    }
+    
+    @media (max-width: 767.98px) {
+      .order-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .order-footer .btn {
+        margin-top: 10px;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <h1 class="h3">My Orders</h1>
+    <p class="text-muted">View and manage your order history</p>
+  </div>
+</div>
+
+<!-- Order History Container -->
+<div class="container mb-5">
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-filter="all">All Orders</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-filter="processing">Processing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-filter="shipped">Shipped</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-filter="delivered">Delivered</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-filter="cancelled">Cancelled</a>
+        </li>
+      </ul>
+      <div class="d-none d-md-block">
+        <select class="form-select" id="orderSort">
+          <option value="date-desc">Most Recent</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="price-desc">Highest Total</option>
+          <option value="price-asc">Lowest Total</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Orders List -->
+  <div id="orders-container">
+    <!-- Order Card 1 - Processing -->
+    <div class="order-card" data-status="processing">
+      <div class="order-header">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="mb-1">Order #PH20230003</h5>
+            <p class="order-date mb-0">Placed on March 8, 2023</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <span class="order-status status-processing">Processing</span>
+          </div>
+        </div>
+      </div>
+      <div class="order-body">
+        <div class="product-list">
+          <div class="product-item">
+            <img src="/src/client/img/category-oils.jpg" alt="Essential Oil" class="product-image">
+            <div class="product-details">
+              <p class="product-name">Lavender Essential Oil</p>
+              <p class="product-qty mb-0">Qty: 1</p>
+            </div>
+          </div>
+          <div class="product-item">
+            <img src="/src/client/img/category-bath.jpg" alt="Bath Bomb" class="product-image">
+            <div class="product-details">
+              <p class="product-name">Rose Bath Bomb Set</p>
+              <p class="product-qty mb-0">Qty: 2</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <p class="mb-0"><strong>Total Items:</strong> 3</p>
+          </div>
+          <div class="col-6 text-md-end">
+            <p class="mb-0"><strong>Total:</strong> $48.95</p>
+          </div>
+        </div>
+      </div>
+      <div class="order-footer">
+        <div>
+          <span class="text-muted">Expected delivery: March 15, 2023</span>
+        </div>
+        <a href="order-details.html?id=PH20230003" class="btn btn-outline-primary">View Details</a>
+      </div>
+    </div>
+    
+    <!-- Order Card 2 - Shipped -->
+    <div class="order-card" data-status="shipped">
+      <div class="order-header">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="mb-1">Order #PH20230002</h5>
+            <p class="order-date mb-0">Placed on March 6, 2023</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <span class="order-status status-shipped">Shipped</span>
+          </div>
+        </div>
+      </div>
+      <div class="order-body">
+        <div class="product-list">
+          <div class="product-item">
+            <img src="/src/client/img/category-candles.jpg" alt="Candle" class="product-image">
+            <div class="product-details">
+              <p class="product-name">Vanilla Soy Candle</p>
+              <p class="product-qty mb-0">Qty: 1</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <p class="mb-0"><strong>Total Items:</strong> 1</p>
+          </div>
+          <div class="col-6 text-md-end">
+            <p class="mb-0"><strong>Total:</strong> $22.99</p>
+          </div>
+        </div>
+      </div>
+      <div class="order-footer">
+        <div>
+          <span class="text-muted">Tracking: <a href="#" class="text-decoration-none">TRACK987654321</a></span>
+        </div>
+        <a href="order-details.html?id=PH20230002" class="btn btn-outline-primary">View Details</a>
+      </div>
+    </div>
+    
+    <!-- Order Card 3 - Delivered -->
+    <div class="order-card" data-status="delivered">
+      <div class="order-header">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="mb-1">Order #PH20230001</h5>
+            <p class="order-date mb-0">Placed on March 5, 2023</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <span class="order-status status-delivered">Delivered</span>
+          </div>
+        </div>
+      </div>
+      <div class="order-body">
+        <div class="product-list">
+          <div class="product-item">
+            <img src="/src/client/img/category-soaps.jpg" alt="Handmade Soap" class="product-image">
+            <div class="product-details">
+              <p class="product-name">Lavender Handmade Soap</p>
+              <p class="product-qty mb-0">Qty: 2</p>
+            </div>
+          </div>
+          <div class="product-item">
+            <img src="/src/client/img/category-candles.jpg" alt="Handmade Candle" class="product-image">
+            <div class="product-details">
+              <p class="product-name">Vanilla Soy Candle</p>
+              <p class="product-qty mb-0">Qty: 1</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <p class="mb-0"><strong>Total Items:</strong> 3</p>
+          </div>
+          <div class="col-6 text-md-end">
+            <p class="mb-0"><strong>Total:</strong> $54.03</p>
+          </div>
+        </div>
+      </div>
+      <div class="order-footer">
+        <div>
+          <span class="text-muted">Delivered on March 10, 2023</span>
+        </div>
+        <div>
+          <a href="order-details.html?id=PH20230001" class="btn btn-outline-primary me-2">View Details</a>
+          <a href="#" class="btn btn-outline-secondary">Buy Again</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add more order cards as needed -->
+  </div>
+  
+  <!-- Empty State (hidden by default) -->
+  <div class="empty-state" id="empty-state" style="display: none;">
+    <div class="empty-icon">
+      <i class="bi bi-box-seam"></i>
+    </div>
+    <h3>No Orders Found</h3>
+    <p class="text-muted mb-4">You haven't placed any orders yet</p>
+    <a href="/src/client/views/product/product-list.html" class="btn btn-primary">Start Shopping</a>
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast通知容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Load navbar and footer
+  fetch('/src/client/assets/layout/navbar.html')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load navbar (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('navbar-placeholder').innerHTML = html;
+      console.log('Navbar loaded successfully');
+      
+      // 导航栏加载完成后，确保更新登录状态
+      setTimeout(() => {
+        console.log('Checking for updateAuthButton availability');
+        
+        // 尝试使用全局函数
+        if (typeof window.updateAuthButton === 'function') {
+          console.log('Updating auth button state using window.updateAuthButton');
+          window.updateAuthButton();
+        }
+        // 尝试使用局部函数
+        else if (typeof updateAuthButton === 'function') {
+          console.log('Updating auth button state using updateAuthButton');
+          updateAuthButton();
+        }
+        // 使用备用实现
+        else {
+          console.log('updateAuthButton function not available, using fallback');
+          // 定义一个备用的updateAuthButton函数
+          window.updateAuthButton = function() {
+            const currentUser = localStorage.getItem('currentUser');
+            const loginButton = document.getElementById('login-button');
+            const registerButton = document.getElementById('register-button');
+            const profileButton = document.getElementById('profile-button');
+            const logoutButton = document.getElementById('logout-button');
+            
+            console.log('Update Auth Button fallback called, currentUser:', currentUser ? 'exists' : 'not found');
+            
+            if (currentUser) {
+              // 用户已登录
+              if (loginButton) loginButton.style.display = 'none';
+              if (registerButton) registerButton.style.display = 'none';
+              if (profileButton) profileButton.style.display = 'block';
+              if (logoutButton) {
+                logoutButton.style.display = 'block';
+                logoutButton.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  localStorage.removeItem('currentUser');
+                  window.location.href = '/src/client/html/index.html';
+                });
+              }
+            } else {
+              // 用户未登录
+              if (loginButton) loginButton.style.display = 'block';
+              if (registerButton) registerButton.style.display = 'block';
+              if (profileButton) profileButton.style.display = 'none';
+              if (logoutButton) logoutButton.style.display = 'none';
+            }
+          };
+          
+          // 调用备用函数
+          window.updateAuthButton();
+        }
+      }, 300);
+      
+      // 更新购物车数量
+      if (typeof updateCartCount === 'function') {
+        updateCartCount();
+      }
+    })
+    .catch(error => {
+      console.error('Error loading navbar:', error);
+      document.getElementById('navbar-placeholder').innerHTML = '<div class="alert alert-danger">Failed to load navigation. Please refresh the page.</div>';
+    });
+
+  fetch('/src/client/assets/layout/footer.html')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to load footer (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById('footer-placeholder').innerHTML = html;
+      console.log('Footer loaded successfully');
+    })
+    .catch(error => {
+      console.error('Error loading footer:', error);
+      document.getElementById('footer-placeholder').innerHTML =
+              '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+    });
+  
+  // 在文档完全加载后再次尝试调用更新身份验证状态和购物车
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded: Document fully loaded, checking auth and cart state');
+    
+    // 添加额外的延迟来确保导航栏已完全加载并且身份验证状态得到正确更新
+    setTimeout(() => {
+      console.log('Document fully loaded, updating auth state again');
+      if (typeof window.updateAuthButton === 'function') {
+        window.updateAuthButton();
+      }
+      
+      if (typeof window.updateCartCount === 'function') {
+        window.updateCartCount();
+      }
+      
+      // 检查用户是否登录
+      checkUserLogin();
+      
+      // 初始化过滤器
+      initializeFilters();
+    }, 500);
+  });
+  
+  // 检查用户是否登录
+  function checkUserLogin() {
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (!currentUser) {
+      // 用户未登录，显示提示并重定向
+      showToast('请登录以查看您的订单历史', 'error');
+      
+      // 3秒后重定向到登录页面
+      setTimeout(() => {
+        window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.href);
+      }, 3000);
+    } else {
+      // 用户已登录，加载订单数据
+      loadOrderHistory();
+    }
+  }
+  
+  // 加载订单历史
+  function loadOrderHistory() {
+    // 在实际应用中，这里会从localStorage或服务器获取订单数据
+    // 这里使用示例数据
+    
+    // 如果没有订单，显示空状态
+    // const hasOrders = false; // 设置为false以测试空状态
+    const hasOrders = true; // 当前示例有订单
+    
+    if (!hasOrders) {
+      document.getElementById('orders-container').style.display = 'none';
+      document.getElementById('empty-state').style.display = 'block';
+    }
+  }
+  
+  // 初始化过滤器
+  function initializeFilters() {
+    // 状态过滤
+    document.querySelectorAll('.nav-pills .nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // 更新活动状态
+        document.querySelectorAll('.nav-pills .nav-link').forEach(el => {
+          el.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // 获取过滤值
+        const filter = this.getAttribute('data-filter');
+        
+        // 过滤订单
+        filterOrders(filter);
+      });
+    });
+    
+    // 排序
+    document.getElementById('orderSort').addEventListener('change', function() {
+      sortOrders(this.value);
+    });
+  }
+  
+  // 过滤订单
+  function filterOrders(status) {
+    const orderCards = document.querySelectorAll('.order-card');
+    
+    orderCards.forEach(card => {
+      if (status === 'all' || card.getAttribute('data-status') === status) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    // 检查是否有可见的订单
+    const visibleOrders = document.querySelectorAll('.order-card[style="display: block"]');
+    
+    if (visibleOrders.length === 0) {
+      showToast(`没有${getStatusText(status)}订单`, 'info');
+    }
+  }
+  
+  // 根据状态值获取状态文本
+  function getStatusText(status) {
+    switch(status) {
+      case 'processing': return '处理中的';
+      case 'shipped': return '已发货的';
+      case 'delivered': return '已送达的';
+      case 'cancelled': return '已取消的';
+      default: return '';
+    }
+  }
+  
+  // 排序订单
+  function sortOrders(sortBy) {
+    const ordersContainer = document.getElementById('orders-container');
+    const orderCards = Array.from(ordersContainer.querySelectorAll('.order-card'));
+    
+    // 根据排序值排序
+    orderCards.sort((a, b) => {
+      if (sortBy === 'date-desc') {
+        // 按日期降序（最新优先）
+        const dateA = a.querySelector('.order-date').textContent.replace('Placed on ', '');
+        const dateB = b.querySelector('.order-date').textContent.replace('Placed on ', '');
+        return new Date(dateB) - new Date(dateA);
+      } else if (sortBy === 'date-asc') {
+        // 按日期升序（最旧优先）
+        const dateA = a.querySelector('.order-date').textContent.replace('Placed on ', '');
+        const dateB = b.querySelector('.order-date').textContent.replace('Placed on ', '');
+        return new Date(dateA) - new Date(dateB);
+      } else if (sortBy === 'price-desc') {
+        // 按价格降序（最高优先）
+        const priceA = parseFloat(a.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
+        const priceB = parseFloat(b.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
+        return priceB - priceA;
+      } else if (sortBy === 'price-asc') {
+        // 按价格升序（最低优先）
+        const priceA = parseFloat(a.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
+        const priceB = parseFloat(b.querySelector('.text-md-end strong').nextSibling.textContent.replace('$', ''));
+        return priceA - priceB;
+      }
+      return 0;
+    });
+    
+    // 重新添加排序后的订单卡片
+    orderCards.forEach(card => {
+      ordersContainer.appendChild(card);
+    });
+  }
+  
+  // 显示Toast通知
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) return;
+    
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.style.backgroundColor = '#fff';
+    toast.style.color = '#333';
+    toast.style.borderRadius = '4px';
+    toast.style.padding = '10px 15px';
+    toast.style.marginBottom = '10px';
+    toast.style.minWidth = '250px';
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.position = 'relative';
+    
+    if (type === 'success') {
+      toast.style.borderLeft = '4px solid #198754';
+    } else if (type === 'error') {
+      toast.style.borderLeft = '4px solid #dc3545';
+    } else if (type === 'info') {
+      toast.style.borderLeft = '4px solid #0dcaf0';
+    }
+    
+    // 添加内容
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // 添加到容器
+    toastContainer.appendChild(toast);
+    
+    // 添加关闭按钮事件
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // 自动3秒后移除
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+</script>
+
+</body>
+</html> 
