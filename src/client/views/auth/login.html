@@ -6,8 +6,33 @@
   <title>Login - Purely Homemade</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="../../assets/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
   <style>
+    /* 使用与首页一致的颜色变量 */
+    :root {
+      --primary-color: #eae2d6; /* 更改为与首页相同的导航栏颜色 */
+      --secondary-color: #e1d7c6;
+      --accent-color: #867666;
+      --text-color: #5e4b3e;
+      --border-color: #bfb1a3;
+      --shadow: 0 4px 6px rgba(94, 75, 62, 0.1);
+      --border-radius: 8px;
+      
+      /* Additional variables for login page */
+      --primary-light: rgba(134, 118, 102, 0.25);
+      --text-muted: #6c757d;
+      --bg-light: #f8f9fa;
+      --success-color: #5a8c70;
+      --danger-color: #a95e5e;
+      --background-color: #f8f5f0;
+    }
+    
+    body {
+      background-color: var(--background-color);
+    }
+    
     /* 登录页特定样式 */
     .login-card {
       border: none;
@@ -34,17 +59,19 @@
     }
     
     .login-form .btn-primary {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
+      background-color: var(--accent-color);
+      color: white;
       border: none;
       padding: 0.75rem;
       margin-top: 0.5rem;
       font-weight: 500;
+      transition: all 0.3s ease;
     }
     
     .login-form .btn-primary:hover {
-      background-color: var(--accent-color);
+      background-color: var(--text-color);
       color: white;
+      transform: translateY(-2px);
     }
     
     .login-links {
