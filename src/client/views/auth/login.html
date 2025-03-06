@@ -10,9 +10,9 @@
   <link href="/src/client/css/style.css" rel="stylesheet">
   <link href="/src/client/css/navbar.css" rel="stylesheet">
   <style>
-    /* 使用与首页一致的颜色变量 */
+    /* Use color variables consistent with homepage */
     :root {
-      --primary-color: #eae2d6; /* 更改为与首页相同的导航栏颜色 */
+      --primary-color: #eae2d6; /* Changed to match navbar color on homepage */
       --secondary-color: #e1d7c6;
       --accent-color: #867666;
       --text-color: #5e4b3e;
@@ -27,13 +27,41 @@
       --success-color: #5a8c70;
       --danger-color: #a95e5e;
       --background-color: #f8f5f0;
+      --admin-highlight: rgba(90, 140, 112, 0.2);
     }
     
     body {
       background-color: var(--background-color);
     }
     
-    /* 登录页特定样式 */
+    /* Navbar user dropdown styles */
+    .dropdown-toggle .user-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+      color: var(--text-color);
+    }
+    
+    .dropdown-toggle .bi-person-circle {
+      font-size: 1.1rem;
+    }
+    
+    .dropdown-toggle.admin-user {
+      background-color: var(--admin-highlight);
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--border-radius);
+    }
+    
+    .dropdown-toggle.admin-user .user-icon {
+      color: var(--success-color);
+    }
+    
+    .dropdown-menu .admin-only-menu-item {
+      border-left: 3px solid var(--success-color);
+    }
+    
+    /* Login page specific styles */
     .login-card {
       border: none;
       border-radius: var(--border-radius);
@@ -95,7 +123,7 @@
       z-index: 1060;
     }
     
-    /* 错误消息动画效果 */
+    /* Error message animations */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -140,7 +168,7 @@
                 </div>
               </div>
               
-              <!-- Error message area - 改进样式使其更醒目 -->
+              <!-- Error message area - Improved style for visibility -->
               <div id="login-error" class="alert alert-danger mt-3 d-none" style="border-left: 4px solid #dc3545; animation: fadeIn 0.3s;">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <span id="login-error-message">Invalid username/email or password. Please try again.</span>
@@ -179,7 +207,7 @@
     <div id="notification-toast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body" id="toast-message">
-          <!-- Toast消息将动态设置 -->
+          <!-- Toast message will be set dynamically -->
         </div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
@@ -190,93 +218,190 @@
   <div id="footer-placeholder"></div>
 
   <script>
-    // 初始化后加载导航栏和页脚
+    // Define updateAuthButton globally so it's available immediately
+    window.updateAuthButton = function() {
+      console.log('Global updateAuthButton function executing');
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const loginButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const userDropdown = document.getElementById('user-dropdown');
+        const cartBadge = document.getElementById('cart-count');
+        
+        if (loginButton && logoutButton) {
+          if (currentUser) {
+            // Hide login button and show logout button when user is logged in
+            loginButton.style.display = 'none';
+            logoutButton.style.display = 'flex';
+            
+            // Update user dropdown if it exists
+            if (userDropdown) {
+              // Find dropdown toggle and update text
+              const dropdownToggle = userDropdown.querySelector('.dropdown-toggle');
+              if (dropdownToggle) {
+                // Create profile icon element
+                let userIcon = dropdownToggle.querySelector('.user-icon');
+                if (!userIcon) {
+                  userIcon = document.createElement('span');
+                  userIcon.className = 'user-icon me-1';
+                  userIcon.innerHTML = '<i class="bi bi-person-circle"></i>';
+                  dropdownToggle.prepend(userIcon);
+                }
+                
+                // Update username in dropdown
+                const usernameText = dropdownToggle.querySelector('.username-text');
+                if (usernameText) {
+                  usernameText.textContent = currentUser.username;
+                } else {
+                  // Create username text if it doesn't exist
+                  const span = document.createElement('span');
+                  span.className = 'username-text';
+                  span.textContent = currentUser.username;
+                  dropdownToggle.appendChild(span);
+                }
+                
+                // Apply any special styling for admin users
+                if (currentUser.isAdmin) {
+                  dropdownToggle.classList.add('admin-user');
+                } else {
+                  dropdownToggle.classList.remove('admin-user');
+                }
+              }
+              
+              // Update dropdown menu items visibility
+              const adminMenuItems = document.querySelectorAll('.admin-only-menu-item');
+              adminMenuItems.forEach(item => {
+                item.style.display = currentUser.isAdmin ? 'block' : 'none';
+              });
+              
+              // Show user-specific menu items
+              const userMenuItems = document.querySelectorAll('.user-menu-item');
+              userMenuItems.forEach(item => {
+                item.style.display = 'block';
+              });
+              
+              // Ensure the dropdown is visible
+              userDropdown.style.display = 'block';
+            }
+          } else {
+            // When no user is logged in
+            loginButton.style.display = 'flex';
+            logoutButton.style.display = 'none';
+            
+            // Hide user-specific menu items
+            if (userDropdown) {
+              const userMenuItems = document.querySelectorAll('.user-menu-item');
+              userMenuItems.forEach(item => {
+                item.style.display = 'none';
+              });
+              
+              // Hide admin menu items
+              const adminMenuItems = document.querySelectorAll('.admin-only-menu-item');
+              adminMenuItems.forEach(item => {
+                item.style.display = 'none';
+              });
+              
+              // Reset dropdown toggle
+              const dropdownToggle = userDropdown.querySelector('.dropdown-toggle');
+              if (dropdownToggle) {
+                dropdownToggle.textContent = 'Guest';
+                dropdownToggle.classList.remove('admin-user');
+              }
+            }
+          }
+          
+          // Update cart count if available
+          if (cartBadge) {
+            try {
+              const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+              const count = cart.reduce((total, item) => total + (item.quantity || 0), 0);
+              cartBadge.textContent = count.toString();
+              cartBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+            } catch (e) {
+              console.warn('Error updating cart badge:', e);
+            }
+          }
+          
+          console.log('Navigation bar successfully updated');
+        } else {
+          console.warn('Navigation bar buttons not found yet');
+        }
+      } catch (error) {
+        console.error('Error in updateAuthButton function:', error);
+      }
+    };
+
+    // Initialize after loading navbar and footer
     document.addEventListener('DOMContentLoaded', function() {
-      // 首先加载导航栏
+      // First load the navigation bar
       fetch('/src/client/assets/layout/navbar.html')
       .then(r => r.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        // 加载后初始化导航栏
+        // Initialize navigation bar after loading with increased timeout
         setTimeout(() => {
           if (typeof updateAuthButton === 'function') {
             updateAuthButton();
             console.log("Navigation bar login status updated");
           } else {
             console.warn("Navigation bar update function not available");
-            // 添加备用的导航栏更新函数
-            window.updateAuthButton = function() {
-              console.log('Using fallback updateAuthButton function to update navigation bar');
-              try {
-                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                const loginButton = document.getElementById('login-button');
-                const logoutButton = document.getElementById('logout-button');
-                const userDropdown = document.getElementById('user-dropdown');
-                
-                if (loginButton && logoutButton && userDropdown) {
-                  if (currentUser) {
-                    loginButton.style.display = 'none';
-                    logoutButton.style.display = 'flex';
-                    userDropdown.querySelector('.dropdown-toggle').textContent = currentUser.username;
-                    
-                    // 更新管理员菜单项可见性
-                    const adminMenuItem = document.getElementById('admin-menu-item');
-                    if (adminMenuItem) {
-                      adminMenuItem.style.display = currentUser.isAdmin ? 'block' : 'none';
-                    }
-                  } else {
-                    loginButton.style.display = 'flex';
-                    logoutButton.style.display = 'none';
-                  }
-                  console.log('Fallback function successfully updated the navigation bar');
-                } else {
-                  console.warn('Fallback function could not find navigation bar buttons');
-                }
-              } catch (error) {
-                console.error('Error updating navigation bar with fallback function:', error);
-              }
-            };
-            
-            // 立即执行备用函数
-            window.updateAuthButton();
+            // No need to define again since we defined it globally
           }
           
-          // 初始化其他内容
+          // Add event listeners for navigation updates
+          window.addEventListener('storage', function(e) {
+            if (e.key === 'currentUser') {
+              console.log('Storage event detected: currentUser changed, updating navigation');
+              if (typeof updateAuthButton === 'function') {
+                updateAuthButton();
+              }
+            }
+          });
+          
+          // Listen for custom login event
+          window.addEventListener('userLoggedIn', function(e) {
+            console.log('Login event detected, updating navigation with user:', e.detail?.username);
+            if (typeof updateAuthButton === 'function') {
+              updateAuthButton();
+            }
+          });
+          
+          // Initialize other content
           ensureAdminAccount();
           initToast();
-        }, 300);
+        }, 500); // Increased timeout to ensure DOM is fully loaded
       })
       .catch(err => {
         console.error("Failed to load navigation bar:", err);
-        // 继续加载其他内容
+        // Continue loading other content
         ensureAdminAccount();
         initToast();
       });
     
-    // 然后加载页脚
+    // Then load the footer
     fetch('/src/client/assets/layout/footer.html')
       .then(r => r.text())
       .then(html => document.getElementById('footer-placeholder').innerHTML = html)
       .catch(err => console.error("Failed to load footer:", err));
     });
 
-    // 初始化Toast组件
+    // Initialize Toast component
     function initToast() {
       try {
         const toastEl = document.getElementById('notification-toast');
         window.toast = new bootstrap.Toast(toastEl, { delay: 3000 });
         
-        // 初始化密码重置模态框
+        // Initialize password reset modal
         const passwordResetModal = new bootstrap.Modal(document.getElementById('passwordResetModal'));
         
-        // 设置"发送重置链接"按钮的事件监听
+        // Set event listener for "Send Reset Link" button
         document.getElementById('sendResetLink').addEventListener('click', function() {
           const email = document.getElementById('resetEmail').value.trim();
           if (email) {
-            // 关闭模态框
+            // Close modal
             passwordResetModal.hide();
             
-            // 显示通知
+            // Show notification
             document.getElementById('toast-message').textContent = "Password reset instructions have been sent to your email.";
             window.toast.show();
           }
@@ -380,46 +505,49 @@
           localStorage.setItem('isAdmin', 'true');
         }
         
-        // 尝试立即更新导航栏状态
+        // Try immediately updating navigation bar status
         console.log('User login successful, attempting to update navigation bar...');
         
-        // 尝试立即更新导航栏上的登录/登出按钮
+        // Update navigation bar directly with global function
         try {
-          // 优先使用全局更新函数
-          if (typeof updateAuthButton === 'function') {
-            updateAuthButton();
-            console.log('Updated navigation bar using global function');
-          } else {
-            // 尝试直接访问并更新导航栏的登录/登出按钮
-            const loginButton = document.getElementById('login-button');
-            const logoutButton = document.getElementById('logout-button');
-            
-            if (loginButton && logoutButton) {
-              // 如果能找到这些按钮，直接更新它们的显示状态
-              loginButton.style.display = 'none';
-              logoutButton.style.display = 'flex';
-              console.log('Directly updated navigation bar buttons');
-            } else {
-              console.log('Navigation bar buttons not found, will refresh after redirect');
-            }
-          }
+          // The function is now defined globally so we can call it directly
+          window.updateAuthButton();
+          console.log('Updated navigation bar after successful login');
+          
+          // Additional attempt with delayed call to ensure DOM updates are complete
+          setTimeout(() => {
+            window.updateAuthButton();
+            console.log('Updated navigation bar with delayed call');
+          }, 300);
         } catch (err) {
-          console.error('Error updating navigation bar buttons:', err);
+          console.error('Error updating navigation bar:', err);
         }
 
-        // 手动触发storage事件，确保其他页面也能感知到变化
+        // Trigger events to notify all components of login
         try {
+          // Manual storage event
           window.dispatchEvent(new StorageEvent('storage', {
             key: 'currentUser',
             newValue: localStorage.getItem('currentUser'),
             url: window.location.href
           }));
-          console.log('Triggered storage event');
+          
+          // Custom login event for more reliable communication
+          const loginEvent = new CustomEvent('userLoggedIn', {
+            detail: {
+              username: user.username,
+              isAdmin: user.isAdmin || false,
+              userId: user.id
+            }
+          });
+          window.dispatchEvent(loginEvent);
+          
+          console.log('Triggered login events');
         } catch (err) {
-          console.error('Error triggering storage event:', err);
+          console.error('Error triggering login events:', err);
         }
         
-        // 显示登录成功消息
+        // Show login success message
         try {
           const message = `Welcome back, ${user.username}!`;
           if (typeof window.showToast === 'function') {
@@ -436,36 +564,36 @@
         // Hide error message if visible
         loginError.classList.add('d-none');
         
-        // 延迟后重定向到个人资料页面
+        // Delay redirect to profile page
         console.log('Preparing to redirect to profile page...');
         setTimeout(() => {
           window.location.href = 'profile.html';
         }, 1200);
       } else {
-        // 检查用户名是否存在，以提供更具体的错误信息
+        // Check if username exists to provide more specific error information
         const usernameExists = users.some(u => 
           isEmail(identifier) ? u.email === identifier : u.username === identifier
         );
         
         const errorMessageElement = document.getElementById('login-error-message');
         if (!usernameExists) {
-          // 账号不存在
+          // Account does not exist
           errorMessageElement.textContent = "Account does not exist. Please check your username/email or create a new account.";
           console.log("Login failed: Account does not exist");
         } else {
-          // 密码错误
+          // Incorrect password
           errorMessageElement.textContent = "Incorrect password. Please try again or use the forgot password feature.";
           console.log("Login failed: Incorrect password");
         }
         
-        // 显示错误消息并添加震动效果
+        // Show error message and add shake effect
         loginError.classList.remove('d-none');
         loginError.style.animation = "none";
         setTimeout(() => {
           loginError.style.animation = "shake 0.5s";
         }, 10);
         
-        // 将焦点放在密码字段上，方便用户重新输入
+        // Focus on password field for user to re-enter
         document.getElementById('loginPassword').focus();
       }
     });
