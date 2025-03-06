@@ -1180,52 +1180,109 @@
 
   // Load user profile from localStorage
   function loadUserProfile() {
-    const userData = localStorage.getItem('user');
+    // Get data from currentUser instead of user
+    const userData = localStorage.getItem('currentUser');
     if (userData) {
+      // Parse the current user data
       userProfile = JSON.parse(userData);
+      
+      console.log('Loading profile for:', userProfile.username);
+      
+      // Get the complete user data from users array using the ID or username
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const completeUserData = users.find(u => u.id == userProfile.id || u.username === userProfile.username);
+      
+      if (completeUserData) {
+        // Merge the data to ensure we have all profile fields
+        userProfile = {...userProfile, ...completeUserData};
+        console.log('Complete user profile loaded:', userProfile.username);
+      } else {
+        console.warn('Could not find complete profile data for user:', userProfile.username);
+      }
       
       // Update profile display
       $('#profile-img').attr('src', userProfile.avatar || '/src/client/assets/img/profile.png');
-      $('#user-full-name').text(`${userProfile.firstName} ${userProfile.lastName}`);
+      $('#user-full-name').text(`${userProfile.firstName || ''} ${userProfile.lastName || ''}`);
       $('#user-email, #email-display').text(userProfile.email);
       
       // Format and display birthday
-      const birthday = new Date(userProfile.birthday);
-      const formattedBirthday = birthday.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      $('#birthday-display').text(formattedBirthday);
+      if (userProfile.birthday) {
+        const birthday = new Date(userProfile.birthday);
+        const formattedBirthday = birthday.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        $('#birthday-display').text(formattedBirthday);
+      } else {
+        $('#birthday-display').text('Not set');
+      }
       
       // Display gender
-      $('#gender-display').text(userProfile.gender.charAt(0).toUpperCase() + userProfile.gender.slice(1));
+      if (userProfile.gender) {
+        $('#gender-display').text(userProfile.gender.charAt(0).toUpperCase() + userProfile.gender.slice(1));
+      } else {
+        $('#gender-display').text('Not set');
+      }
       
       // Display first and last name
-      $('#first-name').text(userProfile.firstName);
-      $('#last-name').text(userProfile.lastName);
+      $('#first-name').text(userProfile.firstName || '');
+      $('#last-name').text(userProfile.lastName || '');
       
       // Format and display join date
-      const joinDate = new Date(userProfile.createdAt);
-      $('#join-date').text(joinDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long'
-      }));
+      if (userProfile.createdAt) {
+        const joinDate = new Date(userProfile.createdAt);
+        $('#join-date').text(joinDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long'
+        }));
+      } else {
+        $('#join-date').text('Unknown');
+      }
       
       // Populate edit profile form
-      $('#firstName').val(userProfile.firstName);
-      $('#lastName').val(userProfile.lastName);
-      $('#email').val(userProfile.email);
-      $('#birthday').val(userProfile.birthday);
-      $(`input[name="gender"][value="${userProfile.gender}"]`).prop('checked', true);
+      $('#firstName').val(userProfile.firstName || '');
+      $('#lastName').val(userProfile.lastName || '');
+      $('#email').val(userProfile.email || '');
+      $('#birthday').val(userProfile.birthday || '');
+      if (userProfile.gender) {
+        $(`input[name="gender"][value="${userProfile.gender}"]`).prop('checked', true);
+      }
+    } else {
+      console.error('No user data found in localStorage');
+      // Redirect to login page if no user data is found
+      window.location.href = 'login.html';
     }
   }
 
   // Load user addresses from localStorage
   function loadUserAddresses() {
-    const addressesData = localStorage.getItem('userAddresses');
-    if (addressesData) {
-      userAddresses = JSON.parse(addressesData);
+    try {
+      // First check if we have a current user
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!currentUser) {
+        console.error('Cannot load addresses: No current user found');
+        return;
+      }
+      
+      // Create a user-specific key for addresses
+      const addressKey = `userAddresses_${currentUser.id}`;
+      console.log(`Loading addresses for user ID: ${currentUser.id} using key: ${addressKey}`);
+      
+      const addressesData = localStorage.getItem(addressKey);
+      if (addressesData) {
+        userAddresses = JSON.parse(addressesData);
+        console.log(`Loaded ${userAddresses.length} addresses for user`);
+      } else {
+        // Initialize empty addresses array for this user
+        userAddresses = [];
+        console.log('No addresses found for this user, initialized empty array');
+      }
+      
+      renderAddresses();
+    } catch (error) {
+      console.error('Error loading user addresses:', error);
+      userAddresses = [];
       renderAddresses();
     }
   }
@@ -1411,59 +1468,65 @@
   // Save new address
   function saveNewAddress() {
     const addressId = $('#address-id').val();
-    const name = $('#addressName').val().trim();
-    const fullName = $('#fullName').val().trim();
-    const phone = $('#phone').val().trim();
-    const addressLine1 = $('#addressLine1').val().trim();
-    const addressLine2 = $('#addressLine2').val().trim();
-    const city = $('#city').val().trim();
-    const state = $('#state').val().trim();
-    const zipCode = $('#zipCode').val().trim();
-    const country = $('#country').val();
-    const isDefault = $('#defaultAddress').is(':checked');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
-    // Validate form
-    if (!name || !fullName || !phone || !addressLine1 || !city || !state || !zipCode || !country) {
-      $('#address-error').text('Please fill in all required fields.').removeClass('d-none');
+    if (!currentUser || !currentUser.id) {
+      alert('Error: User not logged in properly. Please log in again.');
       return;
     }
     
     // Create address object
     const newAddress = {
-      id: addressId || new Date().getTime().toString(),
-      name,
-      fullName,
-      phone,
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      zipCode,
-      country,
-      isDefault
+      id: addressId || Date.now().toString(),
+      name: $('#addressName').val(),
+      fullName: $('#fullName').val(),
+      phone: $('#phone').val(),
+      addressLine1: $('#addressLine1').val(),
+      addressLine2: $('#addressLine2').val(),
+      city: $('#city').val(),
+      state: $('#state').val(),
+      zipCode: $('#zipCode').val(),
+      country: $('#country').val(),
+      isDefault: $('#defaultAddress').is(':checked')
     };
     
-    // If this is set as default, remove default from other addresses
-    if (isDefault) {
-      userAddresses.forEach(addr => addr.isDefault = false);
-    }
-    
-    // Check if we're editing an existing address
-    const existingIndex = userAddresses.findIndex(addr => addr.id === newAddress.id);
-    if (existingIndex >= 0) {
+    // Check if editing existing address
+    if (addressId) {
       // Update existing address
-      userAddresses[existingIndex] = newAddress;
+      const index = userAddresses.findIndex(a => a.id === addressId);
+      if (index !== -1) {
+        // If this address is becoming the default, set others to false
+        if (newAddress.isDefault) {
+          userAddresses.forEach(addr => addr.isDefault = false);
+        }
+        // Preserve default status if no other is default and this is not becoming default
+        else if (!userAddresses.some(a => a.id !== addressId && a.isDefault)) {
+          newAddress.isDefault = true;
+        }
+        
+        userAddresses[index] = newAddress;
+      }
     } else {
       // Add new address
+      
       // If this is the first address, make it default
       if (userAddresses.length === 0) {
         newAddress.isDefault = true;
       }
+      // If this address is becoming the default, set others to false
+      else if (newAddress.isDefault) {
+        userAddresses.forEach(addr => addr.isDefault = false);
+      }
+      
       userAddresses.push(newAddress);
     }
     
-    // Save to localStorage
-    localStorage.setItem('userAddresses', JSON.stringify(userAddresses));
+    // Create a user-specific key for addresses
+    const addressKey = `userAddresses_${currentUser.id}`;
+    
+    // Save to localStorage with user-specific key
+    localStorage.setItem(addressKey, JSON.stringify(userAddresses));
+    console.log(`Saved ${userAddresses.length} addresses for user ID: ${currentUser.id}`);
     
     // Update shipping cost in cart if this is default address
     if (newAddress.isDefault) {
@@ -1511,6 +1574,13 @@
 
   // Set default address
   function setDefaultAddress(index) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (!currentUser || !currentUser.id) {
+      alert('Error: User not logged in properly. Please log in again.');
+      return;
+    }
+    
     // Set all addresses to non-default
     userAddresses.forEach(addr => addr.isDefault = false);
     
@@ -1520,8 +1590,12 @@
     // Update shipping cost in cart
     updateCartShippingCost(userAddresses[index]);
     
-    // Save to localStorage
-    localStorage.setItem('userAddresses', JSON.stringify(userAddresses));
+    // Create a user-specific key for addresses
+    const addressKey = `userAddresses_${currentUser.id}`;
+    
+    // Save to localStorage with user-specific key
+    localStorage.setItem(addressKey, JSON.stringify(userAddresses));
+    console.log(`Updated default address for user ID: ${currentUser.id}`);
     
     // Render addresses
     renderAddresses();
@@ -1536,6 +1610,13 @@
       return;
     }
     
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (!currentUser || !currentUser.id) {
+      alert('Error: User not logged in properly. Please log in again.');
+      return;
+    }
+    
     const wasDefault = userAddresses[index].isDefault;
     
     // Remove address
@@ -1547,8 +1628,12 @@
       updateCartShippingCost(userAddresses[0]);
     }
     
-    // Save to localStorage
-    localStorage.setItem('userAddresses', JSON.stringify(userAddresses));
+    // Create a user-specific key for addresses
+    const addressKey = `userAddresses_${currentUser.id}`;
+    
+    // Save to localStorage with user-specific key
+    localStorage.setItem(addressKey, JSON.stringify(userAddresses));
+    console.log(`Deleted address for user ID: ${currentUser.id}, ${userAddresses.length} addresses remaining`);
     
     // Render addresses
     renderAddresses();
