@@ -94,6 +94,18 @@
       right: 20px;
       z-index: 1060;
     }
+    
+    /* 错误消息动画效果 */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
   </style>
 </head>
 <body>
@@ -107,30 +119,31 @@
         <div class="col-md-6">
           <div class="card login-card">
             <div class="card-body">
-              <h2 class="login-title text-center">登录账户</h2>
+              <h2 class="login-title text-center">Log In</h2>
               <form id="login-form" class="login-form" novalidate>
                 <div class="mb-3">
-                  <input type="text" class="form-control" id="loginIdentifier" placeholder="用户名或电子邮箱" required />
+                  <input type="text" class="form-control" id="loginIdentifier" placeholder="Username or Email" required />
                 </div>
                 <div class="mb-3">
-                  <input type="password" class="form-control" id="loginPassword" placeholder="密码" required minlength="6" />
+                  <input type="password" class="form-control" id="loginPassword" placeholder="Password" required minlength="6" />
                 </div>
-                <button type="submit" class="btn btn-primary w-100">登录</button>
+                <button type="submit" class="btn btn-primary w-100">Log In</button>
               </form>
               <div class="login-links">
                 <div class="row">
                   <div class="col-6 text-start">
-                    <a href="../auth/register.html">创建新账户</a>
+                    <a href="../auth/register.html">Create Account</a>
                   </div>
                   <div class="col-6 text-end">
-                    <a href="#" id="forgot-password">忘记密码?</a>
+                    <a href="#" id="forgot-password">Forgot Password?</a>
                   </div>
                 </div>
               </div>
               
-              <!-- Error message area -->
-              <div id="login-error" class="alert alert-danger mt-3 d-none">
-                用户名/邮箱或密码无效，请重试。
+              <!-- Error message area - 改进样式使其更醒目 -->
+              <div id="login-error" class="alert alert-danger mt-3 d-none" style="border-left: 4px solid #dc3545; animation: fadeIn 0.3s;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span id="login-error-message">Invalid username/email or password. Please try again.</span>
               </div>
             </div>
           </div>
@@ -144,18 +157,18 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="passwordResetModalLabel">重置密码</h5>
+          <h5 class="modal-title" id="passwordResetModalLabel">Reset Password</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>输入您的电子邮箱，我们将向您发送重置密码的说明。</p>
+          <p>Enter your email address and we'll send you instructions to reset your password.</p>
           <div class="mb-3">
-            <input type="email" class="form-control" id="resetEmail" placeholder="电子邮箱地址" required>
+            <input type="email" class="form-control" id="resetEmail" placeholder="Email Address" required>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" id="sendResetLink">发送重置链接</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="sendResetLink">Send Reset Link</button>
         </div>
       </div>
     </div>
@@ -177,21 +190,55 @@
   <div id="footer-placeholder"></div>
 
   <script>
-    // 确保先加载导航栏，再加载其他脚本
-    // 首先加载导航栏
-    fetch('/src/client/assets/layout/navbar.html')
+    // 初始化后加载导航栏和页脚
+    document.addEventListener('DOMContentLoaded', function() {
+      // 首先加载导航栏
+      fetch('/src/client/assets/layout/navbar.html')
       .then(r => r.text())
       .then(html => {
         document.getElementById('navbar-placeholder').innerHTML = html;
-        
-        // 确保导航栏脚本加载完成后再运行其他初始化
+        // 加载后初始化导航栏
         setTimeout(() => {
-          // 当导航栏脚本可用时，确保更新登录状态
           if (typeof updateAuthButton === 'function') {
             updateAuthButton();
-            console.log("导航栏登录状态已更新");
+            console.log("Navigation bar login status updated");
           } else {
-            console.warn("导航栏更新函数不可用");
+            console.warn("Navigation bar update function not available");
+            // 添加备用的导航栏更新函数
+            window.updateAuthButton = function() {
+              console.log('Using fallback updateAuthButton function to update navigation bar');
+              try {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                const loginButton = document.getElementById('login-button');
+                const logoutButton = document.getElementById('logout-button');
+                const userDropdown = document.getElementById('user-dropdown');
+                
+                if (loginButton && logoutButton && userDropdown) {
+                  if (currentUser) {
+                    loginButton.style.display = 'none';
+                    logoutButton.style.display = 'flex';
+                    userDropdown.querySelector('.dropdown-toggle').textContent = currentUser.username;
+                    
+                    // 更新管理员菜单项可见性
+                    const adminMenuItem = document.getElementById('admin-menu-item');
+                    if (adminMenuItem) {
+                      adminMenuItem.style.display = currentUser.isAdmin ? 'block' : 'none';
+                    }
+                  } else {
+                    loginButton.style.display = 'flex';
+                    logoutButton.style.display = 'none';
+                  }
+                  console.log('Fallback function successfully updated the navigation bar');
+                } else {
+                  console.warn('Fallback function could not find navigation bar buttons');
+                }
+              } catch (error) {
+                console.error('Error updating navigation bar with fallback function:', error);
+              }
+            };
+            
+            // 立即执行备用函数
+            window.updateAuthButton();
           }
           
           // 初始化其他内容
@@ -200,7 +247,7 @@
         }, 300);
       })
       .catch(err => {
-        console.error("加载导航栏失败:", err);
+        console.error("Failed to load navigation bar:", err);
         // 继续加载其他内容
         ensureAdminAccount();
         initToast();
@@ -210,7 +257,8 @@
     fetch('/src/client/assets/layout/footer.html')
       .then(r => r.text())
       .then(html => document.getElementById('footer-placeholder').innerHTML = html)
-      .catch(err => console.error("加载页脚失败:", err));
+      .catch(err => console.error("Failed to load footer:", err));
+    });
 
     // 初始化Toast组件
     function initToast() {
@@ -229,32 +277,52 @@
             passwordResetModal.hide();
             
             // 显示通知
-            document.getElementById('toast-message').textContent = "密码重置说明已发送到您的邮箱。";
+            document.getElementById('toast-message').textContent = "Password reset instructions have been sent to your email.";
             window.toast.show();
           }
         });
       } catch (err) {
-        console.error("初始化Toast组件或模态框失败:", err);
+        console.error("Failed to initialize Toast component or modal:", err);
       }
     }
 
     function ensureAdminAccount() {
-        let users = JSON.parse(localStorage.getItem('users') || '[]');
+        try {
+            let usersData = localStorage.getItem('users');
+            let users = [];
+            
+            // Make sure users is always an array
+            if (usersData) {
+                try {
+                    users = JSON.parse(usersData);
+                    // Additional check to ensure users is an array
+                    if (!Array.isArray(users)) {
+                        console.error("Users data is not an array:", users);
+                        users = [];
+                    }
+                } catch (e) {
+                    console.error("Error parsing users data:", e);
+                    users = [];
+                }
+            }
 
-        // If `admin` account does not exist, create it
-        if (!users.some(user => user.username === "admin")) {
-            const adminUser = {
-                id: 1,
-                username: "admin",
-                email: "admin@example.com",
-                password: "admin123",  // Default password
-                isAdmin: true,
-                createdAt: new Date().toISOString()
-            };
+            // If `admin` account does not exist, create it
+            if (!users.some(user => user.username === "admin")) {
+                const adminUser = {
+                    id: 1,
+                    username: "admin",
+                    email: "admin@example.com",
+                    password: "admin123",  // Default password
+                    isAdmin: true,
+                    createdAt: new Date().toISOString()
+                };
 
-            users.push(adminUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            console.log("✅ 默认管理员账户已创建!");
+                users.push(adminUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log("✅ Default admin account created!");
+            }
+        } catch (error) {
+            console.error("Error in ensureAdminAccount:", error);
         }
     }
 
@@ -275,7 +343,23 @@
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
       }
 
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      // Make sure users is always an array
+      let usersData = localStorage.getItem('users');
+      let users = [];
+      
+      if (usersData) {
+          try {
+              users = JSON.parse(usersData);
+              // Additional check to ensure users is an array
+              if (!Array.isArray(users)) {
+                  console.error("Users data is not an array:", users);
+                  users = [];
+              }
+          } catch (e) {
+              console.error("Error parsing users data:", e);
+              users = [];
+          }
+      }
 
       // Find matching user
       const user = users.find(u => 
@@ -297,14 +381,14 @@
         }
         
         // 尝试立即更新导航栏状态
-        console.log('用户登录成功，尝试更新导航栏...');
+        console.log('User login successful, attempting to update navigation bar...');
         
         // 尝试立即更新导航栏上的登录/登出按钮
         try {
           // 优先使用全局更新函数
           if (typeof updateAuthButton === 'function') {
             updateAuthButton();
-            console.log('使用全局函数更新了导航栏');
+            console.log('Updated navigation bar using global function');
           } else {
             // 尝试直接访问并更新导航栏的登录/登出按钮
             const loginButton = document.getElementById('login-button');
@@ -314,13 +398,13 @@
               // 如果能找到这些按钮，直接更新它们的显示状态
               loginButton.style.display = 'none';
               logoutButton.style.display = 'flex';
-              console.log('直接更新了导航栏按钮');
+              console.log('Directly updated navigation bar buttons');
             } else {
-              console.log('未找到导航栏按钮，将在重定向后刷新');
+              console.log('Navigation bar buttons not found, will refresh after redirect');
             }
           }
         } catch (err) {
-          console.error('更新导航栏按钮时出错:', err);
+          console.error('Error updating navigation bar buttons:', err);
         }
 
         // 手动触发storage事件，确保其他页面也能感知到变化
@@ -330,37 +414,59 @@
             newValue: localStorage.getItem('currentUser'),
             url: window.location.href
           }));
-          console.log('触发了storage事件');
+          console.log('Triggered storage event');
         } catch (err) {
-          console.error('触发storage事件时出错:', err);
+          console.error('Error triggering storage event:', err);
         }
         
         // 显示登录成功消息
         try {
-          const message = `欢迎回来，${user.username}！`;
+          const message = `Welcome back, ${user.username}!`;
           if (typeof window.showToast === 'function') {
             window.showToast(message, 'success');
           } else if (window.toast) {
             document.getElementById('toast-message').textContent = message;
             window.toast.show();
           }
-          console.log('显示了成功消息');
+          console.log('Success message displayed');
         } catch (err) {
-          console.error('显示消息时出错:', err);
+          console.error('Error displaying message:', err);
         }
 
         // Hide error message if visible
         loginError.classList.add('d-none');
         
         // 延迟后重定向到个人资料页面
-        console.log('准备重定向到个人资料页面...');
+        console.log('Preparing to redirect to profile page...');
         setTimeout(() => {
           window.location.href = 'profile.html';
         }, 1200);
       } else {
-        // Show error message instead of alert
+        // 检查用户名是否存在，以提供更具体的错误信息
+        const usernameExists = users.some(u => 
+          isEmail(identifier) ? u.email === identifier : u.username === identifier
+        );
+        
+        const errorMessageElement = document.getElementById('login-error-message');
+        if (!usernameExists) {
+          // 账号不存在
+          errorMessageElement.textContent = "Account does not exist. Please check your username/email or create a new account.";
+          console.log("Login failed: Account does not exist");
+        } else {
+          // 密码错误
+          errorMessageElement.textContent = "Incorrect password. Please try again or use the forgot password feature.";
+          console.log("Login failed: Incorrect password");
+        }
+        
+        // 显示错误消息并添加震动效果
         loginError.classList.remove('d-none');
-        console.log('登录失败：无效的凭据');
+        loginError.style.animation = "none";
+        setTimeout(() => {
+          loginError.style.animation = "shake 0.5s";
+        }, 10);
+        
+        // 将焦点放在密码字段上，方便用户重新输入
+        document.getElementById('loginPassword').focus();
       }
     });
 
@@ -373,8 +479,8 @@
         const passwordResetModal = new bootstrap.Modal(document.getElementById('passwordResetModal'));
         passwordResetModal.show();
       } catch (err) {
-        console.error('显示密码重置模态框时出错:', err);
-        alert('忘记密码功能暂时不可用。请稍后再试。');
+        console.error('Error displaying password reset modal:', err);
+        alert('Forgot password feature is temporarily unavailable. Please try again later.');
       }
     });
   </script>
