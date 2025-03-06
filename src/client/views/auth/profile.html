@@ -286,26 +286,26 @@
                 </h4>
                 <button class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                   <i class="bi bi-pencil me-2"></i>Edit Profile
-                </button>
-              </div>
-              
+              </button>
+            </div>
+            
               <div class="row">
                 <div class="col-md-6">
                   <div class="admin-form-group">
                     <label class="admin-form-label">First Name</label>
                     <div class="detail-value fw-medium" id="first-name">John</div>
-                  </div>
+              </div>
                   
                   <div class="admin-form-group">
                     <label class="admin-form-label">Email</label>
                     <div class="detail-value fw-medium" id="email-display">johndoe@example.com</div>
-                  </div>
+              </div>
                   
                   <div class="admin-form-group">
                     <label class="admin-form-label">Gender</label>
                     <div class="detail-value fw-medium" id="gender-display">Male</div>
-                  </div>
-                </div>
+              </div>
+              </div>
                 
                 <div class="col-md-6">
                   <div class="admin-form-group">
@@ -347,28 +347,28 @@
                 <h4 class="mb-0">
                   <i class="bi bi-shield-lock me-2 text-primary"></i>Security Settings
                 </h4>
-              </div>
-              
-              <div class="mb-4">
+            </div>
+            
+            <div class="mb-4">
                 <h5 class="mb-3">Change Password</h5>
-                <form id="change-password-form">
+              <form id="change-password-form">
                   <div class="admin-form-group">
                     <label for="current-password" class="admin-form-label">Current Password</label>
                     <input type="password" class="admin-form-control" id="current-password" required>
-                  </div>
+                </div>
                   <div class="admin-form-group">
                     <label for="new-password" class="admin-form-label">New Password</label>
                     <input type="password" class="admin-form-control" id="new-password" required>
-                  </div>
+                </div>
                   <div class="admin-form-group">
                     <label for="confirm-password" class="admin-form-label">Confirm New Password</label>
                     <input type="password" class="admin-form-control" id="confirm-password" required>
-                  </div>
-                  <div id="password-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div id="password-error" class="alert alert-danger d-none"></div>
                   <button type="submit" class="admin-btn admin-btn-primary">
                     <i class="bi bi-check-lg me-2"></i>Update Password
                   </button>
-                </form>
+              </form>
               </div>
             </div>
           </div>
@@ -630,14 +630,14 @@
               <div class="admin-form-group">
                 <label for="firstName" class="admin-form-label">First Name</label>
                 <input type="text" class="admin-form-control" id="firstName" required>
-              </div>
+            </div>
             </div>
             <div class="col-md-6">
               <div class="admin-form-group">
                 <label for="lastName" class="admin-form-label">Last Name</label>
                 <input type="text" class="admin-form-control" id="lastName" required>
-              </div>
-            </div>
+          </div>
+          </div>
           </div>
           
           <div class="admin-form-group">
@@ -1843,7 +1843,7 @@
         loadUsers();
       }
     });
-    
+
     // Order search
     $('#check-order').click(function() {
       const orderId = parseInt($('#order-search').val());
@@ -1859,7 +1859,7 @@
         alert('Please enter a valid Order ID');
       }
     });
-    
+
     // Category save event
     $('#save-category').click(function() {
       saveCategory();
@@ -2677,16 +2677,16 @@
   // Category management functions
   function loadCategories() {
     // Get categories from localStorage
-    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     const tableBody = document.getElementById('category-table-body');
     const noCategories = document.getElementById('no-categories-message');
-    
+      
     // Clear existing rows
     tableBody.innerHTML = '';
     
     // Get products to count items in each category
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      
     if (categories.length === 0) {
       // No categories found, show empty state message
       tableBody.parentElement.classList.add('d-none');
@@ -2725,10 +2725,10 @@
             <div class="action-buttons">
               <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editCategory(${category.id})" data-bs-toggle="tooltip" title="Edit Category">
                 <i class="bi bi-pencil-square"></i>
-              </button>
+            </button>
               <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteCategory(${category.id})" data-bs-toggle="tooltip" title="Delete Category">
-                <i class="bi bi-trash"></i>
-              </button>
+              <i class="bi bi-trash"></i>
+            </button>
             </div>
           </td>
         `;
@@ -2741,7 +2741,7 @@
       tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
     }
   }
-
+  
   function resetCategoryForm() {
     // Reset form to default values
     document.getElementById('category-form').reset();
@@ -2758,7 +2758,7 @@
     document.getElementById('category-image-file').value = '';
     document.getElementById('category-img-preview').src = '/src/client/assets/img/category-placeholder.jpg';
   }
-
+  
   function editCategory(categoryId) {
     // Get category data
     const categories = JSON.parse(localStorage.getItem('categories') || '[]');
@@ -2789,7 +2789,7 @@
       showToast('Error', `Category with ID ${categoryId} not found`, 'danger');
     }
   }
-
+  
   function saveCategory() {
     // Get form values
     const categoryId = document.getElementById('category-id').value;
@@ -2813,41 +2813,41 @@
     // Function to save category data after image processing
     const finalizeSave = (imageData) => {
       try {
-        if (categoryId) {
-          // Update existing category
-          const index = categories.findIndex(c => c.id === parseInt(categoryId));
-          if (index !== -1) {
-            categories[index].name = name;
-            categories[index].description = description;
-            // Only update image if a new one is provided
-            if (imageData) {
-              categories[index].image = imageData;
-            }
-            categories[index].featured = featured;
-            showToast('Success', 'Category updated successfully', 'success');
-          } else {
-            showToast('Error', `Category with ID ${categoryId} not found for update`, 'danger');
+      if (categoryId) {
+        // Update existing category
+        const index = categories.findIndex(c => c.id === parseInt(categoryId));
+        if (index !== -1) {
+          categories[index].name = name;
+          categories[index].description = description;
+          // Only update image if a new one is provided
+          if (imageData) {
+            categories[index].image = imageData;
           }
+          categories[index].featured = featured;
+            showToast('Success', 'Category updated successfully', 'success');
         } else {
-          // Add new category
-          const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
-          categories.push({
-            id: newId,
-            name: name,
-            description: description,
-            image: imageData || '/src/client/assets/img/category-placeholder.jpg',
-            featured: featured
-          });
-          showToast('Success', 'New category added successfully', 'success');
+            showToast('Error', `Category with ID ${categoryId} not found for update`, 'danger');
         }
-        
-        // Save to localStorage
-        localStorage.setItem('categories', JSON.stringify(categories));
-        
-        // Close modal and refresh category list
-        bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
-        loadCategories();
-        
+      } else {
+        // Add new category
+        const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+        categories.push({
+          id: newId,
+          name: name,
+          description: description,
+            image: imageData || '/src/client/assets/img/category-placeholder.jpg',
+          featured: featured
+        });
+          showToast('Success', 'New category added successfully', 'success');
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('categories', JSON.stringify(categories));
+      
+      // Close modal and refresh category list
+      bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+      loadCategories();
+      
         // Update filter options in product management if they exist
         if (window.updateCategoryFilters) {
           window.updateCategoryFilters(categories);
@@ -2969,7 +2969,7 @@
     
     return document.getElementById('confirmationModal');
   }
-
+  
   // Add event listener for image file input change to show preview
   document.addEventListener('DOMContentLoaded', function() {
     const categoryImageInput = document.getElementById('category-image-file');
