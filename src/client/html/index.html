@@ -90,89 +90,124 @@
       color: white;
     }
     
-    /* 产品卡片样式 - 更新为与new-arrivals页面一致 */
+    /* 产品卡片样式 - 更新为与designer-page页面一致 */
     .product-card {
-      border-radius: 10px;
+      border: none;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      margin-bottom: 30px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      margin-bottom: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
       height: 100%;
-      position: relative;
+      background-color: var(--card-background, #fff);
     }
     
     .product-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-img-wrapper {
+      position: relative;
+      overflow: hidden;
+      height: 240px;
     }
     
     .product-img {
-      height: 250px;
+      height: 100%;
+      width: 100%;
       object-fit: cover;
+      transition: transform 0.8s ease;
     }
     
-    .card-body {
-      padding: 20px;
+    .product-card:hover .product-img {
+      transform: scale(1.05);
     }
     
-    .card-title {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-      color: #333;
+    .product-card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 240px);
+    }
+    
+    .product-title {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    
+    .product-price-wrapper {
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
     }
     
     .product-price {
-      font-weight: bold;
-      color: #0d6efd;
-      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-color, #d9534f);
+      font-size: 1.2rem;
     }
     
-    .product-price-discount {
-      color: #6c757d;
-      text-decoration: line-through;
-      margin-left: 10px;
+    .product-desc {
+      margin-bottom: 1rem;
+      color: var(--light-text, #6c757d);
       font-size: 0.9rem;
+      flex-grow: 1;
     }
     
-    .rating {
-      margin-bottom: 15px;
+    .add-to-cart-btn {
+      position: relative;
+      width: 100%;
+      border-radius: 30px;
+      padding: 0.6rem 1.5rem;
+      font-weight: 500;
+      background-color: var(--accent-color, #d9534f);
+      border: none;
+      color: white;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      margin-top: auto;
+    }
+    
+    .add-to-cart-btn:hover {
+      background-color: var(--text-color, #333);
+      transform: translateY(-2px);
+    }
+    
+    .product-rating {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .product-rating .bi-star-fill,
+    .product-rating .bi-star-half,
+    .product-rating .bi-star {
+      color: #FFD700;
+      font-size: 0.9rem;
+      margin-right: 2px;
     }
     
     .product-badge {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 15px;
+      left: 15px;
       background-color: #dc3545;
       color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 12px;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
       font-weight: 600;
+      letter-spacing: 0.5px;
+      z-index: 2;
     }
     
-    .add-to-cart-btn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #0d6efd;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s;
-      opacity: 0;
-    }
-    
-    .product-card:hover .add-to-cart-btn {
-      opacity: 1;
-    }
-    
-    .add-to-cart-btn:hover {
-      background-color: #0b5ed7;
-      transform: scale(1.1);
+    .product-price-discount {
+      text-decoration: line-through;
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
     }
     
     /* 设计师展示样式 */
@@ -388,8 +423,8 @@
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
-<!-- Toast通知容器 -->
-<div class="toast-container" id="toast-container"></div>
+<!-- Toast Container for notifications -->
+<div class="modern-toast-container" id="toast-container"></div>
 
 <!-- Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -623,91 +658,124 @@
   function renderProducts(products, container) {
     container.innerHTML = '';
     
-    // Get a unique identifier for this container to avoid duplicate event listeners
-    const containerId = container.id;
-    
     products.forEach(product => {
+      // Make sure product.id is treated as a string for consistent comparison
+      const productId = String(product.id);
+      
       // 生成星级评分HTML
       const fullStars = Math.floor(product.rating || 0);
       const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
       
-      let starsHtml = '<div class="rating text-warning">';
+      let starsHtml = '<div class="product-rating">';
       for (let i = 0; i < fullStars; i++) {
-        starsHtml += '<i class="bi bi-star-fill"></i> ';
+        starsHtml += '<i class="bi bi-star-fill"></i>';
       }
       if (hasHalfStar) {
-        starsHtml += '<i class="bi bi-star-half"></i> ';
+        starsHtml += '<i class="bi bi-star-half"></i>';
       }
       const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
       for (let i = 0; i < emptyStars; i++) {
-        starsHtml += '<i class="bi bi-star"></i> ';
+        starsHtml += '<i class="bi bi-star"></i>';
       }
-      starsHtml += `<span class="text-muted ms-1">(${product.reviewCount || 0})</span></div>`;
+      starsHtml += '</div>';
       
       // 价格显示
       let priceHtml = '';
       if (product.onSale && product.salePrice) {
         priceHtml = `
-          <span class="product-price">$${product.salePrice.toFixed(2)}</span>
-          <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+          <div class="product-price-wrapper">
+            <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+            <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+          </div>
         `;
+      } else if (product.price) {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
       } else {
-        priceHtml = `<span class="product-price">$${product.price.toFixed(2)}</span>`;
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
       }
       
-      // 创建产品卡片HTML，添加唯一类名来区分不同容器的按钮
       const productHtml = `
         <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
           <div class="product-card">
-            ${product.onSale ? '<span class="product-badge">SALE</span>' : ''}
-            <a href="/src/client/views/product/product_detail.html?id=${product.id}" class="text-decoration-none text-dark">
-              <img src="${product.images[0]}" class="card-img-top product-img" alt="${product.name}">
-              <div class="card-body">
-                <h5 class="card-title">${product.name}</h5>
-                <div class="mb-2">${priceHtml}</div>
-                ${starsHtml}
-                <p class="card-text text-truncate">${product.description || 'No description available'}</p>
-              </div>
-            </a>
-            <a href="#" class="add-to-cart-btn ${containerId}-cart-btn" data-product-id="${product.id}">
-              <i class="bi bi-cart-plus"></i>
-            </a>
+            <div class="product-img-wrapper">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+                <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
+                ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
+              </a>
+            </div>
+            <div class="product-card-body">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                <h2 class="product-title">${product.name}</h2>
+              </a>
+              ${priceHtml}
+              ${starsHtml}
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
+              <button class="add-to-cart-btn" data-product-id="${productId}" onclick="addToCart('${productId}', 1); return false;">
+                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+              </button>
+            </div>
           </div>
         </div>
       `;
       
       container.innerHTML += productHtml;
     });
-    
-    // 添加Add to Cart按钮事件，只为当前容器中的按钮添加事件监听器
-    document.querySelectorAll(`.${containerId}-cart-btn`).forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const productId = parseInt(this.getAttribute('data-product-id'));
-        addToCart(productId, 1);
-      });
-    });
   }
   
   // 添加到购物车
   function addToCart(productId, quantity) {
+    console.log('addToCart called with productId:', productId, 'type:', typeof productId);
+    
     const productsData = localStorage.getItem('products');
-    if (!productsData) return;
+    if (!productsData) {
+      console.error('No products data found in localStorage');
+      return;
+    }
     
     const products = JSON.parse(productsData);
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+    
+    // Try to match by both string and number comparisons
+    let product = products.find(p => p.id === productId);
+    
+    // If not found, try parsing as integer
+    if (!product && !isNaN(parseInt(productId))) {
+      const numericId = parseInt(productId);
+      console.log('Trying numeric ID:', numericId);
+      product = products.find(p => p.id === numericId);
+    }
+    
+    // If still not found, try string comparison
+    if (!product) {
+      const stringId = String(productId);
+      console.log('Trying string ID:', stringId);
+      product = products.find(p => String(p.id) === stringId);
+    }
+    
+    if (!product) {
+      console.error('Product not found with ID:', productId);
+      showToast('Product not found', 'error');
+      return;
+    }
+    
+    console.log('Found product to add to cart:', product);
     
     // 获取现有购物车
     let cart = [];
     const cartData = localStorage.getItem('cart');
     if (cartData) {
-      cart = JSON.parse(cartData);
+      try {
+        cart = JSON.parse(cartData);
+        console.log('Existing cart:', cart);
+      } catch (e) {
+        console.error('Error parsing cart data:', e);
+        showToast('Error loading cart data', 'error');
+      }
     }
     
     // 计算最终价格，确保不会出现NaN
     const price = parseFloat(product.price) || 0;
     const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
+    console.log('Calculated price:', finalPrice);
     
     // 处理图片URL
     let imageUrl = 'https://via.placeholder.com/80';
@@ -718,10 +786,19 @@
     }
     
     // 检查产品是否已在购物车中
-    const existingItem = cart.find(item => item.id === productId);
+    const existingItem = cart.find(item => {
+      const itemMatch = (item.id === product.id) || 
+                       (parseInt(item.id) === parseInt(product.id)) || 
+                       (String(item.id) === String(product.id));
+      console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
+      return itemMatch;
+    });
+    
     if (existingItem) {
+      console.log('Product already in cart, updating quantity');
       existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
+      console.log('Adding new product to cart');
       // 安全处理产品描述
       let description = 'No description available';
       if (product.description) {
@@ -748,6 +825,7 @@
     }
     
     // 保存到localStorage
+    console.log('Saving updated cart to localStorage:', cart);
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // 显示成功消息
@@ -765,26 +843,14 @@
     
     // 创建toast元素
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.style.backgroundColor = '#fff';
-    toast.style.color = '#333';
-    toast.style.borderRadius = '4px';
-    toast.style.padding = '10px 15px';
-    toast.style.marginBottom = '10px';
-    toast.style.minWidth = '250px';
-    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.animation = 'slideIn 0.3s, fadeOut 0.5s 2.5s forwards';
-    toast.style.position = 'relative';
-    
-    if (type === 'success') {
-      toast.style.borderLeft = '4px solid #198754';
-    }
+    toast.className = `modern-toast ${type}`;
     
     // 添加内容
     toast.innerHTML = `
-      <div style="flex: 1; padding-right: 10px;">${message}</div>
+      <div style="flex: 1; padding-right: 10px;">
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+            ${message}
+      </div>
       <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
@@ -942,6 +1008,55 @@
     bottom: 20px;
     right: 20px;
     z-index: 9999;
+  }
+
+  /* Modern Toast Styles */
+  .modern-toast-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+  }
+  
+  @keyframes slideUpIn {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  .modern-toast {
+    background-color: var(--card-background, #fff);
+    color: var(--text-color, #333);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    min-width: 300px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    animation: slideUpIn 0.3s, fadeOut 0.5s 2.5s forwards;
+  }
+  
+  .modern-toast.success {
+    border-left: 4px solid #198754;
+  }
+  
+  .modern-toast.error {
+    border-left: 4px solid #dc3545;
   }
 </style>
 </body>
