@@ -1684,7 +1684,7 @@
     $('#address-id').val('');
     
     // Instead of using jQuery modal hide, use page refresh
-    showToast('Address saved successfully! Refreshing page...', 'success');
+    showToast('Address saved successfully!', 'success');
     
     // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
@@ -1745,7 +1745,7 @@
     renderAddresses();
     
     // Use toast and page refresh instead of alert
-    showToast('Default address updated successfully! Refreshing page...', 'success');
+    showToast('Default address updated successfully!', 'success');
     
     // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
@@ -1788,7 +1788,7 @@
     renderAddresses();
     
     // Use toast and page refresh instead of alert
-    showToast('Address deleted successfully! Refreshing page...', 'success');
+    showToast('Address deleted successfully!', 'success');
     
     // Give time for toast to be visible, then refresh with a parameter
     setTimeout(function() {
@@ -1865,7 +1865,7 @@
         $('#password-error').addClass('d-none');
         
         // Show success message and refresh
-        showToast('Password changed successfully! Refreshing page...', 'success');
+        showToast('Password changed successfully!', 'success');
         
         // Refresh page after short delay
         setTimeout(function() {
