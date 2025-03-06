@@ -489,7 +489,9 @@
     setTimeout(() => {
       // Hide loading and show products
       if (loadingIndicator) loadingIndicator.style.display = 'none';
-      if (productsContainer) productsContainer.style.display = 'block';
+      // Using empty string for display allows the Bootstrap grid classes to work properly
+      // Setting it to 'block' would override the flex layout needed for multi-column grid
+      if (productsContainer) productsContainer.style.display = '';
       
       // Render products
       renderProducts(filteredProducts);
