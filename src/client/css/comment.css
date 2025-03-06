@@ -1,6 +1,6 @@
 /* General Page Styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: var(--body-font);
     background-color: #fef9f8;
     margin: 0;
     padding: 0;

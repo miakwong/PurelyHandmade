@@ -17,6 +17,8 @@
   --warning-color: #c9aa71;
   --button-color: #867666;
   --button-hover: #6f6255;
+  --header-font: 'Playfair Display', serif;
+  --body-font: 'Poppins', sans-serif;
 }
 
 /* Admin Section Container */
@@ -27,6 +29,7 @@
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   overflow: hidden;
+  font-family: var(--body-font);
 }
 
 .admin-section h4 {
@@ -35,6 +38,7 @@
   font-weight: 600;
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 0.5rem;
+  font-family: var(--header-font);
 }
 
 /* Tables */
@@ -43,6 +47,7 @@
   border-collapse: collapse;
   margin-top: 1rem;
   border: 1px solid var(--border-color);
+  font-family: var(--body-font);
 }
 
 .admin-section th, 

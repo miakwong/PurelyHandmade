@@ -13,6 +13,8 @@
   --footer-height: 90px; /* 页脚高度 - 与footer.css保持一致 */
   --border-radius: 8px; /* 统一的圆角 */
   --transition-speed: 0.3s; /* 统一的过渡速度 */
+  --header-font: 'Playfair Display', serif; /* 标题字体 */
+  --body-font: 'Poppins', sans-serif; /* 正文字体 */
 }
 
 /* 粘性底部布局 */
@@ -20,7 +22,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: var(--body-font);
   color: var(--text-color);
   background-color: var(--background-color);
 }
@@ -41,12 +43,14 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
   font-weight: 600;
   margin-bottom: 1rem;
+  font-family: var(--header-font);
 }
 
 a {
   color: var(--accent-color);
   text-decoration: none;
   transition: color var(--transition-speed);
+  font-family: var(--body-font);
 }
 
 a:hover {
@@ -58,6 +62,7 @@ a:hover {
   border-radius: var(--border-radius);
   transition: all var(--transition-speed);
   font-weight: 500;
+  font-family: var(--body-font);
 }
 
 .btn-primary {
