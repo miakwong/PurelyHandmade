@@ -95,17 +95,16 @@
 </nav>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    updateAuthButton();
-    updateCartCount();
-  });
-  
-  function updateAuthButton() {
+  // 确保函数在全局范围内可用，这样外部脚本可以调用它们
+  window.updateAuthButton = function() {
+    console.log('Navbar updateAuthButton called');
     const currentUser = localStorage.getItem('currentUser');
     const loginButton = document.getElementById('login-button');
     const registerButton = document.getElementById('register-button');
     const profileButton = document.getElementById('profile-button');
     const logoutButton = document.getElementById('logout-button');
+    
+    console.log('Auth status: User is', currentUser ? 'logged in' : 'not logged in');
     
     if (currentUser) {
       // 用户已登录
@@ -114,7 +113,12 @@
       if (profileButton) profileButton.style.display = 'block';
       if (logoutButton) {
         logoutButton.style.display = 'block';
-        logoutButton.addEventListener('click', function(e) {
+        
+        // 移除所有现有的事件监听器，避免多次添加
+        const newLogoutButton = logoutButton.cloneNode(true);
+        logoutButton.parentNode.replaceChild(newLogoutButton, logoutButton);
+        
+        newLogoutButton.addEventListener('click', function(e) {
           e.preventDefault();
           localStorage.removeItem('currentUser');
           window.location.href = '/src/client/html/index.html';
@@ -127,9 +131,9 @@
       if (profileButton) profileButton.style.display = 'none';
       if (logoutButton) logoutButton.style.display = 'none';
     }
-  }
+  };
   
-  function updateCartCount() {
+  window.updateCartCount = function() {
     const cartCountElement = document.getElementById('cart-count');
     if (!cartCountElement) return;
     
@@ -147,5 +151,17 @@
       console.error('Error updating cart count', e);
       cartCountElement.style.display = 'none';
     }
+  };
+
+  // 当脚本加载完成后立即尝试运行一次，这对于通过fetch加载的导航栏很重要
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      updateAuthButton();
+      updateCartCount();
+    });
+  } else {
+    // 如果DOM已经加载完毕，直接执行
+    updateAuthButton();
+    updateCartCount();
   }
 </script> 
