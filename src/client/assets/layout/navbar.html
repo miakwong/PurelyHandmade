@@ -43,6 +43,11 @@
               </a>
             </li>
             <li>
+              <a class="dropdown-item" href="/src/client/views/orders/order-history.html" id="order-history-button" style="display: none;">
+                <i class="bi bi-clock-history me-2"></i>Order History
+              </a>
+            </li>
+            <li>
               <a class="dropdown-item" href="#" id="logout-button" style="display: none;">
                 <i class="bi bi-box-arrow-right me-2"></i>Logout
               </a>
@@ -102,6 +107,7 @@
     const loginButton = document.getElementById('login-button');
     const registerButton = document.getElementById('register-button');
     const profileButton = document.getElementById('profile-button');
+    const orderHistoryButton = document.getElementById('order-history-button');
     const logoutButton = document.getElementById('logout-button');
     
     console.log('Auth status: User is', currentUser ? 'logged in' : 'not logged in');
@@ -111,6 +117,7 @@
       if (loginButton) loginButton.style.display = 'none';
       if (registerButton) registerButton.style.display = 'none';
       if (profileButton) profileButton.style.display = 'block';
+      if (orderHistoryButton) orderHistoryButton.style.display = 'block';
       if (logoutButton) {
         logoutButton.style.display = 'block';
         
@@ -129,6 +136,7 @@
       if (loginButton) loginButton.style.display = 'block';
       if (registerButton) registerButton.style.display = 'block';
       if (profileButton) profileButton.style.display = 'none';
+      if (orderHistoryButton) orderHistoryButton.style.display = 'none';
       if (logoutButton) logoutButton.style.display = 'none';
     }
   };
