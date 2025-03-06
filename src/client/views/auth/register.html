@@ -563,31 +563,38 @@
       // Email format validation
       if (!/^\S+@\S+\.\S+$/.test(email)) {
         isValid = false;
-        showValidationError('email-error', 'Please enter a valid email address.');
+        showValidationError('email-error', '请输入有效的电子邮箱地址。');
       }
       
       // Password strength validation
       if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
         isValid = false;
-        showValidationError('password-error', 'Password must be at least 8 characters long and include at least one uppercase letter and one number.');
+        showValidationError('password-error', '密码必须至少8个字符，且包含至少一个大写字母和一个数字。');
       }
       
       // Password match validation
       if (pass !== confirmPass) {
         isValid = false;
-        showValidationError('password-match-error', 'Passwords do not match.');
+        showValidationError('password-match-error', '两次输入的密码不匹配。');
       }
       
       // Terms & Conditions checked
       if (!termsAccepted) {
         isValid = false;
-        showValidationError('terms-error', 'Please accept the Terms & Conditions to register.');
+        showValidationError('terms-error', '请同意条款和条件以完成注册。');
+      }
+      
+      // Check for duplicate email
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users.some(user => user.email === email)) {
+        isValid = false;
+        showValidationError('email-error', '该邮箱已被注册，请使用其他邮箱或直接登录。');
       }
       
       if (!isValid) {
         // Show overall error message
         const formError = document.getElementById('form-validation-error');
-        formError.textContent = 'Please correct the errors in the form.';
+        formError.textContent = '请修正表单中的错误后再提交。';
         formError.classList.remove('d-none');
         return;
       }
@@ -611,12 +618,6 @@
       try {
         // 获取现有用户列表
         const users = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        // 检查邮箱是否已被使用
-        if (users.some(user => user.email === email)) {
-          showValidationError('email-error', 'This email is already registered. Please use a different email or login.');
-          return;
-        }
         
         // 添加新用户
         users.push(newUser);
@@ -650,6 +651,22 @@
         formError.textContent = 'There was an error creating your account. Please try again.';
         formError.classList.remove('d-none');
         console.error('Registration error:', error);
+      }
+    });
+
+    // 添加邮箱实时重复检测功能
+    document.getElementById('regEmail').addEventListener('blur', function() {
+      const email = this.value.trim();
+      if (email && /^\S+@\S+\.\S+$/.test(email)) {
+        // 邮箱格式正确时，检查是否已被注册
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (users.some(user => user.email === email)) {
+          showValidationError('email-error', '该邮箱已被注册，请使用其他邮箱或直接登录。');
+        } else {
+          // 清除错误消息
+          document.getElementById('email-error').textContent = '';
+          document.getElementById('email-error').classList.remove('show');
+        }
       }
     });
 
