@@ -541,6 +541,70 @@
                 </div>
               </div>
             </div>
+            
+            <!-- Order Management Section -->
+            <div class="admin-section mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                  <i class="bi bi-bag-check me-2 text-primary"></i>Order Management
+                </h4>
+                <button type="button" class="admin-btn admin-btn-outline" onclick="exportOrdersToCSV()">
+                  <i class="bi bi-download me-2"></i>Export Orders
+                </button>
+              </div>
+              
+              <!-- 订单过滤选项 -->
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <label for="orderFilterStatus" class="form-label">Filter by Status:</label>
+                  <select class="form-select" id="orderFilterStatus" onchange="filterAdminOrders()">
+                    <option value="">All Status</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="orderFilterDate" class="form-label">Filter by Date:</label>
+                  <select class="form-select" id="orderFilterDate" onchange="filterAdminOrders()">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="week">Last 7 Days</option>
+                    <option value="month">Last 30 Days</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="orderSearch" class="form-label">Search Orders:</label>
+                  <input type="text" class="form-control" id="orderSearch" placeholder="Order ID or Customer" onkeyup="filterAdminOrders()">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                  <button class="admin-btn admin-btn-outline" onclick="resetOrderFilters()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+                  </button>
+                </div>
+              </div>
+              
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Date</th>
+                      <th>Items</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orderTableBody">
+                    <!-- Order rows will be dynamically added here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
           
         </div>
@@ -1091,6 +1155,10 @@
         
         loadCategories();
         console.log('Categories loaded');
+        
+        // 加载订单数据
+        loadAllOrders();
+        console.log('Orders loaded');
         
         // Setup admin event listeners
         setupAdminEventListeners();
@@ -1775,7 +1843,7 @@
         loadUsers();
       }
     });
-
+    
     // Order search
     $('#check-order').click(function() {
       const orderId = parseInt($('#order-search').val());
@@ -1791,7 +1859,7 @@
         alert('Please enter a valid Order ID');
       }
     });
-
+    
     // Category save event
     $('#save-category').click(function() {
       saveCategory();
@@ -1802,6 +1870,36 @@
       e.preventDefault();
       saveCategory();
     });
+    
+    // 订单管理相关的事件监听器
+    
+    // 导出订单按钮点击事件
+    document.getElementById('exportOrdersToCSV') && document.getElementById('exportOrdersToCSV').addEventListener('click', function() {
+      exportOrdersToCSV();
+    });
+    
+    // 订单状态筛选变化事件
+    document.getElementById('orderFilterStatus') && document.getElementById('orderFilterStatus').addEventListener('change', function() {
+      filterAdminOrders();
+    });
+    
+    // 订单日期筛选变化事件
+    document.getElementById('orderFilterDate') && document.getElementById('orderFilterDate').addEventListener('change', function() {
+      filterAdminOrders();
+    });
+    
+    // 订单搜索框输入事件
+    document.getElementById('orderSearch') && document.getElementById('orderSearch').addEventListener('keyup', function() {
+      filterAdminOrders();
+    });
+    
+    // 重置订单筛选按钮点击事件
+    const resetOrderFiltersBtn = document.getElementById('resetOrderFilters');
+    if (resetOrderFiltersBtn) {
+      resetOrderFiltersBtn.addEventListener('click', function() {
+        resetOrderFilters();
+      });
+    }
   }
 
   // Render filtered users
@@ -2899,6 +2997,335 @@
       loadCategories();
     }
   });
+
+  // =====================
+  // 订单管理功能相关函数
+  // =====================
+  
+  // 初始化订单管理部分
+  function initializeOrderManagement() {
+    console.log('Initializing order management...');
+    loadAllOrders();
+    
+    // 设置导出按钮的事件处理程序
+    document.getElementById('exportOrdersToCSV').addEventListener('click', exportOrdersToCSV);
+  }
+  
+  // 加载所有订单
+  function loadAllOrders() {
+    console.log('Loading all orders...');
+    
+    // 从localStorage获取所有用户
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // 收集所有用户的订单
+    let allOrders = [];
+    users.forEach(user => {
+      if (user.orders && Array.isArray(user.orders)) {
+        // 为每个订单添加用户信息
+        const userOrders = user.orders.map(order => ({
+          ...order,
+          customerName: user.firstName && user.lastName ? 
+                       `${user.firstName} ${user.lastName}` : 
+                       (user.name || user.username || 'Unknown'),
+          customerEmail: user.email
+        }));
+        allOrders = [...allOrders, ...userOrders];
+      }
+    });
+    
+    // 如果没有找到任何订单，尝试使用示例订单数据
+    if (allOrders.length === 0) {
+      allOrders = getSampleOrders();
+    }
+    
+    // 按日期倒序排序（最新的订单在前）
+    allOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // 将订单展示在表格中
+    displayOrdersInTable(allOrders);
+  }
+  
+  // 显示订单数据到表格
+  function displayOrdersInTable(orders) {
+    const orderTableBody = document.getElementById('orderTableBody');
+    orderTableBody.innerHTML = '';
+    
+    if (orders.length === 0) {
+      orderTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-4">
+            <div class="empty-state-icon">
+              <i class="bi bi-bag-x text-muted" style="font-size: 2rem;"></i>
+            </div>
+            <p class="text-muted mt-2">No orders found</p>
+          </td>
+        </tr>`;
+      return;
+    }
+    
+    orders.forEach(order => {
+      // 计算订单中的总商品数量
+      const totalItems = order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+      
+      // 创建订单行
+      const row = document.createElement('tr');
+      row.setAttribute('data-order-id', order.id);
+      row.setAttribute('data-order-status', order.status || 'processing');
+      row.setAttribute('data-order-date', order.date);
+      row.setAttribute('data-order-total', order.total);
+      
+      // 设置订单状态样式
+      const statusClass = getStatusClass(order.status || 'processing');
+      
+      row.innerHTML = `
+        <td><a href="#" onclick="viewOrderDetails('${order.id}')">${order.id}</a></td>
+        <td>${order.customerName}<br><small class="text-muted">${order.customerEmail}</small></td>
+        <td>${formatDate(order.date)}</td>
+        <td>${totalItems}</td>
+        <td>$${(order.total || 0).toFixed(2)}</td>
+        <td><span class="order-status ${statusClass}">${order.status || 'Processing'}</span></td>
+        <td>
+          <div class="btn-group">
+            <button class="admin-btn admin-btn-sm admin-btn-outline" onclick="viewOrderDetails('${order.id}')">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="admin-btn admin-btn-sm admin-btn-outline" onclick="updateOrderStatus('${order.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </div>
+        </td>
+      `;
+      
+      orderTableBody.appendChild(row);
+    });
+  }
+  
+  // 获取状态样式类
+  function getStatusClass(status) {
+    switch(status.toLowerCase()) {
+      case 'processing': return 'status-processing';
+      case 'shipped': return 'status-shipped';
+      case 'delivered': return 'status-delivered';
+      case 'cancelled': return 'status-cancelled';
+      default: return 'status-processing';
+    }
+  }
+  
+  // 格式化日期
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric'
+    });
+  }
+  
+  // 查看订单详情
+  function viewOrderDetails(orderId) {
+    // 此功能将在模态窗口中显示订单详情
+    console.log(`Viewing details for order: ${orderId}`);
+    
+    // TODO: 实现查看订单详情的功能
+    showToast('Coming Soon', 'Order details feature is coming soon', 'info');
+  }
+  
+  // 更新订单状态
+  function updateOrderStatus(orderId) {
+    // 此功能将允许管理员更新订单状态
+    console.log(`Updating status for order: ${orderId}`);
+    
+    // TODO: 实现更新订单状态的功能
+    showToast('Coming Soon', 'Order status update feature is coming soon', 'info');
+  }
+  
+  // 筛选管理员订单列表
+  function filterAdminOrders() {
+    const statusFilter = document.getElementById('orderFilterStatus').value;
+    const dateFilter = document.getElementById('orderFilterDate').value;
+    const searchText = document.getElementById('orderSearch').value.toLowerCase();
+    
+    const orderRows = document.querySelectorAll('#orderTableBody tr');
+    let visibleCount = 0;
+    
+    orderRows.forEach(row => {
+      const orderId = row.getAttribute('data-order-id') || '';
+      const orderStatus = row.getAttribute('data-order-status') || '';
+      const orderDate = new Date(row.getAttribute('data-order-date') || '');
+      const customerInfo = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+      
+      // 检查状态筛选
+      const matchesStatus = statusFilter === '' || orderStatus.toLowerCase() === statusFilter.toLowerCase();
+      
+      // 检查日期筛选
+      let matchesDate = true;
+      if (dateFilter) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        
+        switch(dateFilter) {
+          case 'today':
+            matchesDate = orderDate >= today;
+            break;
+          case 'yesterday':
+            matchesDate = orderDate >= yesterday && orderDate < today;
+            break;
+          case 'week':
+            matchesDate = orderDate >= lastWeek;
+            break;
+          case 'month':
+            matchesDate = orderDate >= lastMonth;
+            break;
+        }
+      }
+      
+      // 检查搜索筛选
+      const matchesSearch = searchText === '' || 
+                           orderId.toLowerCase().includes(searchText) || 
+                           customerInfo.includes(searchText);
+      
+      // 显示或隐藏行
+      if (matchesStatus && matchesDate && matchesSearch) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+    
+    // 如果没有可见的订单，显示空状态
+    if (visibleCount === 0 && orderRows.length > 0) {
+      const noResultsRow = document.createElement('tr');
+      noResultsRow.id = 'no-filter-results';
+      noResultsRow.innerHTML = `
+        <td colspan="7" class="text-center py-4">
+          <div class="empty-state-icon">
+            <i class="bi bi-funnel-fill text-muted" style="font-size: 1.5rem;"></i>
+          </div>
+          <p class="text-muted mt-2">No orders match your filter criteria</p>
+          <button class="admin-btn admin-btn-sm admin-btn-outline mt-2" onclick="resetOrderFilters()">
+            Clear Filters
+          </button>
+        </td>
+      `;
+      
+      // 移除之前的"无结果"行
+      const oldNoResults = document.getElementById('no-filter-results');
+      if (oldNoResults) {
+        oldNoResults.remove();
+      }
+      
+      document.getElementById('orderTableBody').appendChild(noResultsRow);
+    } else {
+      // 移除"无结果"行
+      const noResultsRow = document.getElementById('no-filter-results');
+      if (noResultsRow) {
+        noResultsRow.remove();
+      }
+    }
+  }
+  
+  // 重置订单筛选条件
+  function resetOrderFilters() {
+    document.getElementById('orderFilterStatus').value = '';
+    document.getElementById('orderFilterDate').value = '';
+    document.getElementById('orderSearch').value = '';
+    filterAdminOrders();
+  }
+  
+  // 导出订单到CSV
+  function exportOrdersToCSV() {
+    // 获取表格中可见的订单
+    const orderRows = Array.from(document.querySelectorAll('#orderTableBody tr')).filter(
+      row => row.style.display !== 'none' && !row.id.includes('no-filter-results')
+    );
+    
+    if (orderRows.length === 0) {
+      showToast('No Orders', 'There are no orders to export', 'warning');
+      return;
+    }
+    
+    // 创建CSV头部
+    let csv = 'Order ID,Customer,Email,Date,Items,Total,Status\n';
+    
+    // 为每个订单创建CSV行
+    orderRows.forEach(row => {
+      const orderId = row.getAttribute('data-order-id');
+      const customerName = row.querySelector('td:nth-child(2)').textContent.split('\n')[0];
+      const customerEmail = row.querySelector('td:nth-child(2) small').textContent;
+      const date = row.querySelector('td:nth-child(3)').textContent;
+      const items = row.querySelector('td:nth-child(4)').textContent;
+      const total = row.querySelector('td:nth-child(5)').textContent;
+      const status = row.querySelector('td:nth-child(6) span').textContent;
+      
+      // 添加到CSV
+      csv += `"${orderId}","${customerName}","${customerEmail}","${date}","${items}","${total}","${status}"\n`;
+    });
+    
+    // 创建下载链接
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    
+    // 释放URL对象
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    
+    showToast('Success', `Exported ${orderRows.length} orders to CSV`, 'success');
+  }
+  
+  // 获取示例订单数据（当没有真实数据时使用）
+  function getSampleOrders() {
+    return [
+      {
+        id: 'PH20230001',
+        date: '2023-03-05',
+        status: 'delivered',
+        total: 54.03,
+        customerName: 'John Smith',
+        customerEmail: 'john@example.com',
+        items: [
+          { name: 'Lavender Handmade Soap', quantity: 2, price: 12.99 },
+          { name: 'Vanilla Soy Candle', quantity: 1, price: 22.99 }
+        ]
+      },
+      {
+        id: 'PH20230002',
+        date: '2023-03-06',
+        status: 'shipped',
+        total: 22.99,
+        customerName: 'Emma Johnson',
+        customerEmail: 'emma@example.com',
+        items: [
+          { name: 'Vanilla Soy Candle', quantity: 1, price: 22.99 }
+        ]
+      },
+      {
+        id: 'PH20230003',
+        date: '2023-03-08',
+        status: 'processing',
+        total: 48.95,
+        customerName: 'Michael Davis',
+        customerEmail: 'michael@example.com',
+        items: [
+          { name: 'Lavender Essential Oil', quantity: 1, price: 18.99 },
+          { name: 'Rose Bath Bomb Set', quantity: 2, price: 14.98 }
+        ]
+      }
+    ];
+  }
 </script>
 
 </body>

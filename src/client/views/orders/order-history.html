@@ -174,12 +174,19 @@
     
     .empty-state {
       text-align: center;
-      padding: 50px 20px;
-      background-color: #f8f9fa;
+      padding: 40px 20px;
+      background-color: #ffffff;
       border-radius: 12px;
-      max-width: 600px;
+      max-width: 850px;
       margin: 0 auto;
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s;
+      border: none;
+    }
+    
+    .empty-state:hover {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      transform: translateY(-3px);
     }
     
     .empty-icon {
@@ -427,6 +434,39 @@
     </div>
     
     <!-- Add more order cards as needed -->
+    
+    <!-- Empty states for different order filters -->
+    <div id="empty-state-processing" class="empty-state mt-4" style="display: none;">
+      <div class="empty-icon">
+        <i class="bi bi-hourglass-split" style="color: #0dcaf0;"></i>
+      </div>
+      <h3>No Processing Orders</h3>
+      <p class="text-muted mb-4">You don't have any orders currently being processed</p>
+    </div>
+    
+    <div id="empty-state-shipped" class="empty-state mt-4" style="display: none;">
+      <div class="empty-icon">
+        <i class="bi bi-truck" style="color: #20c997;"></i>
+      </div>
+      <h3>No Shipped Orders</h3>
+      <p class="text-muted mb-4">You don't have any orders currently in transit</p>
+    </div>
+    
+    <div id="empty-state-delivered" class="empty-state mt-4" style="display: none;">
+      <div class="empty-icon">
+        <i class="bi bi-check-circle" style="color: #198754;"></i>
+      </div>
+      <h3>No Delivered Orders</h3>
+      <p class="text-muted mb-4">You don't have any completed deliveries yet</p>
+    </div>
+    
+    <div id="empty-state-cancelled" class="empty-state mt-4" style="display: none;">
+      <div class="empty-icon">
+        <i class="bi bi-x-circle" style="color: #dc3545;"></i>
+      </div>
+      <h3>No Cancelled Orders</h3>
+      <p class="text-muted mb-4">You don't have any cancelled orders</p>
+    </div>
   </div>
   
   <!-- Empty State (hidden by default) -->
@@ -649,6 +689,11 @@
     
     let visibleCount = 0;
     
+    // Hide all empty state messages first
+    document.querySelectorAll('[id^="empty-state-"]').forEach(el => {
+      el.style.display = 'none';
+    });
+    
     orderCards.forEach(card => {
       const cardStatus = card.getAttribute('data-status');
       console.log("Card status:", cardStatus, "Comparing with:", status);
@@ -665,10 +710,23 @@
     
     console.log("Final visible count:", visibleCount);
     
-    // Only show toast if truly no visible orders AND not showing 'all'
-    if (visibleCount === 0 && status !== 'all') {
-      console.log("Showing 'no orders' toast for status:", status);
-      showToast(`No ${getStatusText(status)} orders found`, 'info');
+    // Show the appropriate empty state if no visible orders
+    if (visibleCount === 0) {
+      if (status !== 'all') {
+        // Show status-specific empty state message
+        const emptyStateElement = document.getElementById(`empty-state-${status}`);
+        if (emptyStateElement) {
+          emptyStateElement.style.display = 'block';
+          console.log(`Showing empty state for ${status}`);
+        }
+        
+        // Also show toast notification
+        console.log("Showing 'no orders' toast for status:", status);
+        showToast(`No ${getStatusText(status)} orders found`, 'info');
+      } else {
+        // If "all" is selected and no orders, show the main empty state
+        document.getElementById('empty-state').style.display = 'block';
+      }
     }
   }
   
