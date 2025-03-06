@@ -34,12 +34,12 @@
       --button-hover: #6f6255;
     }
     
-    /* Avatar styles - enlarged to 150px and moved further down */
+    /* Avatar styles - enlarged and moved further down */
     .avatar-wrapper {
       position: relative;
-      width: 150px; /* Increased to 150px as requested */
-      height: 150px; /* Increased to 150px as requested */
-      margin: 30px auto 1.2rem; /* Increased top margin to move further down */
+      width: 180px; /* Increased to 180px as requested */
+      height: 180px; /* Increased to 180px as requested */
+      margin: 45px auto 1.2rem; /* Increased top margin from 30px to 45px to move further down */
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       border-radius: 50%; /* Make wrapper perfectly circular */
@@ -287,7 +287,7 @@
             <small class="text-muted">Username must be 3-20 characters long</small>
           </div>
         </div>
-        <p id="user-email" class="text-muted">johndoe@example.com</p>
+        <p id="user-email" class="text-muted"></p>
         <p class="mb-0"><small class="text-muted">Member since <span id="join-date">January 2023</span></small></p>
       </div>
       <div class="col-md-9">
@@ -396,6 +396,65 @@
           <!-- Order History Tab -->
           <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
             <!-- Add order history content here -->
+          </div>
+          
+          <!-- Addresses Tab -->
+          <div class="tab-pane fade" id="addresses" role="tabpanel" aria-labelledby="addresses-tab">
+            <div class="admin-section">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                  <i class="bi bi-geo-alt me-2 text-primary"></i>My Addresses
+                </h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                  <i class="bi bi-plus-lg me-1"></i> Add New Address
+                </button>
+              </div>
+              
+              <div id="addresses-container" class="mt-4">
+                <!-- Addresses will be loaded here -->
+                <div class="no-addresses text-center py-5">
+                  <i class="bi bi-geo-alt display-4 text-muted"></i>
+                  <p class="mt-3 text-muted">You don't have any saved addresses yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Security Tab -->
+          <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+            <div class="admin-section">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                  <i class="bi bi-shield-lock me-2 text-primary"></i>Security Settings
+                </h4>
+              </div>
+              
+              <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                  <h5 class="card-title mb-4">Change Password</h5>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <form id="change-password-form">
+                        <div class="mb-3">
+                          <label for="current-password" class="form-label text-start w-100">Current Password</label>
+                          <input type="password" class="form-control" id="current-password" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="new-password" class="form-label text-start w-100">New Password</label>
+                          <input type="password" class="form-control" id="new-password" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="confirm-password" class="form-label text-start w-100">Confirm New Password</label>
+                          <input type="password" class="form-control" id="confirm-password" required>
+                        </div>
+                        <div id="password-error" class="alert alert-danger d-none"></div>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <!-- Admin Tab -->
@@ -1226,10 +1285,14 @@
       // Update profile display
       $('#profile-img').attr('src', userProfile.avatar || '../../../img/profile.png');
       $('#user-full-name').text(`${userProfile.firstName || ''} ${userProfile.lastName || ''}`);
-      $('#user-email, #email-display').text(userProfile.email);
       
-      // Display username
-      $('#username-display').text('@' + (userProfile.username || ''));
+      // Only show email without admin indicator
+      $('#user-email, #email-display').text(userProfile.email || '');
+      
+      // Display username without admin indicator
+      const usernameDisplay = userProfile.username ? '@' + userProfile.username : '';
+      $('#username-display').text(usernameDisplay);
+      $('#username-display-profile').text(usernameDisplay);
       
       // Format and display birthday
       if (userProfile.birthday) {
@@ -1430,75 +1493,115 @@
   }
 
   // Update profile photo
-      function updateProfilePhoto(event) {
-          const file = event.target.files[0];
-          if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should not exceed 5MB");
-        return;
-      }
-      
-              const reader = new FileReader();
-      reader.onload = function(e) {
-        const imgData = e.target.result;
-        $('#profile-img').attr('src', imgData);
-        
-        // Update user profile in localStorage
-        if (userProfile) {
-          userProfile.avatar = imgData;
-          localStorage.setItem('user', JSON.stringify(userProfile));
+  function updateProfilePhoto(event) {
+    try {
+      const file = event.target.files[0];
+      if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("Image size should not exceed 5MB", "warning");
+          return;
         }
-              };
-              reader.readAsDataURL(file);
-          } else {
-              alert("Please upload a valid JPG or PNG image.");
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgData = e.target.result;
+          $('#profile-img').attr('src', imgData);
+          
+          // Update user profile in localStorage
+          if (userProfile) {
+            userProfile.avatar = imgData;
+            // Update in currentUser
+            localStorage.setItem('currentUser', JSON.stringify(userProfile));
+            
+            // Also update in users array if exists
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.id === userProfile.id);
+            
+            if (userIndex !== -1) {
+              users[userIndex].avatar = imgData;
+              localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            showToast("Profile photo updated successfully", "success");
           }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        showToast("Please upload a valid JPG or PNG image", "warning");
       }
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      showToast('Error updating profile photo: ' + error.message, 'danger');
+    }
+  }
 
   // Save profile changes
   function saveProfileChanges() {
-    const firstName = $('#firstName').val().trim();
-    const lastName = $('#lastName').val().trim();
-    const email = $('#email').val().trim();
-    const birthday = $('#birthday').val();
-    const gender = $('input[name="gender"]:checked').val();
-    const username = $('#username').val().trim();
-    
-    // Validate form
-    if (!firstName || !lastName || !email || !birthday || !gender) {
-      $('#profile-error').text('Please fill in all required fields.').removeClass('d-none');
-      return;
+    try {
+      console.log('Saving profile changes...');
+      const firstName = $('#firstName').val().trim();
+      const lastName = $('#lastName').val().trim();
+      const email = $('#email').val().trim();
+      const birthday = $('#birthday').val();
+      const gender = $('input[name="gender"]:checked').val();
+      const username = $('#username').val().trim();
+      
+      // Validate form
+      if (!firstName || !lastName || !email) {
+        $('#profile-error').text('Please fill in all required fields.').removeClass('d-none');
+        return;
+      }
+      
+      // Validate username
+      if (!username || username.length < 3) {
+        $('#profile-error').text('Username must be at least 3 characters long.').removeClass('d-none');
+        return;
+      }
+      
+      console.log('Form validation passed, updating profile...');
+      
+      // Update user profile
+      userProfile = {
+        ...userProfile,
+        firstName,
+        lastName,
+        email,
+        birthday: birthday || userProfile.birthday,
+        gender: gender || userProfile.gender,
+        username
+      };
+      
+      // Save to localStorage - ensure we update currentUser
+      localStorage.setItem('currentUser', JSON.stringify(userProfile));
+      
+      // Also update 'user' for backwards compatibility with older code
+      localStorage.setItem('user', JSON.stringify(userProfile));
+      
+      // Get users array if it exists
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex(u => u.id === userProfile.id);
+      
+      // Update the user in the users array if found
+      if (userIndex !== -1) {
+        users[userIndex] = {...users[userIndex], ...userProfile};
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      
+      // No need to call loadUserProfile here since we're going to refresh the page
+      // This prevents double toast messages
+      
+      // Show success message and refresh page
+      showToast('Profile updated successfully! Refreshing page...', 'success');
+      console.log('Profile updated successfully, will refresh page in 1.5 seconds');
+      
+      // Give time for toast to be visible, then refresh
+      setTimeout(function() {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      showToast('Error saving profile: ' + error.message, 'danger');
     }
-    
-    // Validate username
-    if (!username || username.length < 3) {
-      $('#profile-error').text('Username must be at least 3 characters long.').removeClass('d-none');
-      return;
-    }
-    
-    // Update user profile
-    userProfile = {
-      ...userProfile,
-      firstName,
-      lastName,
-      email,
-      birthday,
-      gender,
-      username
-    };
-    
-    // Save to localStorage
-    localStorage.setItem('user', JSON.stringify(userProfile));
-    localStorage.setItem('currentUser', JSON.stringify(userProfile));
-    
-    // Update display
-    loadUserProfile();
-    
-    // Close modal
-    $('#editProfileModal').modal('hide');
-    
-    // Show success message with toast instead of alert
-    showToast('Profile updated successfully!', 'success');
   }
 
   // Save new address
@@ -1576,12 +1679,13 @@
     $('#address-form')[0].reset();
     $('#address-id').val('');
     
-    // Close modal
-    $('#addAddressModal').modal('hide');
-    $('#editAddressModal').modal('hide');
+    // Instead of using jQuery modal hide, use page refresh
+    showToast('Address saved successfully! Refreshing page...', 'success');
     
-    // Show success message
-    alert('Address saved successfully!');
+    // Give time for toast to be visible, then refresh
+    setTimeout(function() {
+      window.location.reload();
+    }, 1500);
   }
 
   // Edit address
@@ -1636,8 +1740,13 @@
     // Render addresses
     renderAddresses();
     
-    // Show success message
-    alert('Default address updated successfully!');
+    // Use toast and page refresh instead of alert
+    showToast('Default address updated successfully! Refreshing page...', 'success');
+    
+    // Give time for toast to be visible, then refresh
+    setTimeout(function() {
+      window.location.reload();
+    }, 1500);
   }
 
   // Delete address
@@ -1673,6 +1782,14 @@
     
     // Render addresses
     renderAddresses();
+    
+    // Use toast and page refresh instead of alert
+    showToast('Address deleted successfully! Refreshing page...', 'success');
+    
+    // Give time for toast to be visible, then refresh
+    setTimeout(function() {
+      window.location.reload();
+    }, 1500);
   }
 
   // Update cart shipping cost based on default address
@@ -1697,43 +1814,63 @@
 
   // Change password
   function changePassword() {
-    const currentPassword = $('#current-password').val();
-    const newPassword = $('#new-password').val();
-    const confirmPassword = $('#confirm-password').val();
-    
-    // Validate passwords
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      $('#password-error').text('Please fill in all password fields.').removeClass('d-none');
-      return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-      $('#password-error').text('New passwords do not match.').removeClass('d-none');
-      return;
-    }
-    
-    if (newPassword.length < 8) {
-      $('#password-error').text('New password must be at least 8 characters long.').removeClass('d-none');
-      return;
-    }
-    
-    // Check if current password is correct
-    if (userProfile && userProfile.password !== currentPassword) {
-      $('#password-error').text('Current password is incorrect.').removeClass('d-none');
-      return;
-    }
-    
-    // Update password
-    if (userProfile) {
-      userProfile.password = newPassword;
-      localStorage.setItem('user', JSON.stringify(userProfile));
+    try {
+      const currentPassword = $('#current-password').val();
+      const newPassword = $('#new-password').val();
+      const confirmPassword = $('#confirm-password').val();
       
-      // Reset form
-      $('#change-password-form')[0].reset();
-      $('#password-error').addClass('d-none');
+      // Validate passwords
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        $('#password-error').text('Please fill in all password fields.').removeClass('d-none');
+        return;
+      }
       
-      // Show success message with toast instead of alert
-      showToast('Password changed successfully!', 'success');
+      if (newPassword !== confirmPassword) {
+        $('#password-error').text('New passwords do not match.').removeClass('d-none');
+        return;
+      }
+      
+      if (newPassword.length < 8) {
+        $('#password-error').text('New password must be at least 8 characters long.').removeClass('d-none');
+        return;
+      }
+      
+      // Check if current password is correct (simplified for demo)
+      // In a real app, this should be verified on the server
+      if (userProfile && userProfile.password !== currentPassword) {
+        $('#password-error').text('Current password is incorrect.').removeClass('d-none');
+        return;
+      }
+      
+      // Update password in all storage locations
+      if (userProfile) {
+        userProfile.password = newPassword;
+        localStorage.setItem('currentUser', JSON.stringify(userProfile));
+        localStorage.setItem('user', JSON.stringify(userProfile)); // for backwards compatibility
+        
+        // Also update in users array if it exists
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const userIndex = users.findIndex(u => u.id === userProfile.id);
+        if (userIndex !== -1) {
+          users[userIndex].password = newPassword;
+          localStorage.setItem('users', JSON.stringify(users));
+        }
+        
+        // Reset form
+        $('#change-password-form')[0].reset();
+        $('#password-error').addClass('d-none');
+        
+        // Show success message and refresh
+        showToast('Password changed successfully! Refreshing page...', 'success');
+        
+        // Refresh page after short delay
+        setTimeout(function() {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      $('#password-error').text('Error: ' + error.message).removeClass('d-none');
     }
   }
 
@@ -4110,4 +4247,110 @@ function showToast(message, type = 'primary') {
 
 <!-- Add Bootstrap JS at the end of body -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfileModalLabel">Edit Personal Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="profile-form">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="birthday" class="form-label">Birthday</label>
+            <input type="date" class="form-control" id="birthday">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Gender</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male">
+                <label class="form-check-label" for="genderMale">Male</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
+                <label class="form-check-label" for="genderFemale">Female</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="gender" id="genderOther" value="other">
+                <label class="form-check-label" for="genderOther">Other</label>
+              </div>
+            </div>
+          </div>
+          <div id="profile-error" class="alert alert-danger d-none"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-profile" onclick="saveProfileChanges()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add this script to ensure modals work properly -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing all modals on page...');
+    // Initialize all modals with proper options after they are defined
+    var modalElements = document.querySelectorAll('.modal');
+    if (modalElements.length > 0) {
+      modalElements.forEach(function(modalElement) {
+        try {
+          var modalInstance = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+          });
+          console.log(`Modal initialized: #${modalElement.id}`);
+        } catch (err) {
+          console.error(`Failed to initialize modal #${modalElement.id}:`, err);
+        }
+      });
+    } else {
+      console.warn('No modal elements found on page');
+    }
+  });
+</script>
+
+<!-- Script to properly initialize all modals -->
+<script>
+  // Ensure modals are properly initialized after page load
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing modals after page load');
+    setTimeout(function() {
+      try {
+        document.querySelectorAll('.modal').forEach(function(modal) {
+          // Check if modal is already initialized
+          if (!bootstrap.Modal.getInstance(modal)) {
+            new bootstrap.Modal(modal);
+            console.log('Modal initialized:', modal.id);
+          }
+        });
+      } catch (error) {
+        console.error('Error initializing modals:', error);
+      }
+    }, 500); // Small delay to ensure DOM is fully loaded
+  });
+</script>
 </html>
