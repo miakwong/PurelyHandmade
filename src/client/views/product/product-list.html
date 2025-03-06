@@ -90,6 +90,7 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
       position: sticky;
       top: 20px;
+      z-index: 10;
     }
     
     .filter-sidebar h4 {
@@ -122,7 +123,19 @@
     .filter-group-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.35s ease;
+      opacity: 0;
+      margin-top: 0;
+      padding-left: 0.5rem;
+      transition: all 0.3s ease-out;
+      pointer-events: none;
+    }
+    
+    .filter-group-content.show {
+      max-height: 300px; /* 一个合理的默认值 */
+      opacity: 1;
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
+      pointer-events: auto;
     }
     
     .price-range-inputs {
@@ -450,9 +463,9 @@
           <div class="filter-group">
             <div class="filter-group-title">
               <span>Categories</span>
-              <i class="bi bi-chevron-down"></i>
+              <i class="bi bi-chevron-up"></i>
             </div>
-            <div class="filter-group-content" id="category-filters">
+            <div class="filter-group-content show" id="category-filters">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="all" id="category-all" checked>
                 <label class="form-check-label" for="category-all">
@@ -469,7 +482,7 @@
               <span>Price Range</span>
               <i class="bi bi-chevron-down"></i>
             </div>
-            <div class="filter-group-content">
+            <div class="filter-group-content" id="price-filter">
               <div class="price-range-inputs">
                 <div class="input-group input-group-sm">
                   <span class="input-group-text">$</span>
@@ -619,14 +632,14 @@
       window.initializeData();
     }
     
+    // 初始化筛选器折叠功能 - 放在更前面执行
+    initializeFilterAccordion();
+    
     // 加载分类
     loadCategories();
     
     // 加载产品
     loadProducts();
-    
-    // 初始化筛选器折叠功能
-    initializeFilterAccordion();
     
     // 添加事件监听器
     document.getElementById('sort-select').addEventListener('change', applyFiltersAndSort);
@@ -1025,8 +1038,27 @@
   function initializeFilterAccordion() {
     const filterTitles = document.querySelectorAll('.filter-group-title');
     
+    // 确保初始状态正确
+    document.querySelectorAll('.filter-group-content').forEach((content, index) => {
+      if (index === 0) {
+        // 第一个筛选器（Categories）默认展开
+        content.classList.add('show');
+        const arrow = content.previousElementSibling.querySelector('i');
+        arrow.classList.remove('bi-chevron-down');
+        arrow.classList.add('bi-chevron-up');
+      } else {
+        // 其他筛选器默认收起
+        content.classList.remove('show');
+        const arrow = content.previousElementSibling.querySelector('i');
+        arrow.classList.remove('bi-chevron-up');
+        arrow.classList.add('bi-chevron-down');
+      }
+    });
+    
+    // 添加点击事件
     filterTitles.forEach(title => {
-      title.addEventListener('click', function() {
+      title.addEventListener('click', function(e) {
+        e.preventDefault();
         const content = this.nextElementSibling;
         
         // 切换箭头方向
@@ -1035,11 +1067,7 @@
         arrow.classList.toggle('bi-chevron-up');
         
         // 切换内容显示
-        if (content.style.maxHeight) {
-          content.style.maxHeight = null;
-        } else {
-          content.style.maxHeight = content.scrollHeight + 'px';
-        }
+        content.classList.toggle('show');
       });
     });
   }
