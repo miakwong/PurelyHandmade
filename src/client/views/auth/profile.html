@@ -414,7 +414,7 @@
                   </div>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                  <button class="admin-btn admin-btn-outline" onclick="resetFilters()">
+                  <button class="admin-btn admin-btn-primary" onclick="resetFilters()">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                   </button>
                 </div>
@@ -548,7 +548,7 @@
                 <h4 class="mb-0">
                   <i class="bi bi-bag-check me-2 text-primary"></i>Order Management
                 </h4>
-                <button type="button" class="admin-btn admin-btn-outline" onclick="exportOrdersToCSV()">
+                <button type="button" class="admin-btn admin-btn-primary" onclick="exportOrdersToCSV()">
                   <i class="bi bi-download me-2"></i>Export Orders
                 </button>
               </div>
@@ -580,7 +580,7 @@
                   <input type="text" class="form-control" id="orderSearch" placeholder="Order ID or Customer" onkeyup="filterAdminOrders()">
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                  <button class="admin-btn admin-btn-outline" onclick="resetOrderFilters()">
+                  <button class="admin-btn admin-btn-primary" onclick="resetOrderFilters()">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                   </button>
                 </div>
@@ -818,7 +818,7 @@
                   <!-- Image previews will be added here -->
                 </div>
                 <div class="d-grid mt-2">
-                  <button type="button" class="admin-btn admin-btn-outline" onclick="document.getElementById('designerImage').click()">
+                  <button type="button" class="admin-btn admin-btn-primary" onclick="document.getElementById('designerImage').click()">
                     <i class="bi bi-upload me-1"></i> Upload Images
                   </button>
                 </div>
@@ -939,7 +939,7 @@
                   <!-- Image previews will be added here -->
                 </div>
                 <div class="d-grid mt-2">
-                  <button type="button" class="admin-btn admin-btn-outline" onclick="document.getElementById('productImages').click()">
+                  <button type="button" class="admin-btn admin-btn-primary" onclick="document.getElementById('productImages').click()">
                     <i class="bi bi-upload me-1"></i> Upload Images
                   </button>
                 </div>
@@ -3087,10 +3087,10 @@
         <td><span class="order-status ${statusClass}">${order.status || 'Processing'}</span></td>
         <td>
           <div class="btn-group">
-            <button class="admin-btn admin-btn-sm admin-btn-outline" onclick="viewOrderDetails('${order.id}')">
+            <button class="admin-btn admin-btn-info admin-btn-sm me-1" onclick="viewOrderDetails('${order.id}')">
               <i class="bi bi-eye"></i>
             </button>
-            <button class="admin-btn admin-btn-sm admin-btn-outline" onclick="updateOrderStatus('${order.id}')">
+            <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="updateOrderStatus('${order.id}')">
               <i class="bi bi-pencil"></i>
             </button>
           </div>
@@ -3213,7 +3213,7 @@
             <i class="bi bi-funnel-fill text-muted" style="font-size: 1.5rem;"></i>
           </div>
           <p class="text-muted mt-2">No orders match your filter criteria</p>
-          <button class="admin-btn admin-btn-sm admin-btn-outline mt-2" onclick="resetOrderFilters()">
+          <button class="admin-btn admin-btn-primary admin-btn-sm mt-2" onclick="resetOrderFilters()">
             Clear Filters
           </button>
         </td>
