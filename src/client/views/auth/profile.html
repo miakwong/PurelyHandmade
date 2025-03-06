@@ -12,9 +12,9 @@
   <link href="/src/client/css/admin.css" rel="stylesheet">
   
   <style>
-    /* 使用与首页一致的颜色变量 */
+    /* Use color variables consistent with homepage */
     :root {
-      --primary-color: #eae2d6; /* 更改为与首页相同的导航栏颜色 */
+      --primary-color: #eae2d6; /* Changed to match navbar color on homepage */
       --secondary-color: #e1d7c6;
       --accent-color: #867666;
       --text-color: #5e4b3e;
@@ -34,6 +34,58 @@
       --button-hover: #6f6255;
     }
     
+    /* Avatar styles - enlarged to 150px and moved further down */
+    .avatar-wrapper {
+      position: relative;
+      width: 150px; /* Increased to 150px as requested */
+      height: 150px; /* Increased to 150px as requested */
+      margin: 30px auto 1.2rem; /* Increased top margin to move further down */
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 50%; /* Make wrapper perfectly circular */
+      cursor: pointer;
+      /* Add a subtle outline to better define the circular shape */
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.8), 0 0 5px rgba(0,0,0,0.1);
+    }
+    
+    .avatar-wrapper:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 3px rgba(255,255,255,1), 0 0 10px rgba(0,0,0,0.2);
+    }
+    
+    .avatar-wrapper:active {
+      transform: scale(0.98);
+    }
+    
+    .profile-avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid white;
+    }
+    
+    .avatar-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      width: 100%;
+      height: 30%;
+      transition: 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .avatar-overlay i {
+      color: white;
+      font-size: 1.2rem;
+    }
+    
     /* 其他profile页面特定样式保持不变 */
     .profile-section {
       background-color: white;
@@ -47,42 +99,6 @@
       padding: 2rem;
       position: relative;
       text-align: center;
-    }
-    
-    .profile-img-wrapper {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      margin: 0 auto 1.5rem;
-    }
-    
-    #profile-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .change-image-btn {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background-color: #fff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .change-image-btn:hover {
-      background-color: #f8f9fa;
     }
     
     .profile-content {
@@ -249,14 +265,28 @@
   <div class="profile-section">
     <div class="row">
       <div class="col-md-3 text-center">
-        <div class="avatar-wrapper">
-          <img src="/src/client/assets/img/profile.png" alt="Profile Photo" id="profile-img" class="profile-avatar">
-          <div class="avatar-overlay" onclick="document.getElementById('avatar-upload').click()">
-            <i class="bi bi-camera"></i>
-      </div>
-          <input type="file" id="avatar-upload" accept="image/png, image/jpeg" onchange="updateProfilePhoto(event)" hidden>
+        <!-- Avatar section -->
+        <div class="avatar-wrapper" onclick="document.getElementById('avatar-upload').click(); console.log('Avatar clicked - triggering file upload dialog');">
+          <img src="../../../img/profile.png" alt="Profile Photo" id="profile-img" class="profile-avatar">
+          <input type="file" id="avatar-upload" class="hidden-upload" accept="image/*">
         </div>
         <h3 id="user-full-name" class="mt-3">John Doe</h3>
+        <!-- Add username display with edit functionality -->
+        <div class="username-container mb-2">
+          <span id="username-display" class="d-inline-block">@johndoe</span>
+          <button class="btn btn-sm btn-link p-0 ms-2" onclick="toggleUsernameEdit()">
+            <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+          </button>
+          <div id="username-edit-container" class="mt-2 d-none">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">@</span>
+              <input type="text" id="username-input" class="form-control form-control-sm" maxlength="20">
+              <button class="btn btn-sm btn-primary" onclick="saveUsername()">Save</button>
+              <button class="btn btn-sm btn-secondary" onclick="cancelUsernameEdit()">Cancel</button>
+            </div>
+            <small class="text-muted">Username must be 3-20 characters long</small>
+          </div>
+        </div>
         <p id="user-email" class="text-muted">johndoe@example.com</p>
         <p class="mb-0"><small class="text-muted">Member since <span id="join-date">January 2023</span></small></p>
       </div>
@@ -286,402 +316,395 @@
                 </h4>
                 <button class="admin-btn admin-btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                   <i class="bi bi-pencil me-2"></i>Edit Profile
-              </button>
-            </div>
+                </button>
+              </div>
             
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label">First Name</label>
-                    <div class="detail-value fw-medium" id="first-name">John</div>
-              </div>
-                  
-                  <div class="admin-form-group">
-                    <label class="admin-form-label">Email</label>
-                    <div class="detail-value fw-medium" id="email-display">johndoe@example.com</div>
-              </div>
-                  
-                  <div class="admin-form-group">
-                    <label class="admin-form-label">Gender</label>
-                    <div class="detail-value fw-medium" id="gender-display">Male</div>
-              </div>
-              </div>
+              <!-- Redesigned Personal Information layout with cards -->
+              <div class="row g-3">
+                <!-- Username -->
+                <div class="col-md-4">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <i class="bi bi-person-badge me-2 text-primary"></i>Username
+                      </h5>
+                      <p class="card-text fs-5 mt-3" id="username-display-profile">@johndoe</p>
+                    </div>
+                  </div>
+                </div>
                 
+                <!-- Name information -->
+                <div class="col-md-8">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <i class="bi bi-person me-2 text-primary"></i>Full Name
+                      </h5>
+                      <div class="row mt-3">
+                        <div class="col-md-6">
+                          <p class="text-muted mb-1">First Name</p>
+                          <p class="fs-5 fw-medium" id="first-name">John</p>
+                        </div>
+                        <div class="col-md-6">
+                          <p class="text-muted mb-1">Last Name</p>
+                          <p class="fs-5 fw-medium" id="last-name">Doe</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Contact Information -->
                 <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label">Last Name</label>
-                    <div class="detail-value fw-medium" id="last-name">Doe</div>
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <i class="bi bi-envelope me-2 text-primary"></i>Contact Information
+                      </h5>
+                      <div class="mt-3">
+                        <p class="text-muted mb-1">Email</p>
+                        <p class="fw-medium" id="email-display">johndoe@example.com</p>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div class="admin-form-group">
-                    <label class="admin-form-label">Birthday</label>
-                    <div class="detail-value fw-medium" id="birthday-display">January 1, 1990</div>
+                </div>
+                
+                <!-- Personal Details -->
+                <div class="col-md-6">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>Personal Details
+                      </h5>
+                      <div class="row mt-3">
+                        <div class="col-md-6">
+                          <p class="text-muted mb-1">Birthday</p>
+                          <p class="fw-medium" id="birthday-display">January 1, 1990</p>
+                        </div>
+                        <div class="col-md-6">
+                          <p class="text-muted mb-1">Gender</p>
+                          <p class="fw-medium" id="gender-display">Male</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <!-- Addresses Tab -->
-          <div class="tab-pane fade" id="addresses" role="tabpanel" aria-labelledby="addresses-tab">
-            <div class="profile-header">
-              <h4>My Addresses</h4>
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                <i class="bi bi-plus-lg me-1"></i> Add New Address
-              </button>
-            </div>
-            
-            <div id="addresses-container">
-              <!-- Addresses will be loaded here -->
-              <div class="no-addresses">
-                <i class="bi bi-geo-alt display-4"></i>
-                <p class="mt-3">You don't have any saved addresses yet.</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Security Tab -->
-          <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-shield-lock me-2 text-primary"></i>Security Settings
-                </h4>
-            </div>
-            
-            <div class="mb-4">
-                <h5 class="mb-3">Change Password</h5>
-              <form id="change-password-form">
-                  <div class="admin-form-group">
-                    <label for="current-password" class="admin-form-label">Current Password</label>
-                    <input type="password" class="admin-form-control" id="current-password" required>
-                </div>
-                  <div class="admin-form-group">
-                    <label for="new-password" class="admin-form-label">New Password</label>
-                    <input type="password" class="admin-form-control" id="new-password" required>
-                </div>
-                  <div class="admin-form-group">
-                    <label for="confirm-password" class="admin-form-label">Confirm New Password</label>
-                    <input type="password" class="admin-form-control" id="confirm-password" required>
-                </div>
-                <div id="password-error" class="alert alert-danger d-none"></div>
-                  <button type="submit" class="admin-btn admin-btn-primary">
-                    <i class="bi bi-check-lg me-2"></i>Update Password
-                  </button>
-              </form>
-              </div>
-            </div>
+          <!-- Order History Tab -->
+          <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+            <!-- Add order history content here -->
           </div>
           
           <!-- Admin Tab -->
           <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="admin-tab">
-            <div class="profile-header">
-              <h4>Admin Features</h4>
-            </div>
-            
-            <!-- Product Management Section -->
-            <div class="admin-section mb-4">
+            <div class="admin-section">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="mb-0">
-                  <i class="bi bi-box-seam me-2 text-primary"></i>Product Management
+                  <i class="bi bi-gear me-2 text-primary"></i>Admin Dashboard
                 </h4>
-                <button type="button" class="admin-btn admin-btn-primary" onclick="resetProductForm()" data-bs-toggle="modal" data-bs-target="#productModal">
-                  <i class="bi bi-plus-lg me-2"></i>Add Product
-                </button>
               </div>
               
-              <!-- 添加产品过滤选项 -->
-              <div class="row mb-3">
-                <div class="col-md-3">
-                  <label for="filterCategory" class="form-label">Filter by Category:</label>
-                  <select class="form-select" id="filterCategory" onchange="filterProducts()">
-                    <option value="">All Categories</option>
-                    <!-- 分类选项将通过JavaScript动态加载 -->
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label for="filterDesigner" class="form-label">Filter by Designer:</label>
-                  <select class="form-select" id="filterDesigner" onchange="filterProducts()">
-                    <option value="">All Designers</option>
-                    <!-- 设计师选项将通过JavaScript动态加载 -->
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label">Sale Status:</label>
-                  <div class="form-check pt-2">
-                    <input class="form-check-input" type="checkbox" id="filterOnSale" onchange="filterProducts()">
-                    <label class="form-check-label" for="filterOnSale">Show only sale items</label>
-                  </div>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                  <button class="admin-btn admin-btn-primary" onclick="resetFilters()">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                  </button>
-                </div>
-              </div>
+              <!-- Admin Dashboard Tabs -->
+              <ul class="nav nav-tabs" id="adminDashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-panel" type="button" role="tab" aria-controls="users-panel" aria-selected="true">Users</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products-panel" type="button" role="tab" aria-controls="products-panel" aria-selected="false">Products</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="orders-admin-tab" data-bs-toggle="tab" data-bs-target="#orders-panel" type="button" role="tab" aria-controls="orders-panel" aria-selected="false">Orders</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments-panel" type="button" role="tab" aria-controls="comments-panel" aria-selected="false">Reviews</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="designers-tab" data-bs-toggle="tab" data-bs-target="#designers-panel" type="button" role="tab" aria-controls="designers-panel" aria-selected="false">Designers</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-panel" type="button" role="tab" aria-controls="categories-panel" aria-selected="false">Categories</button>
+                </li>
+              </ul>
               
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Image</th>
-                      <th>Name</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Stock</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="productTableBody">
-                    <!-- Product rows will be dynamically added here -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <!-- User Management Section -->
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-people me-2 text-primary"></i>User Management
-                </h4>
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Avatar</th>
-                      <th>User</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="userTableBody">
-                    <!-- User rows will be dynamically added here -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <!-- Designer Management Section -->
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-person-badge me-2 text-primary"></i>Designer Management
-                </h4>
-                <button type="button" class="admin-btn admin-btn-primary" onclick="resetDesignerForm()" data-bs-toggle="modal" data-bs-target="#designerModal">
-                  <i class="bi bi-plus-lg me-2"></i>Add Designer
-                </button>
-              </div>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Image</th>
-                      <th>Name</th>
-                      <th>Specialty</th>
-                      <th>Products</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="designerTableBody">
-                    <!-- Designer rows will be dynamically added here -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            <!-- Category Management -->
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-collection me-2 text-primary"></i>Category Management
-                </h4>
-                <button type="button" class="admin-btn admin-btn-primary" onclick="resetCategoryForm()">
-                  <i class="bi bi-plus-lg me-2"></i>Add Category
-                </button>
-              </div>
-              <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th style="width: 80px;">Image</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th style="width: 100px;" class="text-center">Products</th>
-                      <th style="width: 130px;" class="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="category-table-body">
-                    <!-- Categories will be loaded here -->
-                    <tr>
-                      <td colspan="5" class="text-center py-4">
-                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
-                          <span class="visually-hidden">Loading...</span>
+              <div class="tab-content pt-3" id="adminDashboardTabsContent">
+                <!-- Users Panel -->
+                <div class="tab-pane fade show active" id="users-panel" role="tabpanel" aria-labelledby="users-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h5 class="mb-0">User Management</h5>
                         </div>
-                        Loading categories...
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div id="no-categories-message" class="d-none">
-                <div class="empty-state py-4">
-                  <div class="empty-state-icon bg-light rounded-circle p-3 d-inline-flex mb-3">
-                    <i class="bi bi-collection text-secondary" style="font-size: 2rem;"></i>
+                        <div class="col-auto">
+                          <div class="input-group">
+                            <input type="text" class="form-control" id="user-search" placeholder="Search by ID or email">
+                            <button class="btn btn-primary" type="button" id="search-user">
+                              <i class="bi bi-search"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Avatar</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Role</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="userTableBody">
+                            <!-- User data will be loaded here -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
-                  <h5 class="mt-3 mb-1 text-secondary">No categories found</h5>
-                  <p class="text-muted mb-4">Add your first category to organize your products</p>
-                  <button class="admin-btn admin-btn-primary" onclick="resetCategoryForm()">
-                    <i class="bi bi-plus-lg me-2"></i>Add First Category
-                  </button>
                 </div>
-              </div>
-            </div>
-            
-            <!-- Order Management Section -->
-            <div class="admin-section mb-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-bag-check me-2 text-primary"></i>Order Management
-                </h4>
-                <button type="button" class="admin-btn admin-btn-primary" onclick="exportOrdersToCSV()">
-                  <i class="bi bi-download me-2"></i>Export Orders
-                </button>
-              </div>
-              
-              <!-- 订单过滤选项 -->
-              <div class="row mb-3">
-                <div class="col-md-3">
-                  <label for="orderFilterStatus" class="form-label">Filter by Status:</label>
-                  <select class="form-select" id="orderFilterStatus" onchange="filterAdminOrders()">
-                    <option value="">All Status</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                
+                <!-- Products Panel -->
+                <div class="tab-pane fade" id="products-panel" role="tabpanel" aria-labelledby="products-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h5 class="mb-0">Product Management</h5>
+                        </div>
+                        <div class="col-auto">
+                          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Product
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Image</th>
+                              <th>Name</th>
+                              <th>Price</th>
+                              <th>Category</th>
+                              <th>Stock</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="productTableBody">
+                            <!-- Product data will be loaded here -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-3">
-                  <label for="orderFilterDate" class="form-label">Filter by Date:</label>
-                  <select class="form-select" id="orderFilterDate" onchange="filterAdminOrders()">
-                    <option value="">All Time</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="week">Last 7 Days</option>
-                    <option value="month">Last 30 Days</option>
-                  </select>
+                
+                <!-- Designers Panel -->
+                <div class="tab-pane fade" id="designers-panel" role="tabpanel" aria-labelledby="designers-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h5 class="mb-0">Designer Management</h5>
+                        </div>
+                        <div class="col-auto">
+                          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#designerModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Designer
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Avatar</th>
+                              <th>Name</th>
+                              <th>Specialty</th>
+                              <th>Products</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="designerTableBody">
+                            <!-- Designer data will be loaded here -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-3">
-                  <label for="orderSearch" class="form-label">Search Orders:</label>
-                  <input type="text" class="form-control" id="orderSearch" placeholder="Order ID or Customer" onkeyup="filterAdminOrders()">
+                
+                <!-- Categories Panel -->
+                <div class="tab-pane fade" id="categories-panel" role="tabpanel" aria-labelledby="categories-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h5 class="mb-0">Category Management</h5>
+                        </div>
+                        <div class="col-auto">
+                          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Category
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Image</th>
+                              <th>Name</th>
+                              <th>Description</th>
+                              <th>Products</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="category-table-body">
+                            <!-- Category data will be loaded here -->
+                          </tbody>
+                        </table>
+                        <div id="no-categories-message" class="d-none text-center py-5">
+                          <div class="empty-state-icon mx-auto mb-3">
+                            <i class="bi bi-folder-x fs-1 text-muted"></i>
+                          </div>
+                          <p class="text-muted mb-3">No categories found</p>
+                          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                            Add Your First Category
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
-                  <button class="admin-btn admin-btn-primary" onclick="resetOrderFilters()">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                  </button>
+                
+                <!-- Orders Panel -->
+                <div class="tab-pane fade" id="orders-panel" role="tabpanel" aria-labelledby="orders-admin-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <div class="row align-items-center">
+                        <div class="col">
+                          <h5 class="mb-0">Order Management</h5>
+                        </div>
+                        <div class="col-md-auto mb-2 mb-md-0">
+                          <div class="input-group">
+                            <input type="text" class="form-control" id="order-search" placeholder="Order ID">
+                            <button class="btn btn-primary" type="button" id="check-order">
+                              <i class="bi bi-search"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="col-md-auto">
+                          <button class="btn btn-success" id="exportOrdersToCSV">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export to CSV
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <!-- Order stats cards -->
+                      <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                          <div class="card text-white bg-info">
+                            <div class="card-body p-3">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                  <h6 class="mb-0">New Orders</h6>
+                                  <h2 class="mb-0" id="new-count">0</h2>
+                                </div>
+                                <i class="bi bi-bag fs-1"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                          <div class="card text-white bg-primary">
+                            <div class="card-body p-3">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                  <h6 class="mb-0">Packed</h6>
+                                  <h2 class="mb-0" id="packed-count">0</h2>
+                                </div>
+                                <i class="bi bi-box-seam fs-1"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3 mb-sm-0">
+                          <div class="card text-white bg-warning">
+                            <div class="card-body p-3">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                  <h6 class="mb-0">In Transit</h6>
+                                  <h2 class="mb-0" id="transit-count">0</h2>
+                                </div>
+                                <i class="bi bi-truck fs-1"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                          <div class="card text-white bg-success">
+                            <div class="card-body p-3">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                  <h6 class="mb-0">Delivered</h6>
+                                  <h2 class="mb-0" id="delivered-count">0</h2>
+                                </div>
+                                <i class="bi bi-check-circle fs-1"></i>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Order ID</th>
+                              <th>Product</th>
+                              <th>Amount</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="orderTableBody">
+                            <!-- Order data will be loaded here -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Date</th>
-                      <th>Items</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="orderTableBody">
-                    <!-- Order rows will be dynamically added here -->
-                  </tbody>
-                </table>
+                
+                <!-- Comments Panel -->
+                <div class="tab-pane fade" id="comments-panel" role="tabpanel" aria-labelledby="comments-tab">
+                  <div class="card mb-4">
+                    <div class="card-header">
+                      <h5 class="mb-0">Customer Reviews</h5>
+                    </div>
+                    <div class="card-body">
+                      <ul class="list-group" id="comment-list">
+                        <!-- Comment data will be loaded here -->
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Profile Modal -->
-<div class="modal fade admin-modal" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editProfileModalLabel">
-          <i class="bi bi-person-badge me-2 text-primary"></i>Edit Personal Information
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="profile-form">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="firstName" class="admin-form-label">First Name</label>
-                <input type="text" class="admin-form-control" id="firstName" required>
-            </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="lastName" class="admin-form-label">Last Name</label>
-                <input type="text" class="admin-form-control" id="lastName" required>
-          </div>
-          </div>
-          </div>
-          
-          <div class="admin-form-group">
-            <label for="email" class="admin-form-label">Email Address</label>
-            <input type="email" class="admin-form-control" id="email" required>
-          </div>
-          
-          <div class="admin-form-group">
-            <label for="birthday" class="admin-form-label">Birthday</label>
-            <input type="date" class="admin-form-control" id="birthday" required>
-          </div>
-          
-          <div class="admin-form-group">
-            <label class="admin-form-label">Gender</label>
-            <div class="d-flex gap-4">
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male">
-                <label class="form-check-label" for="genderMale">
-                  <i class="bi bi-gender-male me-1"></i>Male
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
-                <label class="form-check-label" for="genderFemale">
-                  <i class="bi bi-gender-female me-1"></i>Female
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderOther" value="other">
-                <label class="form-check-label" for="genderOther">
-                  <i class="bi bi-asterisk me-1"></i>Other
-                </label>
-              </div>
-            </div>
-          </div>
-          
-          <div id="profile-error" class="alert alert-danger d-none"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="admin-btn admin-btn-primary" id="save-profile">
-          <i class="bi bi-check-lg me-2"></i>Save Changes
-        </button>
       </div>
     </div>
   </div>
@@ -1201,9 +1224,12 @@
       }
       
       // Update profile display
-      $('#profile-img').attr('src', userProfile.avatar || '/src/client/assets/img/profile.png');
+      $('#profile-img').attr('src', userProfile.avatar || '../../../img/profile.png');
       $('#user-full-name').text(`${userProfile.firstName || ''} ${userProfile.lastName || ''}`);
       $('#user-email, #email-display').text(userProfile.email);
+      
+      // Display username
+      $('#username-display').text('@' + (userProfile.username || ''));
       
       // Format and display birthday
       if (userProfile.birthday) {
@@ -1245,6 +1271,7 @@
       $('#lastName').val(userProfile.lastName || '');
       $('#email').val(userProfile.email || '');
       $('#birthday').val(userProfile.birthday || '');
+      $('#username').val(userProfile.username || '');
       if (userProfile.gender) {
         $(`input[name="gender"][value="${userProfile.gender}"]`).prop('checked', true);
       }
@@ -1435,10 +1462,17 @@
     const email = $('#email').val().trim();
     const birthday = $('#birthday').val();
     const gender = $('input[name="gender"]:checked').val();
+    const username = $('#username').val().trim();
     
     // Validate form
     if (!firstName || !lastName || !email || !birthday || !gender) {
       $('#profile-error').text('Please fill in all required fields.').removeClass('d-none');
+      return;
+    }
+    
+    // Validate username
+    if (!username || username.length < 3) {
+      $('#profile-error').text('Username must be at least 3 characters long.').removeClass('d-none');
       return;
     }
     
@@ -1449,11 +1483,13 @@
       lastName,
       email,
       birthday,
-      gender
+      gender,
+      username
     };
     
     // Save to localStorage
     localStorage.setItem('user', JSON.stringify(userProfile));
+    localStorage.setItem('currentUser', JSON.stringify(userProfile));
     
     // Update display
     loadUserProfile();
@@ -1729,6 +1765,11 @@
     ];
 
     let userTable = document.getElementById("userTableBody");
+    if (!userTable) {
+      console.log('userTableBody element not found - user table will not be updated');
+      return;
+    }
+    
     userTable.innerHTML = "";
 
     users.forEach(user => {
@@ -1744,7 +1785,7 @@
       const status = user.status || "Active";
       
       // Get user's avatar or use default
-      const avatarSrc = user.avatar || "../../assets/img/profile.png";
+      const avatarSrc = user.avatar || "../../../img/profile.png";
       
       userTable.innerHTML += `
         <tr>
@@ -1810,7 +1851,12 @@
     document.getElementById("delivered-count").textContent = orders.filter(order => order.orderStatus === "Delivered").length;
 
     // Render order list
-    let orderList = document.getElementById("order-list");
+    let orderList = document.getElementById("orderTableBody");
+    if (!orderList) {
+      console.error('orderTableBody element not found! DOM may not be fully loaded.');
+      return;
+    }
+    
     orderList.innerHTML = "";
 
     orders.forEach(order => {
@@ -2014,6 +2060,11 @@
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const tableBody = document.getElementById('designerTableBody');
     
+    if (!tableBody) {
+      console.error('designerTableBody element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if tableBody doesn't exist
+    }
+    
     tableBody.innerHTML = designers.map(designer => {
       const designerProducts = products.filter(p => p.designerId === designer.id);
       return `
@@ -2126,7 +2177,7 @@
     const images = Array.from(document.getElementById('designerImagesContainer').children || [])
       .map(div => div.querySelector('img').src);
     
-    const mainImage = images.length > 0 ? images[0] : '/src/client/assets/img/placeholder.png';
+    const mainImage = images.length > 0 ? images[0] : '../../../img/profile.png';
     
     const designer = {
       id: designerId || `d${Date.now()}`,
@@ -2168,46 +2219,62 @@
 
   // Product management functions
   function loadProducts() {
-    console.log('Loading products...');
-    try {
-      const products = JSON.parse(localStorage.getItem('products') || '[]');
-      console.log(`Found ${products.length} products in localStorage`);
+    const products = JSON.parse(localStorage.getItem("productsData")) || [
+      { id: 1, name: "Handmade Soap", price: 15.99, category: "Bath & Body", stock: 25, image: "../../../img/profile.png" },
+      { id: 2, name: "Scented Candle", price: 24.99, category: "Home Decor", stock: 15, image: "../../../img/profile.png" }
+    ];
+    
+    const tableBody = document.getElementById('productTableBody');
+    if (!tableBody) {
+      console.error('productTableBody element not found! DOM may not be fully loaded.');
       
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
-      console.log(`Found ${categories.length} categories in localStorage`);
+      // Try again after a short delay
+      setTimeout(() => {
+        const retryTableBody = document.getElementById('productTableBody');
+        if (retryTableBody) {
+          console.log('Found productTableBody on retry');
+          renderProductTable(products, retryTableBody);
+        } else {
+          console.error('productTableBody still not found after retry');
+        }
+      }, 500);
       
-      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
-      console.log(`Found ${designers.length} designers in localStorage`);
-      
-      // 加载分类和设计师筛选选项
-      loadFilterOptions(categories, designers);
-      
-      const tableBody = document.getElementById('productTableBody');
-      if (!tableBody) {
-        console.error('productTableBody element not found! DOM may not be fully loaded.');
-        // 尝试延迟后再次加载
-        setTimeout(function() {
-          const retryTableBody = document.getElementById('productTableBody');
-          if (retryTableBody) {
-            console.log('Found productTableBody on retry');
-            fillProductTable(retryTableBody, products, categories, designers);
-          } else {
-            console.error('productTableBody still not found after retry');
-          }
-        }, 1000);
-        return;
-      }
-      
-      fillProductTable(tableBody, products, categories, designers);
-      window.allProducts = products; // 存储所有产品，用于筛选
-      window.allCategories = categories; // 存储所有分类
-      window.allDesigners = designers; // 存储所有设计师
-      productsLoaded = true;
-    } catch (error) {
-      console.error('Error loading products:', error);
+      return;
     }
+    
+    renderProductTable(products, tableBody);
   }
   
+  function renderProductTable(products, tableBody) {
+    tableBody.innerHTML = "";
+    
+    products.forEach(product => {
+      tableBody.innerHTML += `
+        <tr>
+          <td>
+            <img src="${product.image || '../../../img/profile.png'}" alt="${product.name}" class="rounded" width="50" height="50">
+          </td>
+          <td>${product.name}</td>
+          <td>$${product.price.toFixed(2)}</td>
+          <td>${product.category}</td>
+          <td>${product.stock}</td>
+          <td>
+            <div class="btn-group">
+              <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editProduct(${product.id})">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteProduct(${product.id})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    });
+    
+    // Store in localStorage
+    localStorage.setItem("productsData", JSON.stringify(products));
+  }
+
   // 加载筛选选项
   function loadFilterOptions(categories, designers) {
     // 加载分类选项
@@ -2330,7 +2397,7 @@
       const designer = product.designerId ? designers.find(d => d.id === product.designerId) : null;
       
       // 兼容两种图片格式
-      let mainImage = '/src/client/assets/img/placeholder.png';
+      let mainImage = '../../../img/profile.png';
       if (product.images && product.images.length > 0) {
         mainImage = product.images[0];
       }
@@ -2583,7 +2650,7 @@
         onSale: document.getElementById('productOnSale').checked,
         salePrice: document.getElementById('productSalePrice').value ? 
           parseFloat(document.getElementById('productSalePrice').value) : null,
-        images: images.length > 0 ? images : ['/src/client/assets/img/placeholder.png'], // 确保至少有一张默认图片
+        images: images.length > 0 ? images : ['../../../img/profile.png'], // 确保至少有一张默认图片
         listingDate: listingDate,
         reviews: productId ? 
           (products.find(p => p.id === parseInt(productId) || p.id === productId)?.reviews || []) : []
@@ -2762,16 +2829,21 @@
   // Category management functions
   function loadCategories() {
     // Get categories from localStorage
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     const tableBody = document.getElementById('category-table-body');
     const noCategories = document.getElementById('no-categories-message');
-      
+    
+    if (!tableBody) {
+      console.error('category-table-body element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if tableBody doesn't exist
+    }
+    
     // Clear existing rows
     tableBody.innerHTML = '';
     
     // Get products to count items in each category
-      const products = JSON.parse(localStorage.getItem('products') || '[]');
-      
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
     if (categories.length === 0) {
       // No categories found, show empty state message
       tableBody.parentElement.classList.add('d-none');
@@ -2789,7 +2861,7 @@
         row.innerHTML = `
           <td>
             <div class="product-image-small">
-              <img src="${category.image || '/src/client/assets/img/category-placeholder.jpg'}" 
+              <img src="${category.image || '../../../img/profile.png'}" 
                    alt="${category.name}" 
                    style="width: 100%; height: 100%; object-fit: cover;">
             </div>
@@ -2832,7 +2904,7 @@
     document.getElementById('category-form').reset();
     document.getElementById('categoryModalLabel').textContent = 'Add Category';
     document.getElementById('category-id').value = '';
-    document.getElementById('category-img-preview').src = '/src/client/assets/img/category-placeholder.jpg';
+    document.getElementById('category-img-preview').src = '../../../img/profile.png';
     
     // Show the modal
     new bootstrap.Modal(document.getElementById('categoryModal')).show();
@@ -2841,7 +2913,7 @@
   function resetCategoryImage() {
     // Reset the image to default placeholder
     document.getElementById('category-image-file').value = '';
-    document.getElementById('category-img-preview').src = '/src/client/assets/img/category-placeholder.jpg';
+    document.getElementById('category-img-preview').src = '../../../img/profile.png';
   }
   
   function editCategory(categoryId) {
@@ -2865,7 +2937,7 @@
       if (category.image) {
         imgPreview.src = category.image;
       } else {
-        imgPreview.src = '/src/client/assets/img/category-placeholder.jpg';
+        imgPreview.src = '../../../img/profile.png';
       }
       
       // Show the modal
@@ -2898,41 +2970,41 @@
     // Function to save category data after image processing
     const finalizeSave = (imageData) => {
       try {
-      if (categoryId) {
-        // Update existing category
-        const index = categories.findIndex(c => c.id === parseInt(categoryId));
-        if (index !== -1) {
-          categories[index].name = name;
-          categories[index].description = description;
-          // Only update image if a new one is provided
-          if (imageData) {
-            categories[index].image = imageData;
-          }
-          categories[index].featured = featured;
+        if (categoryId) {
+          // Update existing category
+          const index = categories.findIndex(c => c.id === parseInt(categoryId));
+          if (index !== -1) {
+            categories[index].name = name;
+            categories[index].description = description;
+            // Only update image if a new one is provided
+            if (imageData) {
+              categories[index].image = imageData;
+            }
+            categories[index].featured = featured;
             showToast('Success', 'Category updated successfully', 'success');
-        } else {
+          } else {
             showToast('Error', `Category with ID ${categoryId} not found for update`, 'danger');
-        }
-      } else {
-        // Add new category
-        const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
-        categories.push({
-          id: newId,
-          name: name,
-          description: description,
-            image: imageData || '/src/client/assets/img/category-placeholder.jpg',
-          featured: featured
-        });
+          }
+        } else {
+          // Add new category
+          const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+          categories.push({
+            id: newId,
+            name: name,
+            description: description,
+            image: imageData || '../../../img/profile.png',
+            featured: featured
+          });
           showToast('Success', 'New category added successfully', 'success');
-      }
-      
-      // Save to localStorage
-      localStorage.setItem('categories', JSON.stringify(categories));
-      
-      // Close modal and refresh category list
-      bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
-      loadCategories();
-      
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('categories', JSON.stringify(categories));
+        
+        // Close modal and refresh category list
+        bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+        loadCategories();
+        
         // Update filter options in product management if they exist
         if (window.updateCategoryFilters) {
           window.updateCategoryFilters(categories);
@@ -3134,6 +3206,11 @@
   // 显示订单数据到表格
   function displayOrdersInTable(orders) {
     const orderTableBody = document.getElementById('orderTableBody');
+    if (!orderTableBody) {
+      console.error('orderTableBody element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if orderTableBody doesn't exist
+    }
+    
     orderTableBody.innerHTML = '';
     
     if (orders.length === 0) {
@@ -3411,6 +3488,101 @@
       }
     ];
   }
+
+  // Add functions for username editing
+  function toggleUsernameEdit() {
+    const displayElem = document.getElementById('username-display');
+    const editContainer = document.getElementById('username-edit-container');
+    const usernameInput = document.getElementById('username-input');
+    
+    // Get current username without the @ symbol
+    const currentUsername = displayElem.textContent.replace('@', '');
+    
+    // Set the input value
+    usernameInput.value = currentUsername;
+    
+    // Show edit container
+    editContainer.classList.remove('d-none');
+    
+    // Focus on input
+    usernameInput.focus();
+  }
+
+  // Function to save username
+  function saveUsername() {
+    const displayElem = document.getElementById('username-display');
+    const editContainer = document.getElementById('username-edit-container');
+    const usernameInput = document.getElementById('username-input');
+    
+    const newUsername = usernameInput.value.trim();
+    
+    // Validate username
+    if (newUsername.length < 3) {
+      alert('Username must be at least 3 characters long');
+      return;
+    }
+    
+    // Update display
+    displayElem.textContent = '@' + newUsername;
+    
+    // Hide edit container
+    editContainer.classList.add('d-none');
+    
+    // Update user data
+    if (userProfile && userProfile.username !== newUsername) {
+      userProfile.username = newUsername;
+      
+      // Save user data
+      localStorage.setItem('user', JSON.stringify(userProfile));
+      localStorage.setItem('currentUser', JSON.stringify(userProfile));
+      
+      // Update any users array entry if it exists
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex(u => u.id == userProfile.id);
+      if (userIndex !== -1) {
+        users[userIndex].username = newUsername;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+      
+      // Show success message
+      showToast('Username updated successfully!', 'success');
+    }
+  }
+
+  // Function to cancel username edit
+  function cancelUsernameEdit() {
+    const editContainer = document.getElementById('username-edit-container');
+    editContainer.classList.add('d-none');
+  }
+
+  // Define isAdmin as a function
+  function isAdmin() {
+    return localStorage.getItem('isAdmin') === 'true';
+  }
+
+  // Initialize everything when DOM content is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load user profile data first
+    loadUserProfile();
+    
+    // Initialize admin features if the user is an admin
+    if (isAdmin()) {
+      console.log('User is admin, initializing admin features');
+      document.getElementById('admin-tab-container').style.display = 'block';
+      
+      // Setup all the admin data tables
+      loadUsers();
+      loadProducts();
+      loadOrders();
+      loadComments();
+      
+      // Setup admin event listeners
+      setupAdminEventListeners();
+    } else {
+      console.log('User is not admin, hiding admin features');
+      document.getElementById('admin-tab-container').style.display = 'none';
+    }
+  });
 </script>
 
 </body>
@@ -3503,7 +3675,7 @@ function showToast(message, type = 'primary') {
             <label class="admin-form-label">Category Image</label>
             <div class="d-flex align-items-start mb-2">
               <div class="product-preview me-3" style="width: 120px; height: 120px;">
-                <img id="category-img-preview" src="/src/client/assets/img/category-placeholder.jpg" alt="Category preview">
+                <img id="category-img-preview" src="../../../img/profile.png" alt="Category preview">
               </div>
               <div class="flex-grow-1">
                 <input type="file" class="admin-form-control mb-2" id="category-image-file" accept="image/*">
@@ -3595,6 +3767,11 @@ function showToast(message, type = 'primary') {
     const tableBody = document.getElementById('category-table-body');
     const noCategories = document.getElementById('no-categories-message');
     
+    if (!tableBody) {
+      console.error('category-table-body element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if tableBody doesn't exist
+    }
+    
     // Clear existing rows
     tableBody.innerHTML = '';
     
@@ -3618,7 +3795,7 @@ function showToast(message, type = 'primary') {
         row.innerHTML = `
           <td>
             <div class="product-image-small">
-              <img src="${category.image || '/src/client/assets/img/category-placeholder.jpg'}" 
+              <img src="${category.image || '../../../img/profile.png'}" 
                    alt="${category.name}" 
                    style="width: 100%; height: 100%; object-fit: cover;">
             </div>
@@ -3661,7 +3838,7 @@ function showToast(message, type = 'primary') {
     document.getElementById('category-form').reset();
     document.getElementById('categoryModalLabel').textContent = 'Add Category';
     document.getElementById('category-id').value = '';
-    document.getElementById('category-img-preview').src = '/src/client/assets/img/category-placeholder.jpg';
+    document.getElementById('category-img-preview').src = '../../../img/profile.png';
     
     // Show the modal
     new bootstrap.Modal(document.getElementById('categoryModal')).show();
@@ -3670,7 +3847,7 @@ function showToast(message, type = 'primary') {
   function resetCategoryImage() {
     // Reset the image to default placeholder
     document.getElementById('category-image-file').value = '';
-    document.getElementById('category-img-preview').src = '/src/client/assets/img/category-placeholder.jpg';
+    document.getElementById('category-img-preview').src = '../../../img/profile.png';
   }
 
   function editCategory(categoryId) {
@@ -3694,7 +3871,7 @@ function showToast(message, type = 'primary') {
       if (category.image) {
         imgPreview.src = category.image;
       } else {
-        imgPreview.src = '/src/client/assets/img/category-placeholder.jpg';
+        imgPreview.src = '../../../img/profile.png';
       }
       
       // Show the modal
@@ -3749,7 +3926,7 @@ function showToast(message, type = 'primary') {
             id: newId,
             name: name,
             description: description,
-            image: imageData || '/src/client/assets/img/category-placeholder.jpg',
+            image: imageData || '../../../img/profile.png',
             featured: featured
           });
           showToast('Success', 'New category added successfully', 'success');
@@ -3916,4 +4093,21 @@ function showToast(message, type = 'primary') {
 </script>
 
 // ... existing code ...
+
+  // Fix Bootstrap modal initialization
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modals with proper options
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+      new bootstrap.Modal(modal, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+      });
+    });
+  });
+</script>
+
+<!-- Add Bootstrap JS at the end of body -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </html>
