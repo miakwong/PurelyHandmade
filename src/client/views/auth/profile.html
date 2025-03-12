@@ -251,6 +251,30 @@
     }
 
     /* Admin styles now imported from admin.css */
+    
+    /* 确保按钮居中显示 */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* 确保category表格中的action单元格内容居中 */
+    #category-table-body td.text-center {
+      text-align: center !important;
+    }
+    
+    /* 增强按钮样式 */
+    .admin-btn-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -590,7 +614,7 @@
                               <th>Name</th>
                               <th>Specialty</th>
                               <th>Products</th>
-                              <th>Actions</th>
+                              <th class="text-center">Actions</th>
                             </tr>
                           </thead>
                           <tbody id="designerTableBody">
@@ -625,8 +649,7 @@
                               <th>Image</th>
                               <th>Name</th>
                               <th>Description</th>
-                              <th>Products</th>
-                              <th>Actions</th>
+                              <th class="text-center">Actions</th>
                             </tr>
                           </thead>
                           <tbody id="category-table-body">
@@ -2213,20 +2236,26 @@
           <td>
             <img src="${designer.image}" alt="${designer.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
           </td>
-          <td>${designer.name}</td>
+          <td>
+            <div class="d-flex flex-column">
+              <div class="fw-medium">${designer.name}</div>
+              ${designer.featured ? '<span class="badge badge-success mt-1"><i class="bi bi-star-fill me-1"></i>Featured</span>' : ''}
+            </div>
+          </td>
           <td>${designer.specialty}</td>
           <td>${designerProducts.length} products</td>
-          <td>
-            <button class="admin-btn admin-btn-primary admin-btn-sm me-1" onclick="editDesigner('${designer.id}')">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="admin-btn admin-btn-danger admin-btn-sm me-1" onclick="deleteDesigner('${designer.id}')">
-              <i class="bi bi-trash"></i>
-            </button>
-            <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="admin-btn admin-btn-info admin-btn-sm me-1" target="_blank">
-              <i class="bi bi-eye"></i>
-            </a>
-            ${designer.featured ? '<span class="badge bg-success"><i class="bi bi-star-fill"></i> Featured</span>' : ''}
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="admin-btn admin-btn-primary admin-btn-sm me-1" onclick="editDesigner('${designer.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="admin-btn admin-btn-danger admin-btn-sm me-1" onclick="deleteDesigner('${designer.id}')">
+                <i class="bi bi-trash"></i>
+              </button>
+              <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="admin-btn admin-btn-info admin-btn-sm me-1" target="_blank">
+                <i class="bi bi-eye"></i>
+              </a>
+            </div>
           </td>
         </tr>
       `;
@@ -2969,35 +2998,34 @@
 
   // Category management functions
   function loadCategories() {
-    // Get categories from localStorage
+    console.log('Loading categories data for admin panel');
+    
     const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     const tableBody = document.getElementById('category-table-body');
-    const noCategories = document.getElementById('no-categories-message');
+    const noMessage = document.getElementById('no-categories-message');
     
-    if (!tableBody) {
-      console.error('category-table-body element not found! DOM may not be fully loaded.');
-      return; // Exit the function early if tableBody doesn't exist
+    if (!tableBody || !noMessage) {
+      console.error('Category table elements not found');
+      return;
     }
     
-    // Clear existing rows
-    tableBody.innerHTML = '';
+    console.log(`Found ${categories.length} categories`);
     
-    // Get products to count items in each category
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    
+    // Show or hide "no categories" message
     if (categories.length === 0) {
-      // No categories found, show empty state message
-      tableBody.parentElement.classList.add('d-none');
-      noCategories.classList.remove('d-none');
+      tableBody.innerHTML = '';
+      noMessage.classList.remove('d-none');
     } else {
-      // Show table and hide empty state
-      tableBody.parentElement.classList.remove('d-none');
-      noCategories.classList.add('d-none');
+      noMessage.classList.add('d-none');
       
-      // Add category rows
+      // Clear the table
+      tableBody.innerHTML = '';
+      
+      // Get products for counting products in each category
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      
+      // Render each category
       categories.forEach(category => {
-        const productCount = products.filter(product => product.categoryId === category.id).length;
-        
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>
@@ -3017,16 +3045,13 @@
             ${category.description ? category.description : '<span class="text-muted fst-italic">No description</span>'}
           </td>
           <td class="text-center">
-            <span class="badge bg-light text-dark px-3 py-2">${productCount}</span>
-          </td>
-          <td class="text-end">
             <div class="action-buttons">
               <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editCategory(${category.id})" data-bs-toggle="tooltip" title="Edit Category">
                 <i class="bi bi-pencil-square"></i>
-            </button>
+              </button>
               <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteCategory(${category.id})" data-bs-toggle="tooltip" title="Delete Category">
-              <i class="bi bi-trash"></i>
-            </button>
+                <i class="bi bi-trash"></i>
+              </button>
             </div>
           </td>
         `;
@@ -3782,8 +3807,26 @@ function showToast(message, type = 'primary') {
     }
   }
   
-  // Get toast container
-  const toastContainer = document.querySelector('.toast-container');
+  // 检查消息是否为空
+  if (!message || message.trim() === '') {
+    console.error('Empty message provided to showToast');
+    message = 'Operation completed successfully';  // 提供默认消息
+  }
+  
+  // 确保类型有效
+  const validTypes = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
+  if (!validTypes.includes(type)) {
+    console.warn(`Invalid toast type: ${type}, using 'primary' instead`);
+    type = 'primary';
+  }
+  
+  // Get or create toast container
+  let toastContainer = document.querySelector('.toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(toastContainer);
+  }
   
   // Create toast
   const toastElement = document.createElement('div');
@@ -3805,10 +3848,10 @@ function showToast(message, type = 'primary') {
   toastContainer.appendChild(toastElement);
   
   // Initialize and show toast
-  const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+  const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
   toast.show();
   
-  // Clean up after hiding
+  // Remove the toast after it's hidden
   toastElement.addEventListener('hidden.bs.toast', function() {
     toastElement.remove();
   });
@@ -3978,9 +4021,6 @@ function showToast(message, type = 'primary') {
             ${category.description ? category.description : '<span class="text-muted fst-italic">No description</span>'}
           </td>
           <td class="text-center">
-            <span class="badge bg-light text-dark px-3 py-2">${productCount}</span>
-          </td>
-          <td class="text-end">
             <div class="action-buttons">
               <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editCategory(${category.id})" data-bs-toggle="tooltip" title="Edit Category">
                 <i class="bi bi-pencil-square"></i>
