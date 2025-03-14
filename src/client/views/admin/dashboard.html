@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  
+  <style>
+    /* Custom dashboard styles */
+    .dashboard-card {
+      transition: transform 0.3s, box-shadow 0.3s;
+      height: 100%;
+    }
+    
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-color);
+    }
+    
+    .stats-card {
+      border-left: 4px solid var(--accent-color);
+    }
+    
+    /* Style for action buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Admin button styles */
+    .admin-btn-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-gear-fill me-2 text-primary"></i>Admin Dashboard</h1>
+    <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+      <i class="bi bi-person me-2"></i>Back to Profile
+    </a>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Total Users</h6>
+          <h2 id="total-users-count">0</h2>
+          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-users-percent">0%</span> this month</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Total Products</h6>
+          <h2 id="total-products-count">0</h2>
+          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-products-percent">0%</span> this month</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Total Orders</h6>
+          <h2 id="total-orders-count">0</h2>
+          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-orders-percent">0%</span> this month</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+      <div class="card stats-card h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Total Reviews</h6>
+          <h2 id="total-reviews-count">0</h2>
+          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-reviews-percent">0%</span> this month</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Management Modules Cards -->
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-people dashboard-icon"></i>
+          <h4>User Management</h4>
+          <p>Manage user accounts, permissions and activities</p>
+          <a href="users.html" class="btn btn-primary w-100">Manage Users</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-box-seam dashboard-icon"></i>
+          <h4>Product Management</h4>
+          <p>Add, edit or remove products from your inventory</p>
+          <a href="products.html" class="btn btn-primary w-100">Manage Products</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-cart-check dashboard-icon"></i>
+          <h4>Order Management</h4>
+          <p>View and manage customer orders and processing</p>
+          <a href="orders.html" class="btn btn-primary w-100">Manage Orders</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-star dashboard-icon"></i>
+          <h4>Reviews Management</h4>
+          <p>Moderate product reviews and customer feedback</p>
+          <a href="comments.html" class="btn btn-primary w-100">Manage Reviews</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-person-badge dashboard-icon"></i>
+          <h4>Designer Management</h4>
+          <p>Manage designers, their profiles and products</p>
+          <a href="designers.html" class="btn btn-primary w-100">Manage Designers</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-tags dashboard-icon"></i>
+          <h4>Category Management</h4>
+          <p>Organize products with categories and tags</p>
+          <a href="categories.html" class="btn btn-primary w-100">Manage Categories</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load nav and footer
+    loadNavbar();
+    loadFooter();
+    
+    // Load dashboard statistics
+    loadDashboardStats();
+    
+    // Check user permissions
+    checkAdminPermissions();
+  });
+  
+  function loadDashboardStats() {
+    // Get count data from localStorage
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+    
+    // Update the dashboard with counts
+    document.getElementById('total-users-count').textContent = users.length;
+    document.getElementById('total-products-count').textContent = products.length;
+    document.getElementById('total-orders-count').textContent = orders.length;
+    document.getElementById('total-reviews-count').textContent = comments.length;
+    
+    // Calculate month growth (placeholder - would be calculated with actual dates in a real implementation)
+    document.getElementById('new-users-percent').textContent = '5%';
+    document.getElementById('new-products-percent').textContent = '12%';
+    document.getElementById('new-orders-percent').textContent = '8%';
+    document.getElementById('new-reviews-percent').textContent = '15%';
+  }
+  
+  function checkAdminPermissions() {
+    // Check if user is logged in and is admin
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || currentUser.role !== 'admin') {
+      // Redirect to login if not admin
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      alert('You must be logged in as an administrator to access this page.');
+    }
+  }
+</script>
+</body>
+</html> 
