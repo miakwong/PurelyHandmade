@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Settings - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  <style>
+    .settings-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      border: 1px solid #eaeaea;
+    }
+    .settings-header {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    .settings-body {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-gear me-2 text-primary"></i>Website Settings</h1>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-header">
+      <h5 class="mb-0">General Settings</h5>
+    </div>
+    <div class="settings-body">
+      <form id="settings-form">
+        <div class="mb-3">
+          <label for="site-name" class="form-label">Site Name</label>
+          <input type="text" class="form-control" id="site-name" placeholder="Enter site name">
+        </div>
+        <div class="mb-3">
+          <label for="contact-email" class="form-label">Contact Email</label>
+          <input type="email" class="form-control" id="contact-email" placeholder="Enter contact email">
+        </div>
+        <div class="mb-3">
+          <label for="phone-number" class="form-label">Phone Number</label>
+          <input type="text" class="form-control" id="phone-number" placeholder="Enter phone number">
+        </div>
+        <div class="mb-3">
+          <label for="address" class="form-label">Address</label>
+          <textarea class="form-control" id="address" rows="3" placeholder="Enter address"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="facebook-link" class="form-label">Facebook Link</label>
+          <input type="url" class="form-control" id="facebook-link" placeholder="Enter Facebook URL">
+        </div>
+        <div class="mb-3">
+          <label for="twitter-link" class="form-label">Twitter Link</label>
+          <input type="url" class="form-control" id="twitter-link" placeholder="Enter Twitter URL">
+        </div>
+        <div class="mb-3">
+          <label for="instagram-link" class="form-label">Instagram Link</label>
+          <input type="url" class="form-control" id="instagram-link" placeholder="Enter Instagram URL">
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-secondary me-2" onclick="resetSettings()">Reset</button>
+          <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load navbar and footer
+    loadNavbar();
+    loadFooter();
+    
+    // Load existing settings
+    loadSettings();
+  });
+
+  function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+    document.getElementById('site-name').value = settings.siteName || '';
+    document.getElementById('contact-email').value = settings.contactEmail || '';
+    document.getElementById('phone-number').value = settings.phoneNumber || '';
+    document.getElementById('address').value = settings.address || '';
+    document.getElementById('facebook-link').value = settings.facebookLink || '';
+    document.getElementById('twitter-link').value = settings.twitterLink || '';
+    document.getElementById('instagram-link').value = settings.instagramLink || '';
+  }
+
+  function saveSettings() {
+    const settings = {
+      siteName: document.getElementById('site-name').value.trim(),
+      contactEmail: document.getElementById('contact-email').value.trim(),
+      phoneNumber: document.getElementById('phone-number').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      facebookLink: document.getElementById('facebook-link').value.trim(),
+      twitterLink: document.getElementById('twitter-link').value.trim(),
+      instagramLink: document.getElementById('instagram-link').value.trim()
+    };
+    
+    localStorage.setItem('settings', JSON.stringify(settings));
+    showToast('Settings saved successfully', 'success');
+  }
+
+  function resetSettings() {
+    if (confirm('Are you sure you want to reset all settings to their default values?')) {
+      localStorage.removeItem('settings');
+      loadSettings();
+      showToast('Settings reset to default', 'info');
+    }
+  }
+</script>
+</body>
+</html> 

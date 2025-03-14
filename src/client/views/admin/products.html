@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  
+  <style>
+    /* Style for action buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Admin button styles */
+    .admin-btn-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 4px;
+    }
+    
+    /* Style for badges */
+    .badge-success {
+      background-color: #5a8c70;
+      color: white;
+    }
+    
+    .badge-warning {
+      background-color: #e6a23c;
+      color: white;
+    }
+    
+    .badge-danger {
+      background-color: #d9534f;
+      color: white;
+    }
+    
+    .product-management-card {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .product-table th {
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #555;
+    }
+    
+    .product-table tbody tr:hover {
+      background-color: rgba(134, 118, 102, 0.05);
+    }
+    
+    .empty-state-icon {
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 2.5rem;
+      color: #ccc;
+      background-color: #f8f9fa;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .product-image-small {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #eaeaea;
+    }
+    
+    .product-gallery-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .product-gallery-item {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .product-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .product-gallery-item .remove-image {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .product-price {
+      font-weight: bold;
+      color: #5a8c70;
+    }
+    
+    /* Filter section styles */
+    .filter-section {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    
+    /* Review styles */
+    .review-item .card-footer {
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .review-item {
+      transition: all 0.2s ease-in-out;
+    }
+    
+    .review-item:hover {
+      border-color: #ddd;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .review-avatar img {
+      object-fit: cover;
+      border: 1px solid #eee;
+    }
+    
+    .review-content {
+      white-space: pre-line;
+      line-height: 1.5;
+    }
+    
+    .review-date {
+      font-size: 0.85rem;
+    }
+    
+    .review-badge-pending {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    
+    .review-badge-approved {
+      background-color: #5a8c70;
+      color: white;
+    }
+    
+    .review-badge-rejected {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .review-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .review-stats-item {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-box-seam me-2 text-primary"></i>Product Management</h1>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="filter-category" class="form-label">Category</label>
+        <select class="form-select" id="filter-category">
+          <option value="">All Categories</option>
+          <!-- Categories will be loaded here -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-designer" class="form-label">Designer</label>
+        <select class="form-select" id="filter-designer">
+          <option value="">All Designers</option>
+          <!-- Designers will be loaded here -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-status" class="form-label">Status</label>
+        <select class="form-select" id="filter-status">
+          <option value="">All Status</option>
+          <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-search" class="form-label">Search</label>
+        <input type="text" class="form-control" id="filter-search" placeholder="Search products...">
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-secondary me-2" onclick="resetFilters()">
+          <i class="bi bi-x-circle me-2"></i>Clear Filters
+        </button>
+        <button class="btn btn-primary" onclick="applyFilters()">
+          <i class="bi bi-funnel me-2"></i>Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 product-management-card">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="mb-0">Product Management</h5>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" onclick="resetProductForm()">
+            <i class="bi bi-plus-circle me-2"></i>Add Product
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover product-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Category</th>
+              <th>Designer</th>
+              <th>Reviews</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-table-body">
+            <!-- Product data will be loaded here -->
+          </tbody>
+        </table>
+        <div id="no-products-message" class="d-none text-center py-5">
+          <div class="empty-state-icon mx-auto mb-3">
+            <i class="bi bi-box"></i>
+          </div>
+          <p class="text-muted mb-3">No products found</p>
+          <button class="btn btn-primary" onclick="resetProductForm()">
+            Add Your First Product
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow admin-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">Add Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form">
+          <input type="hidden" id="product-id">
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="admin-form-group">
+                <label for="product-name" class="admin-form-label">Product Name<span class="text-danger">*</span></label>
+                <input type="text" class="admin-form-control" id="product-name" required placeholder="Enter product name">
+                <div class="form-text">A clear, descriptive name for your product</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="admin-form-group">
+                <label for="product-sku" class="admin-form-label">SKU</label>
+                <input type="text" class="admin-form-control" id="product-sku" placeholder="Enter SKU code">
+                <div class="form-text">Stock Keeping Unit (optional)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="product-price" class="admin-form-label">Price<span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="admin-form-control" id="product-price" required min="0" step="0.01" placeholder="0.00">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="product-stock" class="admin-form-label">Stock Quantity<span class="text-danger">*</span></label>
+                <input type="number" class="admin-form-control" id="product-stock" required min="0" placeholder="Enter stock quantity">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="product-category" class="admin-form-label">Category</label>
+                <select class="admin-form-control" id="product-category">
+                  <option value="">-- Select Category --</option>
+                  <!-- Categories will be loaded here -->
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="product-designer" class="admin-form-label">Designer</label>
+                <select class="admin-form-control" id="product-designer">
+                  <option value="">-- Select Designer --</option>
+                  <!-- Designers will be loaded here -->
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="admin-form-group">
+            <label for="product-description" class="admin-form-label">Description<span class="text-danger">*</span></label>
+            <textarea class="admin-form-control" id="product-description" rows="4" required placeholder="Describe your product in detail..."></textarea>
+            <div class="form-text">Provide a detailed description of your product</div>
+          </div>
+          
+          <div class="admin-form-group">
+            <label class="admin-form-label">Main Product Image<span class="text-danger">*</span></label>
+            <div class="d-flex align-items-start mb-2">
+              <div class="product-preview me-3" style="width: 120px; height: 120px;">
+                <img id="product-img-preview" src="../../../img/profile.png" alt="Product preview">
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" class="admin-form-control mb-2" id="product-image-file" accept="image/*">
+                <div class="form-text mb-2">Recommended size: 800×800px</div>
+                <div class="d-grid">
+                  <button type="button" class="admin-btn admin-btn-warning" onclick="resetProductImage()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Image
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="admin-form-group">
+            <label class="admin-form-label">Additional Images</label>
+            <input type="file" class="admin-form-control mb-2" id="product-gallery-file" accept="image/*" multiple>
+            <div class="form-text mb-2">Add up to 5 additional images (optional)</div>
+            
+            <div id="product-gallery-preview" class="product-gallery-container">
+              <!-- Gallery images will be previewed here -->
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="product-featured">
+                  <label class="form-check-label" for="product-featured">
+                    Featured Product
+                  </label>
+                  <div class="form-text">Featured products will be highlighted on the homepage</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="product-active" checked>
+                  <label class="form-check-label" for="product-active">
+                    Active Product
+                  </label>
+                  <div class="form-text">Inactive products won't be displayed on the store</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="admin-btn admin-btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="admin-btn admin-btn-primary" onclick="saveProduct()">
+          <i class="bi bi-check2 me-1"></i>Save Product
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Review Management Modal after the product modal -->
+<div class="modal fade" id="reviewsModal" tabindex="-1" aria-labelledby="reviewsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow admin-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reviewsModalLabel">Product Reviews</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0" id="review-product-name">Reviews for Product</h6>
+          <div class="d-flex align-items-center">
+            <div id="review-stats" class="me-3">
+              <!-- Review stats will be loaded here -->
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="refreshReviews()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+          </div>
+        </div>
+        
+        <div id="reviews-container">
+          <!-- Reviews will be loaded here -->
+          <div id="no-reviews-message" class="text-center py-4">
+            <div class="empty-state-icon mx-auto mb-3">
+              <i class="bi bi-chat-square"></i>
+            </div>
+            <p class="text-muted mb-0">No reviews found for this product</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="admin-btn admin-btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add review item template (hidden) -->
+<template id="review-item-template">
+  <div class="review-item card mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="d-flex align-items-center">
+          <div class="review-avatar me-2">
+            <img src="../../../img/profile.png" alt="User" class="rounded-circle" width="40" height="40">
+          </div>
+          <div>
+            <div class="fw-medium review-author">Customer Name</div>
+            <div class="text-muted small review-date">Date</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="review-rating me-3">
+            <i class="bi bi-star-fill text-warning"></i>
+            <span class="ms-1 rating-value">5</span>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item approve-review" href="#"><i class="bi bi-check-circle me-2"></i>Approve</a></li>
+              <li><a class="dropdown-item reject-review" href="#"><i class="bi bi-x-circle me-2"></i>Reject</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item delete-review" href="#"><i class="bi bi-trash me-2"></i>Delete</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="review-content">
+        Content of the review...
+      </div>
+    </div>
+    <div class="card-footer bg-light py-2 px-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="review-status">
+          <span class="badge"></span>
+        </div>
+        <div class="review-actions">
+          <button class="btn btn-sm btn-outline-primary me-1 reply-review">
+            <i class="bi bi-reply me-1"></i>Reply
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast container -->
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  // Store gallery images for the current product
+  let productGalleryImages = [];
+  // Current filters
+  let currentFilters = {
+    category: '',
+    designer: '',
+    status: '',
+    search: ''
+  };
+  
+  // Store current product for reviews
+  let currentReviewProductId = null;
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load nav and footer
+    loadNavbar();
+    loadFooter();
+    
+    // Load products data
+    loadProducts();
+    
+    // Load categories for dropdown
+    loadCategoriesForDropdown();
+    
+    // Load designers for dropdown
+    loadDesignersForDropdown();
+    
+    // Set up image preview for main product image
+    document.getElementById('product-image-file').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('product-img-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Set up gallery image preview
+    document.getElementById('product-gallery-file').addEventListener('change', function(event) {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          if (productGalleryImages.length >= 5) {
+            showToast('Maximum of 5 gallery images allowed', 'warning');
+            break;
+          }
+          
+          const file = files[i];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            productGalleryImages.push(e.target.result);
+            updateGalleryPreview();
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+    
+    // Check user permissions
+    checkAdminPermissions();
+    
+    // Set up search filter event
+    document.getElementById('filter-search').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+  });
+  
+  // Product management functions
+  function loadProducts() {
+    // Get products from localStorage
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    const tableBody = document.getElementById('product-table-body');
+    const noProducts = document.getElementById('no-products-message');
+    
+    // Apply filters if any
+    products = filterProducts(products);
+    
+    if (!tableBody) {
+      console.error('product-table-body element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if tableBody doesn't exist
+    }
+    
+    // Clear existing rows
+    tableBody.innerHTML = '';
+    
+    if (products.length === 0) {
+      // No products found, show empty state message
+      tableBody.parentElement.classList.add('d-none');
+      noProducts.classList.remove('d-none');
+    } else {
+      // Show table and hide empty state
+      tableBody.parentElement.classList.remove('d-none');
+      noProducts.classList.add('d-none');
+      
+      // Get categories and designers for lookup
+      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+      
+      // Add product rows
+      products.forEach(product => {
+        // Find category and designer names
+        const category = categories.find(c => c.id === product.categoryId);
+        const designer = designers.find(d => d.id === product.designerId);
+        
+        // Determine stock status badge
+        let stockBadge;
+        if (product.stock <= 0) {
+          stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
+        } else if (product.stock <= 5) {
+          stockBadge = '<span class="badge badge-warning">Low Stock</span>';
+        } else {
+          stockBadge = '<span class="badge badge-success">In Stock</span>';
+        }
+        
+        const row = document.createElement('tr');
+        row.setAttribute('data-product-id', product.id);
+        row.innerHTML = `
+          <td>
+            <div class="product-image-small">
+              <img src="${product.image || '../../../img/profile.png'}" 
+                   alt="${product.name}" 
+                   style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+          </td>
+          <td>
+            <div class="d-flex flex-column">
+              <div class="fw-medium">${product.name || 'Unnamed Product'}</div>
+              <small class="text-muted">${product.sku || 'No SKU'}</small>
+              ${product.featured ? '<span class="badge badge-success mt-1"><i class="bi bi-star-fill me-1"></i>Featured</span>' : ''}
+              ${!product.active ? '<span class="badge bg-secondary mt-1">Inactive</span>' : ''}
+            </div>
+          </td>
+          <td class="product-price">$${parseFloat(product.price).toFixed(2)}</td>
+          <td>${stockBadge}</td>
+          <td>${category ? category.name : '<span class="text-muted">Uncategorized</span>'}</td>
+          <td>${designer ? designer.name : '<span class="text-muted">No Designer</span>'}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary" onclick="viewProductReviews('${product.id}')">
+              <i class="bi bi-chat-left-text me-1"></i>
+              <span class="review-count">${getReviewCount(product.id)}</span>
+            </button>
+          </td>
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editProduct('${product.id}')" data-bs-toggle="tooltip" title="Edit Product">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteProduct('${product.id}')" data-bs-toggle="tooltip" title="Delete Product">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+      
+      // Initialize tooltips
+      const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+    }
+  }
+
+  function filterProducts(products) {
+    return products.filter(product => {
+      // Apply category filter
+      if (currentFilters.category && product.categoryId !== currentFilters.category) {
+        return false;
+      }
+      
+      // Apply designer filter
+      if (currentFilters.designer && product.designerId !== currentFilters.designer) {
+        return false;
+      }
+      
+      // Apply status filter
+      if (currentFilters.status) {
+        if (currentFilters.status === 'out-of-stock' && product.stock > 0) {
+          return false;
+        } else if (currentFilters.status === 'low-stock' && (product.stock <= 0 || product.stock > 5)) {
+          return false;
+        } else if (currentFilters.status === 'in-stock' && product.stock <= 5) {
+          return false;
+        }
+      }
+      
+      // Apply search filter
+      if (currentFilters.search) {
+        const searchTerm = currentFilters.search.toLowerCase();
+        return (
+          product.name.toLowerCase().includes(searchTerm) ||
+          (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+          (product.sku && product.sku.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      return true;
+    });
+  }
+
+  function applyFilters() {
+    currentFilters = {
+      category: document.getElementById('filter-category').value,
+      designer: document.getElementById('filter-designer').value,
+      status: document.getElementById('filter-status').value,
+      search: document.getElementById('filter-search').value.trim()
+    };
+    
+    loadProducts();
+  }
+
+  function resetFilters() {
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-designer').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-search').value = '';
+    
+    currentFilters = {
+      category: '',
+      designer: '',
+      status: '',
+      search: ''
+    };
+    
+    loadProducts();
+  }
+
+  function loadCategoriesForDropdown() {
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const categoryDropdown = document.getElementById('product-category');
+    const filterDropdown = document.getElementById('filter-category');
+    
+    // Fill product form dropdown
+    if (categoryDropdown) {
+      // Keep the first option and add categories
+      const defaultOption = categoryDropdown.options[0];
+      categoryDropdown.innerHTML = '';
+      categoryDropdown.appendChild(defaultOption);
+      
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        categoryDropdown.appendChild(option);
+      });
+    }
+    
+    // Fill filter dropdown
+    if (filterDropdown) {
+      // Keep the first option and add categories
+      const defaultOption = filterDropdown.options[0];
+      filterDropdown.innerHTML = '';
+      filterDropdown.appendChild(defaultOption);
+      
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        filterDropdown.appendChild(option);
+      });
+    }
+  }
+
+  function loadDesignersForDropdown() {
+    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+    const designerDropdown = document.getElementById('product-designer');
+    const filterDropdown = document.getElementById('filter-designer');
+    
+    // Fill product form dropdown
+    if (designerDropdown) {
+      // Keep the first option and add designers
+      const defaultOption = designerDropdown.options[0];
+      designerDropdown.innerHTML = '';
+      designerDropdown.appendChild(defaultOption);
+      
+      designers.forEach(designer => {
+        const option = document.createElement('option');
+        option.value = designer.id;
+        option.textContent = designer.name;
+        designerDropdown.appendChild(option);
+      });
+    }
+    
+    // Fill filter dropdown
+    if (filterDropdown) {
+      // Keep the first option and add designers
+      const defaultOption = filterDropdown.options[0];
+      filterDropdown.innerHTML = '';
+      filterDropdown.appendChild(defaultOption);
+      
+      designers.forEach(designer => {
+        const option = document.createElement('option');
+        option.value = designer.id;
+        option.textContent = designer.name;
+        filterDropdown.appendChild(option);
+      });
+    }
+  }
+
+  function resetProductForm() {
+    // Reset form to default values
+    document.getElementById('product-form').reset();
+    document.getElementById('productModalLabel').textContent = 'Add Product';
+    document.getElementById('product-id').value = '';
+    document.getElementById('product-img-preview').src = '../../../img/profile.png';
+    
+    // Clear gallery images
+    productGalleryImages = [];
+    updateGalleryPreview();
+    
+    // Set default active state
+    document.getElementById('product-active').checked = true;
+    
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('productModal')).show();
+  }
+  
+  function resetProductImage() {
+    // Reset the image to default placeholder
+    document.getElementById('product-image-file').value = '';
+    document.getElementById('product-img-preview').src = '../../../img/profile.png';
+  }
+  
+  function updateGalleryPreview() {
+    const galleryContainer = document.getElementById('product-gallery-preview');
+    galleryContainer.innerHTML = '';
+    
+    if (productGalleryImages.length === 0) {
+      return;
+    }
+    
+    productGalleryImages.forEach((imageSrc, index) => {
+      const galleryItem = document.createElement('div');
+      galleryItem.className = 'product-gallery-item';
+      galleryItem.innerHTML = `
+        <img src="${imageSrc}" alt="Gallery image ${index + 1}">
+        <div class="remove-image" onclick="removeGalleryImage(${index})">
+          <i class="bi bi-x-circle"></i>
+        </div>
+      `;
+      galleryContainer.appendChild(galleryItem);
+    });
+  }
+  
+  function removeGalleryImage(index) {
+    productGalleryImages.splice(index, 1);
+    updateGalleryPreview();
+  }
+
+  function editProduct(productId) {
+    // Get product data
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === productId);
+    
+    if (product) {
+      // Populate form with product data
+      document.getElementById('productModalLabel').textContent = 'Edit Product';
+      document.getElementById('product-id').value = product.id;
+      document.getElementById('product-name').value = product.name || '';
+      document.getElementById('product-sku').value = product.sku || '';
+      document.getElementById('product-price').value = product.price || '';
+      document.getElementById('product-stock').value = product.stock || '';
+      document.getElementById('product-category').value = product.categoryId || '';
+      document.getElementById('product-designer').value = product.designerId || '';
+      document.getElementById('product-description').value = product.description || '';
+      document.getElementById('product-featured').checked = product.featured || false;
+      document.getElementById('product-active').checked = product.active !== false; // Default to true if not specified
+      
+      // Reset file input
+      document.getElementById('product-image-file').value = '';
+      document.getElementById('product-gallery-file').value = '';
+      
+      // Update image preview
+      const imgPreview = document.getElementById('product-img-preview');
+      if (product.image) {
+        imgPreview.src = product.image;
+      } else {
+        imgPreview.src = '../../../img/profile.png';
+      }
+      
+      // Load gallery images
+      productGalleryImages = product.gallery || [];
+      updateGalleryPreview();
+      
+      // Show the modal
+      new bootstrap.Modal(document.getElementById('productModal')).show();
+    } else {
+      showToast('Product not found', 'danger');
+    }
+  }
+
+  function saveProduct() {
+    // Get form values
+    const productId = document.getElementById('product-id').value;
+    const name = document.getElementById('product-name').value.trim();
+    const sku = document.getElementById('product-sku').value.trim();
+    const price = parseFloat(document.getElementById('product-price').value);
+    const stock = parseInt(document.getElementById('product-stock').value);
+    const categoryId = document.getElementById('product-category').value;
+    const designerId = document.getElementById('product-designer').value;
+    const description = document.getElementById('product-description').value.trim();
+    const featured = document.getElementById('product-featured').checked;
+    const active = document.getElementById('product-active').checked;
+    
+    // Validation
+    if (!name) {
+      showToast('Product name is required', 'danger');
+      return;
+    }
+    
+    if (isNaN(price) || price < 0) {
+      showToast('Please enter a valid price', 'danger');
+      return;
+    }
+    
+    if (isNaN(stock) || stock < 0) {
+      showToast('Please enter a valid stock quantity', 'danger');
+      return;
+    }
+    
+    if (!description) {
+      showToast('Product description is required', 'danger');
+      return;
+    }
+    
+    // Process main image if one is selected
+    const imageFile = document.getElementById('product-image-file').files[0];
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, e.target.result, productGalleryImages);
+      };
+      reader.readAsDataURL(imageFile);
+    } else {
+      // If editing and no new image is selected, keep the existing one
+      if (productId) {
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        const product = products.find(p => p.id === productId);
+        saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, product ? product.image : null, productGalleryImages);
+      } else {
+        showToast('Please upload a product image', 'danger');
+        return;
+      }
+    }
+  }
+  
+  function saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, image, gallery) {
+    // Get existing products
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // Create slug from name
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    
+    if (productId) {
+      // Update existing product
+      const index = products.findIndex(p => p.id === productId);
+      if (index !== -1) {
+        products[index] = {
+          ...products[index],
+          name,
+          slug,
+          sku,
+          price,
+          stock,
+          categoryId: categoryId || null,
+          designerId: designerId || null,
+          description,
+          featured,
+          active,
+          image: image || products[index].image,
+          gallery: gallery || products[index].gallery,
+          updatedAt: new Date().toISOString()
+        };
+        showToast('Product updated successfully', 'success');
+      }
+    } else {
+      // Create new product
+      products.push({
+        id: Date.now().toString(),
+        name,
+        slug,
+        sku,
+        price,
+        stock,
+        categoryId: categoryId || null,
+        designerId: designerId || null,
+        description,
+        featured,
+        active,
+        image,
+        gallery,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      showToast('Product created successfully', 'success');
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+    
+    // Reload products
+    loadProducts();
+  }
+
+  function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      return;
+    }
+    
+    // Get products
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // Remove product
+    const updatedProducts = products.filter(p => p.id !== productId);
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    
+    showToast('Product deleted successfully', 'success');
+    
+    // Reload products
+    loadProducts();
+  }
+  
+  function checkAdminPermissions() {
+    // Check if user is logged in and is admin
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || currentUser.role !== 'admin') {
+      // Redirect to login if not admin
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      alert('You must be logged in as an administrator to access this page.');
+    }
+  }
+  
+  // Helper function to show toast notifications
+  function showToast(message, type = 'primary') {
+    const toastContainer = document.querySelector('.toast-container');
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+
+  // Get review count for a product
+  function getReviewCount(productId) {
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    return reviews.filter(review => review.productId === productId).length;
+  }
+  
+  // View reviews for a product
+  function viewProductReviews(productId) {
+    // Set current product ID for reviews
+    currentReviewProductId = productId;
+    
+    // Get product details
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id === productId);
+    
+    if (!product) {
+      showToast('Product not found', 'danger');
+      return;
+    }
+    
+    // Set product name in modal
+    document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
+    document.getElementById('review-product-name').textContent = product.name;
+    
+    // Load reviews
+    loadProductReviews(productId);
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('reviewsModal')).show();
+  }
+  
+  // Load reviews for a product
+  function loadProductReviews(productId) {
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    const productReviews = reviews.filter(review => review.productId === productId);
+    
+    const reviewsContainer = document.getElementById('reviews-container');
+    const noReviewsMessage = document.getElementById('no-reviews-message');
+    
+    // Clear existing reviews
+    reviewsContainer.innerHTML = '';
+    
+    if (productReviews.length === 0) {
+      // Show no reviews message
+      reviewsContainer.appendChild(noReviewsMessage);
+    } else {
+      // Get users for lookup
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Add reviews
+      productReviews.forEach(review => {
+        // Find user
+        const user = users.find(u => u.id === review.userId);
+        
+        // Create review item from template
+        const template = document.getElementById('review-item-template');
+        const reviewItem = document.importNode(template.content, true).querySelector('.review-item');
+        
+        // Set review data
+        reviewItem.setAttribute('data-review-id', review.id);
+        reviewItem.querySelector('.review-author').textContent = user ? user.name : 'Anonymous User';
+        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt).toLocaleDateString();
+        reviewItem.querySelector('.rating-value').textContent = review.rating;
+        reviewItem.querySelector('.review-content').textContent = review.content;
+        
+        // Set review avatar
+        if (user && user.avatar) {
+          reviewItem.querySelector('.review-avatar img').src = user.avatar;
+        }
+        
+        // Set review stars based on rating
+        const ratingElement = reviewItem.querySelector('.review-rating');
+        ratingElement.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('i');
+          star.className = i <= review.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted';
+          ratingElement.appendChild(star);
+        }
+        
+        // Set review status badge
+        const badgeElement = reviewItem.querySelector('.review-status .badge');
+        let statusClass = '';
+        let statusText = '';
+        
+        switch (review.status) {
+          case 'pending':
+            statusClass = 'review-badge-pending';
+            statusText = 'Pending';
+            break;
+          case 'approved':
+            statusClass = 'review-badge-approved';
+            statusText = 'Approved';
+            break;
+          case 'rejected':
+            statusClass = 'review-badge-rejected';
+            statusText = 'Rejected';
+            break;
+          default:
+            statusClass = 'review-badge-pending';
+            statusText = 'Pending';
+        }
+        
+        badgeElement.className = `badge ${statusClass}`;
+        badgeElement.textContent = statusText;
+        
+        // Set action handlers
+        reviewItem.querySelector('.approve-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          updateReviewStatus(review.id, 'approved');
+        });
+        
+        reviewItem.querySelector('.reject-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          updateReviewStatus(review.id, 'rejected');
+        });
+        
+        reviewItem.querySelector('.delete-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          deleteReview(review.id);
+        });
+        
+        reviewItem.querySelector('.reply-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          replyToReview(review.id);
+        });
+        
+        // Add to container
+        reviewsContainer.appendChild(reviewItem);
+      });
+      
+      // Update review stats
+      updateReviewStats(productReviews);
+    }
+  }
+  
+  // Update review stats
+  function updateReviewStats(reviews) {
+    const statsElement = document.getElementById('review-stats');
+    
+    // Count reviews by status
+    const total = reviews.length;
+    const pending = reviews.filter(r => r.status === 'pending' || !r.status).length;
+    const approved = reviews.filter(r => r.status === 'approved').length;
+    const rejected = reviews.filter(r => r.status === 'rejected').length;
+    
+    // Calculate average rating
+    let totalRating = 0;
+    reviews.forEach(review => {
+      totalRating += review.rating;
+    });
+    const averageRating = total > 0 ? (totalRating / total).toFixed(1) : '0.0';
+    
+    // Update stats HTML
+    statsElement.innerHTML = `
+      <div class="review-stats">
+        <div class="review-stats-item" title="Average Rating">
+          <i class="bi bi-star-fill text-warning me-1"></i>
+          ${averageRating}
+        </div>
+        <div class="review-stats-item" title="Total Reviews">
+          <i class="bi bi-chat-left-text me-1"></i>
+          ${total}
+        </div>
+        <div class="review-stats-item" title="Pending Reviews">
+          <i class="bi bi-clock me-1"></i>
+          ${pending}
+        </div>
+        <div class="review-stats-item" title="Approved Reviews">
+          <i class="bi bi-check-circle me-1"></i>
+          ${approved}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Update review status
+  function updateReviewStatus(reviewId, status) {
+    // Get reviews
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    
+    // Find review
+    const index = reviews.findIndex(r => r.id === reviewId);
+    
+    if (index !== -1) {
+      // Update status
+      reviews[index].status = status;
+      reviews[index].updatedAt = new Date().toISOString();
+      
+      // Save to localStorage
+      localStorage.setItem('reviews', JSON.stringify(reviews));
+      
+      // Reload reviews
+      loadProductReviews(currentReviewProductId);
+      
+      // Show toast
+      showToast(`Review ${status}`, 'success');
+    } else {
+      showToast('Review not found', 'danger');
+    }
+  }
+  
+  // Delete review
+  function deleteReview(reviewId) {
+    if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+      return;
+    }
+    
+    // Get reviews
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    
+    // Remove review
+    const updatedReviews = reviews.filter(r => r.id !== reviewId);
+    localStorage.setItem('reviews', JSON.stringify(updatedReviews));
+    
+    // Reload reviews
+    loadProductReviews(currentReviewProductId);
+    
+    // Update review count for product in table
+    const productRow = document.querySelector(`tr[data-product-id="${currentReviewProductId}"]`);
+    if (productRow) {
+      const reviewCountElement = productRow.querySelector('.review-count');
+      reviewCountElement.textContent = getReviewCount(currentReviewProductId);
+    }
+    
+    showToast('Review deleted successfully', 'success');
+  }
+  
+  // Reply to review
+  function replyToReview(reviewId) {
+    // Get the review
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    const review = reviews.find(r => r.id === reviewId);
+    
+    if (!review) {
+      showToast('Review not found', 'danger');
+      return;
+    }
+    
+    // Prompt for reply
+    const reply = prompt('Enter your reply to this review:', review.adminReply || '');
+    
+    if (reply !== null) {
+      // Update review with reply
+      const index = reviews.findIndex(r => r.id === reviewId);
+      reviews[index].adminReply = reply;
+      reviews[index].adminReplyDate = new Date().toISOString();
+      reviews[index].updatedAt = new Date().toISOString();
+      
+      // Save to localStorage
+      localStorage.setItem('reviews', JSON.stringify(reviews));
+      
+      // Reload reviews
+      loadProductReviews(currentReviewProductId);
+      
+      showToast('Reply added successfully', 'success');
+    }
+  }
+  
+  // Refresh reviews
+  function refreshReviews() {
+    if (currentReviewProductId) {
+      loadProductReviews(currentReviewProductId);
+    }
+  }
+</script>
+</body>
+</html> 

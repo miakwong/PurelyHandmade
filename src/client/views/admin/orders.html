@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-receipt me-2 text-primary"></i>Order Management</h1>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Orders List</h5>
+    </div>
+    <div class="card-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Total Amount</th>
+            <th>Order Date</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="order-table-body">
+          <!-- Orders data will be loaded here -->
+        </tbody>
+      </table>
+      <div id="no-orders-message" class="text-center py-5 d-none">
+        <p class="text-muted">No orders found</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    loadNavbar();
+    loadFooter();
+    loadOrders();
+  });
+
+  function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const tableBody = document.getElementById('order-table-body');
+    const noOrdersMessage = document.getElementById('no-orders-message');
+
+    tableBody.innerHTML = '';
+
+    if (orders.length === 0) {
+      noOrdersMessage.classList.remove('d-none');
+    } else {
+      noOrdersMessage.classList.add('d-none');
+      orders.forEach(order => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.userName}</td>
+          <td>${order.status}</td>
+          <td>$${order.totalAmount.toFixed(2)}</td>
+          <td>${new Date(order.date).toLocaleDateString()}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-primary" onclick="viewOrderDetails('${order.id}')">View</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteOrder('${order.id}')">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+  }
+
+  function viewOrderDetails(orderId) {
+    alert('View details for order: ' + orderId);
+  }
+
+  function deleteOrder(orderId) {
+    if (confirm('Are you sure you want to delete this order?')) {
+      let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+      orders = orders.filter(order => order.id !== orderId);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      loadOrders();
+      alert('Order deleted successfully');
+    }
+  }
+</script>
+</body>
+</html> 

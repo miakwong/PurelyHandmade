@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  
+  <style>
+    /* Style for action buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    /* Admin button styles */
+    .admin-btn-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 4px;
+    }
+    
+    /* Style for badges */
+    .badge-success {
+      background-color: #5a8c70;
+      color: white;
+    }
+    
+    .badge-warning {
+      background-color: #e6a23c;
+      color: white;
+    }
+    
+    .badge-danger {
+      background-color: #d9534f;
+      color: white;
+    }
+    
+    .user-management-card {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .user-table th {
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #555;
+    }
+    
+    .user-table tbody tr:hover {
+      background-color: rgba(134, 118, 102, 0.05);
+    }
+    
+    .empty-state-icon {
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-size: 2.5rem;
+      color: #ccc;
+      background-color: #f8f9fa;
+      border: 1px solid #f0f0f0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      overflow: hidden;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #eaeaea;
+    }
+    
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .user-role-admin {
+      background-color: #5a8c70;
+      color: white;
+    }
+    
+    .user-role-user {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .user-role-designer {
+      background-color: #17a2b8;
+      color: white;
+    }
+    
+    .user-status-active {
+      background-color: #5a8c70;
+      color: white;
+    }
+    
+    .user-status-inactive {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    /* Filter section styles */
+    .filter-section {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .user-preview {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      overflow: hidden;
+      border-radius: 50%;
+      border: 2px solid #eaeaea;
+      margin: 0 auto;
+    }
+    
+    .user-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .user-stats-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .user-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .user-stat-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #5a8c70;
+    }
+    
+    .user-stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .user-stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-people me-2 text-primary"></i>User Management</h1>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+  
+  <!-- User Stats -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="user-stat">
+        <div class="user-stat-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="user-stat-value" id="total-users">0</div>
+        <div class="user-stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="user-stat">
+        <div class="user-stat-icon">
+          <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div class="user-stat-value" id="active-users">0</div>
+        <div class="user-stat-label">Active Users</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="user-stat">
+        <div class="user-stat-icon">
+          <i class="bi bi-person-fill-lock"></i>
+        </div>
+        <div class="user-stat-value" id="admin-users">0</div>
+        <div class="user-stat-label">Administrators</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="user-stat">
+        <div class="user-stat-icon">
+          <i class="bi bi-palette-fill"></i>
+        </div>
+        <div class="user-stat-value" id="designer-users">0</div>
+        <div class="user-stat-label">Designers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label for="filter-role" class="form-label">Role</label>
+        <select class="form-select" id="filter-role">
+          <option value="">All Roles</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="designer">Designer</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="filter-status" class="form-label">Status</label>
+        <select class="form-select" id="filter-status">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="filter-search" class="form-label">Search</label>
+        <input type="text" class="form-control" id="filter-search" placeholder="Search by name or email...">
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-secondary me-2" onclick="resetFilters()">
+          <i class="bi bi-x-circle me-2"></i>Clear Filters
+        </button>
+        <button class="btn btn-primary" onclick="applyFilters()">
+          <i class="bi bi-funnel me-2"></i>Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 user-management-card">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="mb-0">User Management</h5>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" onclick="resetUserForm()">
+            <i class="bi bi-plus-circle me-2"></i>Add User
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover user-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined Date</th>
+              <th>Last Login</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="user-table-body">
+            <!-- User data will be loaded here -->
+          </tbody>
+        </table>
+        <div id="no-users-message" class="d-none text-center py-5">
+          <div class="empty-state-icon mx-auto mb-3">
+            <i class="bi bi-people"></i>
+          </div>
+          <p class="text-muted mb-3">No users found</p>
+          <button class="btn btn-primary" onclick="resetUserForm()">
+            Add Your First User
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow admin-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">Add User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <input type="hidden" id="user-id">
+          
+          <div class="text-center mb-4">
+            <div class="user-preview mb-3">
+              <img id="user-img-preview" src="../../../img/profile.png" alt="User preview">
+            </div>
+            <div class="d-flex justify-content-center">
+              <div style="max-width: 250px;">
+                <input type="file" class="admin-form-control mb-2" id="user-image-file" accept="image/*">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetUserImage()">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Image
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-name" class="admin-form-label">Full Name<span class="text-danger">*</span></label>
+                <input type="text" class="admin-form-control" id="user-name" required placeholder="Enter full name">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-email" class="admin-form-label">Email<span class="text-danger">*</span></label>
+                <input type="email" class="admin-form-control" id="user-email" required placeholder="Enter email address">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row" id="password-fields">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-password" class="admin-form-label">Password<span class="text-danger password-required">*</span></label>
+                <input type="password" class="admin-form-control" id="user-password" placeholder="Enter password">
+                <div class="form-text">Leave blank to keep current password (when editing)</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-password-confirm" class="admin-form-label">Confirm Password<span class="text-danger password-required">*</span></label>
+                <input type="password" class="admin-form-control" id="user-password-confirm" placeholder="Confirm password">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-role" class="admin-form-label">Role<span class="text-danger">*</span></label>
+                <select class="admin-form-control" id="user-role" required>
+                  <option value="user">User</option>
+                  <option value="designer">Designer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-status" class="admin-form-label">Status<span class="text-danger">*</span></label>
+                <select class="admin-form-control" id="user-status" required>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="admin-form-group">
+            <label for="user-bio" class="admin-form-label">Bio</label>
+            <textarea class="admin-form-control" id="user-bio" rows="3" placeholder="Short bio about the user..."></textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-phone" class="admin-form-label">Phone Number</label>
+                <input type="tel" class="admin-form-control" id="user-phone" placeholder="Enter phone number">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="admin-form-group">
+                <label for="user-address" class="admin-form-label">Address</label>
+                <input type="text" class="admin-form-control" id="user-address" placeholder="Enter address">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="admin-btn admin-btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="admin-btn admin-btn-primary" onclick="saveUser()">
+          <i class="bi bi-check2 me-1"></i>Save User
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast container -->
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  // Current filters
+  let currentFilters = {
+    role: '',
+    status: '',
+    search: ''
+  };
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load nav and footer
+    loadNavbar();
+    loadFooter();
+    
+    // Load users data
+    loadUsers();
+    
+    // Update user stats
+    updateUserStats();
+    
+    // Set up image preview for user image
+    document.getElementById('user-image-file').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('user-img-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Check user permissions
+    checkAdminPermissions();
+    
+    // Set up search filter event
+    document.getElementById('filter-search').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+  });
+  
+  // User management functions
+  function loadUsers() {
+    // Get users from localStorage
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    const tableBody = document.getElementById('user-table-body');
+    const noUsers = document.getElementById('no-users-message');
+    
+    // Apply filters if any
+    users = filterUsers(users);
+    
+    if (!tableBody) {
+      console.error('user-table-body element not found! DOM may not be fully loaded.');
+      return; // Exit the function early if tableBody doesn't exist
+    }
+    
+    // Clear existing rows
+    tableBody.innerHTML = '';
+    
+    if (users.length === 0) {
+      // No users found, show empty state message
+      tableBody.parentElement.classList.add('d-none');
+      noUsers.classList.remove('d-none');
+    } else {
+      // Show table and hide empty state
+      tableBody.parentElement.classList.remove('d-none');
+      noUsers.classList.add('d-none');
+      
+      // Add user rows
+      users.forEach(user => {
+        // Determine role badge
+        let roleBadge;
+        switch (user.role) {
+          case 'admin':
+            roleBadge = '<span class="badge user-role-admin">Admin</span>';
+            break;
+          case 'designer':
+            roleBadge = '<span class="badge user-role-designer">Designer</span>';
+            break;
+          default:
+            roleBadge = '<span class="badge user-role-user">User</span>';
+        }
+        
+        // Determine status badge
+        let statusBadge;
+        if (user.status === 'inactive') {
+          statusBadge = '<span class="badge user-status-inactive">Inactive</span>';
+        } else {
+          statusBadge = '<span class="badge user-status-active">Active</span>';
+        }
+        
+        // Format dates
+        const joinedDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown';
+        const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <div class="d-flex align-items-center">
+              <div class="user-avatar me-3">
+                <img src="${user.avatar || '../../../img/profile.png'}" alt="${user.name || 'User'}">
+              </div>
+              <div>
+                <div class="fw-medium">${user.name || 'Unnamed User'}</div>
+                ${user.username ? `<small class="text-muted">@${user.username}</small>` : ''}
+              </div>
+            </div>
+          </td>
+          <td>${user.email || 'N/A'}</td>
+          <td>${roleBadge}</td>
+          <td>${statusBadge}</td>
+          <td>${joinedDate}</td>
+          <td>${lastLogin}</td>
+          <td class="text-center">
+            <div class="action-buttons">
+              <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editUser('${user.id}')" data-bs-toggle="tooltip" title="Edit User">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              ${user.role !== 'admin' || getCurrentUserId() !== user.id ? 
+                `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
+                  <i class="bi bi-trash"></i>
+                </button>` : 
+                `<button class="admin-btn admin-btn-secondary admin-btn-sm" disabled data-bs-toggle="tooltip" title="Cannot delete yourself">
+                  <i class="bi bi-trash"></i>
+                </button>`
+              }
+            </div>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+      
+      // Initialize tooltips
+      const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+    }
+  }
+
+  function filterUsers(users) {
+    return users.filter(user => {
+      // Apply role filter
+      if (currentFilters.role && user.role !== currentFilters.role) {
+        return false;
+      }
+      
+      // Apply status filter
+      if (currentFilters.status && user.status !== currentFilters.status) {
+        return false;
+      }
+      
+      // Apply search filter
+      if (currentFilters.search) {
+        const searchTerm = currentFilters.search.toLowerCase();
+        return (
+          (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+          (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+          (user.username && user.username.toLowerCase().includes(searchTerm))
+        );
+      }
+      
+      return true;
+    });
+  }
+
+  function applyFilters() {
+    currentFilters = {
+      role: document.getElementById('filter-role').value,
+      status: document.getElementById('filter-status').value,
+      search: document.getElementById('filter-search').value.trim()
+    };
+    
+    loadUsers();
+  }
+
+  function resetFilters() {
+    document.getElementById('filter-role').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-search').value = '';
+    
+    currentFilters = {
+      role: '',
+      status: '',
+      search: ''
+    };
+    
+    loadUsers();
+  }
+
+  function updateUserStats() {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // Count total users
+    document.getElementById('total-users').textContent = users.length;
+    
+    // Count active users
+    const activeUsers = users.filter(user => user.status !== 'inactive').length;
+    document.getElementById('active-users').textContent = activeUsers;
+    
+    // Count admin users
+    const adminUsers = users.filter(user => user.role === 'admin').length;
+    document.getElementById('admin-users').textContent = adminUsers;
+    
+    // Count designer users
+    const designerUsers = users.filter(user => user.role === 'designer').length;
+    document.getElementById('designer-users').textContent = designerUsers;
+  }
+
+  function resetUserForm() {
+    // Reset form to default values
+    document.getElementById('user-form').reset();
+    document.getElementById('userModalLabel').textContent = 'Add User';
+    document.getElementById('user-id').value = '';
+    document.getElementById('user-img-preview').src = '../../../img/profile.png';
+    
+    // Show password fields as required for new users
+    document.querySelectorAll('.password-required').forEach(el => el.classList.remove('d-none'));
+    
+    // Set default status to active
+    document.getElementById('user-status').value = 'active';
+    
+    // Set default role to user
+    document.getElementById('user-role').value = 'user';
+    
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('userModal')).show();
+  }
+  
+  function resetUserImage() {
+    // Reset the image to default placeholder
+    document.getElementById('user-image-file').value = '';
+    document.getElementById('user-img-preview').src = '../../../img/profile.png';
+  }
+
+  function editUser(userId) {
+    // Get user data
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.id === userId);
+    
+    if (user) {
+      // Hide password required indicators for edit mode
+      document.querySelectorAll('.password-required').forEach(el => el.classList.add('d-none'));
+      
+      // Populate form with user data
+      document.getElementById('userModalLabel').textContent = 'Edit User';
+      document.getElementById('user-id').value = user.id;
+      document.getElementById('user-name').value = user.name || '';
+      document.getElementById('user-email').value = user.email || '';
+      document.getElementById('user-password').value = '';
+      document.getElementById('user-password-confirm').value = '';
+      document.getElementById('user-role').value = user.role || 'user';
+      document.getElementById('user-status').value = user.status || 'active';
+      document.getElementById('user-bio').value = user.bio || '';
+      document.getElementById('user-phone').value = user.phone || '';
+      document.getElementById('user-address').value = user.address || '';
+      
+      // Reset file input
+      document.getElementById('user-image-file').value = '';
+      
+      // Update image preview
+      const imgPreview = document.getElementById('user-img-preview');
+      if (user.avatar) {
+        imgPreview.src = user.avatar;
+      } else {
+        imgPreview.src = '../../../img/profile.png';
+      }
+      
+      // Show the modal
+      new bootstrap.Modal(document.getElementById('userModal')).show();
+    } else {
+      showToast('User not found', 'danger');
+    }
+  }
+
+  function saveUser() {
+    // Get form values
+    const userId = document.getElementById('user-id').value;
+    const name = document.getElementById('user-name').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const password = document.getElementById('user-password').value;
+    const passwordConfirm = document.getElementById('user-password-confirm').value;
+    const role = document.getElementById('user-role').value;
+    const status = document.getElementById('user-status').value;
+    const bio = document.getElementById('user-bio').value.trim();
+    const phone = document.getElementById('user-phone').value.trim();
+    const address = document.getElementById('user-address').value.trim();
+    
+    // Validation
+    if (!name) {
+      showToast('Name is required', 'danger');
+      return;
+    }
+    
+    if (!email) {
+      showToast('Email is required', 'danger');
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      showToast('Please enter a valid email address', 'danger');
+      return;
+    }
+    
+    // For new users, password is required
+    if (!userId && !password) {
+      showToast('Password is required for new users', 'danger');
+      return;
+    }
+    
+    // If password is provided, validate it
+    if (password) {
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'danger');
+        return;
+      }
+      
+      if (password !== passwordConfirm) {
+        showToast('Passwords do not match', 'danger');
+        return;
+      }
+    }
+    
+    // Process avatar if one is selected
+    const imageFile = document.getElementById('user-image-file').files[0];
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        saveUserData(userId, name, email, password, role, status, bio, phone, address, e.target.result);
+      };
+      reader.readAsDataURL(imageFile);
+    } else {
+      // If editing and no new image is selected, keep the existing one
+      if (userId) {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = users.find(u => u.id === userId);
+        saveUserData(userId, name, email, password, role, status, bio, phone, address, user ? user.avatar : null);
+      } else {
+        saveUserData(userId, name, email, password, role, status, bio, phone, address, null);
+      }
+    }
+  }
+  
+  function saveUserData(userId, name, email, password, role, status, bio, phone, address, avatar) {
+    // Get existing users
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // Check if email already exists (for new users or when changing email)
+    const emailExists = users.some(u => u.email === email && u.id !== userId);
+    if (emailExists) {
+      showToast('Email already in use', 'danger');
+      return;
+    }
+    
+    // Generate username from email if not exists
+    const username = email.split('@')[0];
+    
+    if (userId) {
+      // Update existing user
+      const index = users.findIndex(u => u.id === userId);
+      if (index !== -1) {
+        const updatedUser = {
+          ...users[index],
+          name,
+          email,
+          username: users[index].username || username,
+          role,
+          status,
+          bio,
+          phone,
+          address,
+          avatar: avatar || users[index].avatar,
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Only update password if provided
+        if (password) {
+          updatedUser.password = password;
+        }
+        
+        users[index] = updatedUser;
+        showToast('User updated successfully', 'success');
+      }
+    } else {
+      // Create new user
+      users.push({
+        id: Date.now().toString(),
+        name,
+        email,
+        username,
+        password,
+        role,
+        status,
+        bio,
+        phone,
+        address,
+        avatar,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      showToast('User created successfully', 'success');
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+    
+    // Reload users and update stats
+    loadUsers();
+    updateUserStats();
+  }
+
+  function deleteUser(userId) {
+    // Prevent deleting yourself
+    if (getCurrentUserId() === userId) {
+      showToast('You cannot delete your own account', 'danger');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    
+    // Get users
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // Find user to be deleted
+    const user = users.find(u => u.id === userId);
+    if (user && user.role === 'admin') {
+      // Extra confirmation for deleting an admin
+      if (!confirm('Warning: You are about to delete an administrator account. Are you absolutely sure?')) {
+        return;
+      }
+    }
+    
+    // Remove user
+    const updatedUsers = users.filter(u => u.id !== userId);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    
+    showToast('User deleted successfully', 'success');
+    
+    // Reload users and update stats
+    loadUsers();
+    updateUserStats();
+  }
+  
+  function getCurrentUserId() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    return currentUser ? currentUser.id : null;
+  }
+  
+  function isValidEmail(email) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  }
+  
+  function checkAdminPermissions() {
+    // Check if user is logged in and is admin
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || currentUser.role !== 'admin') {
+      // Redirect to login if not admin
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      alert('You must be logged in as an administrator to access this page.');
+    }
+  }
+  
+  // Helper function to show toast notifications
+  function showToast(message, type = 'primary') {
+    const toastContainer = document.querySelector('.toast-container');
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+</script>
+</body>
+</html> 

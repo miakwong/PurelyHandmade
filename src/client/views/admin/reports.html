@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports & Analytics - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    .report-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      border: 1px solid #eaeaea;
+    }
+    
+    .report-header {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    .report-body {
+      padding: 20px;
+    }
+    
+    .report-stat {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      height: 100%;
+    }
+    
+    .report-stat-title {
+      font-size: 0.85rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    
+    .report-stat-value {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    
+    .report-stat-trend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    
+    .trend-up {
+      color: #198754;
+    }
+    
+    .trend-down {
+      color: #dc3545;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    
+    .top-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    .top-item:last-child {
+      border-bottom: none;
+    }
+    
+    .top-item-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-right: 15px;
+    }
+    
+    .top-item-badge {
+      width: 24px;
+      height: 24px;
+      background-color: #5a8c70;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-right: 15px;
+    }
+    
+    .filter-section {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+  </style>
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-graph-up me-2 text-primary"></i>Reports & Analytics</h1>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label for="date-range" class="form-label">Date Range</label>
+        <select class="form-select" id="date-range">
+          <option value="7">Last 7 Days</option>
+          <option value="30" selected>Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="365">Last Year</option>
+          <option value="all">All Time</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="category-filter" class="form-label">Category</label>
+        <select class="form-select" id="category-filter">
+          <option value="">All Categories</option>
+          <!-- Categories will be loaded dynamically -->
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="applyFilters()">
+          <i class="bi bi-funnel me-2"></i>Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Performance Indicators -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="report-stat">
+        <div class="report-stat-title">Total Sales</div>
+        <div class="report-stat-value" id="total-sales">$0</div>
+        <div class="report-stat-trend">
+          <i class="bi bi-arrow-up me-1 trend-up"></i>
+          <span id="sales-trend">0%</span> vs previous period
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="report-stat">
+        <div class="report-stat-title">Orders</div>
+        <div class="report-stat-value" id="total-orders">0</div>
+        <div class="report-stat-trend">
+          <i class="bi bi-arrow-up me-1 trend-up"></i>
+          <span id="orders-trend">0%</span> vs previous period
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="report-stat">
+        <div class="report-stat-title">Average Order Value</div>
+        <div class="report-stat-value" id="avg-order">$0</div>
+        <div class="report-stat-trend">
+          <i class="bi bi-arrow-down me-1 trend-down"></i>
+          <span id="aov-trend">0%</span> vs previous period
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="report-stat">
+        <div class="report-stat-title">Conversion Rate</div>
+        <div class="report-stat-value" id="conversion-rate">0%</div>
+        <div class="report-stat-trend">
+          <i class="bi bi-arrow-up me-1 trend-up"></i>
+          <span id="conversion-trend">0%</span> vs previous period
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales Chart -->
+  <div class="report-card mb-4">
+    <div class="report-header">
+      <h5 class="mb-0">Sales Over Time</h5>
+    </div>
+    <div class="report-body">
+      <div class="chart-container">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <!-- Top Products -->
+    <div class="col-md-6">
+      <div class="report-card h-100">
+        <div class="report-header">
+          <h5 class="mb-0">Top Selling Products</h5>
+        </div>
+        <div class="report-body">
+          <div id="top-products">
+            <!-- Top products will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Category Distribution -->
+    <div class="col-md-6">
+      <div class="report-card h-100">
+        <div class="report-header">
+          <h5 class="mb-0">Sales by Category</h5>
+        </div>
+        <div class="report-body">
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <!-- User Acquisition -->
+    <div class="col-md-6">
+      <div class="report-card h-100">
+        <div class="report-header">
+          <h5 class="mb-0">New Users</h5>
+        </div>
+        <div class="report-body">
+          <div class="chart-container">
+            <canvas id="usersChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Status Distribution -->
+    <div class="col-md-6">
+      <div class="report-card h-100">
+        <div class="report-header">
+          <h5 class="mb-0">Order Status Distribution</h5>
+        </div>
+        <div class="report-body">
+          <div class="chart-container">
+            <canvas id="orderStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  // Chart instances
+  let salesChart, categoryChart, usersChart, orderStatusChart;
+  
+  // Current filter settings
+  let dateRange = 30; // Default to 30 days
+  let categoryFilter = ''; // Default to all categories
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load navbar and footer
+    loadNavbar();
+    loadFooter();
+    
+    // Load categories for filter
+    loadCategoriesForFilter();
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Load data based on filters
+    loadData();
+    
+    // Check user permissions
+    checkAdminPermissions();
+  });
+  
+  function loadCategoriesForFilter() {
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    const categorySelect = document.getElementById('category-filter');
+    
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category.id;
+      option.textContent = category.name;
+      categorySelect.appendChild(option);
+    });
+  }
+  
+  function initializeCharts() {
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    salesChart = new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Sales ($)',
+          data: [],
+          borderColor: '#5a8c70',
+          backgroundColor: 'rgba(90, 140, 112, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(categoryCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: [
+            '#5a8c70',
+            '#867666',
+            '#6c757d',
+            '#f7c653',
+            '#dc3545',
+            '#17a2b8',
+            '#6610f2',
+            '#fd7e14'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          }
+        }
+      }
+    });
+    
+    // Users Chart
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    usersChart = new Chart(usersCtx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'New Users',
+          data: [],
+          backgroundColor: 'rgba(90, 140, 112, 0.7)',
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+    
+    // Order Status Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    orderStatusChart = new Chart(orderStatusCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        datasets: [{
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [
+            '#f7c653', // Pending
+            '#6c757d', // Processing
+            '#17a2b8', // Shipped
+            '#5a8c70', // Delivered
+            '#dc3545'  // Cancelled
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          }
+        }
+      }
+    });
+  }
+  
+  function loadData() {
+    // Get data from localStorage
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    
+    // Filter orders by date range
+    const filteredOrders = filterOrdersByDate(orders);
+    
+    // Calculate key metrics
+    updateKeyMetrics(filteredOrders, orders);
+    
+    // Update sales chart
+    updateSalesChart(filteredOrders);
+    
+    // Update top products
+    updateTopProducts(filteredOrders, products);
+    
+    // Update category distribution
+    updateCategoryChart(filteredOrders, products, categories);
+    
+    // Update users chart
+    updateUsersChart(users);
+    
+    // Update order status chart
+    updateOrderStatusChart(filteredOrders);
+  }
+  
+  function filterOrdersByDate(orders) {
+    if (dateRange === 'all') {
+      return orders;
+    }
+    
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+    
+    return orders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= cutoffDate;
+    });
+  }
+  
+  function updateKeyMetrics(filteredOrders, allOrders) {
+    // Calculate total sales
+    const totalSales = filteredOrders.reduce((sum, order) => sum + (parseFloat(order.totalAmount) || 0), 0);
+    document.getElementById('total-sales').textContent = '$' + totalSales.toFixed(2);
+    
+    // Calculate total orders
+    document.getElementById('total-orders').textContent = filteredOrders.length;
+    
+    // Calculate average order value
+    const avgOrder = filteredOrders.length > 0 ? totalSales / filteredOrders.length : 0;
+    document.getElementById('avg-order').textContent = '$' + avgOrder.toFixed(2);
+    
+    // Calculate conversion rate (simplified)
+    // In a real app, this would be orders / sessions or visitors
+    document.getElementById('conversion-rate').textContent = '3.2%';
+    
+    // Calculate trends (comparing to previous period)
+    const previousPeriodEnd = new Date();
+    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - dateRange);
+    
+    const previousPeriodStart = new Date(previousPeriodEnd);
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - dateRange);
+    
+    const previousPeriodOrders = allOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= previousPeriodStart && orderDate < previousPeriodEnd;
+    });
+    
+    const previousSales = previousPeriodOrders.reduce((sum, order) => sum + (parseFloat(order.totalAmount) || 0), 0);
+    const previousOrderCount = previousPeriodOrders.length;
+    const previousAvgOrder = previousOrderCount > 0 ? previousSales / previousOrderCount : 0;
+    
+    // Calculate percent changes
+    const salesTrend = previousSales > 0 ? ((totalSales - previousSales) / previousSales * 100) : 100;
+    const ordersTrend = previousOrderCount > 0 ? ((filteredOrders.length - previousOrderCount) / previousOrderCount * 100) : 100;
+    const aovTrend = previousAvgOrder > 0 ? ((avgOrder - previousAvgOrder) / previousAvgOrder * 100) : 0;
+    
+    // Update trend displays
+    updateTrendDisplay('sales-trend', salesTrend);
+    updateTrendDisplay('orders-trend', ordersTrend);
+    updateTrendDisplay('aov-trend', aovTrend);
+    updateTrendDisplay('conversion-trend', 1.5); // Placeholder value
+  }
+  
+  function updateTrendDisplay(elementId, percentChange) {
+    const element = document.getElementById(elementId);
+    const parentIcon = element.previousElementSibling;
+    
+    element.textContent = Math.abs(percentChange).toFixed(1) + '%';
+    
+    if (percentChange >= 0) {
+      parentIcon.className = 'bi bi-arrow-up me-1 trend-up';
+    } else {
+      parentIcon.className = 'bi bi-arrow-down me-1 trend-down';
+    }
+  }
+  
+  function updateSalesChart(orders) {
+    // Group sales by date
+    const salesByDate = {};
+    
+    orders.forEach(order => {
+      const date = new Date(order.date).toISOString().split('T')[0];
+      if (!salesByDate[date]) {
+        salesByDate[date] = 0;
+      }
+      salesByDate[date] += parseFloat(order.totalAmount) || 0;
+    });
+    
+    // Sort dates
+    const sortedDates = Object.keys(salesByDate).sort();
+    
+    // Generate data for chart
+    const labels = [];
+    const data = [];
+    
+    // If we have no sales data, generate some dummy data
+    if (sortedDates.length === 0) {
+      // Create dummy data for the past 7 days
+      const today = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateString = date.toISOString().split('T')[0];
+        labels.push(formatDate(dateString));
+        data.push(Math.floor(Math.random() * 500) + 100); // Random values between 100 and 600
+      }
+    } else {
+      sortedDates.forEach(date => {
+        labels.push(formatDate(date));
+        data.push(salesByDate[date]);
+      });
+    }
+    
+    // Update chart
+    salesChart.data.labels = labels;
+    salesChart.data.datasets[0].data = data;
+    salesChart.update();
+  }
+  
+  function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  }
+  
+  function updateTopProducts(orders, products) {
+    // Count product sales
+    const productSales = {};
+    
+    orders.forEach(order => {
+      // In a real app, orders would have line items
+      // This is a simplified example
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          if (!productSales[item.productId]) {
+            productSales[item.productId] = {
+              count: 0,
+              revenue: 0
+            };
+          }
+          productSales[item.productId].count += item.quantity || 1;
+          productSales[item.productId].revenue += (item.price * (item.quantity || 1)) || 0;
+        });
+      }
+    });
+    
+    // Sort products by sales
+    const sortedProducts = Object.keys(productSales)
+      .map(productId => {
+        const product = products.find(p => p.id === productId) || { id: productId, name: 'Unknown Product', image: '' };
+        return {
+          id: productId,
+          name: product.name,
+          image: product.image,
+          count: productSales[productId].count,
+          revenue: productSales[productId].revenue
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5); // Get top 5
+    
+    // If we have no product sales data, generate some dummy data
+    if (sortedProducts.length === 0 && products.length > 0) {
+      sortedProducts.push(
+        ...products.slice(0, Math.min(5, products.length)).map((product, index) => ({
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          count: Math.floor(Math.random() * 50) + 10, // Random values
+          revenue: Math.floor(Math.random() * 1000) + 200 // Random values
+        }))
+      );
+    }
+    
+    // Update UI
+    const topProductsContainer = document.getElementById('top-products');
+    topProductsContainer.innerHTML = '';
+    
+    sortedProducts.forEach((product, index) => {
+      const productElement = document.createElement('div');
+      productElement.className = 'top-item';
+      productElement.innerHTML = `
+        <div class="top-item-badge">${index + 1}</div>
+        <img src="${product.image || '../../../img/product-placeholder.jpg'}" class="top-item-img" alt="${product.name}">
+        <div class="flex-grow-1">
+          <div class="fw-medium">${product.name}</div>
+          <div class="text-muted small">${product.count} sold | $${product.revenue.toFixed(2)} revenue</div>
+        </div>
+      `;
+      topProductsContainer.appendChild(productElement);
+    });
+  }
+  
+  function updateCategoryChart(orders, products, categories) {
+    // Map categories
+    const categoryMap = {};
+    categories.forEach(category => {
+      categoryMap[category.id] = category.name;
+    });
+    
+    // Count sales by category
+    const categorySales = {};
+    
+    // In a real app, this would use order line items
+    // This is a simplified example
+    orders.forEach(order => {
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          const product = products.find(p => p.id === item.productId);
+          if (product && product.categoryId) {
+            const categoryName = categoryMap[product.categoryId] || 'Other';
+            if (!categorySales[categoryName]) {
+              categorySales[categoryName] = 0;
+            }
+            categorySales[categoryName] += (item.price * (item.quantity || 1)) || 0;
+          }
+        });
+      }
+    });
+    
+    // If we have no category data, generate some dummy data
+    if (Object.keys(categorySales).length === 0) {
+      const dummyCategories = categories.length > 0 
+        ? categories.slice(0, Math.min(5, categories.length)).map(c => c.name)
+        : ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'];
+      
+      dummyCategories.forEach(category => {
+        categorySales[category] = Math.floor(Math.random() * 1000) + 200;
+      });
+    }
+    
+    // Sort categories
+    const sortedCategories = Object.keys(categorySales)
+      .sort((a, b) => categorySales[b] - categorySales[a]);
+    
+    const categoryValues = sortedCategories.map(category => categorySales[category]);
+    
+    // Update chart
+    categoryChart.data.labels = sortedCategories;
+    categoryChart.data.datasets[0].data = categoryValues;
+    categoryChart.update();
+  }
+  
+  function updateUsersChart(users) {
+    // Group users by registration date
+    const usersByDate = {};
+    
+    users.forEach(user => {
+      if (user.createdAt) {
+        const date = new Date(user.createdAt).toISOString().split('T')[0];
+        if (!usersByDate[date]) {
+          usersByDate[date] = 0;
+        }
+        usersByDate[date]++;
+      }
+    });
+    
+    // Sort dates
+    const sortedDates = Object.keys(usersByDate).sort();
+    
+    // Generate data for chart
+    const labels = [];
+    const data = [];
+    
+    // If we have no user data, generate some dummy data
+    if (sortedDates.length === 0) {
+      // Create dummy data for the past 7 days
+      const today = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateString = date.toISOString().split('T')[0];
+        labels.push(formatDate(dateString));
+        data.push(Math.floor(Math.random() * 10) + 1); // Random values between 1 and 10
+      }
+    } else {
+      sortedDates.forEach(date => {
+        labels.push(formatDate(date));
+        data.push(usersByDate[date]);
+      });
+    }
+    
+    // Update chart
+    usersChart.data.labels = labels;
+    usersChart.data.datasets[0].data = data;
+    usersChart.update();
+  }
+  
+  function updateOrderStatusChart(orders) {
+    // Count orders by status
+    const statusCounts = {
+      'pending': 0,
+      'processing': 0,
+      'shipped': 0,
+      'delivered': 0,
+      'cancelled': 0
+    };
+    
+    orders.forEach(order => {
+      const status = order.status ? order.status.toLowerCase() : 'pending';
+      if (statusCounts.hasOwnProperty(status)) {
+        statusCounts[status]++;
+      } else {
+        statusCounts.pending++;
+      }
+    });
+    
+    // If we have no orders, generate some dummy data
+    if (orders.length === 0) {
+      statusCounts.pending = 5;
+      statusCounts.processing = 8;
+      statusCounts.shipped = 12;
+      statusCounts.delivered = 20;
+      statusCounts.cancelled = 3;
+    }
+    
+    // Update chart
+    orderStatusChart.data.datasets[0].data = [
+      statusCounts.pending,
+      statusCounts.processing,
+      statusCounts.shipped,
+      statusCounts.delivered,
+      statusCounts.cancelled
+    ];
+    orderStatusChart.update();
+  }
+  
+  function applyFilters() {
+    dateRange = document.getElementById('date-range').value;
+    categoryFilter = document.getElementById('category-filter').value;
+    loadData();
+  }
+  
+  function checkAdminPermissions() {
+    // Check if user is logged in and is admin
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser || currentUser.role !== 'admin') {
+      // Redirect to login if not admin
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      alert('You must be logged in as an administrator to access this page.');
+    }
+  }
+</script>
+</body>
+</html> 
