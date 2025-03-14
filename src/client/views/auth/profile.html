@@ -429,7 +429,7 @@
                 <h4 class="mb-0">
                   <i class="bi bi-geo-alt me-2 text-primary"></i>My Addresses
                 </h4>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal" onclick="addAddress()">
                   <i class="bi bi-plus-lg me-1"></i> Add New Address
                 </button>
               </div>
@@ -575,11 +575,71 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Will use the same form as addAddressModal -->
+        <form id="edit-address-form">
+          <input type="hidden" id="edit-address-id">
+          <div class="mb-3">
+            <label for="edit-addressName" class="form-label">Address Name</label>
+            <input type="text" class="form-control" id="edit-addressName" placeholder="e.g. Home, Work, etc." required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-fullName" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="edit-fullName" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-phone" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="edit-phone" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-addressLine1" class="form-label">Address Line 1</label>
+            <input type="text" class="form-control" id="edit-addressLine1" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-addressLine2" class="form-label">Address Line 2 (Optional)</label>
+            <input type="text" class="form-control" id="edit-addressLine2">
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="edit-city" class="form-label">City</label>
+              <input type="text" class="form-control" id="edit-city" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="edit-state" class="form-label">State/Province</label>
+              <input type="text" class="form-control" id="edit-state" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="edit-zipCode" class="form-label">ZIP/Postal Code</label>
+              <input type="text" class="form-control" id="edit-zipCode" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="edit-country" class="form-label">Country</label>
+            <select class="form-select" id="edit-country" required>
+              <option value="" selected disabled>Select Country</option>
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="UK">United Kingdom</option>
+              <option value="AU">Australia</option>
+              <option value="FR">France</option>
+              <option value="DE">Germany</option>
+              <option value="JP">Japan</option>
+              <option value="CN">China</option>
+              <option value="IN">India</option>
+              <option value="BR">Brazil</option>
+              <option value="MX">Mexico</option>
+            </select>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="edit-defaultAddress">
+            <label class="form-check-label" for="edit-defaultAddress">
+              Set as default shipping address
+            </label>
+          </div>
+          <div id="edit-address-error" class="alert alert-danger d-none"></div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveAddress(true)">Save Address</button>
+        <button type="button" class="btn btn-primary" onclick="saveEditedAddress()">Save Address</button>
       </div>
     </div>
   </div>
@@ -588,12 +648,16 @@
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
+<!-- Include Bootstrap and other scripts only once -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/src/client/js/common.js"></script>
 
 <script>
+  // Single DOMContentLoaded event listener to handle all initialization
   document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded - initializing page');
+    
     // Load navbar and footer components
     loadNavbar();
     loadFooter();
@@ -609,41 +673,106 @@
     
     // Load saved addresses
     loadAddresses();
+    
+    // Initialize all modals with proper options
+    console.log('Initializing all modals on page...');
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+      try {
+        var modalInstance = new bootstrap.Modal(modal, {
+          backdrop: true,
+          keyboard: true,
+          focus: true
+        });
+        console.log(`Modal initialized: #${modal.id}`);
+      } catch (err) {
+        console.error(`Failed to initialize modal #${modal.id}:`, err);
+      }
+    });
+    
+    // Set up tab change handlers
+    const tabEls = document.querySelectorAll('a[data-bs-toggle="tab"]');
+    if (tabEls.length > 0) {
+      tabEls.forEach(function(tabEl) {
+        tabEl.addEventListener('shown.bs.tab', function (event) {
+          const targetId = event.target.getAttribute('data-bs-target');
+          if (targetId === '#users-panel') {
+            loadUsers();
+          } else if (targetId === '#products-panel') {
+            if (typeof loadProducts === 'function') {
+              loadProducts();
+            }
+          } else if (targetId === '#orders-panel') {
+            if (typeof loadOrders === 'function') {
+              loadOrders();
+            }
+          } else if (targetId === '#comments-panel') {
+            if (typeof loadComments === 'function') {
+              loadComments();
+            }
+          }
+        });
+      });
+    }
+
+    // Call specific functions when admin tab is shown
+    const adminTab = document.getElementById('admin-tab');
+    if (adminTab) {
+      adminTab.addEventListener('shown.bs.tab', function (event) {
+        loadUsers();
+      });
+    }
+    
+    console.log('Page initialization complete');
   });
   
   function initUserProfile() {
     // Get current user data
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    console.log('Loading user profile data:', currentUser);
     
     if (currentUser) {
       // Set user profile data
-      document.getElementById('user-full-name').textContent = `${currentUser.name}`;
-      document.getElementById('username-display').textContent = `@${currentUser.username}`;
-      document.getElementById('username-display-profile').textContent = `@${currentUser.username}`;
-      document.getElementById('email-display').textContent = currentUser.email;
+      document.getElementById('user-full-name').textContent = `${currentUser.name || ''}`;
+      document.getElementById('username-display').textContent = `@${currentUser.username || ''}`;
+      document.getElementById('username-display-profile').textContent = `@${currentUser.username || ''}`;
+      document.getElementById('email-display').textContent = currentUser.email || '';
+      
+      // 更新个人信息卡片中的名字和姓氏
+      const firstNameElem = document.getElementById('first-name');
+      const lastNameElem = document.getElementById('last-name');
+      if (firstNameElem) firstNameElem.textContent = currentUser.firstName || '';
+      if (lastNameElem) lastNameElem.textContent = currentUser.lastName || '';
       
       if (currentUser.avatar) {
         document.getElementById('profile-img').src = currentUser.avatar;
       }
       
-      // Set profile edit form values
-      document.getElementById('edit-first-name').value = currentUser.firstName || '';
-      document.getElementById('edit-last-name').value = currentUser.lastName || '';
-      document.getElementById('edit-email').value = currentUser.email || '';
-      document.getElementById('edit-birthday').value = currentUser.birthday || '';
+      // Fill in edit profile form
+      const firstNameInput = document.getElementById('firstName');
+      const lastNameInput = document.getElementById('lastName');
+      const emailInput = document.getElementById('email');
+      const usernameInput = document.getElementById('username');
+      const birthdayInput = document.getElementById('birthday');
       
-      const genderSelect = document.getElementById('edit-gender');
+      if (firstNameInput) firstNameInput.value = currentUser.firstName || '';
+      if (lastNameInput) lastNameInput.value = currentUser.lastName || '';
+      if (emailInput) emailInput.value = currentUser.email || '';
+      if (usernameInput) usernameInput.value = currentUser.username || '';
+      if (birthdayInput) birthdayInput.value = currentUser.birthday || '';
+      
+      // Set gender radio buttons
       if (currentUser.gender) {
-        for (let i = 0; i < genderSelect.options.length; i++) {
-          if (genderSelect.options[i].value === currentUser.gender) {
-            genderSelect.selectedIndex = i;
-            break;
-          }
-        }
+        const genderRadio = document.getElementById(`gender${currentUser.gender.charAt(0).toUpperCase() + currentUser.gender.slice(1)}`);
+        if (genderRadio) genderRadio.checked = true;
       }
       
       // Update display fields
       updateProfileDisplayFields();
+    } else {
+      console.error('No user data found in localStorage');
+      // Redirect to login page if no user is logged in
+      // window.location.href = '/src/client/views/auth/login.html';
     }
   }
   
@@ -678,10 +807,10 @@
     const avatarUpload = document.getElementById('avatar-upload');
     if (avatarUpload) {
       avatarUpload.addEventListener('change', function(event) {
-      const file = event.target.files[0];
+        const file = event.target.files[0];
         if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
             const profileImg = document.getElementById('profile-img');
             profileImg.src = e.target.result;
             
@@ -690,10 +819,24 @@
             if (currentUser) {
               currentUser.avatar = e.target.result;
               localStorage.setItem('currentUser', JSON.stringify(currentUser));
-          }
-        };
-        reader.readAsDataURL(file);
+            }
+          };
+          reader.readAsDataURL(file);
         }
+      });
+    }
+    
+    // Setup save address button for add address modal
+    const saveAddressBtn = document.getElementById('save-address');
+    if (saveAddressBtn) {
+      // Remove previous listeners by cloning and replacing the button
+      const newSaveBtn = saveAddressBtn.cloneNode(true);
+      saveAddressBtn.parentNode.replaceChild(newSaveBtn, saveAddressBtn);
+      
+      // Add fresh event listener
+      document.getElementById('save-address').addEventListener('click', function() {
+        console.log('Save address button clicked');
+        saveAddress();
       });
     }
     
@@ -860,57 +1003,77 @@
   function checkAdminStatus() {
     // Check if user is admin and show admin tab if yes
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser && currentUser.role === 'admin') {
-      document.getElementById('admin-tab-container').style.display = 'block';
+    if (currentUser && (currentUser.role === 'admin' || currentUser.isAdmin === true)) {
+      const adminTabContainer = document.getElementById('admin-tab-container');
+      if (adminTabContainer) {
+        adminTabContainer.style.display = 'block';
+      }
+      console.log('Admin status detected, showing admin tab');
+    } else {
+      console.log('User is not an admin or not logged in');
     }
   }
   
   // Address management functions
   function loadAddresses() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) return;
+    console.log('Loading addresses for user:', currentUser);
+    
+    if (!currentUser) {
+      console.error('No user found in localStorage');
+      return;
+    }
     
     const addresses = currentUser.addresses || [];
+    console.log('Found addresses:', addresses);
+    
     const container = document.getElementById('addresses-container');
     
+    if (!container) {
+      console.error('Addresses container not found in the DOM');
+      return;
+    }
+    
     if (addresses.length === 0) {
+      console.log('No addresses found, showing empty state');
       container.innerHTML = `
         <div class="no-addresses text-center py-5">
           <i class="bi bi-geo-alt display-4 text-muted"></i>
           <p class="mt-3 text-muted">You don't have any saved addresses yet.</p>
-            </div>
+        </div>
       `;
       return;
     }
     
+    console.log('Rendering address cards');
     container.innerHTML = '<div class="row">' + 
       addresses.map((address, index) => `
         <div class="col-md-6 mb-3">
-          <div class="card h-100">
+          <div class="card h-100 ${address.isDefault ? 'border-primary' : ''}">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title">${address.name}</h5>
-                <div>
-                  ${address.isDefault ? '<span class="badge bg-primary">Default</span>' : ''}
-                  </div>
-                </div>
-              <p class="card-text mb-1">${address.streetAddress}</p>
-              <p class="card-text mb-1">${address.aptSuite ? address.aptSuite + ', ' : ''}${address.city}, ${address.state} ${address.zipCode}</p>
-              <p class="card-text mb-3">${address.country}</p>
-              <p class="card-text"><small class="text-muted">Phone: ${address.phone}</small></p>
+                <h5 class="card-title">${address.name || 'Address'}</h5>
+                ${address.isDefault ? '<span class="badge bg-primary">Default</span>' : ''}
+              </div>
+              <p class="card-text mb-1"><strong>${address.fullName || ''}</strong></p>
+              <p class="card-text mb-1">${address.streetAddress || address.addressLine1 || ''}</p>
+              ${address.aptSuite || address.addressLine2 ? `<p class="card-text mb-1">${address.aptSuite || address.addressLine2}</p>` : ''}
+              <p class="card-text mb-1">${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}</p>
+              <p class="card-text mb-3">${address.country || ''}</p>
+              <p class="card-text"><small class="text-muted">Phone: ${address.phone || ''}</small></p>
             </div>
             <div class="card-footer bg-transparent border-top-0">
               <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-outline-primary" onclick="editAddress(${index})">
                   <i class="bi bi-pencil me-1"></i>Edit
-                  </button>
+                </button>
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteAddress(${index})">
                   <i class="bi bi-trash me-1"></i>Delete
-                  </button>
+                </button>
                 ${!address.isDefault ? `<button class="btn btn-sm btn-outline-secondary" onclick="setDefaultAddress(${index})">Set as Default</button>` : ''}
-                </div>
               </div>
             </div>
+          </div>
         </div>
       `).join('') + '</div>';
   }
@@ -921,7 +1084,7 @@
     currentAddressIndex = -1;
     document.getElementById('address-form').reset();
     document.querySelector('#addAddressModal .modal-title').textContent = 'Add New Address';
-    document.getElementById('default-address').checked = false;
+    document.getElementById('defaultAddress').checked = false;
   }
   
   function editAddress(index) {
@@ -934,67 +1097,76 @@
     currentAddressIndex = index;
     
     // Fill form fields
-    document.getElementById('address-name').value = address.name || '';
-    document.getElementById('street-address').value = address.streetAddress || '';
-    document.getElementById('apt-suite').value = address.aptSuite || '';
-    document.getElementById('city').value = address.city || '';
-    document.getElementById('state').value = address.state || '';
-    document.getElementById('zip-code').value = address.zipCode || '';
-    document.getElementById('country').value = address.country || '';
-    document.getElementById('phone').value = address.phone || '';
-    document.getElementById('default-address').checked = address.isDefault || false;
-    
-    document.querySelector('#editAddressModal .modal-title').textContent = 'Edit Address';
+    document.getElementById('edit-addressName').value = address.name || '';
+    document.getElementById('edit-fullName').value = address.fullName || '';
+    document.getElementById('edit-phone').value = address.phone || '';
+    document.getElementById('edit-addressLine1').value = address.streetAddress || address.addressLine1 || '';
+    document.getElementById('edit-addressLine2').value = address.aptSuite || address.addressLine2 || '';
+    document.getElementById('edit-city').value = address.city || '';
+    document.getElementById('edit-state').value = address.state || '';
+    document.getElementById('edit-zipCode').value = address.zipCode || '';
+    document.getElementById('edit-country').value = address.country || '';
+    document.getElementById('edit-defaultAddress').checked = address.isDefault || false;
     
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('editAddressModal'));
     modal.show();
   }
   
-  function saveAddress(isEdit = false) {
+  function saveAddress() {
+    console.log('Saving address');
+    
     const addressForm = document.getElementById('address-form');
     
     // Validate form
+    if (!addressForm) {
+      console.error('Address form not found');
+      return;
+    }
+    
     if (!addressForm.checkValidity()) {
+      console.log('Form validation failed');
       addressForm.reportValidity();
       return;
     }
     
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.error('No user found in localStorage');
+      return;
+    }
     
     // Initialize addresses array if it doesn't exist
     if (!currentUser.addresses) {
       currentUser.addresses = [];
     }
     
+    // Collect form data
     const newAddress = {
-      name: document.getElementById('address-name').value,
-      streetAddress: document.getElementById('street-address').value,
-      aptSuite: document.getElementById('apt-suite').value,
+      name: document.getElementById('addressName').value,
+      fullName: document.getElementById('fullName').value,
+      streetAddress: document.getElementById('addressLine1').value,
+      aptSuite: document.getElementById('addressLine2').value,
       city: document.getElementById('city').value,
       state: document.getElementById('state').value,
-      zipCode: document.getElementById('zip-code').value,
+      zipCode: document.getElementById('zipCode').value,
       country: document.getElementById('country').value,
       phone: document.getElementById('phone').value,
-      isDefault: document.getElementById('default-address').checked
+      isDefault: document.getElementById('defaultAddress').checked
     };
+    
+    console.log('New address data:', newAddress);
     
     // If setting as default, remove default from other addresses
     if (newAddress.isDefault) {
       currentUser.addresses.forEach(addr => addr.isDefault = false);
     }
     
-    // Add new or update existing address
-    if (isEdit && currentAddressIndex >= 0) {
-      currentUser.addresses[currentAddressIndex] = newAddress;
-    } else {
-      // If first address, set as default
-      if (currentUser.addresses.length === 0) {
-        newAddress.isDefault = true;
-      }
-      currentUser.addresses.push(newAddress);
+    // Add new address
+    if (currentUser.addresses.length === 0) {
+      newAddress.isDefault = true;
     }
+    currentUser.addresses.push(newAddress);
     
     // Save changes
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1008,9 +1180,11 @@
     }
     
     // Close modal
-    const modalId = isEdit ? 'editAddressModal' : 'addAddressModal';
-    const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-    modal.hide();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addAddressModal'));
+    if (modal) modal.hide();
+    
+    // Show success message
+    showToast('Address saved successfully', 'success');
     
     // Reload addresses
     loadAddresses();
@@ -1072,9 +1246,171 @@
     // Reload addresses
     loadAddresses();
   }
-</script>
+  
+  // Helper function to show loading spinner
+  function showLoadingSpinner(element) {
+    element.innerHTML = `
+      <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+            </div>
+            </div>
+    `;
+  }
+  
+  // Add missing saveProfileChanges function
+  function saveProfileChanges() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+      showToast('No user logged in', 'danger');
+      return;
+    }
+    
+    // Get form values
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const birthday = document.getElementById('birthday').value;
+    
+    // Get selected gender
+    let gender = '';
+    const genderRadios = document.getElementsByName('gender');
+    for (let i = 0; i < genderRadios.length; i++) {
+      if (genderRadios[i].checked) {
+        gender = genderRadios[i].value;
+        break;
+      }
+    }
+    
+    // Validate inputs
+    if (!firstName || !lastName || !email || !username) {
+      document.getElementById('profile-error').textContent = 'Please fill in all required fields.';
+      document.getElementById('profile-error').classList.remove('d-none');
+      return;
+    }
+    
+    // Update user data
+    currentUser.firstName = firstName;
+    currentUser.lastName = lastName;
+    currentUser.name = `${firstName} ${lastName}`;
+    currentUser.email = email;
+    currentUser.username = username;
+    currentUser.birthday = birthday;
+    currentUser.gender = gender;
+    
+    // Save to localStorage
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    // Update users array if exists
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userIndex = users.findIndex(user => user.id === currentUser.id);
+    if (userIndex !== -1) {
+      users[userIndex] = { ...users[userIndex], ...currentUser };
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+    
+    // Hide modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+    if (modal) modal.hide();
+    
+    // Update displayed user information
+    document.getElementById('user-full-name').textContent = currentUser.name;
+    document.getElementById('username-display').textContent = `@${currentUser.username}`;
+    document.getElementById('username-display-profile').textContent = `@${currentUser.username}`;
+    document.getElementById('email-display').textContent = currentUser.email;
+    
+    // Update first name and last name in the personal info card
+    const firstNameDisplay = document.getElementById('first-name');
+    const lastNameDisplay = document.getElementById('last-name');
+    if (firstNameDisplay) firstNameDisplay.textContent = currentUser.firstName;
+    if (lastNameDisplay) lastNameDisplay.textContent = currentUser.lastName;
+    
+    updateProfileDisplayFields();
+    
+    // Show success message
+    showToast('Profile updated successfully', 'success');
+  }
 
-</body>
+  function saveEditedAddress() {
+    console.log('Saving edited address');
+    
+    const addressForm = document.getElementById('edit-address-form');
+    
+    // Validate form
+    if (!addressForm) {
+      console.error('Edit address form not found');
+      return;
+    }
+    
+    if (!addressForm.checkValidity()) {
+      console.log('Form validation failed');
+      addressForm.reportValidity();
+      return;
+    }
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+      console.error('No user found in localStorage');
+      return;
+    }
+    
+    // Initialize addresses array if it doesn't exist
+    if (!currentUser.addresses) {
+      currentUser.addresses = [];
+    }
+    
+    // Collect form data
+    const editedAddress = {
+      name: document.getElementById('edit-addressName').value,
+      fullName: document.getElementById('edit-fullName').value,
+      streetAddress: document.getElementById('edit-addressLine1').value,
+      aptSuite: document.getElementById('edit-addressLine2').value,
+      city: document.getElementById('edit-city').value,
+      state: document.getElementById('edit-state').value,
+      zipCode: document.getElementById('edit-zipCode').value,
+      country: document.getElementById('edit-country').value,
+      phone: document.getElementById('edit-phone').value,
+      isDefault: document.getElementById('edit-defaultAddress').checked
+    };
+    
+    console.log('Edited address data:', editedAddress);
+    
+    // If setting as default, remove default from other addresses
+    if (editedAddress.isDefault) {
+      currentUser.addresses.forEach(addr => addr.isDefault = false);
+    }
+    
+    // Update existing address
+    if (currentAddressIndex >= 0 && currentAddressIndex < currentUser.addresses.length) {
+      currentUser.addresses[currentAddressIndex] = editedAddress;
+    } else {
+      console.error('Invalid address index:', currentAddressIndex);
+      return;
+    }
+    
+    // Save changes
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    // Update users array if exists
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userIndex = users.findIndex(user => user.id === currentUser.id);
+    if (userIndex !== -1) {
+      users[userIndex].addresses = currentUser.addresses;
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+    if (modal) modal.hide();
+    
+    // Show success message
+    showToast('Address updated successfully', 'success');
+    
+    // Reload addresses
+    loadAddresses();
+  }
+</script>
 
 <!-- Add confirmation delete modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
@@ -1097,72 +1433,6 @@
 
 <!-- Add toast container for notifications -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
-
-<script>
-// ... existing code ...
-
-// Add the showToast helper function at the end of your javascript
-function showToast(message, type = 'primary') {
-  // Prevent duplicate toasts with the same message within a short time
-  const existingToasts = document.querySelectorAll('.toast');
-  for (let i = 0; i < existingToasts.length; i++) {
-    const toastBody = existingToasts[i].querySelector('.toast-body');
-    if (toastBody && toastBody.textContent.trim() === message.trim()) {
-      console.log('Preventing duplicate toast:', message);
-      return; // Don't show duplicate toast
-    }
-  }
-  
-  // 检查消息是否为空
-  if (!message || message.trim() === '') {
-    console.error('Empty message provided to showToast');
-    message = 'Operation completed successfully';  // 提供默认消息
-  }
-  
-  // 确保类型有效
-  const validTypes = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
-  if (!validTypes.includes(type)) {
-    console.warn(`Invalid toast type: ${type}, using 'primary' instead`);
-    type = 'primary';
-  }
-  
-  // Get or create toast container
-  let toastContainer = document.querySelector('.toast-container');
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-    document.body.appendChild(toastContainer);
-  }
-  
-  // Create toast
-  const toastElement = document.createElement('div');
-  toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
-  toastElement.setAttribute('role', 'alert');
-  toastElement.setAttribute('aria-live', 'assertive');
-  toastElement.setAttribute('aria-atomic', 'true');
-  
-  const toastContent = `
-    <div class="d-flex">
-      <div class="toast-body">
-        ${message}
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  `;
-  
-  toastElement.innerHTML = toastContent;
-  toastContainer.appendChild(toastElement);
-  
-  // Initialize and show toast
-  const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
-  toast.show();
-  
-  // Remove the toast after it's hidden
-  toastElement.addEventListener('hidden.bs.toast', function() {
-    toastElement.remove();
-  });
-}
-</script>
 
 <!-- Add/Edit Category Modal -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
@@ -1274,76 +1544,6 @@ function showToast(message, type = 'primary') {
   }
 </style>
 
-<script>
-// ... existing code ...
-
-  // Helper function to show loading spinner
-  function showLoadingSpinner(element) {
-    element.innerHTML = `
-      <div class="d-flex justify-content-center my-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-            </div>
-            </div>
-    `;
-  }
-  
-  // Initialize tabs if present
-  document.addEventListener('DOMContentLoaded', function () {
-    const tabEls = document.querySelectorAll('a[data-bs-toggle="tab"]');
-    if (tabEls.length > 0) {
-      tabEls.forEach(function(tabEl) {
-        tabEl.addEventListener('shown.bs.tab', function (event) {
-          const targetId = event.target.getAttribute('data-bs-target');
-          if (targetId === '#users-panel') {
-            loadUsers();
-          } else if (targetId === '#products-panel') {
-            if (typeof loadProducts === 'function') {
-              loadProducts();
-            }
-          } else if (targetId === '#orders-panel') {
-            if (typeof loadOrders === 'function') {
-              loadOrders();
-            }
-          } else if (targetId === '#comments-panel') {
-            if (typeof loadComments === 'function') {
-              loadComments();
-            }
-          }
-        });
-      });
-    }
-
-    // Call specific functions when admin tab is shown
-    const adminTab = document.getElementById('admin-tab');
-    if (adminTab) {
-      adminTab.addEventListener('shown.bs.tab', function (event) {
-        loadUsers();
-      });
-    }
-    
-    // Initialize modals with proper options
-    console.log('Initializing all modals on page...');
-    // Initialize all modals with proper options after they are defined
-    var modals = document.querySelectorAll('.modal');
-    modals.forEach(function(modal) {
-      try {
-        var modalInstance = new bootstrap.Modal(modal, {
-        backdrop: true,
-        keyboard: true,
-        focus: true
-      });
-        console.log(`Modal initialized: #${modal.id}`);
-      } catch (err) {
-        console.error(`Failed to initialize modal #${modal.id}:`, err);
-      }
-    });
-  });
-</script>
-
-<!-- Add Bootstrap JS at the end of body -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -1404,45 +1604,35 @@ function showToast(message, type = 'primary') {
   </div>
 </div>
 
-<!-- Add this script to ensure modals work properly -->
+<!-- Script to create a test admin user for debugging -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing all modals on page...');
-    // Initialize all modals with proper options after they are defined
-    var modals = document.querySelectorAll('.modal');
-    modals.forEach(function(modal) {
-        try {
-        var modalInstance = new bootstrap.Modal(modal, {
-            backdrop: true,
-            keyboard: true,
-            focus: true
-          });
-        console.log(`Modal initialized: #${modal.id}`);
-        } catch (err) {
-        console.error(`Failed to initialize modal #${modal.id}:`, err);
-        }
-      });
-  });
-</script>
-
-<!-- Script to properly initialize all modals -->
-<script>
-  // Ensure modals are properly initialized after page load
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing modals after page load');
-    setTimeout(function() {
-      try {
-        document.querySelectorAll('.modal').forEach(function(modal) {
-          // Check if modal is already initialized
-          if (!bootstrap.Modal.getInstance(modal)) {
-            new bootstrap.Modal(modal);
-            console.log('Modal initialized:', modal.id);
-          }
-        });
-      } catch (error) {
-        console.error('Error initializing modals:', error);
-      }
-    }, 500); // Small delay to ensure DOM is fully loaded
-  });
+  // Function to create test admin user
+  function createTestAdminUser() {
+    const testUser = {
+      id: 'admin1',
+      username: 'admin',
+      email: 'admin@example.com',
+      name: 'Admin User',
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'admin',
+      isAdmin: true
+    };
+    
+    localStorage.setItem('currentUser', JSON.stringify(testUser));
+    
+    // Add to users array if it exists
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (!users.find(u => u.id === testUser.id)) {
+      users.push(testUser);
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+    
+    alert('Test admin user created and logged in!');
+    window.location.reload();
+  }
+  
+  // Uncomment this line to automatically create an admin user when the page loads
+  // document.addEventListener('DOMContentLoaded', createTestAdminUser);
 </script>
 </html>
