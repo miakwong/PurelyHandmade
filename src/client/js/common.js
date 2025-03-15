@@ -7,6 +7,7 @@
 function loadNavbar() {
   fetch('/src/client/assets/layout/navbar.html')
     .then(response => {
+      if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
       }
       return response.text();

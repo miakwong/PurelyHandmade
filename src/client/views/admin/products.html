@@ -895,9 +895,15 @@
   function editProduct(productId) {
     // Get product data
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const product = products.find(p => p.id === productId);
+    console.log('Editing product with ID:', productId);
+    console.log('Available products:', products);
+    
+    // Convert productId to string to ensure type consistency
+    const productIdStr = String(productId);
+    const product = products.find(p => String(p.id) === productIdStr);
     
     if (product) {
+      console.log('Found product:', product);
       // Populate form with product data
       document.getElementById('productModalLabel').textContent = 'Edit Product';
       document.getElementById('product-id').value = product.id;
@@ -930,6 +936,8 @@
       // Show the modal
       new bootstrap.Modal(document.getElementById('productModal')).show();
     } else {
+      console.error('Product not found with ID:', productId);
+      console.log('Product IDs in database:', products.map(p => p.id));
       showToast('Product not found', 'danger');
     }
   }
@@ -992,14 +1000,25 @@
   function saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, image, gallery) {
     // Get existing products
     const products = JSON.parse(localStorage.getItem('products') || '[]');
+    console.log('Saving product data:', { productId, name });
     
     // Create slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
     if (productId) {
-      // Update existing product
-      const index = products.findIndex(p => p.id === productId);
+      console.log('Updating existing product with ID:', productId);
+      
+      // Convert productId to string to ensure type consistency
+      const productIdStr = String(productId);
+      const index = products.findIndex(p => String(p.id) === productIdStr);
+      
+      console.log('Found product at index:', index);
+      
       if (index !== -1) {
+        // Make a copy of the current product for comparison
+        const oldProduct = {...products[index]};
+        
+        // Update the product
         products[index] = {
           ...products[index],
           name,
@@ -1016,11 +1035,20 @@
           gallery: gallery || products[index].gallery,
           updatedAt: new Date().toISOString()
         };
+        
+        console.log('Product before update:', oldProduct);
+        console.log('Product after update:', products[index]);
+        
+        // Save to localStorage
+        localStorage.setItem('products', JSON.stringify(products));
         showToast('Product updated successfully', 'success');
+      } else {
+        console.error('Failed to find product with ID:', productId);
+        showToast('Error updating product: Product not found', 'danger');
       }
     } else {
       // Create new product
-      products.push({
+      const newProduct = {
         id: Date.now().toString(),
         name,
         slug,
@@ -1036,17 +1064,31 @@
         gallery,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      });
+      };
+      
+      console.log('Creating new product:', newProduct);
+      products.push(newProduct);
+      
+      // Save to localStorage
+      localStorage.setItem('products', JSON.stringify(products));
       showToast('Product created successfully', 'success');
     }
     
-    // Save to localStorage
-    localStorage.setItem('products', JSON.stringify(products));
-    
     // Close modal
-    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+    try {
+      const modalElement = document.getElementById('productModal');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      } else {
+        console.warn('No modal instance found, creating new instance to hide');
+        new bootstrap.Modal(modalElement).hide();
+      }
+    } catch (error) {
+      console.error('Error closing modal:', error);
+    }
     
-    // Reload products
+    // Refresh the products list
     loadProducts();
   }
 
@@ -1071,10 +1113,14 @@
   function checkAdminPermissions() {
     // Check if user is logged in and is admin
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || currentUser.role !== 'admin') {
+    console.log('Checking admin permissions for user:', currentUser);
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
       // Redirect to login if not admin
+      console.log('User is not admin, redirecting...');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
       alert('You must be logged in as an administrator to access this page.');
+    } else {
+      console.log('Admin permissions verified successfully');
     }
   }
   
@@ -1110,22 +1156,38 @@
   // Get review count for a product
   function getReviewCount(productId) {
     const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    return reviews.filter(review => review.productId === productId).length;
+    // Convert productId to string to ensure type consistency
+    const productIdStr = String(productId);
+    return reviews.filter(review => String(review.productId) === productIdStr).length;
   }
   
   // View reviews for a product
   function viewProductReviews(productId) {
     // Set current product ID for reviews
     currentReviewProductId = productId;
+    console.log('查看产品评论 - 产品ID:', productId, '类型:', typeof productId);
     
     // Get product details
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const product = products.find(p => p.id === productId);
+    console.log('可用产品数量:', products.length);
+    
+    // Convert productId to string to ensure type consistency
+    const productIdStr = String(productId);
+    const product = products.find(p => String(p.id) === productIdStr);
     
     if (!product) {
-      showToast('Product not found', 'danger');
+      console.error('未找到产品, ID:', productId);
+      console.log('产品ID列表:', products.map(p => p.id));
+      showToast('产品未找到', 'danger');
       return;
     }
+    
+    console.log('找到产品:', product.name);
+    
+    // 检查reviews是否存在
+    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    console.log('localStorage中的评论总数:', allReviews.length);
+    console.log('评论数据示例:', allReviews.length > 0 ? allReviews[0] : '无评论');
     
     // Set product name in modal
     document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
@@ -1141,7 +1203,16 @@
   // Load reviews for a product
   function loadProductReviews(productId) {
     const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    const productReviews = reviews.filter(review => review.productId === productId);
+    console.log('正在加载产品评论, 产品ID:', productId, '总评论数:', reviews.length);
+    
+    // Convert productId to string to ensure type consistency
+    const productIdStr = String(productId);
+    const productReviews = reviews.filter(review => String(review.productId) === productIdStr);
+    
+    console.log('找到该产品的评论数:', productReviews.length);
+    if (productReviews.length > 0) {
+      console.log('该产品的第一条评论:', productReviews[0]);
+    }
     
     const reviewsContainer = document.getElementById('reviews-container');
     const noReviewsMessage = document.getElementById('no-reviews-message');
@@ -1158,8 +1229,9 @@
       
       // Add reviews
       productReviews.forEach(review => {
-        // Find user
-        const user = users.find(u => u.id === review.userId);
+        // Find user - convert IDs to strings for comparison
+        const userIdStr = String(review.userId);
+        const user = users.find(u => String(u.id) === userIdStr);
         
         // Create review item from template
         const template = document.getElementById('review-item-template');
@@ -1167,10 +1239,12 @@
         
         // Set review data
         reviewItem.setAttribute('data-review-id', review.id);
-        reviewItem.querySelector('.review-author').textContent = user ? user.name : 'Anonymous User';
-        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt).toLocaleDateString();
+        reviewItem.querySelector('.review-author').textContent = user 
+            ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) 
+            : 'Anonymous User';
+        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt || review.date).toLocaleDateString();
         reviewItem.querySelector('.rating-value').textContent = review.rating;
-        reviewItem.querySelector('.review-content').textContent = review.content;
+        reviewItem.querySelector('.review-content').textContent = review.content || review.comment || 'No comment provided.';
         
         // Set review avatar
         if (user && user.avatar) {
@@ -1371,6 +1445,122 @@
       loadProductReviews(currentReviewProductId);
     }
   }
+  
+  // 创建测试评论数据的函数
+  function createTestReviews() {
+    console.log('创建测试评论数据');
+    
+    // 获取产品
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    if (products.length === 0) {
+      console.error('没有找到产品，无法创建评论');
+      return;
+    }
+    
+    // 获取用户
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (users.length === 0) {
+      console.error('没有找到用户，无法创建评论');
+      return;
+    }
+    
+    // 获取现有评论
+    const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    
+    // 创建新的测试评论
+    const testReviews = [
+      {
+        id: Date.now().toString() + '1',
+        productId: String(products[0].id),
+        userId: String(users[0].id),
+        rating: 5,
+        title: '非常棒的产品！',
+        content: '质量很好，做工精细，强烈推荐购买。',
+        status: 'approved',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now().toString() + '2',
+        productId: String(products[0].id),
+        userId: String(users[0].id),
+        rating: 4,
+        title: '性价比高',
+        content: '总体不错，但价格稍高。',
+        status: 'approved',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: Date.now().toString() + '3',
+        productId: String(products.length > 1 ? products[1].id : products[0].id),
+        userId: String(users.length > 1 ? users[1].id : users[0].id),
+        rating: 3,
+        title: '一般般',
+        content: '没什么特别的地方。',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    // 合并评论并保存
+    const allReviews = [...existingReviews, ...testReviews];
+    localStorage.setItem('reviews', JSON.stringify(allReviews));
+    
+    console.log('已创建测试评论数据:', testReviews);
+    console.log('现在可以刷新页面查看评论');
+    
+    return '创建了 ' + testReviews.length + ' 条测试评论';
+  }
+  
+  // 诊断和修复评论数据问题
+  function diagnoseReviews() {
+    console.log('开始诊断评论数据问题...');
+    
+    // 检查localStorage中的所有键
+    console.log('localStorage中的所有键:');
+    for (let i = 0; i < localStorage.length; i++) {
+      console.log(`${i}: ${localStorage.key(i)}`);
+    }
+    
+    // 检查reviews数据
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    console.log('reviews键中的数据数量:', reviews.length);
+    if (reviews.length > 0) {
+      console.log('第一条评论样本:', reviews[0]);
+    }
+    
+    // 检查comments数据（可能是另一个键名）
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+    console.log('comments键中的数据数量:', comments.length);
+    if (comments.length > 0) {
+      console.log('第一条comments样本:', comments[0]);
+    }
+    
+    // 检查所有可能的键名
+    const allPossibleKeys = ['reviews', 'comments', 'product_reviews', 'ratings'];
+    for (const key of allPossibleKeys) {
+      const data = JSON.parse(localStorage.getItem(key) || '[]');
+      console.log(`键 "${key}" 中的数据数量:`, data.length);
+    }
+    
+    // 尝试修复问题 - 将comments数据合并到reviews
+    if (comments.length > 0 && reviews.length === 0) {
+      console.log('修复: 将comments数据复制到reviews键');
+      localStorage.setItem('reviews', JSON.stringify(comments));
+      return '已将comments数据复制到reviews键，请刷新页面';
+    }
+    
+    // 如果什么都没有，创建测试数据
+    if (reviews.length === 0 && comments.length === 0) {
+      console.log('未找到任何评论数据，创建测试数据');
+      return createTestReviews();
+    }
+    
+    return '诊断完成。评论数量: ' + reviews.length;
+  }
+  
+  // 注册全局函数，以便在控制台中调用
+  window.createTestReviews = createTestReviews;
+  window.diagnoseReviews = diagnoseReviews;
 </script>
 </body>
 </html> 

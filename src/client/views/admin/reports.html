@@ -812,10 +812,14 @@
   function checkAdminPermissions() {
     // Check if user is logged in and is admin
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || currentUser.role !== 'admin') {
+    console.log('Checking admin permissions for user:', currentUser);
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
       // Redirect to login if not admin
+      console.log('User is not admin, redirecting...');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
       alert('You must be logged in as an administrator to access this page.');
+    } else {
+      console.log('Admin permissions verified successfully');
     }
   }
 </script>
