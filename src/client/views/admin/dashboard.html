@@ -60,10 +60,12 @@
 
 <div class="container my-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-gear-fill me-2 text-primary"></i>Admin Dashboard</h1>
-    <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-      <i class="bi bi-person me-2"></i>Back to Profile
-    </a>
+    <h1><i class="bi bi-speedometer2 me-2 text-primary"></i>Admin Dashboard</h1>
+    <div class="admin-actions">
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
   </div>
 
   <!-- Stats Overview -->
@@ -186,15 +188,15 @@
 <script src="/src/client/js/common.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Load nav and footer
+    // Load navbar and footer
     loadNavbar();
     loadFooter();
     
-    // Load dashboard statistics
-    loadDashboardStats();
-    
-    // Check user permissions
+    // Check admin permissions
     checkAdminPermissions();
+    
+    // Load dashboard data
+    loadDashboardData();
   });
   
   function loadDashboardStats() {
@@ -220,11 +222,122 @@
   function checkAdminPermissions() {
     // Check if user is logged in and is admin
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || currentUser.role !== 'admin') {
+    console.log('Checking admin permissions for user:', currentUser);
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
       // Redirect to login if not admin
+      console.log('User is not admin, redirecting...');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
       alert('You must be logged in as an administrator to access this page.');
+    } else {
+      console.log('Admin permissions verified successfully');
     }
+  }
+  
+  // Load dashboard data
+  function loadDashboardData() {
+    console.log('Loading dashboard data...');
+    
+    // Get data from localStorage
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    
+    // Update dashboard statistics
+    document.getElementById('total-products-count').textContent = products.length;
+    document.getElementById('total-users-count').textContent = users.length;
+    document.getElementById('total-orders-count').textContent = orders.length;
+    document.getElementById('total-reviews-count').textContent = reviews.length;
+    
+    // Calculate pending reviews
+    const pendingReviews = reviews.filter(review => review.status === 'pending').length;
+    document.getElementById('new-reviews-percent').textContent = `${pendingReviews}/${reviews.length} pending reviews`;
+    
+    // Calculate low stock products
+    const lowStockProducts = products.filter(product => product.stock <= 5 && product.stock > 0).length;
+    document.getElementById('low-stock-products').textContent = lowStockProducts;
+    
+    // Update recent reviews
+    updateRecentReviews(reviews, products, users);
+    
+    console.log('Dashboard data loaded successfully');
+  }
+  
+  // Update recent reviews section
+  function updateRecentReviews(reviews, products, users) {
+    const recentReviewsContainer = document.getElementById('recent-reviews');
+    if (!recentReviewsContainer) return;
+    
+    // Clear existing content
+    recentReviewsContainer.innerHTML = '';
+    
+    // Sort reviews by date, newest first
+    const sortedReviews = [...reviews].sort((a, b) => 
+      new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
+    );
+    
+    // Get last 5 reviews
+    const recentReviews = sortedReviews.slice(0, 5);
+    
+    if (recentReviews.length === 0) {
+      recentReviewsContainer.innerHTML = '<p class="text-muted text-center">No reviews found</p>';
+      return;
+    }
+    
+    // Create reviews HTML
+    recentReviews.forEach(review => {
+      // Find product and user
+      const product = products.find(p => String(p.id) === String(review.productId)) || { name: 'Unknown Product' };
+      const user = users.find(u => String(u.id) === String(review.userId)) || { firstName: 'Unknown', lastName: 'User' };
+      
+      // Create review element
+      const reviewElement = document.createElement('div');
+      reviewElement.className = 'list-group-item list-group-item-action';
+      
+      // Get status badge
+      let statusBadge = '';
+      switch(review.status) {
+        case 'approved':
+          statusBadge = '<span class="badge bg-success">Approved</span>';
+          break;
+        case 'rejected':
+          statusBadge = '<span class="badge bg-danger">Rejected</span>';
+          break;
+        default:
+          statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+      }
+      
+      // Format date
+      const reviewDate = new Date(review.createdAt || review.date).toLocaleDateString();
+      
+      // Generate stars HTML
+      const rating = parseInt(review.rating) || 0;
+      let starsHtml = '';
+      for (let i = 0; i < 5; i++) {
+        if (i < rating) {
+          starsHtml += '<i class="bi bi-star-fill text-warning"></i>';
+        } else {
+          starsHtml += '<i class="bi bi-star text-muted"></i>';
+        }
+      }
+      
+      reviewElement.innerHTML = `
+        <div class="d-flex w-100 justify-content-between">
+          <h6 class="mb-1">${product.name}</h6>
+          <small>${reviewDate}</small>
+        </div>
+        <p class="mb-1"><strong>${review.title || 'Review'}</strong>: ${review.content || 'No content'}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">By ${user.firstName} ${user.lastName}</small>
+            <small class="ms-2">${starsHtml}</small>
+          </div>
+          <div>${statusBadge}</div>
+        </div>
+      `;
+      
+      recentReviewsContainer.appendChild(reviewElement);
+    });
   }
 </script>
 </body>
