@@ -697,6 +697,28 @@
     
     // 处理下单
     document.getElementById('place-order').addEventListener('click', function() {
+      // 首先检查用户是否有权限下单
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      
+      // 如果用户未登录，请他们登录
+      if (!currentUser || !currentUser.id) {
+        alert('Please login to place an order.');
+        window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.href);
+        return;
+      }
+      
+      // 检查用户是否有下单权限
+      if (currentUser.canOrder === false) {
+        alert('Your account is currently restricted from placing orders. Please contact customer support for assistance.');
+        return;
+      }
+      
+      // 如果用户账户被锁定（inactive），也不允许下单
+      if (currentUser.status === 'inactive') {
+        alert('Your account is currently inactive. Please contact customer support to reactivate your account.');
+        return;
+      }
+      
       // 验证配送表单
       const shippingForm = document.getElementById('shipping-form');
       if (!shippingForm.checkValidity()) {
