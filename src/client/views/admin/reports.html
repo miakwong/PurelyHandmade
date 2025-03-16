@@ -13,12 +13,17 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
+    body {
+      background-color: var(--background-color);
+    }
+    
     .report-card {
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       margin-bottom: 20px;
       border: 1px solid #eaeaea;
+      background-color: var(--card-background);
     }
     
     .report-header {
@@ -29,14 +34,17 @@
     
     .report-body {
       padding: 20px;
+      background-color: var(--card-background);
     }
     
     .report-stat {
-      background-color: #f8f9fa;
+      background-color: var(--card-background);
       border-radius: 10px;
       padding: 20px;
       text-align: center;
       height: 100%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #eaeaea;
     }
     
     .report-stat-title {
@@ -51,7 +59,7 @@
       font-size: 2rem;
       font-weight: 600;
       margin-bottom: 5px;
-      color: #333;
+      color: var(--text-color);
     }
     
     .report-stat-trend {
@@ -73,6 +81,7 @@
       position: relative;
       height: 300px;
       width: 100%;
+      background-color: var(--card-background);
     }
     
     .top-item {
@@ -80,6 +89,7 @@
       align-items: center;
       padding: 10px 0;
       border-bottom: 1px solid #eaeaea;
+      background-color: var(--card-background);
     }
     
     .top-item:last-child {
@@ -109,11 +119,27 @@
     }
     
     .filter-section {
-      background-color: #f8f9fa;
+      background-color: var(--card-background);
       border-radius: 8px;
       padding: 15px;
       margin-bottom: 20px;
       border: 1px solid #e9ecef;
+    }
+    
+    /* 确保表格样式与网站整体风格一致 */
+    .table {
+      color: var(--text-color);
+    }
+    
+    .table thead th {
+      border-bottom: 2px solid var(--border-color);
+      color: var(--text-color);
+      font-weight: 600;
+    }
+    
+    .table td, .table th {
+      border-color: var(--border-color);
+      padding: 0.75rem;
     }
   </style>
 </head>
@@ -137,7 +163,7 @@
   <!-- Filter Section -->
   <div class="filter-section mb-4">
     <div class="row g-3">
-      <div class="col-md-4">
+      <div class="col-md-6">
         <label for="date-range" class="form-label">Date Range</label>
         <select class="form-select" id="date-range">
           <option value="7">Last 7 Days</option>
@@ -147,14 +173,7 @@
           <option value="all">All Time</option>
         </select>
       </div>
-      <div class="col-md-4">
-        <label for="category-filter" class="form-label">Category</label>
-        <select class="form-select" id="category-filter">
-          <option value="">All Categories</option>
-          <!-- Categories will be loaded dynamically -->
-        </select>
-      </div>
-      <div class="col-md-4 d-flex align-items-end">
+      <div class="col-md-6 d-flex align-items-end">
         <button class="btn btn-primary w-100" onclick="applyFilters()">
           <i class="bi bi-funnel me-2"></i>Apply Filters
         </button>
@@ -228,6 +247,18 @@
         <div class="report-body">
           <div id="top-products">
             <!-- Top products will be loaded here -->
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody id="top-products-body">
+                <!-- Product rows will be inserted here -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -242,6 +273,22 @@
         <div class="report-body">
           <div class="chart-container">
             <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <!-- Product Sales Chart -->
+    <div class="col-12">
+      <div class="report-card">
+        <div class="report-header">
+          <h5 class="mb-0">Product Sales Distribution</h5>
+        </div>
+        <div class="report-body">
+          <div class="chart-container">
+            <canvas id="productChart"></canvas>
           </div>
         </div>
       </div>
@@ -289,15 +336,11 @@
   
   // Current filter settings
   let dateRange = 30; // Default to 30 days
-  let categoryFilter = ''; // Default to all categories
   
   document.addEventListener('DOMContentLoaded', function() {
     // Load navbar and footer
     loadNavbar();
     loadFooter();
-    
-    // Load categories for filter
-    loadCategoriesForFilter();
     
     // Initialize charts
     initializeCharts();
@@ -308,18 +351,6 @@
     // Check user permissions
     checkAdminPermissions();
   });
-  
-  function loadCategoriesForFilter() {
-    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
-    const categorySelect = document.getElementById('category-filter');
-    
-    categories.forEach(category => {
-      const option = document.createElement('option');
-      option.value = category.id;
-      option.textContent = category.name;
-      categorySelect.appendChild(option);
-    });
-  }
   
   function initializeCharts() {
     // Sales Chart
@@ -391,6 +422,43 @@
       }
     });
     
+    // Product Chart (水平条形图)
+    const productCtx = document.getElementById('productChart');
+    if (productCtx) {
+      productChart = new Chart(productCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Sales by Product',
+            data: [],
+            backgroundColor: 'rgba(90, 140, 112, 0.8)',
+            borderWidth: 0
+          }]
+        },
+        options: {
+          indexAxis: 'y',  // 水平条形图
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
     // Users Chart
     const usersCtx = document.getElementById('usersChart').getContext('2d');
     usersChart = new Chart(usersCtx, {
@@ -460,8 +528,17 @@
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const categories = JSON.parse(localStorage.getItem('categories') || '[]');
     
+    console.log('Loaded data from localStorage:');
+    console.log('Orders:', orders.length);
+    console.log('Products:', products.length);
+    console.log('Users:', users.length);
+    console.log('Categories:', categories.length);
+    console.log('Current filter - Date range:', dateRange);
+    
     // Filter orders by date range
-    const filteredOrders = filterOrdersByDate(orders);
+    let filteredOrders = filterOrdersByDate(orders);
+    
+    console.log('Filtered orders after date filter:', filteredOrders.length);
     
     // Calculate key metrics
     updateKeyMetrics(filteredOrders, orders);
@@ -475,6 +552,9 @@
     // Update category distribution
     updateCategoryChart(filteredOrders, products, categories);
     
+    // Update product chart
+    updateProductChart(filteredOrders, products);
+    
     // Update users chart
     updateUsersChart(users);
     
@@ -487,18 +567,24 @@
       return orders;
     }
     
+    // 将dateRange字符串转换为数字
+    const daysToSubtract = parseInt(dateRange) || 30; // 默认30天
+    
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+    cutoffDate.setDate(cutoffDate.getDate() - daysToSubtract);
+    
+    console.log('Filtering orders since:', cutoffDate.toISOString());
     
     return orders.filter(order => {
-      const orderDate = new Date(order.date);
+      // 处理可能的不同日期格式
+      const orderDate = new Date(order.createdAt || order.date || order.updatedAt || Date.now());
       return orderDate >= cutoffDate;
     });
   }
   
   function updateKeyMetrics(filteredOrders, allOrders) {
     // Calculate total sales
-    const totalSales = filteredOrders.reduce((sum, order) => sum + (parseFloat(order.totalAmount) || 0), 0);
+    const totalSales = filteredOrders.reduce((sum, order) => sum + (parseFloat(order.grandTotal || order.totalAmount) || 0), 0);
     document.getElementById('total-sales').textContent = '$' + totalSales.toFixed(2);
     
     // Calculate total orders
@@ -513,18 +599,24 @@
     document.getElementById('conversion-rate').textContent = '3.2%';
     
     // Calculate trends (comparing to previous period)
+    // 将dateRange字符串转换为数字(与filterOrdersByDate保持一致)
+    const daysToSubtract = parseInt(dateRange) || 30;
+    
     const previousPeriodEnd = new Date();
-    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - dateRange);
+    previousPeriodEnd.setDate(previousPeriodEnd.getDate() - daysToSubtract);
     
     const previousPeriodStart = new Date(previousPeriodEnd);
-    previousPeriodStart.setDate(previousPeriodStart.getDate() - dateRange);
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - daysToSubtract);
     
-    const previousPeriodOrders = allOrders.filter(order => {
-      const orderDate = new Date(order.date);
+    // 按照相同的过滤条件获取上一时期的订单
+    let previousPeriodOrders = allOrders.filter(order => {
+      const orderDate = new Date(order.createdAt || order.date || order.updatedAt || Date.now());
       return orderDate >= previousPeriodStart && orderDate < previousPeriodEnd;
     });
     
-    const previousSales = previousPeriodOrders.reduce((sum, order) => sum + (parseFloat(order.totalAmount) || 0), 0);
+    console.log('Previous period orders:', previousPeriodOrders.length);
+    
+    const previousSales = previousPeriodOrders.reduce((sum, order) => sum + (parseFloat(order.grandTotal || order.totalAmount) || 0), 0);
     const previousOrderCount = previousPeriodOrders.length;
     const previousAvgOrder = previousOrderCount > 0 ? previousSales / previousOrderCount : 0;
     
@@ -558,11 +650,11 @@
     const salesByDate = {};
     
     orders.forEach(order => {
-      const date = new Date(order.date).toISOString().split('T')[0];
+      const date = new Date(order.createdAt || order.date || order.updatedAt || Date.now()).toISOString().split('T')[0];
       if (!salesByDate[date]) {
         salesByDate[date] = 0;
       }
-      salesByDate[date] += parseFloat(order.totalAmount) || 0;
+      salesByDate[date] += parseFloat(order.grandTotal || order.totalAmount || 0);
     });
     
     // Sort dates
@@ -602,121 +694,182 @@
   }
   
   function updateTopProducts(orders, products) {
-    // Count product sales
+    // Count products by sales
     const productSales = {};
     
     orders.forEach(order => {
-      // In a real app, orders would have line items
-      // This is a simplified example
-      if (order.items && Array.isArray(order.items)) {
-        order.items.forEach(item => {
-          if (!productSales[item.productId]) {
-            productSales[item.productId] = {
-              count: 0,
-              revenue: 0
-            };
-          }
-          productSales[item.productId].count += item.quantity || 1;
-          productSales[item.productId].revenue += (item.price * (item.quantity || 1)) || 0;
-        });
-      }
+      // 处理不同格式的订单项数据
+      const items = order.items || [];
+      
+      items.forEach(item => {
+        const productId = item.productId;
+        const quantity = parseInt(item.quantity) || 1;
+        const price = parseFloat(item.price) || 0;
+        const subtotal = item.subtotal || (quantity * price);
+        
+        if (!productSales[productId]) {
+          productSales[productId] = {
+            revenue: 0,
+            quantity: 0,
+            name: item.productName || 'Unknown Product'
+          };
+        }
+        
+        productSales[productId].revenue += parseFloat(subtotal);
+        productSales[productId].quantity += quantity;
+      });
     });
     
-    // Sort products by sales
-    const sortedProducts = Object.keys(productSales)
-      .map(productId => {
-        const product = products.find(p => p.id === productId) || { id: productId, name: 'Unknown Product', image: '' };
-        return {
-          id: productId,
-          name: product.name,
-          image: product.image,
-          count: productSales[productId].count,
-          revenue: productSales[productId].revenue
-        };
-      })
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5); // Get top 5
-    
-    // If we have no product sales data, generate some dummy data
-    if (sortedProducts.length === 0 && products.length > 0) {
-      sortedProducts.push(
-        ...products.slice(0, Math.min(5, products.length)).map((product, index) => ({
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          count: Math.floor(Math.random() * 50) + 10, // Random values
-          revenue: Math.floor(Math.random() * 1000) + 200 // Random values
-        }))
-      );
+    // Look up full product data
+    for (const productId in productSales) {
+      const product = products.find(p => String(p.id) === String(productId));
+      if (product) {
+        productSales[productId].name = product.name;
+      }
     }
     
-    // Update UI
-    const topProductsContainer = document.getElementById('top-products');
-    topProductsContainer.innerHTML = '';
+    // Sort products by revenue
+    const sortedProducts = Object.keys(productSales)
+      .sort((a, b) => productSales[b].revenue - productSales[a].revenue)
+      .slice(0, 5); // Get top 5
     
-    sortedProducts.forEach((product, index) => {
-      const productElement = document.createElement('div');
-      productElement.className = 'top-item';
-      productElement.innerHTML = `
-        <div class="top-item-badge">${index + 1}</div>
-        <img src="${product.image || '../../../img/product-placeholder.jpg'}" class="top-item-img" alt="${product.name}">
-        <div class="flex-grow-1">
-          <div class="fw-medium">${product.name}</div>
-          <div class="text-muted small">${product.count} sold | $${product.revenue.toFixed(2)} revenue</div>
-        </div>
-      `;
-      topProductsContainer.appendChild(productElement);
-    });
+    // Display in table
+    const tableBody = document.getElementById('top-products-body');
+    tableBody.innerHTML = '';
+    
+    if (sortedProducts.length === 0) {
+      // 如果没有产品数据，展示样本数据
+      if (products.length > 0) {
+        // 使用现有产品数据创建示例
+        const sampleProducts = products.slice(0, Math.min(5, products.length));
+        sampleProducts.forEach((product, index) => {
+          const quantity = Math.floor(Math.random() * 20) + 5;
+          const revenue = Math.floor(Math.random() * 500) + 100;
+          
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${product.name || 'Sample Product ' + (index + 1)}</td>
+            <td>${quantity}</td>
+            <td>$${revenue.toFixed(2)}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        // 完全没有产品数据
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="3" class="text-center py-3"><i class="bi bi-info-circle me-2"></i>No product sales data available</td>';
+        tableBody.appendChild(row);
+      }
+    } else {
+      // Add products
+      sortedProducts.forEach(productId => {
+        const data = productSales[productId];
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+          <td>${data.name}</td>
+          <td>${data.quantity}</td>
+          <td>$${data.revenue.toFixed(2)}</td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
   }
   
   function updateCategoryChart(orders, products, categories) {
-    // Map categories
-    const categoryMap = {};
-    categories.forEach(category => {
-      categoryMap[category.id] = category.name;
-    });
-    
     // Count sales by category
     const categorySales = {};
     
-    // In a real app, this would use order line items
-    // This is a simplified example
-    orders.forEach(order => {
-      if (order.items && Array.isArray(order.items)) {
-        order.items.forEach(item => {
-          const product = products.find(p => p.id === item.productId);
-          if (product && product.categoryId) {
-            const categoryName = categoryMap[product.categoryId] || 'Other';
-            if (!categorySales[categoryName]) {
-              categorySales[categoryName] = 0;
+    // 创建产品ID到分类名称的映射
+    const productToCategory = {};
+    products.forEach(product => {
+      let categoryName = 'Uncategorized';
+      
+      // 查找产品的分类
+      if (product.categories && Array.isArray(product.categories)) {
+        // 处理分类数组
+        for (const cat of product.categories) {
+          if (typeof cat === 'string') {
+            const category = categories.find(c => c.id === cat);
+            if (category) {
+              categoryName = category.name;
+              break;
             }
-            categorySales[categoryName] += (item.price * (item.quantity || 1)) || 0;
+          } else if (cat && cat.id) {
+            const category = categories.find(c => c.id === cat.id);
+            if (category) {
+              categoryName = category.name;
+              break;
+            }
           }
-        });
+        }
+      } else if (product.category) {
+        // 直接分类ID
+        const category = categories.find(c => c.id === product.category);
+        if (category) {
+          categoryName = category.name;
+        }
+      } else if (product.categoryId) {
+        // 另一种分类ID格式
+        const category = categories.find(c => c.id === product.categoryId);
+        if (category) {
+          categoryName = category.name;
+        }
+      } else if (product.categoryName) {
+        // 直接使用分类名称
+        categoryName = product.categoryName;
       }
+      
+      productToCategory[product.id] = categoryName;
     });
     
-    // If we have no category data, generate some dummy data
-    if (Object.keys(categorySales).length === 0) {
-      const dummyCategories = categories.length > 0 
-        ? categories.slice(0, Math.min(5, categories.length)).map(c => c.name)
-        : ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'];
-      
-      dummyCategories.forEach(category => {
-        categorySales[category] = Math.floor(Math.random() * 1000) + 200;
+    // 计算所有分类的销售数据
+    orders.forEach(order => {
+      const items = order.items || [];
+      items.forEach(item => {
+        const productCategory = productToCategory[item.productId];
+        
+        if (!categorySales[productCategory]) {
+          categorySales[productCategory] = 0;
+        }
+        
+        const quantity = parseInt(item.quantity) || 1;
+        const price = parseFloat(item.price) || 0;
+        const subtotal = parseFloat(item.subtotal) || (quantity * price);
+        
+        categorySales[productCategory] += subtotal;
       });
+    });
+    
+    // 如果没有销售数据，生成模拟数据
+    if (Object.keys(categorySales).length === 0) {
+      if (categories.length > 0) {
+        // 使用现有分类
+        categories.slice(0, Math.min(5, categories.length)).forEach(category => {
+          categorySales[category.name] = Math.floor(Math.random() * 1000) + 200;
+        });
+      } else {
+        // 创建默认分类
+        ['Category A', 'Category B', 'Category C', 'Category D', 'Category E'].forEach(category => {
+          categorySales[category] = Math.floor(Math.random() * 1000) + 200;
+        });
+      }
     }
     
-    // Sort categories
+    // 按销售额排序分类
     const sortedCategories = Object.keys(categorySales)
       .sort((a, b) => categorySales[b] - categorySales[a]);
     
     const categoryValues = sortedCategories.map(category => categorySales[category]);
     
-    // Update chart
+    // 更新图表
     categoryChart.data.labels = sortedCategories;
     categoryChart.data.datasets[0].data = categoryValues;
+    categoryChart.data.datasets[0].backgroundColor = categoryChart.data.datasets[0].backgroundColor;
     categoryChart.update();
+    
+    console.log('Category chart updated with', sortedCategories.length, 'categories');
   }
   
   function updateUsersChart(users) {
@@ -805,7 +958,18 @@
   
   function applyFilters() {
     dateRange = document.getElementById('date-range').value;
-    categoryFilter = document.getElementById('category-filter').value;
+    
+    console.log('Applying date range filter:', dateRange);
+    
+    // 更新UI以显示正在应用的过滤器
+    const filterButton = document.querySelector('.filter-section button');
+    if (filterButton) {
+      filterButton.innerHTML = '<i class="bi bi-funnel-fill me-2"></i>Filters Applied';
+      setTimeout(() => {
+        filterButton.innerHTML = '<i class="bi bi-funnel me-2"></i>Apply Filters';
+      }, 2000);
+    }
+    
     loadData();
   }
   
@@ -821,6 +985,79 @@
     } else {
       console.log('Admin permissions verified successfully');
     }
+  }
+
+  function updateProductChart(orders, products) {
+    // 计算每个产品的销售额
+    const productSales = {};
+    
+    // 首先确保所有存在于订单中的产品ID都有名称
+    const productNames = {};
+    products.forEach(product => {
+      productNames[product.id] = product.name || 'Unknown Product';
+    });
+    
+    // 计算每个产品的销售额
+    orders.forEach(order => {
+      const items = order.items || [];
+      
+      items.forEach(item => {
+        const productId = item.productId;
+        // 查找产品名称
+        let productName = productNames[productId];
+        
+        // 尝试从订单项中获取产品名称
+        if (!productName && item.productName) {
+          productName = item.productName;
+        }
+        
+        // 如果还是没有名称，使用ID作为标识
+        if (!productName) {
+          productName = `Product ${productId}`;
+        }
+        
+        if (!productSales[productName]) {
+          productSales[productName] = 0;
+        }
+        
+        const quantity = parseInt(item.quantity) || 1;
+        const price = parseFloat(item.price) || 0;
+        const subtotal = parseFloat(item.subtotal) || (quantity * price);
+        
+        productSales[productName] += subtotal;
+      });
+    });
+    
+    // 如果没有销售数据，生成模拟数据
+    if (Object.keys(productSales).length === 0) {
+      console.log('No product sales data found, generating dummy data');
+      
+      if (products.length > 0) {
+        // 使用存在的产品
+        products.slice(0, Math.min(8, products.length)).forEach(product => {
+          productSales[product.name || 'Unknown Product'] = Math.floor(Math.random() * 1000) + 100;
+        });
+      } else {
+        // 使用默认产品名
+        ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'].forEach(product => {
+          productSales[product] = Math.floor(Math.random() * 1000) + 100;
+        });
+      }
+    }
+    
+    // 按销售额排序
+    const sortedProducts = Object.keys(productSales)
+      .sort((a, b) => productSales[b] - productSales[a])
+      .slice(0, 10); // 只显示前10个产品
+    
+    const productValues = sortedProducts.map(product => productSales[product]);
+    
+    // 更新图表
+    productChart.data.labels = sortedProducts;
+    productChart.data.datasets[0].data = productValues;
+    productChart.update();
+    
+    console.log('Product chart updated with', sortedProducts.length, 'products');
   }
 </script>
 </body>
