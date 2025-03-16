@@ -70,6 +70,36 @@
       </div>
     </div>
     <div class="card-body">
+      <!-- Add filter section -->
+      <div class="mb-4 p-3 border rounded bg-light">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="filter-name" class="form-label">Designer Name</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control" id="filter-name" placeholder="Filter by designer name">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="filter-specialty" class="form-label">Specialty</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-tools"></i></span>
+              <input type="text" class="form-control" id="filter-specialty" placeholder="Filter by specialty">
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+              <i class="bi bi-x-circle me-1"></i>Clear
+            </button>
+            <button class="btn btn-primary" onclick="applyFilters()">
+              <i class="bi bi-search me-1"></i>Search
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
@@ -193,7 +223,27 @@
       return; // Exit the function early if tableBody doesn't exist
     }
     
-    tableBody.innerHTML = designers.map(designer => {
+    // Filter designers based on filters
+    const filteredDesigners = filterDesigners(designers);
+    
+    if (filteredDesigners.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center py-4">
+            <div class="py-5">
+              <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3">No designers found matching your search criteria</p>
+              <button class="btn btn-outline-secondary btn-sm mt-2" onclick="resetFilters()">
+                Clear Filters
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    tableBody.innerHTML = filteredDesigners.map(designer => {
       const designerProducts = products.filter(p => p.designerId === designer.id);
       return `
         <tr>
@@ -352,17 +402,107 @@
   }
   
   function checkAdminPermissions() {
-    // Check if user is logged in and is admin
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Checking admin permissions for user:', currentUser);
     if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      // Redirect to login if not admin
-      console.log('User is not admin, redirecting...');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
       alert('You must be logged in as an administrator to access this page.');
-    } else {
-      console.log('Admin permissions verified successfully');
     }
+  }
+  
+  // Current filter values
+  let currentFilters = {
+    name: '',
+    specialty: ''
+  };
+  
+  // Filter designers function
+  function filterDesigners(designers) {
+    if (!designers || !designers.length) return [];
+    
+    return designers.filter(designer => {
+      // Filter by name
+      if (currentFilters.name && !designer.name.toLowerCase().includes(currentFilters.name.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by specialty
+      if (currentFilters.specialty && !designer.specialty.toLowerCase().includes(currentFilters.specialty.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+  }
+  
+  // Apply filters
+  function applyFilters() {
+    currentFilters = {
+      name: document.getElementById('filter-name').value.trim(),
+      specialty: document.getElementById('filter-specialty').value.trim()
+    };
+    
+    loadDesigners();
+    
+    // Show which filters are applied
+    const appliedFilters = Object.entries(currentFilters)
+      .filter(([_, value]) => value)
+      .map(([key, _]) => key)
+      .join(', ');
+      
+    if (appliedFilters) {
+      showToast(`Filters applied: ${appliedFilters}`, 'info');
+    }
+  }
+  
+  // Reset filters
+  function resetFilters() {
+    document.getElementById('filter-name').value = '';
+    document.getElementById('filter-specialty').value = '';
+    
+    currentFilters = {
+      name: '',
+      specialty: ''
+    };
+    
+    loadDesigners();
+    showToast('Filters cleared', 'info');
+  }
+  
+  // Show toast notification
+  function showToast(message, type = 'success') {
+    const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+  
+  // Create toast container if doesn't exist
+  function createToastContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    document.body.appendChild(container);
+    return container;
   }
 </script>
 </body>
