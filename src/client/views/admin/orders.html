@@ -27,6 +27,86 @@
     .order-id-text:hover {
       text-decoration: underline;
     }
+    
+    /* Management UI styles */
+    .admin-card {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+      border: none;
+    }
+    
+    .admin-card .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #eaecef;
+      padding: 15px 20px;
+    }
+    
+    .admin-card .card-body {
+      padding: 20px;
+    }
+    
+    .filter-section {
+      background-color: #f8f9fa;
+      border: 1px solid #eaecef !important;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 20px !important;
+    }
+    
+    .filter-toggle {
+      cursor: pointer;
+      color: #6c757d;
+    }
+    
+    .filter-toggle:hover {
+      color: #495057;
+    }
+    
+    .admin-table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .admin-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      border-top: none;
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px 15px;
+    }
+    
+    .admin-table td {
+      padding: 12px 15px;
+      vertical-align: middle;
+    }
+    
+    .admin-table tbody tr:hover {
+      background-color: #f1f3f5;
+    }
+    
+    .action-buttons {
+      white-space: nowrap;
+    }
+    
+    .action-button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      margin-right: 0.25rem;
+    }
+    
+    .badge-status {
+      padding: 0.5em 0.75em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    
+    @media (max-width: 768px) {
+      .filter-section .row > div {
+        margin-bottom: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -46,71 +126,87 @@
     </div>
   </div>
 
-  <div class="card mb-4">
-    <div class="card-header">
+  <div class="card admin-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Orders List</h5>
+      <span class="filter-toggle" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+        <i class="bi bi-funnel me-1"></i>Filters <i class="bi bi-chevron-up"></i>
+      </span>
     </div>
     <div class="card-body">
       <!-- Add filter section -->
-      <div class="filter-section mb-4 p-3 border rounded bg-light">
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label for="filter-id" class="form-label">Order ID</label>
-            <input type="text" class="form-control" id="filter-id" placeholder="Filter by Order ID">
+      <div class="collapse show" id="filterCollapse">
+        <div class="filter-section mb-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label for="filter-id" class="form-label">Order ID</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
+                <input type="text" class="form-control" id="filter-id" placeholder="Filter by Order ID">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label for="filter-user" class="form-label">Customer</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="filter-user" placeholder="Filter by customer name">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label for="filter-status" class="form-label">Status</label>
+              <select class="form-select" id="filter-status">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="filter-date-from" class="form-label">Date From</label>
+              <input type="date" class="form-control" id="filter-date-from">
+            </div>
+            <div class="col-md-2">
+              <label for="filter-date-to" class="form-label">Date To</label>
+              <input type="date" class="form-control" id="filter-date-to">
+            </div>
           </div>
-          <div class="col-md-3">
-            <label for="filter-user" class="form-label">Customer</label>
-            <input type="text" class="form-control" id="filter-user" placeholder="Filter by customer name">
-          </div>
-          <div class="col-md-2">
-            <label for="filter-status" class="form-label">Status</label>
-            <select class="form-select" id="filter-status">
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div class="col-md-2">
-            <label for="filter-date" class="form-label">Date From</label>
-            <input type="date" class="form-control" id="filter-date-from">
-          </div>
-          <div class="col-md-2">
-            <label for="filter-date" class="form-label">Date To</label>
-            <input type="date" class="form-control" id="filter-date-to">
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-12 d-flex justify-content-end">
-            <button class="btn btn-secondary me-2" onclick="resetFilters()">
-              <i class="bi bi-x-circle me-1"></i>Clear Filters
-            </button>
-            <button class="btn btn-primary" onclick="applyFilters()">
-              <i class="bi bi-funnel me-1"></i>Apply Filters
-            </button>
+          <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+                <i class="bi bi-x-circle me-1"></i>Clear
+              </button>
+              <button class="btn btn-primary" onclick="applyFilters()">
+                <i class="bi bi-search me-1"></i>Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
       
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th class="order-id-column">Order ID</th>
-            <th>User</th>
-            <th>Status</th>
-            <th>Total Amount</th>
-            <th>Order Date</th>
-            <th class="text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="order-table-body">
-          <!-- Orders data will be loaded here -->
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table admin-table table-hover">
+          <thead>
+            <tr>
+              <th class="order-id-column">Order ID</th>
+              <th>User</th>
+              <th>Status</th>
+              <th>Total Amount</th>
+              <th>Order Date</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="order-table-body">
+            <!-- Orders data will be loaded here -->
+          </tbody>
+        </table>
+      </div>
       <div id="no-orders-message" class="text-center py-5 d-none">
-        <p class="text-muted">No orders found</p>
+        <div class="py-5">
+          <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+          <p class="text-muted mt-3">No orders found</p>
+        </div>
       </div>
     </div>
   </div>
@@ -128,6 +224,16 @@
     loadFooter();
     checkAdminPermissions();
     loadOrders();
+    
+    // Setup for filter collapse toggle icon
+    document.querySelector('.filter-toggle').addEventListener('click', function() {
+      const icon = this.querySelector('.bi-chevron-up, .bi-chevron-down');
+      if (icon.classList.contains('bi-chevron-up')) {
+        icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      } else {
+        icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      }
+    });
   });
 
   function loadOrders() {
@@ -147,8 +253,10 @@
 
     if (filteredOrders.length === 0) {
       noOrdersMessage.classList.remove('d-none');
+      document.querySelector('.table-responsive').classList.add('d-none');
     } else {
       noOrdersMessage.classList.add('d-none');
+      document.querySelector('.table-responsive').classList.remove('d-none');
       
       filteredOrders.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
       
@@ -157,21 +265,27 @@
         const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
         
         let statusBadgeClass = 'bg-secondary';
+        let statusIcon = '';
         switch(order.status) {
           case 'pending':
             statusBadgeClass = 'bg-warning text-dark';
+            statusIcon = '<i class="bi bi-hourglass me-1"></i>';
             break;
           case 'processing':
             statusBadgeClass = 'bg-info text-dark';
+            statusIcon = '<i class="bi bi-gear me-1"></i>';
             break;
           case 'shipped':
             statusBadgeClass = 'bg-primary';
+            statusIcon = '<i class="bi bi-truck me-1"></i>';
             break;
           case 'delivered':
             statusBadgeClass = 'bg-success';
+            statusIcon = '<i class="bi bi-check-circle me-1"></i>';
             break;
           case 'cancelled':
             statusBadgeClass = 'bg-danger';
+            statusIcon = '<i class="bi bi-x-circle me-1"></i>';
             break;
         }
         
@@ -187,15 +301,25 @@
           <td class="order-id-column">
             <span class="order-id-text" title="${order.id}" onclick="copyToClipboard('${order.id}')">${order.id}</span>
           </td>
-          <td>${userName}</td>
-          <td><span class="badge ${statusBadgeClass}">${order.status || 'unknown'}</span></td>
-          <td>$${totalAmount}</td>
-          <td>${formattedDate}</td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-primary" onclick="viewOrderDetails('${order.id}')">
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-person-circle me-2 text-secondary"></i>
+              ${userName}
+            </div>
+          </td>
+          <td><span class="badge badge-status ${statusBadgeClass}">${statusIcon}${order.status || 'unknown'}</span></td>
+          <td><strong>$${totalAmount}</strong></td>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-calendar-date me-2 text-secondary"></i>
+              ${formattedDate}
+            </div>
+          </td>
+          <td class="text-center action-buttons">
+            <button class="btn btn-sm btn-primary action-button" onclick="viewOrderDetails('${order.id}')">
               <i class="bi bi-eye me-1"></i>View
             </button>
-            <button class="btn btn-sm btn-danger" onclick="deleteOrder('${order.id}')">
+            <button class="btn btn-sm btn-danger action-button" onclick="deleteOrder('${order.id}')">
               <i class="bi bi-trash me-1"></i>Delete
             </button>
           </td>
