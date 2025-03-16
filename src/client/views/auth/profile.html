@@ -786,7 +786,15 @@
     if (currentUser) {
       // Format the birthday for display if it exists
       if (currentUser.birthday) {
-        const birthdayDate = new Date(currentUser.birthday);
+        // 修复日期显示问题：使用日期字符串分割，避免时区影响
+        const birthdayParts = currentUser.birthday.split('-');
+        // 注意：这里月份参数是从0开始的，所以要减1
+        const birthdayDate = new Date(
+          parseInt(birthdayParts[0]), // 年
+          parseInt(birthdayParts[1]) - 1, // 月（减1，因为JavaScript月份从0开始）
+          parseInt(birthdayParts[2]) // 日
+        );
+        
         const formattedBirthday = birthdayDate.toLocaleDateString('en-US', {
           year: 'numeric', 
           month: 'long', 
