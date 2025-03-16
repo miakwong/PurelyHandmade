@@ -13,9 +13,14 @@
   
   <style>
     /* Custom dashboard styles */
+    body {
+      background-color: var(--background-color);
+    }
+    
     .dashboard-card {
       transition: transform 0.3s, box-shadow 0.3s;
       height: 100%;
+      background-color: var(--card-background);
     }
     
     .dashboard-card:hover {
@@ -31,6 +36,7 @@
     
     .stats-card {
       border-left: 4px solid var(--accent-color);
+      background-color: var(--card-background);
     }
     
     /* Style for action buttons */
@@ -175,6 +181,30 @@
           <h4>Category Management</h4>
           <p>Organize products with categories and tags</p>
           <a href="categories.html" class="btn btn-primary w-100">Manage Categories</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Reports Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-bar-chart dashboard-icon"></i>
+          <h4>Reports & Analytics</h4>
+          <p>View sales reports, user statistics and analytics</p>
+          <a href="reports.html" class="btn btn-primary w-100">View Reports</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- New Settings Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card dashboard-card">
+        <div class="card-body text-center p-4">
+          <i class="bi bi-gear dashboard-icon"></i>
+          <h4>Website Settings</h4>
+          <p>Configure website options, preferences and features</p>
+          <a href="settings.html" class="btn btn-primary w-100">Manage Settings</a>
         </div>
       </div>
     </div>
