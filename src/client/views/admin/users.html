@@ -313,134 +313,156 @@
 <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content border-0 shadow admin-modal">
-      <div class="modal-header">
-        <h5 class="modal-title" id="userModalLabel">Add User</h5>
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="userModalLabel">Edit User</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body p-0">
         <form id="user-form">
           <input type="hidden" id="user-id">
           
-          <div class="text-center mb-4">
-            <div class="user-preview mb-3">
+          <!-- User Profile Header -->
+          <div class="bg-light p-4 text-center border-bottom">
+            <div class="user-preview mb-3 mx-auto">
               <img id="user-img-preview" src="../../../img/user-placeholder.png" alt="User preview">
             </div>
-            <div class="d-flex justify-content-center">
-              <div style="max-width: 250px;">
-                <input type="file" class="admin-form-control mb-2" id="user-image-file" accept="image/*">
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetUserImage()">
-                  <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Image
-                </button>
-              </div>
-            </div>
+            <h4 id="user-full-name" class="mb-1">User Name</h4>
+            <p id="user-email-display" class="text-muted mb-0">user@example.com</p>
           </div>
           
-          <div class="row">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-first-name" class="admin-form-label">First Name<span class="text-danger">*</span></label>
-                <input type="text" class="admin-form-control" id="user-first-name" required placeholder="Enter first name">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-last-name" class="admin-form-label">Last Name<span class="text-danger">*</span></label>
-                <input type="text" class="admin-form-control" id="user-last-name" required placeholder="Enter last name">
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-email" class="admin-form-label">Email<span class="text-danger">*</span></label>
-                <input type="email" class="admin-form-control" id="user-email" required placeholder="Enter email address">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-username" class="admin-form-label">Username<span class="text-danger">*</span></label>
-                <input type="text" class="admin-form-control" id="user-username" required placeholder="Enter username">
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-birthday" class="admin-form-label">Birthday</label>
-                <input type="date" class="admin-form-control" id="user-birthday" placeholder="Select birthday">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-gender" class="admin-form-label">Gender</label>
-                <select class="admin-form-control" id="user-gender">
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+          <div class="row g-0">
+            <!-- Admin Controls Column -->
+            <div class="col-md-6 border-end p-4">
+              <h5 class="mb-4 pb-2 border-bottom text-primary">
+                <i class="bi bi-shield-lock me-2"></i>Admin Controls
+              </h5>
+              
+              <!-- Account Permissions -->
+              <div class="admin-form-group mb-4">
+                <label for="user-role" class="admin-form-label fw-bold">Account Type<span class="text-danger">*</span></label>
+                <select class="admin-form-control form-select" id="user-role" required>
+                  <option value="user">Standard User</option>
+                  <option value="admin">Administrator</option>
                 </select>
+                <small class="form-text">Administrator accounts have full access to the admin panel</small>
               </div>
-            </div>
-          </div>
-          
-          <div class="row" id="password-fields">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-password" class="admin-form-label">Password<span class="text-danger password-required">*</span></label>
-                <input type="password" class="admin-form-control" id="user-password" placeholder="Enter password">
-                <div class="form-text">Leave blank to keep current password (when editing)</div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-password-confirm" class="admin-form-label">Confirm Password<span class="text-danger password-required">*</span></label>
-                <input type="password" class="admin-form-control" id="user-password-confirm" placeholder="Confirm password">
-              </div>
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-role" class="admin-form-label">Role<span class="text-danger">*</span></label>
-                <select class="admin-form-control" id="user-role" required>
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
+              
+              <div class="admin-form-group mb-4">
+                <label for="user-status" class="admin-form-label fw-bold">Account Status<span class="text-danger">*</span></label>
+                <select class="admin-form-control form-select" id="user-status" required>
+                  <option value="active">Active (Unlocked)</option>
+                  <option value="inactive">Inactive (Locked)</option>
                 </select>
+                <small class="form-text text-muted">Inactive accounts cannot log in to the system</small>
               </div>
-            </div>
-            <div class="col-md-6">
-              <div class="admin-form-group">
-                <label for="user-status" class="admin-form-label">Status<span class="text-danger">*</span></label>
-                <select class="admin-form-control" id="user-status" required>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+              
+              <div class="admin-form-group mb-4">
+                <label for="user-can-order" class="admin-form-label fw-bold">Ordering Permission<span class="text-danger">*</span></label>
+                <select class="admin-form-control form-select" id="user-can-order" required>
+                  <option value="true">Allowed</option>
+                  <option value="false">Blocked</option>
                 </select>
+                <small class="form-text text-muted">Blocked users cannot place new orders</small>
+              </div>
+              
+              <!-- Password Reset -->
+              <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Password Reset</h6>
+                </div>
+                <div class="card-body">
+                  <div class="admin-form-group mb-3">
+                    <label for="user-password" class="admin-form-label">New Password</label>
+                    <input type="password" class="admin-form-control" id="user-password" placeholder="Enter new password to reset">
+                  </div>
+                  <div class="admin-form-group">
+                    <label for="user-password-confirm" class="admin-form-label">Confirm Password</label>
+                    <input type="password" class="admin-form-control" id="user-password-confirm" placeholder="Confirm new password">
+                  </div>
+                  <div class="form-text mt-2">Only fill this section when a password reset is needed</div>
+                </div>
+              </div>
+              
+              <!-- Admin Notes -->
+              <div class="admin-form-group">
+                <label for="user-bio" class="admin-form-label fw-bold">Admin Notes</label>
+                <textarea class="admin-form-control" id="user-bio" rows="3" placeholder="Private notes visible to administrators only..."></textarea>
               </div>
             </div>
-          </div>
-          
-          <div class="admin-form-group">
-            <label for="user-bio" class="admin-form-label">Bio</label>
-            <textarea class="admin-form-control" id="user-bio" rows="3" placeholder="Short bio about the user..."></textarea>
-          </div>
-          
-          <div class="row">
-            <div class="col-12">
-              <div class="admin-form-group">
-                <label for="user-phone" class="admin-form-label">Phone Number</label>
-                <input type="tel" class="admin-form-control" id="user-phone" placeholder="Enter phone number">
+            
+            <!-- User Information Column (Read-only) -->
+            <div class="col-md-6 p-4 bg-light bg-opacity-50">
+              <h5 class="mb-4 pb-2 border-bottom text-secondary">
+                <i class="bi bi-person-vcard me-2"></i>User Information
+                <span class="badge bg-secondary ms-2 fs-6">Read-only</span>
+              </h5>
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="admin-form-group">
+                    <label class="admin-form-label small text-muted">First Name</label>
+                    <div class="form-control bg-white bg-opacity-75" id="user-first-name-display">-</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="admin-form-group">
+                    <label class="admin-form-label small text-muted">Last Name</label>
+                    <div class="form-control bg-white bg-opacity-75" id="user-last-name-display">-</div>
+                  </div>
+                </div>
               </div>
+              
+              <div class="admin-form-group mt-3">
+                <label class="admin-form-label small text-muted">Username</label>
+                <div class="form-control bg-white bg-opacity-75" id="user-username-display">-</div>
+              </div>
+              
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <div class="admin-form-group">
+                    <label class="admin-form-label small text-muted">Birthday</label>
+                    <div class="form-control bg-white bg-opacity-75" id="user-birthday-display">-</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="admin-form-group">
+                    <label class="admin-form-label small text-muted">Gender</label>
+                    <div class="form-control bg-white bg-opacity-75" id="user-gender-display">-</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="admin-form-group mt-3">
+                <label class="admin-form-label small text-muted">Phone Number</label>
+                <div class="form-control bg-white bg-opacity-75" id="user-phone-display">-</div>
+              </div>
+              
+              <div class="mt-4">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Personal information can only be modified by the user themselves through their profile page
+                </div>
+              </div>
+              
+              <!-- Hidden fields to store the values -->
+              <input type="hidden" id="user-first-name">
+              <input type="hidden" id="user-last-name">
+              <input type="hidden" id="user-email">
+              <input type="hidden" id="user-username">
+              <input type="hidden" id="user-birthday">
+              <input type="hidden" id="user-gender">
+              <input type="hidden" id="user-phone">
+              <input type="hidden" id="user-image-file">
             </div>
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="admin-btn admin-btn-danger" data-bs-dismiss="modal">Cancel</button>
+      <div class="modal-footer bg-light">
+        <button type="button" class="admin-btn admin-btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
         <button type="button" class="admin-btn admin-btn-primary" onclick="saveUser()">
-          <i class="bi bi-check2 me-1"></i>Save User
+          <i class="bi bi-check2-circle me-1"></i>Save Changes
         </button>
       </div>
     </div>
@@ -536,7 +558,8 @@
         gender: user.gender || '',
         createdAt: user.createdAt || user.created_at || new Date().toISOString(),
         updatedAt: user.updatedAt || user.updated_at || user.createdAt || new Date().toISOString(),
-        lastLogin: user.lastLogin || user.last_login || null
+        lastLogin: user.lastLogin || user.last_login || null,
+        canOrder: user.canOrder !== undefined ? user.canOrder : true // 默认允许下单
       };
       
       // 确保console中可见规范化后的用户数据，便于调试
@@ -598,6 +621,14 @@
           statusBadge = '<span class="badge user-status-active">Active</span>';
         }
         
+        // 处理canOrder状态
+        let orderBadge;
+        if (user.canOrder === false) {
+          orderBadge = '<span class="badge bg-danger ms-1">No Orders</span>';
+        } else {
+          orderBadge = '<span class="badge bg-success ms-1">Can Order</span>';
+        }
+        
         // Format dates
         const joinedDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown';
         const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never';
@@ -617,7 +648,7 @@
           </td>
           <td>${user.email || 'N/A'}</td>
           <td>${roleBadge}</td>
-          <td>${statusBadge}</td>
+          <td>${statusBadge} ${orderBadge}</td>
           <td>${joinedDate}</td>
           <td>${lastLogin}</td>
           <td class="text-center">
@@ -716,23 +747,55 @@
   }
 
   function resetUserForm() {
-    // Reset form to default values
-    document.getElementById('user-form').reset();
-    document.getElementById('userModalLabel').textContent = 'Add User';
-    document.getElementById('user-id').value = '';
-    document.getElementById('user-img-preview').src = '../../../img/user-placeholder.png';
+    // Show an informational modal instead of the actual add user form
+    // since we're no longer allowing adding users directly
+    const modalContent = `
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title">User Registration Information</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-4">
+              <i class="bi bi-info-circle-fill text-info" style="font-size: 4rem;"></i>
+            </div>
+            <p>Users must register themselves through the registration page. This approach ensures:</p>
+            <ul>
+              <li>Users create their own secure passwords</li>
+              <li>Personal information is entered directly by users</li>
+              <li>Privacy requirements are properly maintained</li>
+            </ul>
+            <div class="alert alert-light border mt-3">
+              <p class="mb-1"><strong>Registration URL:</strong></p>
+              <code>http://localhost:8000/src/client/views/auth/register.html</code>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    `;
     
-    // Show password fields as required for new users
-    document.querySelectorAll('.password-required').forEach(el => el.classList.remove('d-none'));
+    // Create a temporary modal
+    const tempModal = document.createElement('div');
+    tempModal.className = 'modal fade';
+    tempModal.id = 'infoModal';
+    tempModal.setAttribute('tabindex', '-1');
+    tempModal.innerHTML = modalContent;
     
-    // Set default status to active
-    document.getElementById('user-status').value = 'active';
-    
-    // Set default role to user
-    document.getElementById('user-role').value = 'user';
+    // Add to body
+    document.body.appendChild(tempModal);
     
     // Show the modal
-    new bootstrap.Modal(document.getElementById('userModal')).show();
+    const modal = new bootstrap.Modal(tempModal);
+    modal.show();
+    
+    // Remove when hidden
+    tempModal.addEventListener('hidden.bs.modal', function() {
+      document.body.removeChild(tempModal);
+    });
   }
   
   function resetUserImage() {
@@ -747,10 +810,11 @@
     
     // 添加更多日志信息便于调试
     console.log('所有用户数据:', users);
-    console.log('正在查找用户ID:', userId);
+    console.log('正在查找用户ID:', userId, '类型:', typeof userId);
+    console.log('所有用户ID及类型:', users.map(u => ({id: u.id, type: typeof u.id})));
     
-    // 通过ID查找用户
-    let user = users.find(u => u.id === userId || u.id === parseInt(userId));
+    // 通过ID查找用户 - 使用toString确保类型一致
+    let user = users.find(u => u.id.toString() === userId.toString());
     
     // 如果通过ID没找到，尝试通过email查找
     if (!user) {
@@ -808,31 +872,66 @@
     if (user) {
       console.log('找到用户:', user);
       
-      // Hide password required indicators for edit mode
-      document.querySelectorAll('.password-required').forEach(el => el.classList.add('d-none'));
-      
       // 标准化单个用户数据以确保所有字段一致
       const normalizedUser = normalizeUserData([user])[0];
       console.log('标准化后的用户数据:', normalizedUser);
       
-      // Populate form with user data
+      // Update modal title
       document.getElementById('userModalLabel').textContent = 'Edit User';
+      
+      // Populate user profile header
+      document.getElementById('user-full-name').textContent = 
+        normalizedUser.firstName && normalizedUser.lastName 
+          ? `${normalizedUser.firstName} ${normalizedUser.lastName}` 
+          : normalizedUser.name || normalizedUser.username || 'User';
+      document.getElementById('user-email-display').textContent = normalizedUser.email || 'No email provided';
+      
+      // Populate hidden fields for form submission
       document.getElementById('user-id').value = normalizedUser.id;
       document.getElementById('user-first-name').value = normalizedUser.firstName || '';
       document.getElementById('user-last-name').value = normalizedUser.lastName || '';
       document.getElementById('user-email').value = normalizedUser.email || '';
       document.getElementById('user-username').value = normalizedUser.username || '';
+      document.getElementById('user-birthday').value = normalizedUser.birthday || '';
+      document.getElementById('user-gender').value = normalizedUser.gender || '';
+      document.getElementById('user-phone').value = normalizedUser.phone || '';
+      
+      // Populate read-only display fields
+      document.getElementById('user-first-name-display').textContent = normalizedUser.firstName || 'Not provided';
+      document.getElementById('user-last-name-display').textContent = normalizedUser.lastName || 'Not provided';
+      document.getElementById('user-username-display').textContent = normalizedUser.username || 'Not provided';
+      
+      // Format and display birthday if available
+      if (normalizedUser.birthday) {
+        const birthday = new Date(normalizedUser.birthday);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('user-birthday-display').textContent = birthday.toLocaleDateString(undefined, options);
+      } else {
+        document.getElementById('user-birthday-display').textContent = 'Not provided';
+      }
+      
+      // Format and display gender
+      let displayGender = 'Not provided';
+      if (normalizedUser.gender) {
+        if (normalizedUser.gender === 'male') displayGender = 'Male';
+        else if (normalizedUser.gender === 'female') displayGender = 'Female';
+        else if (normalizedUser.gender === 'other') displayGender = 'Other';
+        else displayGender = normalizedUser.gender;
+      }
+      document.getElementById('user-gender-display').textContent = displayGender;
+      
+      // Display phone number
+      document.getElementById('user-phone-display').textContent = normalizedUser.phone || 'Not provided';
+      
+      // Populate editable admin fields
       document.getElementById('user-password').value = '';
       document.getElementById('user-password-confirm').value = '';
       document.getElementById('user-role').value = normalizedUser.role;
       document.getElementById('user-status').value = normalizedUser.status || 'active';
       document.getElementById('user-bio').value = normalizedUser.bio || '';
-      document.getElementById('user-phone').value = normalizedUser.phone || '';
-      document.getElementById('user-birthday').value = normalizedUser.birthday || '';
-      document.getElementById('user-gender').value = normalizedUser.gender || '';
       
-      // Reset file input
-      document.getElementById('user-image-file').value = '';
+      // Initialize canOrder field, default to true (allowed)
+      document.getElementById('user-can-order').value = normalizedUser.canOrder !== false ? 'true' : 'false';
       
       // Update image preview
       const imgPreview = document.getElementById('user-img-preview');
@@ -851,49 +950,33 @@
   }
 
   function saveUser() {
-    // Get form values
+    // Get hidden form values
     const userId = document.getElementById('user-id').value;
-    const firstName = document.getElementById('user-first-name').value.trim();
-    const lastName = document.getElementById('user-last-name').value.trim();
-    const email = document.getElementById('user-email').value.trim();
-    const username = document.getElementById('user-username').value.trim();
-    const password = document.getElementById('user-password').value;
-    const passwordConfirm = document.getElementById('user-password-confirm').value;
+    
+    // Get editable admin control values
     const role = document.getElementById('user-role').value;
     const status = document.getElementById('user-status').value;
+    const canOrder = document.getElementById('user-can-order').value === 'true';
+    const password = document.getElementById('user-password').value;
+    const passwordConfirm = document.getElementById('user-password-confirm').value;
     const bio = document.getElementById('user-bio').value.trim();
-    const phone = document.getElementById('user-phone').value.trim();
+    
+    // Get user information from hidden fields
+    const firstName = document.getElementById('user-first-name').value;
+    const lastName = document.getElementById('user-last-name').value;
+    const email = document.getElementById('user-email').value;
+    const username = document.getElementById('user-username').value;
     const birthday = document.getElementById('user-birthday').value;
     const gender = document.getElementById('user-gender').value;
+    const phone = document.getElementById('user-phone').value;
     
-    // Validation
-    if (!firstName) {
-      showToast('First Name is required', 'danger');
+    // 验证逻辑
+    if (!userId) {
+      showToast('Cannot add new users through the admin interface. Users must register themselves.', 'danger');
       return;
     }
     
-    if (!lastName) {
-      showToast('Last Name is required', 'danger');
-      return;
-    }
-    
-    if (!email) {
-      showToast('Email is required', 'danger');
-      return;
-    }
-    
-    if (!isValidEmail(email)) {
-      showToast('Please enter a valid email address', 'danger');
-      return;
-    }
-    
-    // For new users, password is required
-    if (!userId && !password) {
-      showToast('Password is required for new users', 'danger');
-      return;
-    }
-    
-    // If password is provided, validate it
+    // Validate password if provided
     if (password) {
       if (password.length < 6) {
         showToast('Password must be at least 6 characters', 'danger');
@@ -906,69 +989,96 @@
       }
     }
     
-    // Process avatar if one is selected
-    const imageFile = document.getElementById('user-image-file').files[0];
-    if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        saveUserData(userId, firstName, lastName, email, username, password, role, status, bio, phone, birthday, gender, e.target.result);
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      // If editing and no new image is selected, keep the existing one
-      if (userId) {
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.id === userId);
-        saveUserData(userId, firstName, lastName, email, username, password, role, status, bio, phone, birthday, gender, user ? user.avatar : null);
-      } else {
-        saveUserData(userId, firstName, lastName, email, username, password, role, status, bio, phone, birthday, gender, null);
-      }
+    // 获取现有用户数据
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    
+    // 添加debug日志
+    console.log('正在保存用户, ID:', userId, '类型:', typeof userId);
+    console.log('所有用户ID:', users.map(u => ({id: u.id, type: typeof u.id})));
+    
+    // 使用toString()方法确保ID比较正确
+    const currentUser = users.find(u => u.id.toString() === userId.toString());
+    
+    if (!currentUser) {
+      showToast('User not found', 'danger');
+      console.error('未能找到ID为', userId, '的用户');
+      return;
     }
+    
+    // 使用管理功能修改用户状态和权限
+    saveUserData(
+      userId, 
+      firstName, 
+      lastName, 
+      email, 
+      username, 
+      password, 
+      role, 
+      status, 
+      bio, 
+      phone, 
+      birthday, 
+      gender, 
+      currentUser.avatar,
+      canOrder
+    );
   }
   
-  function saveUserData(userId, firstName, lastName, email, username, password, role, status, bio, phone, birthday, gender, avatar) {
+  function saveUserData(userId, firstName, lastName, email, username, password, role, status, bio, phone, birthday, gender, avatar, canOrder) {
     // Get existing users
     let users = JSON.parse(localStorage.getItem('users') || '[]');
     
     // 标准化所有用户数据
     users = normalizeUserData(users);
     
-    // Check if email already exists (for new users or when changing email)
-    const emailExists = users.some(u => u.email === email && u.id !== userId);
-    if (emailExists) {
-      showToast('Email already in use', 'danger');
-      return;
-    }
-    
-    // Check if username already exists
-    const usernameExists = users.some(u => u.username === username && u.id !== userId);
-    if (usernameExists) {
-      showToast('Username already in use', 'danger');
-      return;
-    }
-    
-    // 组合名称为完整名称
-    const name = `${firstName} ${lastName}`.trim();
+    console.log('saveUserData接收到的ID:', userId, '类型:', typeof userId);
     
     if (userId) {
-      // Update existing user
-      const index = users.findIndex(u => u.id === userId);
+      // Update existing user - 使用toString确保ID类型一致
+      const index = users.findIndex(u => u.id.toString() === userId.toString());
       if (index !== -1) {
+        // 跟踪更改的字段
+        const changes = [];
+        const originalUser = users[index];
+        
+        // 检查各个字段是否有变化
+        if (originalUser.role !== role) {
+          changes.push(`role to ${role === 'admin' ? 'Administrator' : 'Standard User'}`);
+        }
+        
+        if (originalUser.status !== status) {
+          changes.push(`status to ${status === 'active' ? 'Active' : 'Inactive'}`);
+        }
+        
+        // 检查canOrder是否改变（需要特殊处理布尔值）
+        const originalCanOrder = originalUser.canOrder !== false;
+        if (originalCanOrder !== canOrder) {
+          changes.push(`ordering permission to ${canOrder ? 'Allowed' : 'Blocked'}`);
+        }
+        
+        if (password) {
+          changes.push('password');
+        }
+        
+        // 检测admin备注是否变化
+        if ((originalUser.bio || '') !== bio) {
+          if (!originalUser.bio && bio) {
+            changes.push('added admin notes');
+          } else if (originalUser.bio && !bio) {
+            changes.push('removed admin notes');
+          } else {
+            changes.push('updated admin notes');
+          }
+        }
+        
+        // 只更新管理员可以修改的字段
         const updatedUser = {
           ...users[index],
-          firstName,
-          lastName,
-          name,            // 保留name字段以兼容旧代码
-          email,
-          username,
           role,
           isAdmin: role === 'admin', // Update isAdmin property based on role for backward compatibility
           status,
           bio,
-          phone,
-          birthday,
-          gender,
-          avatar: avatar || users[index].avatar,
+          canOrder: canOrder !== undefined ? canOrder : users[index].canOrder || true, // 默认为true如果之前未设置
           updatedAt: new Date().toISOString()
         };
         
@@ -978,30 +1088,35 @@
         }
         
         users[index] = updatedUser;
-        showToast('User updated successfully', 'success');
+        
+        // 根据变更生成成功消息
+        let successMessage = '';
+        
+        // 获取用户显示名称
+        const userDisplayName = originalUser.firstName && originalUser.lastName 
+          ? `${originalUser.firstName} ${originalUser.lastName}`
+          : (originalUser.username || originalUser.email || `User #${originalUser.id}`);
+        
+        if (changes.length === 0) {
+          successMessage = `No changes were made to ${userDisplayName}`;
+        } else if (changes.length === 1) {
+          successMessage = `Updated ${userDisplayName}'s ${changes[0]} successfully`;
+        } else {
+          // 格式化多个变更
+          const lastChange = changes.pop();
+          successMessage = `Updated ${userDisplayName}'s ${changes.join(', ')} and ${lastChange} successfully`;
+        }
+        
+        showToast(successMessage, 'success');
+      } else {
+        console.error('saveUserData中无法找到用户索引, ID:', userId);
+        showToast('User not found during update', 'danger');
+        return;
       }
     } else {
-      // Create new user
-      users.push({
-        id: Date.now().toString(),
-        firstName,
-        lastName,
-        name,            // 保留name字段以兼容旧代码
-        email,
-        username,
-        password,
-        role,
-        isAdmin: role === 'admin', // Set isAdmin property based on role for backward compatibility
-        status,
-        bio,
-        phone,
-        birthday,
-        gender,
-        avatar,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-      showToast('User created successfully', 'success');
+      // 管理员界面不应该允许创建新用户
+      showToast('New users should register themselves through the registration page', 'danger');
+      return;
     }
     
     // Save to localStorage
@@ -1111,6 +1226,26 @@
   function showToast(message, type = 'primary') {
     const toastContainer = document.querySelector('.toast-container');
     
+    // 根据消息类型选择图标
+    let icon = '';
+    let delay = 3000; // 默认3秒
+    
+    switch(type) {
+      case 'success':
+        icon = '<i class="bi bi-check-circle-fill me-2"></i>';
+        delay = 4000; // 成功消息显示更长时间
+        break;
+      case 'danger':
+        icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
+        delay = 5000; // 错误消息显示更长时间
+        break;
+      case 'warning':
+        icon = '<i class="bi bi-exclamation-circle-fill me-2"></i>';
+        break;
+      default:
+        icon = '<i class="bi bi-info-circle-fill me-2"></i>';
+    }
+    
     const toastElement = document.createElement('div');
     toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
     toastElement.setAttribute('role', 'alert');
@@ -1120,7 +1255,7 @@
     toastElement.innerHTML = `
       <div class="d-flex">
         <div class="toast-body">
-          ${message}
+          ${icon}${message}
         </div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
@@ -1128,7 +1263,7 @@
     
     toastContainer.appendChild(toastElement);
     
-    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: delay });
     toast.show();
     
     toastElement.addEventListener('hidden.bs.toast', function() {
