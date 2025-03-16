@@ -625,11 +625,11 @@
               <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editUserByEmail('${user.email}')" data-bs-toggle="tooltip" title="Edit User">
                 <i class="bi bi-pencil-square"></i>
               </button>
-              ${user.role !== 'admin' || getCurrentUserId() !== user.id ? 
-                `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
+              ${getCurrentUserId() && getCurrentUserId().toString() === user.id.toString() ? 
+                `<button class="admin-btn admin-btn-secondary admin-btn-sm" disabled data-bs-toggle="tooltip" title="Cannot delete yourself">
                   <i class="bi bi-trash"></i>
                 </button>` : 
-                `<button class="admin-btn admin-btn-secondary admin-btn-sm" disabled data-bs-toggle="tooltip" title="Cannot delete yourself">
+                `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
                   <i class="bi bi-trash"></i>
                 </button>`
               }
@@ -1017,7 +1017,12 @@
 
   function deleteUser(userId) {
     // Prevent deleting yourself
-    if (getCurrentUserId() === userId) {
+    const currentUserId = getCurrentUserId();
+    console.log('当前用户ID:', currentUserId, '类型:', typeof currentUserId);
+    console.log('要删除的用户ID:', userId, '类型:', typeof userId);
+    
+    // 确保ID以字符串形式比较
+    if (currentUserId && currentUserId.toString() === userId.toString()) {
       showToast('You cannot delete your own account', 'danger');
       return;
     }
@@ -1027,10 +1032,14 @@
     }
     
     // Get users
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    console.log('删除前用户数量:', users.length);
+    
+    // 标准化用户数据格式
+    users = normalizeUserData(users);
     
     // Find user to be deleted
-    const user = users.find(u => u.id === userId);
+    const user = users.find(u => u.id.toString() === userId.toString());
     if (user && (user.role === 'admin' || user.isAdmin === true)) {
       // Extra confirmation for deleting an admin
       if (!confirm('Warning: You are about to delete an administrator account. Are you absolutely sure?')) {
@@ -1038,8 +1047,18 @@
       }
     }
     
-    // Remove user
-    const updatedUsers = users.filter(u => u.id !== userId);
+    // Remove user - 确保使用字符串比较
+    const updatedUsers = users.filter(u => u.id.toString() !== userId.toString());
+    console.log('删除后用户数量:', updatedUsers.length);
+    
+    if (users.length === updatedUsers.length) {
+      console.log('没有用户被删除，用户ID可能不匹配');
+      console.log('所有用户ID:', users.map(u => u.id));
+      showToast('User not found or could not be deleted', 'danger');
+      return;
+    }
+    
+    // 保存更新后的用户列表
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     
     showToast('User deleted successfully', 'success');
