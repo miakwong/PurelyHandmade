@@ -334,6 +334,15 @@
               </div>
 
               <div class="form-field-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required />
+                <small class="form-text text-muted">
+                  Username will be displayed on your profile and comments
+                </small>
+                <div id="username-error" class="validation-message"></div>
+              </div>
+
+              <div class="form-field-group">
                 <label for="regEmail" class="form-label">Email Address</label>
                 <input type="email" class="form-control" id="regEmail" required />
                 <div id="email-error" class="validation-message"></div>
@@ -552,6 +561,7 @@
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
+      const username = document.getElementById('username').value.trim();
       const pass = document.getElementById('regPassword').value;
       const confirmPass = document.getElementById('regPasswordConfirm').value;
       const termsAccepted = document.getElementById('termsCheck').checked;
@@ -564,6 +574,19 @@
       if (!/^\S+@\S+\.\S+$/.test(email)) {
         isValid = false;
         showValidationError('email-error', '请输入有效的电子邮箱地址。');
+      }
+      
+      // Username validation
+      if (username.length < 3) {
+        isValid = false;
+        showValidationError('username-error', '用户名长度至少需要3个字符。');
+      }
+      
+      // Check for duplicate username
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users.some(user => user.username === username)) {
+        isValid = false;
+        showValidationError('username-error', '该用户名已被使用，请选择其他用户名。');
       }
       
       // Password strength validation
@@ -585,7 +608,6 @@
       }
       
       // Check for duplicate email
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
       if (users.some(user => user.email === email)) {
         isValid = false;
         showValidationError('email-error', '该邮箱已被注册，请使用其他邮箱或直接登录。');
@@ -602,7 +624,7 @@
       // Create user object
       const newUser = {
         id: Date.now(), // 使用时间戳作为唯一ID
-        username: firstName.toLowerCase() + lastName.toLowerCase().substring(0, 1), // 简单的用户名生成
+        username: username,
         firstName: firstName,
         lastName: lastName,
         email: email,
@@ -666,6 +688,28 @@
           // 清除错误消息
           document.getElementById('email-error').textContent = '';
           document.getElementById('email-error').classList.remove('show');
+        }
+      }
+    });
+
+    // 添加用户名实时重复检测功能
+    document.getElementById('username').addEventListener('blur', function() {
+      const username = this.value.trim();
+      if (username) {
+        // 检查用户名长度
+        if (username.length < 3) {
+          showValidationError('username-error', '用户名长度至少需要3个字符。');
+          return;
+        }
+        
+        // 检查是否已被注册
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        if (users.some(user => user.username === username)) {
+          showValidationError('username-error', '该用户名已被使用，请选择其他用户名。');
+        } else {
+          // 清除错误消息
+          document.getElementById('username-error').textContent = '';
+          document.getElementById('username-error').classList.remove('show');
         }
       }
     });
