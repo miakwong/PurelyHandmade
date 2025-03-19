@@ -573,50 +573,50 @@
       // Email format validation
       if (!/^\S+@\S+\.\S+$/.test(email)) {
         isValid = false;
-        showValidationError('email-error', '请输入有效的电子邮箱地址。');
+        showValidationError('email-error', 'Please enter a valid email address.');
       }
       
       // Username validation
       if (username.length < 3) {
         isValid = false;
-        showValidationError('username-error', '用户名长度至少需要3个字符。');
+        showValidationError('username-error', 'Username must be at least 3 characters long.');
       }
       
       // Check for duplicate username
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       if (users.some(user => user.username === username)) {
         isValid = false;
-        showValidationError('username-error', '该用户名已被使用，请选择其他用户名。');
+        showValidationError('username-error', 'This username is already taken. Please choose another one.');
       }
       
       // Password strength validation
       if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
         isValid = false;
-        showValidationError('password-error', '密码必须至少8个字符，且包含至少一个大写字母和一个数字。');
+        showValidationError('password-error', 'Password must be at least 8 characters long and include at least one uppercase letter and one number.');
       }
       
       // Password match validation
       if (pass !== confirmPass) {
         isValid = false;
-        showValidationError('password-match-error', '两次输入的密码不匹配。');
+        showValidationError('password-match-error', 'The passwords you entered do not match.');
       }
       
       // Terms & Conditions checked
       if (!termsAccepted) {
         isValid = false;
-        showValidationError('terms-error', '请同意条款和条件以完成注册。');
+        showValidationError('terms-error', 'Please agree to the terms and conditions to complete the registration.');
       }
       
       // Check for duplicate email
       if (users.some(user => user.email === email)) {
         isValid = false;
-        showValidationError('email-error', '该邮箱已被注册，请使用其他邮箱或直接登录。');
+        showValidationError('email-error', 'This email is already registered. Please use another email or log in directly.');
       }
       
       if (!isValid) {
         // Show overall error message
         const formError = document.getElementById('form-validation-error');
-        formError.textContent = '请修正表单中的错误后再提交。';
+        formError.textContent = 'Please correct the errors in the form before submitting.';
         formError.classList.remove('d-none');
         return;
       }
@@ -688,7 +688,7 @@
         // 邮箱格式正确时，检查是否已被注册
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         if (users.some(user => user.email === email)) {
-          showValidationError('email-error', '该邮箱已被注册，请使用其他邮箱或直接登录。');
+          showValidationError('email-error', 'This email is already registered. Please use another email or log in directly.');
         } else {
           // 清除错误消息
           document.getElementById('email-error').textContent = '';
@@ -703,14 +703,14 @@
       if (username) {
         // 检查用户名长度
         if (username.length < 3) {
-          showValidationError('username-error', '用户名长度至少需要3个字符。');
+          showValidationError('username-error', 'Username must be at least 3 characters long.');
           return;
         }
         
         // 检查是否已被注册
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         if (users.some(user => user.username === username)) {
-          showValidationError('username-error', '该用户名已被使用，请选择其他用户名。');
+          showValidationError('username-error', 'This username is already taken. Please choose another one.');
         } else {
           // 清除错误消息
           document.getElementById('username-error').textContent = '';
