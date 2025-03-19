@@ -184,128 +184,192 @@
 <!-- Navbar Placeholder -->
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-people me-2 text-primary"></i>User Management</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
-  
-  <!-- User Stats -->
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="user-stat">
-        <div class="user-stat-icon">
-          <i class="bi bi-people-fill"></i>
-        </div>
-        <div class="user-stat-value" id="total-users">0</div>
-        <div class="user-stat-label">Total Users</div>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
       </div>
-    </div>
-    <div class="col-md-4">
-      <div class="user-stat">
-        <div class="user-stat-icon">
-          <i class="bi bi-person-check-fill"></i>
-        </div>
-        <div class="user-stat-value" id="active-users">0</div>
-        <div class="user-stat-label">Active Users</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="user-stat">
-        <div class="user-stat-icon">
-          <i class="bi bi-person-fill-lock"></i>
-        </div>
-        <div class="user-stat-value" id="admin-users">0</div>
-        <div class="user-stat-label">Administrators</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filter Section -->
-  <div class="filter-section mb-4">
-    <div class="row g-3">
-      <div class="col-md-4">
-        <label for="filter-role" class="form-label">Role</label>
-        <select class="form-select" id="filter-role">
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="filter-status" class="form-label">Status</label>
-        <select class="form-select" id="filter-status">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
-      <div class="col-md-4">
-        <label for="filter-search" class="form-label">Search</label>
-        <input type="text" class="form-control" id="filter-search" placeholder="Search by name or email...">
-      </div>
-    </div>
-    <div class="row mt-3">
-      <div class="col-12 d-flex justify-content-end">
-        <button class="btn btn-secondary me-2" onclick="resetFilters()">
-          <i class="bi bi-x-circle me-2"></i>Clear Filters
-        </button>
-        <button class="btn btn-primary" onclick="applyFilters()">
-          <i class="bi bi-funnel me-2"></i>Apply Filters
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb-4 user-management-card">
-    <div class="card-header">
-      <div class="row align-items-center">
-        <div class="col">
-          <h5 class="mb-0">User Management</h5>
-        </div>
-        <div class="col-auto">
-          <button class="btn btn-primary" onclick="resetUserForm()">
-            <i class="bi bi-plus-circle me-2"></i>Add User
-          </button>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-people me-2 text-primary"></i>User Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
         </div>
       </div>
-    </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover user-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Joined Date</th>
-              <th>Last Login</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="user-table-body">
-            <!-- User data will be loaded here -->
-          </tbody>
-        </table>
-        <div id="no-users-message" class="d-none text-center py-5">
-          <div class="empty-state-icon mx-auto mb-3">
-            <i class="bi bi-people"></i>
+      
+      <!-- User Stats -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="user-stat">
+            <div class="user-stat-icon">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="user-stat-value" id="total-users">0</div>
+            <div class="user-stat-label">Total Users</div>
           </div>
-          <p class="text-muted mb-3">No users found</p>
-          <button class="btn btn-primary" onclick="resetUserForm()">
-            Add Your First User
-          </button>
+        </div>
+        <div class="col-md-4">
+          <div class="user-stat">
+            <div class="user-stat-icon">
+              <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div class="user-stat-value" id="active-users">0</div>
+            <div class="user-stat-label">Active Users</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="user-stat">
+            <div class="user-stat-icon">
+              <i class="bi bi-person-fill-lock"></i>
+            </div>
+            <div class="user-stat-value" id="admin-users">0</div>
+            <div class="user-stat-label">Administrators</div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- Filter Section -->
+      <div class="filter-section mb-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="filter-role" class="form-label">Role</label>
+            <select class="form-select" id="filter-role">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="filter-status" class="form-label">Status</label>
+            <select class="form-select" id="filter-status">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="filter-search" class="form-label">Search</label>
+            <input type="text" class="form-control" id="filter-search" placeholder="Search by name or email...">
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-secondary me-2" onclick="resetFilters()">
+              <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </button>
+            <button class="btn btn-primary" onclick="applyFilters()">
+              <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4 user-management-card">
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="mb-0">User Management</h5>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-primary" onclick="resetUserForm()">
+                <i class="bi bi-plus-circle me-2"></i>Add User
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover user-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined Date</th>
+                  <th>Last Login</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="user-table-body">
+                <!-- User data will be loaded here -->
+              </tbody>
+            </table>
+            <div id="no-users-message" class="d-none text-center py-5">
+              <div class="empty-state-icon mx-auto mb-3">
+                <i class="bi bi-people"></i>
+              </div>
+              <p class="text-muted mb-3">No users found</p>
+              <button class="btn btn-primary" onclick="resetUserForm()">
+                Add Your First User
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -520,6 +584,17 @@
         applyFilters();
       }
     });
+
+    // Check if user is admin after navbar is loaded
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        // Load users data
+        loadUsers();
+      }
+    }, 100);
   });
   
   /**
@@ -1075,7 +1150,7 @@
         const updatedUser = {
           ...users[index],
           role,
-          isAdmin: role === 'admin', // Update isAdmin property based on role for backward compatibility
+          isAdmin: role === 'admin', // Set isAdmin based on role
           status,
           bio,
           canOrder: canOrder !== undefined ? canOrder : users[index].canOrder || true, // 默认为true如果之前未设置

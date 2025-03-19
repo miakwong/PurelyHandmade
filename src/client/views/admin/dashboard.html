@@ -355,6 +355,31 @@
 <script src="/src/client/js/admin-api-service.js"></script>
 
 <script>
+  // Fallback if AdminApiService is not available
+  if (typeof AdminApiService === 'undefined') {
+    console.warn('AdminApiService not found, using fallback implementation with DataService');
+    window.AdminApiService = {
+      getAllProducts: function() {
+        return Promise.resolve({
+          success: true,
+          data: JSON.parse(localStorage.getItem('products') || '[]')
+        });
+      },
+      getAllOrders: function() {
+        return Promise.resolve({
+          success: true,
+          data: JSON.parse(localStorage.getItem('orders') || '[]')
+        });
+      },
+      getAllUsers: function() {
+        return Promise.resolve({
+          success: true,
+          data: JSON.parse(localStorage.getItem('users') || '[]')
+        });
+      }
+    };
+  }
+
   // Ensure the user is logged in and is an admin
   document.addEventListener('DOMContentLoaded', function() {
     // Load navbar

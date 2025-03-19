@@ -201,105 +201,169 @@
 <!-- Navbar Placeholder -->
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-box-seam me-2 text-primary"></i>Product Management</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
-
-  <!-- Filter Section -->
-  <div class="filter-section mb-4">
-    <div class="row g-3">
-      <div class="col-md-3">
-        <label for="filter-category" class="form-label">Category</label>
-        <select class="form-select" id="filter-category">
-          <option value="">All Categories</option>
-          <!-- Categories will be loaded here -->
-        </select>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
       </div>
-      <div class="col-md-3">
-        <label for="filter-designer" class="form-label">Designer</label>
-        <select class="form-select" id="filter-designer">
-          <option value="">All Designers</option>
-          <!-- Designers will be loaded here -->
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="filter-status" class="form-label">Status</label>
-        <select class="form-select" id="filter-status">
-          <option value="">All Status</option>
-          <option value="in-stock">In Stock</option>
-          <option value="low-stock">Low Stock</option>
-          <option value="out-of-stock">Out of Stock</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <label for="filter-search" class="form-label">Search</label>
-        <input type="text" class="form-control" id="filter-search" placeholder="Search products...">
-      </div>
-    </div>
-    <div class="row mt-3">
-      <div class="col-12 d-flex justify-content-end">
-        <button class="btn btn-secondary me-2" onclick="resetFilters()">
-          <i class="bi bi-x-circle me-2"></i>Clear Filters
-        </button>
-        <button class="btn btn-primary" onclick="applyFilters()">
-          <i class="bi bi-funnel me-2"></i>Apply Filters
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb-4 product-management-card">
-    <div class="card-header">
-      <div class="row align-items-center">
-        <div class="col">
-          <h5 class="mb-0">Product Management</h5>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-box-seam me-2 text-primary"></i>Product Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
         </div>
-        <div class="col-auto">
-          <button class="btn btn-primary" onclick="resetProductForm()">
-            <i class="bi bi-plus-circle me-2"></i>Add Product
-          </button>
-        </div>
       </div>
-    </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover product-table">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Category</th>
-              <th>Designer</th>
-              <th>Reviews</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="product-table-body">
-            <!-- Product data will be loaded here -->
-          </tbody>
-        </table>
-        <div id="no-products-message" class="d-none text-center py-5">
-          <div class="empty-state-icon mx-auto mb-3">
-            <i class="bi bi-box"></i>
+
+      <!-- Filter Section -->
+      <div class="filter-section mb-4">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="filter-category" class="form-label">Category</label>
+            <select class="form-select" id="filter-category">
+              <option value="">All Categories</option>
+              <!-- Categories will be loaded here -->
+            </select>
           </div>
-          <p class="text-muted mb-3">No products found</p>
-          <button class="btn btn-primary" onclick="resetProductForm()">
-            Add Your First Product
-          </button>
+          <div class="col-md-3">
+            <label for="filter-designer" class="form-label">Designer</label>
+            <select class="form-select" id="filter-designer">
+              <option value="">All Designers</option>
+              <!-- Designers will be loaded here -->
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-status" class="form-label">Status</label>
+            <select class="form-select" id="filter-status">
+              <option value="">All Status</option>
+              <option value="in-stock">In Stock</option>
+              <option value="low-stock">Low Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-search" class="form-label">Search</label>
+            <input type="text" class="form-control" id="filter-search" placeholder="Search products...">
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-secondary me-2" onclick="resetFilters()">
+              <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </button>
+            <button class="btn btn-primary" onclick="applyFilters()">
+              <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div class="card mb-4 product-management-card">
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="mb-0">Product Management</h5>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-primary" onclick="resetProductForm()">
+                <i class="bi bi-plus-circle me-2"></i>Add Product
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover product-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Category</th>
+                  <th>Designer</th>
+                  <th>Reviews</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="product-table-body">
+                <!-- Product data will be loaded here -->
+              </tbody>
+            </table>
+            <div id="no-products-message" class="d-none text-center py-5">
+              <div class="empty-state-icon mx-auto mb-3">
+                <i class="bi bi-box"></i>
+              </div>
+              <p class="text-muted mb-3">No products found</p>
+              <button class="btn btn-primary" onclick="resetProductForm()">
+                Add Your First Product
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -530,6 +594,10 @@
   </div>
 </template>
 
+    </main>
+  </div>
+</div>
+
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
@@ -557,6 +625,19 @@
     loadNavbar();
     loadFooter();
     
+    // Check user permissions
+    checkAdminPermissions();
+    
+    // Set up search filter event
+    document.getElementById('filter-search').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+  });
+  
+  // Initialize product management functionality
+  function initProductManagement() {
     // Load products data
     loadProducts();
     
@@ -598,17 +679,7 @@
         }
       }
     });
-    
-    // Check user permissions
-    checkAdminPermissions();
-    
-    // Set up search filter event
-    document.getElementById('filter-search').addEventListener('keyup', function(e) {
-      if (e.key === 'Enter') {
-        applyFilters();
-      }
-    });
-  });
+  }
   
   // Product management functions
   function loadProducts() {
@@ -1111,17 +1182,15 @@
   }
   
   function checkAdminPermissions() {
-    // Check if user is logged in and is admin
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Checking admin permissions for user:', currentUser);
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      // Redirect to login if not admin
-      console.log('User is not admin, redirecting...');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('You must be logged in as an administrator to access this page.');
-    } else {
-      console.log('Admin permissions verified successfully');
-    }
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        // Initialize product management
+        initProductManagement();
+      }
+    }, 100);
   }
   
   // Helper function to show toast notifications

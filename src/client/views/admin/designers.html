@@ -43,80 +43,144 @@
 <!-- Navbar Placeholder -->
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-person-badge me-2 text-primary"></i>Designer Management</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-person-badge me-2 text-primary"></i>Designer Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
 
-  <div class="card mb-4">
-    <div class="card-header">
-      <div class="row align-items-center">
-        <div class="col">
-          <h5 class="mb-0">Designer Management</h5>
-        </div>
-        <div class="col-auto">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#designerModal" onclick="resetDesignerForm()">
-            <i class="bi bi-plus-circle me-2"></i>Add Designer
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="card-body">
-      <!-- Add filter section -->
-      <div class="mb-4 p-3 border rounded bg-light">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label for="filter-name" class="form-label">Designer Name</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-              <input type="text" class="form-control" id="filter-name" placeholder="Filter by designer name">
+      <div class="card mb-4">
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="mb-0">Designer Management</h5>
             </div>
-          </div>
-          <div class="col-md-6">
-            <label for="filter-specialty" class="form-label">Specialty</label>
-            <div class="input-group">
-              <span class="input-group-text bg-light"><i class="bi bi-tools"></i></span>
-              <input type="text" class="form-control" id="filter-specialty" placeholder="Filter by specialty">
+            <div class="col-auto">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#designerModal" onclick="resetDesignerForm()">
+                <i class="bi bi-plus-circle me-2"></i>Add Designer
+              </button>
             </div>
           </div>
         </div>
-        <div class="row mt-3">
-          <div class="col-12 d-flex justify-content-end">
-            <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
-              <i class="bi bi-x-circle me-1"></i>Clear
-            </button>
-            <button class="btn btn-primary" onclick="applyFilters()">
-              <i class="bi bi-search me-1"></i>Search
-            </button>
+        <div class="card-body">
+          <!-- Add filter section -->
+          <div class="mb-4 p-3 border rounded bg-light">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="filter-name" class="form-label">Designer Name</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                  <input type="text" class="form-control" id="filter-name" placeholder="Filter by designer name">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="filter-specialty" class="form-label">Specialty</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-tools"></i></span>
+                  <input type="text" class="form-control" id="filter-specialty" placeholder="Filter by specialty">
+                </div>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12 d-flex justify-content-end">
+                <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+                  <i class="bi bi-x-circle me-1"></i>Clear
+                </button>
+                <button class="btn btn-primary" onclick="applyFilters()">
+                  <i class="bi bi-search me-1"></i>Search
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Avatar</th>
+                  <th>Name</th>
+                  <th>Specialty</th>
+                  <th>Products</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="designerTableBody">
+                <!-- Designer data will be loaded here -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Name</th>
-              <th>Specialty</th>
-              <th>Products</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="designerTableBody">
-            <!-- Designer data will be loaded here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </main>
   </div>
 </div>
 
@@ -205,11 +269,16 @@
     loadNavbar();
     loadFooter();
     
-    // Load designers data
-    loadDesigners();
-    
     // Check user permissions
-    checkAdminPermissions();
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        // Load designers data
+        loadDesigners();
+      }
+    }, 100);
   });
   
   // Designer management functions
@@ -398,14 +467,6 @@
       const filteredDesigners = designers.filter(d => d.id !== id);
       localStorage.setItem('designers', JSON.stringify(filteredDesigners));
       loadDesigners();
-    }
-  }
-  
-  function checkAdminPermissions() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('You must be logged in as an administrator to access this page.');
     }
   }
   
