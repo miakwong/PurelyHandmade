@@ -5,12 +5,9 @@
  * Provides admin API access layer for handling admin functions with the server
  */
 
-// 确保在Node.js环境中可以导入ApiService
-let ApiService;
-if (typeof require !== 'undefined') {
+// For Node.js environment (for testing purposes)
+if (typeof require !== 'undefined' && typeof ApiService === 'undefined') {
   ApiService = require('./api-service.js');
-} else if (typeof window !== 'undefined' && window.ApiService) {
-  ApiService = window.ApiService;
 }
 
 const AdminApiService = {

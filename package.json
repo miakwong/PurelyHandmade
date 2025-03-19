@@ -2,5 +2,26 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.13.0",
+    "prisma": "^6.5.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:setup-db": "node tests/setup-test-db.js",
+    "test:all": "npm run test:setup-db && npm test",
+    "start": "./start-server.sh",
+    "seed": "node src/server/seed.js",
+    "db-tool": "node tools/db-tool.js"
   }
 }

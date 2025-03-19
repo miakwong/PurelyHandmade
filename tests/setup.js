@@ -99,4 +99,40 @@ global.console = {
 // 在每次测试后清除所有模拟
 afterEach(() => {
   jest.clearAllMocks();
+});
+
+/**
+ * 测试全局设置
+ */
+
+// 增加测试超时时间
+jest.setTimeout(30000);
+
+// 创建测试环境变量
+process.env.NODE_ENV = 'test';
+process.env.SERVER_PORT = '9877'; // 使用不同的测试端口
+process.env.DATABASE_URL = 'mysql://root:15879512@localhost:3306/purely_handmade_test'; // 测试数据库
+
+// 创建全局变量以在测试之间共享
+global.testUsers = {
+  admin: {
+    email: 'admin@test.com',
+    password: 'admin123',
+    token: null
+  },
+  user: {
+    email: 'user@test.com',
+    password: 'user123',
+    token: null
+  }
+};
+
+// 在所有测试前清理
+beforeAll(async () => {
+  // 可以在此处添加测试前的数据库清理或其他设置
+});
+
+// 在所有测试后清理
+afterAll(async () => {
+  // 可以在此处添加测试后的数据库清理或其他清理步骤
 }); 
