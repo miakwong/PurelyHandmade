@@ -3,6 +3,8 @@
  * 认证控制器
  * 处理用户登录、注册和认证相关的功能
  */
+require_once __DIR__ . '/models.php';
+
 class AuthController {
     /**
      * 处理用户登录请求
@@ -27,10 +29,26 @@ class AuthController {
             $_SESSION['is_admin'] = true;
             $_SESSION['logged_in'] = true;
             
-            // 重定向到适当的页面
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'redirect' => '/admin-tools.html']);
-            exit;
+            // 创建用户数据
+            $userData = [
+                'id' => 1,
+                'username' => 'admin',
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'email' => 'admin@example.com',
+                'is_admin' => true,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            // 使用标准用户模型
+            $user = createUserModel($userData, false);
+            
+            // 返回登录成功响应
+            sendApiResponse([
+                'user' => $user,
+                'redirect' => '/admin-tools.html'
+            ], true);
         } else {
             $this->respondWithError("用户名或密码不正确");
         }
@@ -53,8 +71,6 @@ class AuthController {
      * 返回错误信息
      */
     private function respondWithError($message) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => $message]);
-        exit;
+        sendApiResponse($message, false, 401);
     }
 } 

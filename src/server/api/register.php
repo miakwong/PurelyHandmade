@@ -1,23 +1,21 @@
 <?php
 require_once '../controllers/Database.php';
+require_once '../index.php'; // Include for sendApiResponse function
 
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(["success" => false, "error" => "Invalid request method"]);
-    exit;
+    sendApiResponse("Invalid request method", false, 405);
 }
 
 // 获取 JSON 请求数据
 $data = json_decode(file_get_contents("php://input"), true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    echo json_encode(["success" => false, "error" => "Invalid JSON input"]);
-    exit;
+    sendApiResponse("Invalid JSON input", false, 400);
 }
 
 if (!$data) {
-    echo json_encode(["success" => false, "error" => "Invalid request"]);
-    exit;
+    sendApiResponse("Invalid request", false, 400);
 }
 
 // 检查是否缺少字段
@@ -46,8 +44,7 @@ if (!isset($data['gender']) || !in_array($data['gender'], $validGenders)) {
 
 // 终止并返回错误
 if (!empty($errors)) {
-    echo json_encode(["success" => false, "errors" => $errors]);
-    exit;
+    sendApiResponse(["validation_errors" => $errors], false, 400);
 }
 
 $db = new Database();
@@ -55,8 +52,7 @@ $db = new Database();
 // 检查用户名或邮箱是否已存在
 $existingUser = $db->fetchOne("SELECT id FROM users WHERE username = ? OR email = ?", [$data['username'], $data['email']]);
 if ($existingUser) {
-    echo json_encode(["success" => false, "error" => "Username or Email already exists"]);
-    exit;
+    sendApiResponse("Username or Email already exists", false, 409);
 }
 
 // 加密密码
@@ -69,8 +65,7 @@ if (!empty($data['avatar'])) {
     $decodedAvatar = $avatarData ? base64_decode($avatarData) : false;
     
     if ($decodedAvatar === false) {
-        echo json_encode(["success" => false, "error" => "Invalid avatar format."]);
-        exit;
+        sendApiResponse("Invalid avatar format", false, 400);
     }
 
     // 存储 base64 数据
@@ -87,7 +82,8 @@ $insertId = $db->insert("users", [
     "birthday" => trim($data['birthday']),
     "gender" => trim($data['gender']),
     "avatar" => $avatarBase64,  // 存储 Base64
-    "created_at" => date("Y-m-d H:i:s")
+    "created_at" => date("Y-m-d H:i:s"),
+    "updated_at" => date("Y-m-d H:i:s")
 ]);
 
 if ($insertId) {
@@ -95,8 +91,18 @@ if ($insertId) {
     session_start();
     $_SESSION['user_id'] = $insertId;
     $_SESSION['username'] = $data['username'];
-    echo json_encode(["success" => true, "user_id" => $insertId]);
+    
+    // 返回用户数据（不包含密码）
+    $userData = [
+        "user_id" => $insertId,
+        "username" => $data['username'],
+        "email" => $data['email'],
+        "first_name" => $data['first_name'],
+        "last_name" => $data['last_name']
+    ];
+    
+    sendApiResponse($userData, true, 201);
 } else {
-    echo json_encode(["success" => false, "error" => "Failed to create account"]);
+    sendApiResponse("Failed to create account", false, 500);
 }
 ?>

@@ -57,117 +57,95 @@ function loadFooter() {
 
 // Update authentication state in the navbar
 function updateAuthState() {
-  const currentUserStr = localStorage.getItem('currentUser');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const loginButton = document.getElementById('login-button');
+  const logoutButton = document.getElementById('logout-button');
   const registerButton = document.getElementById('register-button');
   const profileButton = document.getElementById('profile-button');
-  const orderHistoryButton = document.getElementById('order-history-button');
-  const logoutButton = document.getElementById('logout-button');
-  const adminButton = document.getElementById('admin-button');
+  const adminButton = document.getElementById('admin-dashboard-button');
   
-  if (!loginButton || !registerButton) {
-    console.warn('Could not find authentication buttons in navbar');
+  if (!loginButton || !logoutButton) {
+    console.log('Login/logout buttons not found in this page');
     return;
   }
   
-  try {
-    if (currentUserStr) {
-      // User is logged in
-      const currentUser = JSON.parse(currentUserStr);
-      
-      loginButton.style.display = 'none';
-      registerButton.style.display = 'none';
-      
-      if (profileButton) profileButton.style.display = 'block';
-      if (orderHistoryButton) orderHistoryButton.style.display = 'block';
-      
-      if (logoutButton) {
-        logoutButton.style.display = 'block';
-        // Add logout functionality
-        logoutButton.addEventListener('click', function(e) {
-          e.preventDefault();
-          localStorage.removeItem('currentUser');
-          window.location.href = '/';
-        });
-      }
-      
-      // Check if admin
-      if (currentUser.role === 'admin' && adminButton) {
-        adminButton.style.display = 'block';
-      }
-      
-      console.log('User is logged in, showing logged-in state');
-    } else {
-      // User is not logged in
-      loginButton.style.display = 'block';
-      registerButton.style.display = 'block';
-      
-      if (profileButton) profileButton.style.display = 'none';
-      if (orderHistoryButton) orderHistoryButton.style.display = 'none';
-      if (logoutButton) logoutButton.style.display = 'none';
-      if (adminButton) adminButton.style.display = 'none';
-      
-      console.log('User is not logged in, showing login/register buttons');
+  if (currentUser) {
+    // User is logged in
+    loginButton.style.display = 'none';
+    if (registerButton) registerButton.style.display = 'none';
+    logoutButton.style.display = 'block';
+    if (profileButton) profileButton.style.display = 'block';
+    
+    // Show admin dashboard button for admins
+    if (currentUser.isAdmin === true && adminButton) {
+      adminButton.style.display = 'block';
+    } else if (adminButton) {
+      adminButton.style.display = 'none';
     }
-  } catch (e) {
-    console.error('Error updating auth state:', e);
+    
+    // Update username display if available
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement) {
+      userNameElement.textContent = currentUser.username || currentUser.name || 'User';
+    }
+  } else {
+    // User is not logged in
+    loginButton.style.display = 'block';
+    if (registerButton) registerButton.style.display = 'block';
+    logoutButton.style.display = 'none';
+    if (profileButton) profileButton.style.display = 'none';
+    if (adminButton) adminButton.style.display = 'none';
   }
 }
 
 // Check admin permissions
 function checkAdminPermissions() {
-  const currentUserStr = localStorage.getItem('currentUser');
-  if (!currentUserStr) {
-    window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  
+  if (!currentUser) {
+    // User not logged in, redirect to login page
+    window.location.replace('/src/client/views/auth/login.html');
     return false;
   }
   
-  try {
-    const currentUser = JSON.parse(currentUserStr);
-    if (currentUser.role !== 'admin') {
-      alert('You must be logged in as an administrator to access this page.');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.error('Error checking admin permissions:', e);
-    window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+  if (currentUser.isAdmin !== true) {
+    // User is not an admin, redirect to home page
+    window.location.replace('/');
+    alert('You do not have permission to access this page.');
     return false;
   }
+  
+  return true; // User is an admin
 }
 
 // Helper function to show toast notifications
 function showToast(message, type = 'primary') {
-  // Check if toast container exists, if not create it
-  let toastContainer = document.querySelector('.toast-container');
+  const toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-    document.body.appendChild(toastContainer);
+    console.error('Toast container not found');
+    return;
   }
   
-  const toastElement = document.createElement('div');
-  toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
-  toastElement.setAttribute('role', 'alert');
-  toastElement.setAttribute('aria-live', 'assertive');
-  toastElement.setAttribute('aria-atomic', 'true');
-  
-  toastElement.innerHTML = `
-    <div class="d-flex">
+  const toastId = 'toast-' + Date.now();
+  const toastHtml = `
+    <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-${type} text-white">
+        <strong class="me-auto">Purely Handmade</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
       <div class="toast-body">
         ${message}
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   `;
   
-  toastContainer.appendChild(toastElement);
-  
-  const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+  toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+  const toastElement = document.getElementById(toastId);
+  const toast = new bootstrap.Toast(toastElement);
   toast.show();
   
-  toastElement.addEventListener('hidden.bs.toast', function() {
+  // Automatically remove toast after it's hidden
+  toastElement.addEventListener('hidden.bs.toast', function () {
     toastElement.remove();
   });
 } 
