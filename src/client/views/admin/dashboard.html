@@ -49,13 +49,52 @@
     
     /* Admin button styles */
     .admin-btn-sm {
-      display: inline-flex;
-      align-items: center;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Data loading spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--accent-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Loading state */
+    .loading {
+      position: relative;
+    }
+    
+    .loading::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.7);
+      display: flex;
       justify-content: center;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      border-radius: 4px;
+      align-items: center;
+      z-index: 10;
+    }
+    
+    /* Error message */
+    .error-message {
+      padding: 1rem;
+      border-radius: 0.25rem;
+      background-color: rgba(220, 53, 69, 0.1);
+      border: 1px solid #dc3545;
+      color: #dc3545;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
@@ -64,310 +103,405 @@
 <!-- Navbar Placeholder -->
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-speedometer2 me-2 text-primary"></i>Admin Dashboard</h1>
-    <div class="admin-actions">
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
-
-  <!-- Stats Overview -->
-  <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-      <div class="card stats-card h-100">
-        <div class="card-body">
-          <h6 class="text-muted">Total Users</h6>
-          <h2 id="total-users-count">0</h2>
-          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-users-percent">0%</span> this month</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-      <div class="card stats-card h-100">
-        <div class="card-body">
-          <h6 class="text-muted">Total Products</h6>
-          <h2 id="total-products-count">0</h2>
-          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-products-percent">0%</span> this month</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-      <div class="card stats-card h-100">
-        <div class="card-body">
-          <h6 class="text-muted">Total Orders</h6>
-          <h2 id="total-orders-count">0</h2>
-          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-orders-percent">0%</span> this month</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-      <div class="card stats-card h-100">
-        <div class="card-body">
-          <h6 class="text-muted">Total Reviews</h6>
-          <h2 id="total-reviews-count">0</h2>
-          <p class="text-success mb-0"><i class="bi bi-arrow-up"></i> <span id="new-reviews-percent">0%</span> this month</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Management Modules Cards -->
+<div class="container-fluid">
   <div class="row">
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-people dashboard-icon"></i>
-          <h4>User Management</h4>
-          <p>Manage user accounts, permissions and activities</p>
-          <a href="users.html" class="btn btn-primary w-100">Manage Users</a>
-        </div>
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
       </div>
-    </div>
+    </nav>
     
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-box-seam dashboard-icon"></i>
-          <h4>Product Management</h4>
-          <p>Add, edit or remove products from your inventory</p>
-          <a href="products.html" class="btn btn-primary w-100">Manage Products</a>
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshData">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+            <i class="bi bi-calendar3"></i>
+            This month
+          </button>
         </div>
       </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-cart-check dashboard-icon"></i>
-          <h4>Order Management</h4>
-          <p>View and manage customer orders and processing</p>
-          <a href="orders.html" class="btn btn-primary w-100">Manage Orders</a>
+      
+      <!-- Error message container -->
+      <div id="error-container" class="error-message d-none">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="error-message">Unable to load data from API. Please try again later.</span>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
+        <div class="col">
+          <div class="card stats-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="card-subtitle mb-2 text-muted">Total Products</h6>
+                  <h3 class="card-title" id="total-products">
+                    <div class="loading-spinner"></div>
+                  </h3>
+                </div>
+                <i class="bi bi-box dashboard-icon"></i>
+              </div>
+              <p class="card-text"><small class="text-muted" id="products-change">Loading...</small></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col">
+          <div class="card stats-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                  <h3 class="card-title" id="total-orders">
+                    <div class="loading-spinner"></div>
+                  </h3>
+                </div>
+                <i class="bi bi-cart-check dashboard-icon"></i>
+              </div>
+              <p class="card-text"><small class="text-muted" id="orders-change">Loading...</small></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col">
+          <div class="card stats-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
+                  <h3 class="card-title" id="total-users">
+                    <div class="loading-spinner"></div>
+                  </h3>
+                </div>
+                <i class="bi bi-people dashboard-icon"></i>
+              </div>
+              <p class="card-text"><small class="text-muted" id="users-change">Loading...</small></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col">
+          <div class="card stats-card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="card-subtitle mb-2 text-muted">Revenue</h6>
+                  <h3 class="card-title" id="total-revenue">
+                    <div class="loading-spinner"></div>
+                  </h3>
+                </div>
+                <i class="bi bi-graph-up-arrow dashboard-icon"></i>
+              </div>
+              <p class="card-text"><small class="text-muted" id="revenue-change">Loading...</small></p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-star dashboard-icon"></i>
-          <h4>Reviews Management</h4>
-          <p>Moderate product reviews and customer feedback</p>
-          <a href="comments.html" class="btn btn-primary w-100">Manage Reviews</a>
+      
+      <!-- Quick Links -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              Quick Actions
+            </div>
+            <div class="card-body">
+              <div class="row row-cols-1 row-cols-md-4 g-4">
+                <div class="col">
+                  <a href="products.html?action=new" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-plus-lg me-2"></i>Add Product
+                  </a>
+                </div>
+                <div class="col">
+                  <a href="orders.html" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-cart-check me-2"></i>View Orders
+                  </a>
+                </div>
+                <div class="col">
+                  <a href="reports.html" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-bar-chart me-2"></i>View Reports
+                  </a>
+                </div>
+                <div class="col">
+                  <a href="settings.html" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-gear me-2"></i>Settings
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-person-badge dashboard-icon"></i>
-          <h4>Designer Management</h4>
-          <p>Manage designers, their profiles and products</p>
-          <a href="designers.html" class="btn btn-primary w-100">Manage Designers</a>
+      
+      <!-- Recent Orders -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              Recent Orders
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Total</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-orders-table">
+                    <tr>
+                      <td colspan="6" class="text-center">
+                        <div class="loading-spinner"></div>
+                        <p>Loading recent orders...</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-footer">
+              <a href="orders.html" class="btn btn-sm btn-outline-primary">View All Orders</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-tags dashboard-icon"></i>
-          <h4>Category Management</h4>
-          <p>Organize products with categories and tags</p>
-          <a href="categories.html" class="btn btn-primary w-100">Manage Categories</a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- New Reports Card -->
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-bar-chart dashboard-icon"></i>
-          <h4>Reports & Analytics</h4>
-          <p>View sales reports, user statistics and analytics</p>
-          <a href="reports.html" class="btn btn-primary w-100">View Reports</a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- New Settings Card -->
-    <div class="col-md-4 mb-4">
-      <div class="card dashboard-card">
-        <div class="card-body text-center p-4">
-          <i class="bi bi-gear dashboard-icon"></i>
-          <h4>Website Settings</h4>
-          <p>Configure website options, preferences and features</p>
-          <a href="settings.html" class="btn btn-primary w-100">Manage Settings</a>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 </div>
 
-<!-- Footer Placeholder -->
-<div id="footer-placeholder"></div>
+<!-- Footer -->
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container text-center">
+    <span class="text-muted">© 2023 Purely Homemade. All rights reserved.</span>
+  </div>
+</footer>
 
+<!-- Bootstrap and other scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/src/client/js/common.js"></script>
+<script src="/src/client/js/api-service.js"></script>
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/ui-helpers.js"></script>
+<script src="/src/client/js/admin-api-service.js"></script>
+
 <script>
+  // Ensure the user is logged in and is an admin
   document.addEventListener('DOMContentLoaded', function() {
-    // Load navbar and footer
-    loadNavbar();
-    loadFooter();
+    // Load navbar
+    fetch('/src/client/assets/layout/navbar.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+        
+        // Check if user is admin after navbar is loaded
+        setTimeout(() => {
+          const currentUser = DataService.getCurrentUser();
+          if (!currentUser || currentUser.isAdmin !== true) {
+            window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+          } else {
+            // Load dashboard data
+            loadDashboardData();
+          }
+        }, 100);
+      });
     
-    // Check admin permissions
-    checkAdminPermissions();
-    
-    // Load dashboard data
-    loadDashboardData();
+    // Refresh button event
+    document.getElementById('refreshData').addEventListener('click', function() {
+      loadDashboardData();
+    });
   });
   
-  function loadDashboardStats() {
-    // Get count data from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+  // Load dashboard data from API
+  function loadDashboardData() {
+    showLoadingState();
     
-    // Update the dashboard with counts
-    document.getElementById('total-users-count').textContent = users.length;
-    document.getElementById('total-products-count').textContent = products.length;
-    document.getElementById('total-orders-count').textContent = orders.length;
-    document.getElementById('total-reviews-count').textContent = comments.length;
-    
-    // Calculate month growth (placeholder - would be calculated with actual dates in a real implementation)
-    document.getElementById('new-users-percent').textContent = '5%';
-    document.getElementById('new-products-percent').textContent = '12%';
-    document.getElementById('new-orders-percent').textContent = '8%';
-    document.getElementById('new-reviews-percent').textContent = '15%';
+    // Parallel requests for different data
+    Promise.all([
+      AdminApiService.getAllProducts(),
+      AdminApiService.getAllOrders(),
+      AdminApiService.getAllUsers(),
+      // Get recent orders
+      AdminApiService.getAllOrders()
+    ])
+    .then(([productsResponse, ordersResponse, usersResponse, recentOrdersResponse]) => {
+      // Update statistics
+      updateStatistics(productsResponse, ordersResponse, usersResponse);
+      
+      // Update recent orders table
+      updateRecentOrders(recentOrdersResponse);
+      
+      hideLoadingState();
+    })
+    .catch(error => {
+      console.error('Error loading dashboard data:', error);
+      showError('Failed to load dashboard data. ' + (error.message || ''));
+      hideLoadingState();
+    });
   }
   
-  function checkAdminPermissions() {
-    // Check if user is logged in and is admin
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Checking admin permissions for user:', currentUser);
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      // Redirect to login if not admin
-      console.log('User is not admin, redirecting...');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('You must be logged in as an administrator to access this page.');
-    } else {
-      console.log('Admin permissions verified successfully');
+  // Update statistics cards
+  function updateStatistics(productsResponse, ordersResponse, usersResponse) {
+    if (productsResponse.success) {
+      const products = productsResponse.data;
+      document.getElementById('total-products').textContent = products.length;
+      document.getElementById('products-change').textContent = 'Updated just now';
+    }
+    
+    if (ordersResponse.success) {
+      const orders = ordersResponse.data;
+      document.getElementById('total-orders').textContent = orders.length;
+      document.getElementById('orders-change').textContent = 'Updated just now';
+      
+      // Calculate total revenue
+      const revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
+      document.getElementById('total-revenue').textContent = '$' + revenue.toFixed(2);
+      document.getElementById('revenue-change').textContent = 'From all orders';
+    }
+    
+    if (usersResponse.success) {
+      const users = usersResponse.data;
+      document.getElementById('total-users').textContent = users.length;
+      document.getElementById('users-change').textContent = 'Updated just now';
     }
   }
   
-  // Load dashboard data
-  function loadDashboardData() {
-    console.log('Loading dashboard data...');
+  // Update recent orders table
+  function updateRecentOrders(response) {
+    const tableBody = document.getElementById('recent-orders-table');
     
-    // Get data from localStorage
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    
-    // Update dashboard statistics
-    document.getElementById('total-products-count').textContent = products.length;
-    document.getElementById('total-users-count').textContent = users.length;
-    document.getElementById('total-orders-count').textContent = orders.length;
-    document.getElementById('total-reviews-count').textContent = reviews.length;
-    
-    // Calculate pending reviews
-    const pendingReviews = reviews.filter(review => review.status === 'pending').length;
-    document.getElementById('new-reviews-percent').textContent = `${pendingReviews}/${reviews.length} pending reviews`;
-    
-    // Calculate low stock products
-    const lowStockProducts = products.filter(product => product.stock <= 5 && product.stock > 0).length;
-    document.getElementById('low-stock-products').textContent = lowStockProducts;
-    
-    // Update recent reviews
-    updateRecentReviews(reviews, products, users);
-    
-    console.log('Dashboard data loaded successfully');
-  }
-  
-  // Update recent reviews section
-  function updateRecentReviews(reviews, products, users) {
-    const recentReviewsContainer = document.getElementById('recent-reviews');
-    if (!recentReviewsContainer) return;
-    
-    // Clear existing content
-    recentReviewsContainer.innerHTML = '';
-    
-    // Sort reviews by date, newest first
-    const sortedReviews = [...reviews].sort((a, b) => 
-      new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
-    );
-    
-    // Get last 5 reviews
-    const recentReviews = sortedReviews.slice(0, 5);
-    
-    if (recentReviews.length === 0) {
-      recentReviewsContainer.innerHTML = '<p class="text-muted text-center">No reviews found</p>';
+    if (!response.success || !response.data || !response.data.length) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center">No recent orders found</td>
+        </tr>
+      `;
       return;
     }
     
-    // Create reviews HTML
-    recentReviews.forEach(review => {
-      // Find product and user
-      const product = products.find(p => String(p.id) === String(review.productId)) || { name: 'Unknown Product' };
-      const user = users.find(u => String(u.id) === String(review.userId)) || { firstName: 'Unknown', lastName: 'User' };
-      
-      // Create review element
-      const reviewElement = document.createElement('div');
-      reviewElement.className = 'list-group-item list-group-item-action';
-      
-      // Get status badge
-      let statusBadge = '';
-      switch(review.status) {
-        case 'approved':
-          statusBadge = '<span class="badge bg-success">Approved</span>';
-          break;
-        case 'rejected':
-          statusBadge = '<span class="badge bg-danger">Rejected</span>';
-          break;
-        default:
-          statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
-      }
-      
+    // Get 5 most recent orders
+    const recentOrders = response.data
+      .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+      .slice(0, 5);
+    
+    let html = '';
+    
+    recentOrders.forEach(order => {
       // Format date
-      const reviewDate = new Date(review.createdAt || review.date).toLocaleDateString();
+      const orderDate = new Date(order.orderDate);
+      const formattedDate = orderDate.toLocaleDateString();
       
-      // Generate stars HTML
-      const rating = parseInt(review.rating) || 0;
-      let starsHtml = '';
-      for (let i = 0; i < 5; i++) {
-        if (i < rating) {
-          starsHtml += '<i class="bi bi-star-fill text-warning"></i>';
-        } else {
-          starsHtml += '<i class="bi bi-star text-muted"></i>';
-        }
-      }
+      // Status badge class
+      let statusClass = 'bg-secondary';
+      if (order.status === 'pending') statusClass = 'bg-warning text-dark';
+      if (order.status === 'processing') statusClass = 'bg-info text-dark';
+      if (order.status === 'shipped') statusClass = 'bg-primary';
+      if (order.status === 'delivered') statusClass = 'bg-success';
+      if (order.status === 'cancelled') statusClass = 'bg-danger';
       
-      reviewElement.innerHTML = `
-        <div class="d-flex w-100 justify-content-between">
-          <h6 class="mb-1">${product.name}</h6>
-          <small>${reviewDate}</small>
-        </div>
-        <p class="mb-1"><strong>${review.title || 'Review'}</strong>: ${review.content || 'No content'}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <small class="text-muted">By ${user.firstName} ${user.lastName}</small>
-            <small class="ms-2">${starsHtml}</small>
-          </div>
-          <div>${statusBadge}</div>
-        </div>
+      html += `
+        <tr>
+          <td>#${order.id}</td>
+          <td>${order.username || 'Guest'}</td>
+          <td>${formattedDate}</td>
+          <td><span class="badge ${statusClass}">${order.status}</span></td>
+          <td>$${parseFloat(order.totalAmount).toFixed(2)}</td>
+          <td>
+            <a href="orders.html?id=${order.id}" class="btn btn-sm btn-outline-primary">View</a>
+          </td>
+        </tr>
       `;
-      
-      recentReviewsContainer.appendChild(reviewElement);
     });
+    
+    tableBody.innerHTML = html;
+  }
+  
+  // Show loading state
+  function showLoadingState() {
+    document.getElementById('error-container').classList.add('d-none');
+  }
+  
+  // Hide loading state
+  function hideLoadingState() {
+    // Nothing to do here since we're replacing content directly
+  }
+  
+  // Show error message
+  function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    const errorMessage = document.getElementById('error-message');
+    
+    errorMessage.textContent = message;
+    errorContainer.classList.remove('d-none');
   }
 </script>
 </body>

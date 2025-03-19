@@ -85,9 +85,11 @@ window.initializeData = function() {
       images: ['/src/client/img/mug_1.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_3.JPG'],
       listingDate: yesterday.toISOString(),
       reviews: [
-        { name: 'Jane D.', rating: 5, comment: 'Beautiful mug, love the craftsmanship!', date: '2023-10-15' },
-        { name: 'Michael R.', rating: 4, comment: 'Great quality and unique design.', date: '2023-09-20' }
-      ]
+        { id: 1, userId: 1, name: 'Jane D.', rating: 5, comment: 'Beautiful mug, love the craftsmanship!', date: '2023-10-15' },
+        { id: 2, userId: 2, name: 'Michael R.', rating: 4, comment: 'Great quality and unique design.', date: '2023-09-20' }
+      ],
+      createdAt: yesterday.toISOString(),
+      updatedAt: yesterday.toISOString()
     },
     {
       id: 2, 
@@ -103,8 +105,10 @@ window.initializeData = function() {
       images: ['/src/client/img/mug_item2_1.JPG', '/src/client/img/mug_item2_2.JPG', '/src/client/img/mug_item2_3.JPG'],
       listingDate: today.toISOString(),
       reviews: [
-        { name: 'Sarah T.', rating: 5, comment: 'These mugs are stunning! Perfect size and feel great in the hand.', date: '2023-11-05' }
-      ]
+        { id: 3, userId: 3, name: 'Sarah T.', rating: 5, comment: 'These mugs are stunning! Perfect size and feel great in the hand.', date: '2023-11-05' }
+      ],
+      createdAt: today.toISOString(),
+      updatedAt: today.toISOString()
     },
     {
       id: 3, 
@@ -119,7 +123,9 @@ window.initializeData = function() {
       salePrice: null,
       images: ['/src/client/img/mug_3.JPG', '/src/client/img/mug_2.JPG', '/src/client/img/mug_1.JPG'],
       listingDate: twoDaysAgo.toISOString(),
-      reviews: []
+      reviews: [],
+      createdAt: twoDaysAgo.toISOString(),
+      updatedAt: twoDaysAgo.toISOString()
     },
     {
       id: 4, 
@@ -135,9 +141,11 @@ window.initializeData = function() {
       images: ['/src/client/img/Wood_1.JPG', '/src/client/img/Wood_2.JPG', '/src/client/img/Wood_3.JPG'],
       listingDate: threeDaysAgo.toISOString(),
       reviews: [
-        { name: 'Robert J.', rating: 5, comment: 'Stunning piece of art. The craftsmanship is exceptional.', date: '2023-10-10' },
-        { name: 'Lisa M.', rating: 4, comment: 'Beautiful grain patterns and excellent finish.', date: '2023-09-05' }
-      ]
+        { id: 4, userId: 4, name: 'Robert J.', rating: 5, comment: 'Stunning piece of art. The craftsmanship is exceptional.', date: '2023-10-10' },
+        { id: 5, userId: 5, name: 'Lisa M.', rating: 4, comment: 'Beautiful grain patterns and excellent finish.', date: '2023-09-05' }
+      ],
+      createdAt: threeDaysAgo.toISOString(),
+      updatedAt: threeDaysAgo.toISOString()
     },
     {
       id: 5, 
@@ -153,8 +161,10 @@ window.initializeData = function() {
       images: ['/src/client/img/wood_item2_1.JPG', '/src/client/img/wood_item2_2.JPG', '/src/client/img/wood_item2_3.JPG'],
       listingDate: fiveDaysAgo.toISOString(),
       reviews: [
-        { name: 'David K.', rating: 5, comment: 'This bowl is simply beautiful! The craftsmanship is outstanding.', date: '2023-11-15' }
-      ]
+        { id: 6, userId: 6, name: 'David K.', rating: 5, comment: 'This bowl is simply beautiful! The craftsmanship is outstanding.', date: '2023-11-15' }
+      ],
+      createdAt: fiveDaysAgo.toISOString(),
+      updatedAt: fiveDaysAgo.toISOString()
     },
     {
       id: 6, 
@@ -170,9 +180,11 @@ window.initializeData = function() {
       images: ['/src/client/img/Handwoven_1.JPG', '/src/client/img/Handwoven_2.JPG', '/src/client/img/Handwoven_3.JPG'],
       listingDate: threeDaysAgo.toISOString(),
       reviews: [
-        { name: 'Emily R.', rating: 5, comment: 'This wall hanging is even more beautiful in person! The craftsmanship is incredible.', date: '2023-10-25' },
-        { name: 'Thomas N.', rating: 4, comment: 'Love the natural colors and texture. It\'s the perfect addition to my living room.', date: '2023-09-18' }
-      ]
+        { id: 7, userId: 7, name: 'Emily R.', rating: 5, comment: 'This wall hanging is even more beautiful in person! The craftsmanship is incredible.', date: '2023-10-25' },
+        { id: 8, userId: 8, name: 'Thomas N.', rating: 4, comment: 'Love the natural colors and texture. It\'s the perfect addition to my living room.', date: '2023-09-18' }
+      ],
+      createdAt: threeDaysAgo.toISOString(),
+      updatedAt: threeDaysAgo.toISOString()
     },
     {
       id: 7, 
@@ -188,24 +200,10 @@ window.initializeData = function() {
       images: ['/src/client/img/handwoven_item2_1.JPG', '/src/client/img/handwoven_item2_2.JPG', '/src/client/img/handwoven_item2_3.JPG'],
       listingDate: sevenDaysAgo.toISOString(),
       reviews: [
-        { name: 'Jennifer L.', rating: 5, comment: 'These baskets are beautiful and well-made. Perfect for organizing my space!', date: '2023-11-08' }
-      ]
-    },
-    // 添加一个空产品作为示例
-    {
-      id: 8,
-      name: "",
-      categoryId: null,
-      designerId: null,
-      price: null,
-      stock: null,
-      description: "",
-      details: "",
-      onSale: false,
-      salePrice: null,
-      images: [],
-      listingDate: today.toISOString(),
-      reviews: []
+        { id: 9, userId: 9, name: 'Jennifer L.', rating: 5, comment: 'These baskets are beautiful and well-made. Perfect for organizing my space!', date: '2023-11-08' }
+      ],
+      createdAt: sevenDaysAgo.toISOString(),
+      updatedAt: sevenDaysAgo.toISOString()
     }
   ];
   
@@ -248,17 +246,10 @@ window.initializeData = function() {
       });
       
       console.log('Verification - Products from last month:', recentProducts.length);
-      if (recentProducts.length > 0) {
-        console.log('Verification - Recent product names:', recentProducts.map(p => p.name).join(', '));
-      } else {
-        console.warn('Verification - No recent products found! Date comparison may be incorrect.');
-      }
     }
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('Error verifying stored data:', error);
   }
-  
-  return { products, categories, designers };
 };
 
 // Call initialization function

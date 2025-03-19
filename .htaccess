@@ -1,12 +1,25 @@
+# PurelyHandmade .htaccess 文件
+# 用于路由前端和API请求
+
 # 启用重写引擎
 RewriteEngine On
 
-# 确保请求不是已存在的文件或目录
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# 设置基本URL（如果在子目录中）
+# RewriteBase /purelyhandmade/
 
-# 将所有请求交给入口文件处理
-RewriteRule ^(.*)$ src/server/index.php [QSA,L]
+# 如果是实际存在的文件或目录，直接访问
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 处理API请求
+RewriteRule ^api/(.*)$ src/server/api.php [QSA,L]
+
+# 如果请求的是客户端文件，进行路由
+RewriteRule ^client/(.*)$ src/client/$1 [QSA,L]
+
+# 其他所有请求都路由到主入口文件
+RewriteRule ^(.*)$ src/index.php [QSA,L]
 
 # PHP设置
 php_flag display_errors on
@@ -28,4 +41,4 @@ AddDefaultCharset UTF-8
 </Files>
 
 # 定义默认文档
-DirectoryIndex src/server/index.php 
+DirectoryIndex src/index.php 
