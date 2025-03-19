@@ -1,27 +1,24 @@
 module.exports = {
-  // 测试环境是jsdom（浏览器环境）
-  testEnvironment: 'jsdom',
+  // 测试环境是node（服务器环境）
+  testEnvironment: 'node',
   
   // 测试文件的匹配模式
   testMatch: [
     '**/tests/**/*.test.js'
   ],
   
-  // 忽略的文件夹
-  testPathIgnorePatterns: [
-    '/node_modules/'
-  ],
-  
   // 测试覆盖率设置
   collectCoverage: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    'src/client/js/**/*.js'
+    'src/server/**/*.js',
+    '!src/server/seed.js'
   ],
+  coverageReporters: ['text', 'lcov'],
   
   // 每个测试文件运行前的设置
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup.js'
+    './tests/setup.js'
   ],
   
   // 模块路径别名

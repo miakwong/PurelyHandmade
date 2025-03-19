@@ -262,3 +262,36 @@ const UIHelpers = {
         : '';
       
       html += `
+        <div class="col-md-4 col-lg-3 mb-4">
+          <div class="card product-card h-100">
+            ${discount}
+            <img src="${product.image || imgBasePath + 'product-placeholder.jpg'}" class="card-img-top" alt="${product.name}">
+            <div class="card-body">
+              <h5 class="card-title">${product.name}</h5>
+              <p class="card-text">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="price-tag">${price}</div>
+                <button class="btn btn-primary btn-sm add-to-cart" data-product-id="${product.id}">
+                  <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Add event listeners to the Add to Cart buttons
+    container.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', () => {
+        const productId = button.getAttribute('data-product-id');
+        DataService.addToCart(productId, 1);
+        this.showToast('Product added to cart!', 'success');
+        this.updateCartCount();
+      });
+    });
+  }
+};
