@@ -1,37 +1,42 @@
 <?php
 /**
- * 数据库连接和查询辅助类
+ * Database connection and query helper class
  */
+
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'purely_handmade';
-    private $username = 'root';
-    private $password = '';
     private $conn = null;
-    
-    /**
-     * 获取数据库连接
-     */
-    public function getConnection() {
-        try {
-            if ($this->conn === null) {
-                $this->conn = new PDO(
-                    "mysql:host={$this->host};dbname={$this->db_name}",
-                    $this->username,
-                    $this->password
-                );
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->conn->exec("set names utf8");
-            }
-            return $this->conn;
-        } catch(PDOException $e) {
-            echo "连接失败: " . $e->getMessage();
-            return null;
-        }
+    private $config;
+
+    public function __construct() {
+        $configData = require __DIR__ . "/../config.php";
+
+        //根据 ENV_MODE 选择数据库配置 Select database configuration according to ENV_MODE
+        $this->config = $configData[$configData['ENV_MODE']];
     }
     
     /**
-     * 执行查询并返回结果集
+     * Get database connection
+     */
+    public function getConnection() {
+        if ($this->conn === null) {
+            try {
+                $this->conn = new PDO(
+                    "mysql:host=" . $this->config['host'] . ";dbname=" . $this->config['dbname'],
+                    $this->config['username'],
+                    $this->config['password']
+                );
+                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->conn->exec("set names utf8");
+            } catch (PDOException $e) {
+                throw new Exception("Database connection error: " . $e->getMessage());
+            }
+        }
+        return $this->conn;
+    }
+
+    
+    /**
+     * 执行查询并返回结果集 Execute an SQL query and return the result set
      */
     public function query($sql, $params = []) {
         try {
@@ -39,35 +44,49 @@ class Database {
             $stmt->execute($params);
             return $stmt;
         } catch(PDOException $e) {
-            echo "查询失败: " . $e->getMessage();
+            echo "Query failed: " . $e->getMessage();
             return null;
         }
     }
     
     /**
-     * 执行查询并返回单个结果
+     * 执行查询并返回单个结果Execute an SQL query and return a single result
      */
     public function fetchOne($sql, $params = []) {
         $stmt = $this->query($sql, $params);
         return $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
+
+        if ($result && isset($result['avatar'])) {
+            // 解码 Base64 数据以便使用
+            $result['avatar'] = base64_decode($result['avatar']);
+        }
+    
+        return $result;
     }
     
     /**
-     * 执行查询并返回所有结果
+     * 执行查询并返回所有结果Execute an SQL query and return all results
      */
     public function fetchAll($sql, $params = []) {
         $stmt = $this->query($sql, $params);
         return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+
+        foreach ($results as &$result) {
+            if (isset($result['avatar'])) {
+                // 解码 Base64 数据
+                $result['avatar'] = base64_decode($result['avatar']);
+            }
+        }
+    
+        return $results;
     }
     
     /**
-     * 插入记录并返回新插入的ID
+     * 插入记录并返回新插入的IDInsert a record and return the newly inserted ID
      */
     public function insert($table, $data) {
         $fields = array_keys($data);
-        $placeholders = array_map(function($field) {
-            return ":{$field}";
-        }, $fields);
+        $placeholders = array_map(fn($field) => ":{$field}", $fields);
         
         $sql = "INSERT INTO {$table} (" . implode(", ", $fields) . ") 
                 VALUES (" . implode(", ", $placeholders) . ")";
@@ -77,13 +96,13 @@ class Database {
             $stmt->execute($data);
             return $this->getConnection()->lastInsertId();
         } catch(PDOException $e) {
-            echo "插入失败: " . $e->getMessage();
+            echo "Insert failed: " . $e->getMessage();
             return false;
         }
     }
     
     /**
-     * 更新记录
+     * Update records in the database
      */
     public function update($table, $data, $where, $whereParams = []) {
         $setClauses = [];
@@ -104,25 +123,38 @@ class Database {
             $stmt = $this->getConnection()->prepare($sql);
             $stmt->execute($params);
             return $stmt->rowCount();
-        } catch(PDOException $e) {
-            echo "更新失败: " . $e->getMessage();
+        } catch (PDOException $e) {
+            echo "Update failed: " . $e->getMessage();
             return false;
         }
     }
     
     /**
-     * 删除记录
+     * Delete records from the database
      */
     public function delete($table, $where, $params = []) {
         $sql = "DELETE FROM {$table} WHERE {$where}";
-        
+
         try {
             $stmt = $this->getConnection()->prepare($sql);
             $stmt->execute($params);
             return $stmt->rowCount();
-        } catch(PDOException $e) {
-            echo "删除失败: " . $e->getMessage();
+        } catch (PDOException $e) {
+            echo "Delete failed: " . $e->getMessage();
             return false;
+        }
+    }
+
+    
+    /**
+     * Test connection
+     */
+    public function testConnection() {
+        try {
+            $this->getConnection();
+            echo "✅ Database connection successful!";
+        } catch (Exception $e) {
+            echo "❌ Database connection failed: " . $e->getMessage();
         }
     }
 } 
