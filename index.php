@@ -1,5 +1,5 @@
 <?php
-// 重定向到首页
+//Redirect to the index.html file
 header("Location: /src/client/html/index.html");
 exit;
 ?> 
