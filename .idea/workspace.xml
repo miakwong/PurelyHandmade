@@ -39,7 +39,7 @@
     "JavaScript Debug.product_detail.html.executor": "Run",
     "Node.js.product_detail.js.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "milestone2",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/mia/IdeaProjects/PurelyHandmade",
     "node.js.detected.package.eslint": "true",
@@ -95,6 +95,7 @@
       <updated>1740801590238</updated>
       <workItem from="1740801591224" duration="49284000" />
       <workItem from="1740901832247" duration="21000" />
+      <workItem from="1742089146257" duration="1118000" />
     </task>
     <servers />
   </component>
