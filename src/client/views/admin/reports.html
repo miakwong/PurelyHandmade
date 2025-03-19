@@ -147,182 +147,246 @@
 
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-graph-up me-2 text-primary"></i>Reports & Analytics</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
-
-  <!-- Filter Section -->
-  <div class="filter-section mb-4">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label for="date-range" class="form-label">Date Range</label>
-        <select class="form-select" id="date-range">
-          <option value="7">Last 7 Days</option>
-          <option value="30" selected>Last 30 Days</option>
-          <option value="90">Last 90 Days</option>
-          <option value="365">Last Year</option>
-          <option value="all">All Time</option>
-        </select>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
       </div>
-      <div class="col-md-6 d-flex align-items-end">
-        <button class="btn btn-primary w-100" onclick="applyFilters()">
-          <i class="bi bi-funnel me-2"></i>Apply Filters
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Key Performance Indicators -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="report-stat">
-        <div class="report-stat-title">Total Sales</div>
-        <div class="report-stat-value" id="total-sales">$0</div>
-        <div class="report-stat-trend">
-          <i class="bi bi-arrow-up me-1 trend-up"></i>
-          <span id="sales-trend">0%</span> vs previous period
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="report-stat">
-        <div class="report-stat-title">Orders</div>
-        <div class="report-stat-value" id="total-orders">0</div>
-        <div class="report-stat-trend">
-          <i class="bi bi-arrow-up me-1 trend-up"></i>
-          <span id="orders-trend">0%</span> vs previous period
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="report-stat">
-        <div class="report-stat-title">Average Order Value</div>
-        <div class="report-stat-value" id="avg-order">$0</div>
-        <div class="report-stat-trend">
-          <i class="bi bi-arrow-down me-1 trend-down"></i>
-          <span id="aov-trend">0%</span> vs previous period
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="report-stat">
-        <div class="report-stat-title">Conversion Rate</div>
-        <div class="report-stat-value" id="conversion-rate">0%</div>
-        <div class="report-stat-trend">
-          <i class="bi bi-arrow-up me-1 trend-up"></i>
-          <span id="conversion-trend">0%</span> vs previous period
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sales Chart -->
-  <div class="report-card mb-4">
-    <div class="report-header">
-      <h5 class="mb-0">Sales Over Time</h5>
-    </div>
-    <div class="report-body">
-      <div class="chart-container">
-        <canvas id="salesChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <div class="row mb-4">
-    <!-- Top Products -->
-    <div class="col-md-6">
-      <div class="report-card h-100">
-        <div class="report-header">
-          <h5 class="mb-0">Top Selling Products</h5>
-        </div>
-        <div class="report-body">
-          <div id="top-products">
-            <!-- Top products will be loaded here -->
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Revenue</th>
-                </tr>
-              </thead>
-              <tbody id="top-products-body">
-                <!-- Product rows will be inserted here -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+    </nav>
     
-    <!-- Category Distribution -->
-    <div class="col-md-6">
-      <div class="report-card h-100">
-        <div class="report-header">
-          <h5 class="mb-0">Sales by Category</h5>
-        </div>
-        <div class="report-body">
-          <div class="chart-container">
-            <canvas id="categoryChart"></canvas>
-          </div>
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-graph-up me-2 text-primary"></i>Reports & Analytics</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="row mb-4">
-    <!-- Product Sales Chart -->
-    <div class="col-12">
-      <div class="report-card">
-        <div class="report-header">
-          <h5 class="mb-0">Product Sales Distribution</h5>
-        </div>
-        <div class="report-body">
-          <div class="chart-container">
-            <canvas id="productChart"></canvas>
+      <!-- Filter Section -->
+      <div class="filter-section mb-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="date-range" class="form-label">Date Range</label>
+            <select class="form-select" id="date-range">
+              <option value="7">Last 7 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="365">Last Year</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div class="col-md-6 d-flex align-items-end">
+            <button class="btn btn-primary w-100" onclick="applyFilters()">
+              <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="row mb-4">
-    <!-- User Acquisition -->
-    <div class="col-md-6">
-      <div class="report-card h-100">
-        <div class="report-header">
-          <h5 class="mb-0">New Users</h5>
+      <!-- Key Performance Indicators -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="report-stat">
+            <div class="report-stat-title">Total Sales</div>
+            <div class="report-stat-value" id="total-sales">$0</div>
+            <div class="report-stat-trend">
+              <i class="bi bi-arrow-up me-1 trend-up"></i>
+              <span id="sales-trend">0%</span> vs previous period
+            </div>
+          </div>
         </div>
-        <div class="report-body">
-          <div class="chart-container">
-            <canvas id="usersChart"></canvas>
+        <div class="col-md-3">
+          <div class="report-stat">
+            <div class="report-stat-title">Orders</div>
+            <div class="report-stat-value" id="total-orders">0</div>
+            <div class="report-stat-trend">
+              <i class="bi bi-arrow-up me-1 trend-up"></i>
+              <span id="orders-trend">0%</span> vs previous period
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="report-stat">
+            <div class="report-stat-title">Average Order Value</div>
+            <div class="report-stat-value" id="avg-order">$0</div>
+            <div class="report-stat-trend">
+              <i class="bi bi-arrow-down me-1 trend-down"></i>
+              <span id="aov-trend">0%</span> vs previous period
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="report-stat">
+            <div class="report-stat-title">Conversion Rate</div>
+            <div class="report-stat-value" id="conversion-rate">0%</div>
+            <div class="report-stat-trend">
+              <i class="bi bi-arrow-up me-1 trend-up"></i>
+              <span id="conversion-trend">0%</span> vs previous period
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Order Status Distribution -->
-    <div class="col-md-6">
-      <div class="report-card h-100">
+
+      <!-- Sales Chart -->
+      <div class="report-card mb-4">
         <div class="report-header">
-          <h5 class="mb-0">Order Status Distribution</h5>
+          <h5 class="mb-0">Sales Over Time</h5>
         </div>
         <div class="report-body">
           <div class="chart-container">
-            <canvas id="orderStatusChart"></canvas>
+            <canvas id="salesChart"></canvas>
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="row mb-4">
+        <!-- Top Products -->
+        <div class="col-md-6">
+          <div class="report-card h-100">
+            <div class="report-header">
+              <h5 class="mb-0">Top Selling Products</h5>
+            </div>
+            <div class="report-body">
+              <div id="top-products">
+                <!-- Top products will be loaded here -->
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top-products-body">
+                    <!-- Product rows will be inserted here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Category Distribution -->
+        <div class="col-md-6">
+          <div class="report-card h-100">
+            <div class="report-header">
+              <h5 class="mb-0">Sales by Category</h5>
+            </div>
+            <div class="report-body">
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <!-- Product Sales Chart -->
+        <div class="col-12">
+          <div class="report-card">
+            <div class="report-header">
+              <h5 class="mb-0">Product Sales Distribution</h5>
+            </div>
+            <div class="report-body">
+              <div class="chart-container">
+                <canvas id="productChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <!-- User Acquisition -->
+        <div class="col-md-6">
+          <div class="report-card h-100">
+            <div class="report-header">
+              <h5 class="mb-0">New Users</h5>
+            </div>
+            <div class="report-body">
+              <div class="chart-container">
+                <canvas id="usersChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Status Distribution -->
+        <div class="col-md-6">
+          <div class="report-card h-100">
+            <div class="report-header">
+              <h5 class="mb-0">Order Status Distribution</h5>
+            </div>
+            <div class="report-body">
+              <div class="chart-container">
+                <canvas id="orderStatusChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -349,7 +413,15 @@
     loadData();
     
     // Check user permissions
-    checkAdminPermissions();
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        // Load report data
+        initReports();
+      }
+    }, 100);
   });
   
   function initializeCharts() {
@@ -973,20 +1045,6 @@
     loadData();
   }
   
-  function checkAdminPermissions() {
-    // Check if user is logged in and is admin
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Checking admin permissions for user:', currentUser);
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      // Redirect to login if not admin
-      console.log('User is not admin, redirecting...');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('You must be logged in as an administrator to access this page.');
-    } else {
-      console.log('Admin permissions verified successfully');
-    }
-  }
-
   function updateProductChart(orders, products) {
     // 计算每个产品的销售额
     const productSales = {};

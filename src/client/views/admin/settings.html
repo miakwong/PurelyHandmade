@@ -32,59 +32,123 @@
 
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-gear me-2 text-primary"></i>Website Settings</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-gear me-2 text-primary"></i>Website Settings</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
 
-  <div class="settings-card">
-    <div class="settings-header">
-      <h5 class="mb-0">General Settings</h5>
-    </div>
-    <div class="settings-body">
-      <form id="settings-form">
-        <div class="mb-3">
-          <label for="site-name" class="form-label">Site Name</label>
-          <input type="text" class="form-control" id="site-name" placeholder="Enter site name">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h5 class="mb-0">General Settings</h5>
         </div>
-        <div class="mb-3">
-          <label for="contact-email" class="form-label">Contact Email</label>
-          <input type="email" class="form-control" id="contact-email" placeholder="Enter contact email">
+        <div class="settings-body">
+          <form id="settings-form">
+            <div class="mb-3">
+              <label for="site-name" class="form-label">Site Name</label>
+              <input type="text" class="form-control" id="site-name" placeholder="Enter site name">
+            </div>
+            <div class="mb-3">
+              <label for="contact-email" class="form-label">Contact Email</label>
+              <input type="email" class="form-control" id="contact-email" placeholder="Enter contact email">
+            </div>
+            <div class="mb-3">
+              <label for="phone-number" class="form-label">Phone Number</label>
+              <input type="text" class="form-control" id="phone-number" placeholder="Enter phone number">
+            </div>
+            <div class="mb-3">
+              <label for="address" class="form-label">Address</label>
+              <textarea class="form-control" id="address" rows="3" placeholder="Enter address"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="facebook-link" class="form-label">Facebook Link</label>
+              <input type="url" class="form-control" id="facebook-link" placeholder="Enter Facebook URL">
+            </div>
+            <div class="mb-3">
+              <label for="twitter-link" class="form-label">Twitter Link</label>
+              <input type="url" class="form-control" id="twitter-link" placeholder="Enter Twitter URL">
+            </div>
+            <div class="mb-3">
+              <label for="instagram-link" class="form-label">Instagram Link</label>
+              <input type="url" class="form-control" id="instagram-link" placeholder="Enter Instagram URL">
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-secondary me-2" onclick="resetSettings()">Reset</button>
+              <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+            </div>
+          </form>
         </div>
-        <div class="mb-3">
-          <label for="phone-number" class="form-label">Phone Number</label>
-          <input type="text" class="form-control" id="phone-number" placeholder="Enter phone number">
-        </div>
-        <div class="mb-3">
-          <label for="address" class="form-label">Address</label>
-          <textarea class="form-control" id="address" rows="3" placeholder="Enter address"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="facebook-link" class="form-label">Facebook Link</label>
-          <input type="url" class="form-control" id="facebook-link" placeholder="Enter Facebook URL">
-        </div>
-        <div class="mb-3">
-          <label for="twitter-link" class="form-label">Twitter Link</label>
-          <input type="url" class="form-control" id="twitter-link" placeholder="Enter Twitter URL">
-        </div>
-        <div class="mb-3">
-          <label for="instagram-link" class="form-label">Instagram Link</label>
-          <input type="url" class="form-control" id="instagram-link" placeholder="Enter Instagram URL">
-        </div>
-        <div class="d-flex justify-content-end">
-          <button type="button" class="btn btn-secondary me-2" onclick="resetSettings()">Reset</button>
-          <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -99,7 +163,14 @@
     loadFooter();
     
     // Load existing settings
-    loadSettings();
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        loadSettings();
+      }
+    }, 100);
   });
 
   function loadSettings() {

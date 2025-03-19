@@ -1022,13 +1022,13 @@
       adminTabContainer.style.display = 'none';
       
       // 只有当用户存在且是管理员时才显示
-      if (currentUser && (currentUser.role === 'admin' || currentUser.isAdmin === true)) {
+      if (currentUser && currentUser.isAdmin === true) {
         adminTabContainer.style.display = 'block';
         console.log('Admin status detected, showing admin dashboard button');
-        } else {
-        console.log('User is not an admin or not logged in, hiding admin dashboard button');
-        }
       } else {
+        console.log('User is not an admin or not logged in, hiding admin dashboard button');
+      }
+    } else {
       console.error('Admin tab container element not found');
     }
   }

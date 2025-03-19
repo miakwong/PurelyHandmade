@@ -113,102 +113,166 @@
 
 <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-receipt me-2 text-primary"></i>Order Management</h1>
-    <div>
-      <a href="dashboard.html" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-        <i class="bi bi-person me-2"></i>Back to Profile
-      </a>
-    </div>
-  </div>
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-receipt me-2 text-primary"></i>Order Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
 
-  <div class="card admin-card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Orders List</h5>
-      <span class="filter-toggle" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
-        <i class="bi bi-funnel me-1"></i>Filters <i class="bi bi-chevron-up"></i>
-      </span>
-    </div>
-    <div class="card-body">
-      <!-- Add filter section -->
-      <div class="collapse show" id="filterCollapse">
-        <div class="filter-section mb-4">
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label for="filter-id" class="form-label">Order ID</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
-                <input type="text" class="form-control" id="filter-id" placeholder="Filter by Order ID">
+      <div class="card admin-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Orders List</h5>
+          <span class="filter-toggle" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+            <i class="bi bi-funnel me-1"></i>Filters <i class="bi bi-chevron-up"></i>
+          </span>
+        </div>
+        <div class="card-body">
+          <!-- Add filter section -->
+          <div class="collapse show" id="filterCollapse">
+            <div class="filter-section mb-4">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label for="filter-id" class="form-label">Order ID</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
+                    <input type="text" class="form-control" id="filter-id" placeholder="Filter by Order ID">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label for="filter-user" class="form-label">Customer</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="filter-user" placeholder="Filter by customer name">
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-status" class="form-label">Status</label>
+                  <select class="form-select" id="filter-status">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-date-from" class="form-label">Date From</label>
+                  <input type="date" class="form-control" id="filter-date-from">
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-date-to" class="form-label">Date To</label>
+                  <input type="date" class="form-control" id="filter-date-to">
+                </div>
               </div>
-            </div>
-            <div class="col-md-3">
-              <label for="filter-user" class="form-label">Customer</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" id="filter-user" placeholder="Filter by customer name">
+              <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-end">
+                  <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                  </button>
+                  <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="bi bi-search me-1"></i>Search
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="col-md-2">
-              <label for="filter-status" class="form-label">Status</label>
-              <select class="form-select" id="filter-status">
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label for="filter-date-from" class="form-label">Date From</label>
-              <input type="date" class="form-control" id="filter-date-from">
-            </div>
-            <div class="col-md-2">
-              <label for="filter-date-to" class="form-label">Date To</label>
-              <input type="date" class="form-control" id="filter-date-to">
             </div>
           </div>
-          <div class="row mt-3">
-            <div class="col-12 d-flex justify-content-end">
-              <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
-                <i class="bi bi-x-circle me-1"></i>Clear
-              </button>
-              <button class="btn btn-primary" onclick="applyFilters()">
-                <i class="bi bi-search me-1"></i>Search
-              </button>
+          
+          <div class="table-responsive">
+            <table class="table admin-table table-hover">
+              <thead>
+                <tr>
+                  <th class="order-id-column">Order ID</th>
+                  <th>User</th>
+                  <th>Status</th>
+                  <th>Total Amount</th>
+                  <th>Order Date</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="order-table-body">
+                <!-- Orders data will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+          <div id="no-orders-message" class="text-center py-5 d-none">
+            <div class="py-5">
+              <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3">No orders found</p>
             </div>
           </div>
         </div>
       </div>
-      
-      <div class="table-responsive">
-        <table class="table admin-table table-hover">
-          <thead>
-            <tr>
-              <th class="order-id-column">Order ID</th>
-              <th>User</th>
-              <th>Status</th>
-              <th>Total Amount</th>
-              <th>Order Date</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="order-table-body">
-            <!-- Orders data will be loaded here -->
-          </tbody>
-        </table>
-      </div>
-      <div id="no-orders-message" class="text-center py-5 d-none">
-        <div class="py-5">
-          <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-          <p class="text-muted mt-3">No orders found</p>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 </div>
 
@@ -535,15 +599,15 @@
   }
 
   function checkAdminPermissions() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Checking admin permissions for user:', currentUser);
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      console.log('User is not admin, redirecting...');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('You must be logged in as an administrator to access this page.');
-    } else {
-      console.log('Admin permissions verified successfully');
-    }
+    setTimeout(() => {
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser || currentUser.isAdmin !== true) {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      } else {
+        // Load orders data
+        loadOrders();
+      }
+    }, 100);
   }
   
   // Current filter values
