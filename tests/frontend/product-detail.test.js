@@ -82,7 +82,7 @@ describe('产品详情页面测试', () => {
     };
     
     const mockCategory = {
-      id: 1,
+        id: 1,
       name: 'Test Category',
       slug: 'test-category'
     };
@@ -261,7 +261,7 @@ describe('产品详情页面测试', () => {
   test('库存为0时"Add to Cart"按钮应被禁用', () => {
     // 模拟产品数据
     const mockProduct = {
-      id: 1,
+        id: 1,
       name: 'Out of Stock Product',
       price: 29.99,
       stock: 0

@@ -270,98 +270,98 @@
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2"><i class="bi bi-box-seam me-2 text-primary"></i>Product Management</h1>
         <div>
-          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-            <i class="bi bi-person me-2"></i>Back to Profile
-          </a>
+      <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-2"></i>Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section mb-4">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label for="filter-category" class="form-label">Category</label>
+        <select class="form-select" id="filter-category">
+          <option value="">All Categories</option>
+          <!-- Categories will be loaded here -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-designer" class="form-label">Designer</label>
+        <select class="form-select" id="filter-designer">
+          <option value="">All Designers</option>
+          <!-- Designers will be loaded here -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-status" class="form-label">Status</label>
+        <select class="form-select" id="filter-status">
+          <option value="">All Status</option>
+          <option value="in-stock">In Stock</option>
+          <option value="low-stock">Low Stock</option>
+          <option value="out-of-stock">Out of Stock</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filter-search" class="form-label">Search</label>
+        <input type="text" class="form-control" id="filter-search" placeholder="Search products...">
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-secondary me-2" onclick="resetFilters()">
+          <i class="bi bi-x-circle me-2"></i>Clear Filters
+        </button>
+        <button class="btn btn-primary" onclick="applyFilters()">
+          <i class="bi bi-funnel me-2"></i>Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 product-management-card">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="mb-0">Product Management</h5>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" onclick="resetProductForm()">
+            <i class="bi bi-plus-circle me-2"></i>Add Product
+          </button>
         </div>
       </div>
-
-      <!-- Filter Section -->
-      <div class="filter-section mb-4">
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label for="filter-category" class="form-label">Category</label>
-            <select class="form-select" id="filter-category">
-              <option value="">All Categories</option>
-              <!-- Categories will be loaded here -->
-            </select>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover product-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Category</th>
+              <th>Designer</th>
+              <th>Reviews</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="product-table-body">
+            <!-- Product data will be loaded here -->
+          </tbody>
+        </table>
+        <div id="no-products-message" class="d-none text-center py-5">
+          <div class="empty-state-icon mx-auto mb-3">
+            <i class="bi bi-box"></i>
           </div>
-          <div class="col-md-3">
-            <label for="filter-designer" class="form-label">Designer</label>
-            <select class="form-select" id="filter-designer">
-              <option value="">All Designers</option>
-              <!-- Designers will be loaded here -->
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="filter-status" class="form-label">Status</label>
-            <select class="form-select" id="filter-status">
-              <option value="">All Status</option>
-              <option value="in-stock">In Stock</option>
-              <option value="low-stock">Low Stock</option>
-              <option value="out-of-stock">Out of Stock</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="filter-search" class="form-label">Search</label>
-            <input type="text" class="form-control" id="filter-search" placeholder="Search products...">
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-12 d-flex justify-content-end">
-            <button class="btn btn-secondary me-2" onclick="resetFilters()">
-              <i class="bi bi-x-circle me-2"></i>Clear Filters
-            </button>
-            <button class="btn btn-primary" onclick="applyFilters()">
-              <i class="bi bi-funnel me-2"></i>Apply Filters
-            </button>
-          </div>
+          <p class="text-muted mb-3">No products found</p>
+          <button class="btn btn-primary" onclick="resetProductForm()">
+            Add Your First Product
+          </button>
         </div>
       </div>
-
-      <div class="card mb-4 product-management-card">
-        <div class="card-header">
-          <div class="row align-items-center">
-            <div class="col">
-              <h5 class="mb-0">Product Management</h5>
-            </div>
-            <div class="col-auto">
-              <button class="btn btn-primary" onclick="resetProductForm()">
-                <i class="bi bi-plus-circle me-2"></i>Add Product
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover product-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Category</th>
-                  <th>Designer</th>
-                  <th>Reviews</th>
-                  <th class="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="product-table-body">
-                <!-- Product data will be loaded here -->
-              </tbody>
-            </table>
-            <div id="no-products-message" class="d-none text-center py-5">
-              <div class="empty-state-icon mx-auto mb-3">
-                <i class="bi bi-box"></i>
-              </div>
-              <p class="text-muted mb-3">No products found</p>
-              <button class="btn btn-primary" onclick="resetProductForm()">
-                Add Your First Product
-              </button>
-            </div>
-          </div>
-        </div>
+    </div>
       </div>
     </main>
   </div>
@@ -605,6 +605,188 @@
 <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 直接在页面中内联定义关键服务，避免加载问题 -->
+<script>
+/**
+ * API Service for Purely Handmade
+ * 提供统一的API访问层，处理所有与服务器的通信
+ */
+const ApiService = {
+  // 基础API URL
+  baseUrl: '/api',
+  
+  // 处理API响应
+  handleResponse: async function(response) {
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    
+    // 如果状态码不在2xx范围内，抛出错误
+    if (!response.ok) {
+      let errorData;
+      
+      try {
+        errorData = isJson ? await response.json() : await response.text();
+      } catch (error) {
+        errorData = 'Failed to parse error response';
+      }
+      
+      const error = new Error(
+        isJson && errorData.error 
+          ? errorData.error 
+          : 'API request failed'
+      );
+      
+      error.status = response.status;
+      error.statusText = response.statusText;
+      error.data = errorData;
+      
+      throw error;
+    }
+    
+    // 解析成功响应
+    return isJson ? response.json() : response.text();
+  },
+  
+  // 发送请求
+  request: async function(url, options = {}) {
+    const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+    
+    // 默认选项
+    const defaultOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'same-origin',
+    };
+    
+    // 合并选项
+    const fetchOptions = {
+      ...defaultOptions,
+      ...options,
+      headers: {
+        ...defaultOptions.headers,
+        ...options.headers,
+      },
+    };
+    
+    try {
+      const response = await fetch(fullUrl, fetchOptions);
+      return await this.handleResponse(response);
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  },
+  
+  // GET请求
+  get: function(url, params = {}) {
+    // 构建查询字符串
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        queryParams.append(key, params[key]);
+      }
+    });
+    
+    const queryString = queryParams.toString();
+    const fullUrl = queryString ? `${url}?${queryString}` : url;
+    
+    return this.request(fullUrl, { method: 'GET' });
+  },
+  
+  // POST请求
+  post: function(url, data = {}) {
+    return this.request(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // PUT请求
+  put: function(url, data = {}) {
+    return this.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // DELETE请求
+  delete: function(url) {
+    return this.request(url, { method: 'DELETE' });
+  }
+};
+
+/**
+ * Admin API Service for Purely Handmade
+ * 提供管理员API访问层，处理与服务器的管理功能通信
+ */
+const AdminApiService = {
+  // 获取所有用户
+  getAllUsers: function() {
+    return ApiService.get('/users?all=1');
+  },
+  
+  // 获取所有产品
+  getAllProducts: function() {
+    return ApiService.get('/products');
+  },
+  
+  // 添加新产品
+  addProduct: function(productData) {
+    return ApiService.post('/products', productData);
+  },
+  
+  // 更新产品
+  updateProduct: function(productId, productData) {
+    return ApiService.put(`/products/${productId}`, productData);
+  },
+  
+  // 删除产品
+  deleteProduct: function(productId) {
+    return ApiService.delete(`/products/${productId}`);
+  },
+  
+  // 获取所有类别
+  getAllCategories: function() {
+    return ApiService.get('/categories');
+  },
+  
+  // 添加新类别
+  addCategory: function(categoryData) {
+    return ApiService.post('/categories', categoryData);
+  },
+  
+  // 更新类别
+  updateCategory: function(categoryId, categoryData) {
+    return ApiService.put(`/categories/${categoryId}`, categoryData);
+  },
+  
+  // 删除类别
+  deleteCategory: function(categoryId) {
+    return ApiService.delete(`/categories/${categoryId}`);
+  },
+  
+  // 获取所有设计师
+  getAllDesigners: function() {
+    return ApiService.get('/designers');
+  },
+  
+  // 获取所有订单
+  getAllOrders: function() {
+    return ApiService.get('/orders?all=1');
+  },
+  
+  // 获取所有评论
+  getAllReviews: function() {
+    return ApiService.get('/reviews');
+  }
+};
+</script>
+
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/ui-helpers.js"></script>
 <script src="/src/client/js/common.js"></script>
 <script>
   // Store gallery images for the current product
@@ -620,10 +802,18 @@
   // Store current product for reviews
   let currentReviewProductId = null;
   
+  // 全局加载状态标记
+  let isLoading = false;
+  
   document.addEventListener('DOMContentLoaded', function() {
     // Load nav and footer
+    if (typeof UIHelpers !== 'undefined') {
+      UIHelpers.loadNavbar();
+      UIHelpers.loadFooter();
+    } else {
     loadNavbar();
     loadFooter();
+    }
     
     // Check user permissions
     checkAdminPermissions();
@@ -638,14 +828,24 @@
   
   // Initialize product management functionality
   function initProductManagement() {
-    // Load products data
-    loadProducts();
+    // 显示全局加载状态
+    showPageLoadingState();
     
-    // Load categories for dropdown
-    loadCategoriesForDropdown();
-    
-    // Load designers for dropdown
-    loadDesignersForDropdown();
+    // 并行加载所有数据
+    Promise.all([
+      loadProducts(),
+      loadCategoriesForDropdown(),
+      loadDesignersForDropdown()
+    ])
+    .then(() => {
+      // 隐藏全局加载状态
+      hidePageLoadingState();
+    })
+    .catch(error => {
+      console.error('初始化失败:', error);
+      showErrorMessage('加载数据时出错，请刷新页面或稍后再试。');
+      hidePageLoadingState();
+    });
     
     // Set up image preview for main product image
     document.getElementById('product-image-file').addEventListener('change', function(event) {
@@ -681,44 +881,128 @@
     });
   }
   
+  // 显示页面全局加载状态
+  function showPageLoadingState() {
+    isLoading = true;
+    
+    // 创建一个加载蒙层
+    if (!document.getElementById('global-loading')) {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'global-loading';
+      loadingEl.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+      loadingEl.innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 text-primary fw-bold">正在加载数据...</p>
+        </div>
+      `;
+      document.body.appendChild(loadingEl);
+    } else {
+      document.getElementById('global-loading').style.display = 'flex';
+    }
+  }
+  
+  // 隐藏页面全局加载状态
+  function hidePageLoadingState() {
+    isLoading = false;
+    const loadingEl = document.getElementById('global-loading');
+    if (loadingEl) {
+      loadingEl.style.display = 'none';
+    }
+  }
+  
+  // 显示错误消息
+  function showErrorMessage(message) {
+    const main = document.querySelector('main');
+    if (main) {
+      const alertEl = document.createElement('div');
+      alertEl.className = 'alert alert-danger alert-dismissible fade show my-3';
+      alertEl.role = 'alert';
+      alertEl.innerHTML = `
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      // 插入到页面顶部
+      if (main.firstChild) {
+        main.insertBefore(alertEl, main.firstChild);
+      } else {
+        main.appendChild(alertEl);
+      }
+    } else {
+      // 如果找不到main元素，使用toast
+      showToast(message, 'danger');
+    }
+  }
+  
   // Product management functions
-  function loadProducts() {
-    // Get products from localStorage
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
+  async function loadProducts() {
     const tableBody = document.getElementById('product-table-body');
     const noProducts = document.getElementById('no-products-message');
-    
-    // Apply filters if any
-    products = filterProducts(products);
     
     if (!tableBody) {
       console.error('product-table-body element not found! DOM may not be fully loaded.');
       return; // Exit the function early if tableBody doesn't exist
     }
     
-    // Clear existing rows
+    // 显示加载状态
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading products...</p>
+        </td>
+      </tr>
+    `;
+    
+    try {
+      // 从API获取产品数据
+      const result = await AdminApiService.getAllProducts();
+      let products = result.data || [];
+      
+      // 应用过滤器
+      products = filterProducts(products);
+      
+      // 清空现有行
     tableBody.innerHTML = '';
     
     if (products.length === 0) {
-      // No products found, show empty state message
+        // 没有产品，显示空状态消息
       tableBody.parentElement.classList.add('d-none');
       noProducts.classList.remove('d-none');
     } else {
-      // Show table and hide empty state
+        // 显示表格，隐藏空状态
       tableBody.parentElement.classList.remove('d-none');
       noProducts.classList.add('d-none');
       
-      // Get categories and designers for lookup
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
-      const designers = JSON.parse(localStorage.getItem('designers') || '[]');
-      
-      // Add product rows
-      products.forEach(product => {
-        // Find category and designer names
-        const category = categories.find(c => c.id === product.categoryId);
-        const designer = designers.find(d => d.id === product.designerId);
+        // 获取类别和设计师数据-使用缓存避免重复请求
+        let categories = window.adminCachedCategories || [];
+        let designers = window.adminCachedDesigners || [];
         
-        // Determine stock status badge
+        if (!categories.length) {
+          const catResult = await AdminApiService.getAllCategories();
+          categories = catResult.data || [];
+          window.adminCachedCategories = categories;
+        }
+        
+        if (!designers.length) {
+          const designerResult = await AdminApiService.getAllDesigners();
+          designers = designerResult.data || [];
+          window.adminCachedDesigners = designers;
+        }
+        
+        // 添加产品行
+      products.forEach(product => {
+          // 查找类别和设计师名称
+          const category = categories.find(c => c.id == product.categoryId);
+          const designer = designers.find(d => d.id == product.designerId);
+          
+          // 确定库存状态徽章
         let stockBadge;
         if (product.stock <= 0) {
           stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
@@ -753,7 +1037,7 @@
           <td>
             <button class="btn btn-sm btn-outline-secondary" onclick="viewProductReviews('${product.id}')">
               <i class="bi bi-chat-left-text me-1"></i>
-              <span class="review-count">${getReviewCount(product.id)}</span>
+                <span class="review-count">${product.reviewCount || 0}</span>
             </button>
           </td>
           <td class="text-center">
@@ -771,21 +1055,34 @@
         tableBody.appendChild(row);
       });
       
-      // Initialize tooltips
+        // 初始化提示工具
       const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+      }
+    } catch (error) {
+      console.error('加载产品时出错:', error);
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <div class="alert alert-danger mb-0">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              加载产品数据时出错，请刷新页面或稍后再试。
+            </div>
+          </td>
+        </tr>
+      `;
     }
   }
 
   function filterProducts(products) {
     return products.filter(product => {
       // Apply category filter
-      if (currentFilters.category && product.categoryId !== currentFilters.category) {
+      if (currentFilters.category && product.categoryId != currentFilters.category) {
         return false;
       }
       
       // Apply designer filter
-      if (currentFilters.designer && product.designerId !== currentFilters.designer) {
+      if (currentFilters.designer && product.designerId != currentFilters.designer) {
         return false;
       }
       
@@ -841,14 +1138,20 @@
     loadProducts();
   }
 
-  function loadCategoriesForDropdown() {
-    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+  async function loadCategoriesForDropdown() {
     const categoryDropdown = document.getElementById('product-category');
     const filterDropdown = document.getElementById('filter-category');
     
-    // Fill product form dropdown
+    try {
+      const result = await AdminApiService.getAllCategories();
+      const categories = result.data || [];
+      
+      // 缓存类别数据
+      window.adminCachedCategories = categories;
+      
+      // 填充产品表单下拉菜单
     if (categoryDropdown) {
-      // Keep the first option and add categories
+        // 保留第一个选项并添加类别
       const defaultOption = categoryDropdown.options[0];
       categoryDropdown.innerHTML = '';
       categoryDropdown.appendChild(defaultOption);
@@ -861,9 +1164,9 @@
       });
     }
     
-    // Fill filter dropdown
+      // 填充筛选下拉菜单
     if (filterDropdown) {
-      // Keep the first option and add categories
+        // 保留第一个选项并添加类别
       const defaultOption = filterDropdown.options[0];
       filterDropdown.innerHTML = '';
       filterDropdown.appendChild(defaultOption);
@@ -874,17 +1177,27 @@
         option.textContent = category.name;
         filterDropdown.appendChild(option);
       });
+      }
+    } catch (error) {
+      console.error('加载类别时出错:', error);
+      showToast('加载类别数据时出错，某些功能可能不可用', 'warning');
     }
   }
 
-  function loadDesignersForDropdown() {
-    const designers = JSON.parse(localStorage.getItem('designers') || '[]');
+  async function loadDesignersForDropdown() {
     const designerDropdown = document.getElementById('product-designer');
     const filterDropdown = document.getElementById('filter-designer');
     
-    // Fill product form dropdown
+    try {
+      const result = await AdminApiService.getAllDesigners();
+      const designers = result.data || [];
+      
+      // 缓存设计师数据
+      window.adminCachedDesigners = designers;
+      
+      // 填充产品表单下拉菜单
     if (designerDropdown) {
-      // Keep the first option and add designers
+        // 保留第一个选项并添加设计师
       const defaultOption = designerDropdown.options[0];
       designerDropdown.innerHTML = '';
       designerDropdown.appendChild(defaultOption);
@@ -897,9 +1210,9 @@
       });
     }
     
-    // Fill filter dropdown
+      // 填充筛选下拉菜单
     if (filterDropdown) {
-      // Keep the first option and add designers
+        // 保留第一个选项并添加设计师
       const defaultOption = filterDropdown.options[0];
       filterDropdown.innerHTML = '';
       filterDropdown.appendChild(defaultOption);
@@ -910,29 +1223,33 @@
         option.textContent = designer.name;
         filterDropdown.appendChild(option);
       });
+      }
+    } catch (error) {
+      console.error('加载设计师时出错:', error);
+      showToast('加载设计师数据时出错，某些功能可能不可用', 'warning');
     }
   }
 
   function resetProductForm() {
-    // Reset form to default values
+    // 重置表单为默认值
     document.getElementById('product-form').reset();
     document.getElementById('productModalLabel').textContent = 'Add Product';
     document.getElementById('product-id').value = '';
     document.getElementById('product-img-preview').src = '../../../img/profile.png';
     
-    // Clear gallery images
+    // 清除画廊图片
     productGalleryImages = [];
     updateGalleryPreview();
     
-    // Set default active state
+    // 设置默认活动状态
     document.getElementById('product-active').checked = true;
     
-    // Show the modal
+    // 显示模态窗口
     new bootstrap.Modal(document.getElementById('productModal')).show();
   }
   
   function resetProductImage() {
-    // Reset the image to default placeholder
+    // 将图像重置为默认占位符
     document.getElementById('product-image-file').value = '';
     document.getElementById('product-img-preview').src = '../../../img/profile.png';
   }
@@ -963,19 +1280,21 @@
     updateGalleryPreview();
   }
 
-  function editProduct(productId) {
-    // Get product data
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    console.log('Editing product with ID:', productId);
-    console.log('Available products:', products);
+  async function editProduct(productId) {
+    showToast('正在加载产品数据...', 'info');
     
-    // Convert productId to string to ensure type consistency
+    try {
+      // 获取产品数据
+      const result = await AdminApiService.getAllProducts();
+      const products = result.data || [];
+      
+      // 查找指定ID的产品
     const productIdStr = String(productId);
     const product = products.find(p => String(p.id) === productIdStr);
     
     if (product) {
-      console.log('Found product:', product);
-      // Populate form with product data
+        console.log('找到产品:', product);
+        // 用产品数据填充表单
       document.getElementById('productModalLabel').textContent = 'Edit Product';
       document.getElementById('product-id').value = product.id;
       document.getElementById('product-name').value = product.name || '';
@@ -986,13 +1305,13 @@
       document.getElementById('product-designer').value = product.designerId || '';
       document.getElementById('product-description').value = product.description || '';
       document.getElementById('product-featured').checked = product.featured || false;
-      document.getElementById('product-active').checked = product.active !== false; // Default to true if not specified
+        document.getElementById('product-active').checked = product.active !== false; // 如果未指定，则默认为true
       
-      // Reset file input
+        // 重置文件输入
       document.getElementById('product-image-file').value = '';
       document.getElementById('product-gallery-file').value = '';
       
-      // Update image preview
+        // 更新图像预览
       const imgPreview = document.getElementById('product-img-preview');
       if (product.image) {
         imgPreview.src = product.image;
@@ -1000,21 +1319,25 @@
         imgPreview.src = '../../../img/profile.png';
       }
       
-      // Load gallery images
+        // 加载图库图像
       productGalleryImages = product.gallery || [];
       updateGalleryPreview();
       
-      // Show the modal
+        // 显示模态窗口
       new bootstrap.Modal(document.getElementById('productModal')).show();
     } else {
-      console.error('Product not found with ID:', productId);
-      console.log('Product IDs in database:', products.map(p => p.id));
-      showToast('Product not found', 'danger');
+        console.error('未找到ID为以下ID的产品:', productId);
+        console.log('数据库中的产品ID:', products.map(p => p.id));
+        showToast('未找到产品', 'danger');
+      }
+    } catch (error) {
+      console.error('编辑产品时出错:', error);
+      showToast('加载产品数据时出错', 'danger');
     }
   }
 
-  function saveProduct() {
-    // Get form values
+  async function saveProduct() {
+    // 获取表单值
     const productId = document.getElementById('product-id').value;
     const name = document.getElementById('product-name').value.trim();
     const sku = document.getElementById('product-sku').value.trim();
@@ -1026,74 +1349,45 @@
     const featured = document.getElementById('product-featured').checked;
     const active = document.getElementById('product-active').checked;
     
-    // Validation
+    // 验证
     if (!name) {
-      showToast('Product name is required', 'danger');
+      showToast('产品名称是必填项', 'danger');
       return;
     }
     
     if (isNaN(price) || price < 0) {
-      showToast('Please enter a valid price', 'danger');
+      showToast('请输入有效的价格', 'danger');
       return;
     }
     
     if (isNaN(stock) || stock < 0) {
-      showToast('Please enter a valid stock quantity', 'danger');
+      showToast('请输入有效的库存数量', 'danger');
       return;
     }
     
     if (!description) {
-      showToast('Product description is required', 'danger');
+      showToast('产品描述是必填项', 'danger');
       return;
     }
     
-    // Process main image if one is selected
+    // 处理主图像（如果已选择）
     const imageFile = document.getElementById('product-image-file').files[0];
+    let imageData = null;
+    
+    // 如果选择了新图像，处理它
     if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, e.target.result, productGalleryImages);
-      };
-      reader.readAsDataURL(imageFile);
-    } else {
-      // If editing and no new image is selected, keep the existing one
-      if (productId) {
-        const products = JSON.parse(localStorage.getItem('products') || '[]');
-        const product = products.find(p => p.id === productId);
-        saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, product ? product.image : null, productGalleryImages);
-      } else {
-        showToast('Please upload a product image', 'danger');
+      try {
+        imageData = await readFileAsDataURL(imageFile);
+      } catch (error) {
+        console.error('读取图像文件时出错:', error);
+        showToast('处理图像时出错', 'danger');
         return;
       }
     }
-  }
-  
-  function saveProductData(productId, name, sku, price, stock, categoryId, designerId, description, featured, active, image, gallery) {
-    // Get existing products
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    console.log('Saving product data:', { productId, name });
     
-    // Create slug from name
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    
-    if (productId) {
-      console.log('Updating existing product with ID:', productId);
-      
-      // Convert productId to string to ensure type consistency
-      const productIdStr = String(productId);
-      const index = products.findIndex(p => String(p.id) === productIdStr);
-      
-      console.log('Found product at index:', index);
-      
-      if (index !== -1) {
-        // Make a copy of the current product for comparison
-        const oldProduct = {...products[index]};
-        
-        // Update the product
-        products[index] = {
-          ...products[index],
+    // 准备产品数据
+    const productData = {
           name,
-          slug,
           sku,
           price,
           stock,
@@ -1102,99 +1396,420 @@
           description,
           featured,
           active,
-          image: image || products[index].image,
-          gallery: gallery || products[index].gallery,
-          updatedAt: new Date().toISOString()
-        };
-        
-        console.log('Product before update:', oldProduct);
-        console.log('Product after update:', products[index]);
-        
-        // Save to localStorage
-        localStorage.setItem('products', JSON.stringify(products));
-        showToast('Product updated successfully', 'success');
-      } else {
-        console.error('Failed to find product with ID:', productId);
-        showToast('Error updating product: Product not found', 'danger');
-      }
-    } else {
-      // Create new product
-      const newProduct = {
-        id: Date.now().toString(),
-        name,
-        slug,
-        sku,
-        price,
-        stock,
-        categoryId: categoryId || null,
-        designerId: designerId || null,
-        description,
-        featured,
-        active,
-        image,
-        gallery,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      console.log('Creating new product:', newProduct);
-      products.push(newProduct);
-      
-      // Save to localStorage
-      localStorage.setItem('products', JSON.stringify(products));
-      showToast('Product created successfully', 'success');
+      gallery: productGalleryImages
+    };
+    
+    // 仅在有新图像时添加图像数据
+    if (imageData) {
+      productData.image = imageData;
     }
     
-    // Close modal
+    try {
+      showToast('正在保存产品...', 'info');
+      
+      let result;
+      if (productId) {
+        // 更新现有产品
+        result = await AdminApiService.updateProduct(productId, productData);
+      } else {
+        // 创建新产品
+        result = await AdminApiService.addProduct(productData);
+      }
+      
+      if (result.success) {
+        showToast(productId ? '产品更新成功' : '产品创建成功', 'success');
+        
+        // 关闭模态窗口
     try {
       const modalElement = document.getElementById('productModal');
       const modalInstance = bootstrap.Modal.getInstance(modalElement);
       if (modalInstance) {
         modalInstance.hide();
       } else {
-        console.warn('No modal instance found, creating new instance to hide');
+            console.warn('未找到模态实例，创建新实例以隐藏');
         new bootstrap.Modal(modalElement).hide();
       }
     } catch (error) {
-      console.error('Error closing modal:', error);
+          console.error('关闭模态窗口时出错:', error);
     }
     
-    // Refresh the products list
+        // 刷新产品列表
     loadProducts();
+      } else {
+        showToast(`操作失败: ${result.message || '未知错误'}`, 'danger');
+      }
+    } catch (error) {
+      console.error('保存产品时出错:', error);
+      showToast('保存产品时出错', 'danger');
+    }
+  }
+  
+  // 将文件读取为数据URL的辅助函数
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
-  function deleteProduct(productId) {
-    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+  async function deleteProduct(productId) {
+    if (!confirm('确定要删除此产品吗？此操作无法撤消。')) {
       return;
     }
     
-    // Get products
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    
-    // Remove product
-    const updatedProducts = products.filter(p => p.id !== productId);
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-    
-    showToast('Product deleted successfully', 'success');
-    
-    // Reload products
+    try {
+      showToast('正在删除产品...', 'info');
+      
+      // 通过API删除产品
+      const result = await AdminApiService.deleteProduct(productId);
+      
+      if (result.success) {
+        showToast('产品删除成功', 'success');
+        // 重新加载产品
     loadProducts();
+      } else {
+        showToast(`删除失败: ${result.message || '未知错误'}`, 'danger');
+      }
+    } catch (error) {
+      console.error('删除产品时出错:', error);
+      showToast('删除产品时出错', 'danger');
+    }
   }
   
   function checkAdminPermissions() {
-    setTimeout(() => {
-      const currentUser = DataService.getCurrentUser();
-      if (!currentUser || currentUser.isAdmin !== true) {
-        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      } else {
-        // Initialize product management
+    if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.checkAdminPermissions === 'function') {
+      // 使用UIHelpers检查权限
+      if (UIHelpers.checkAdminPermissions()) {
         initProductManagement();
       }
-    }, 100);
+    } else {
+      // 后备实现
+      setTimeout(() => {
+        const currentUser = DataService.getCurrentUser();
+        if (!currentUser || currentUser.isAdmin !== true) {
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+    } else {
+          // 初始化产品管理
+          initProductManagement();
+        }
+      }, 100);
+    }
   }
   
-  // Helper function to show toast notifications
+  // 查看产品评论
+  async function viewProductReviews(productId) {
+    // 设置当前评论的产品ID
+    currentReviewProductId = productId;
+    
+    try {
+      // 获取产品详情
+      const productsResult = await AdminApiService.getAllProducts();
+      const products = productsResult.data || [];
+      
+      // 查找指定ID的产品
+    const productIdStr = String(productId);
+    const product = products.find(p => String(p.id) === productIdStr);
+    
+    if (!product) {
+      console.error('未找到产品, ID:', productId);
+      showToast('产品未找到', 'danger');
+      return;
+    }
+    
+      // 设置模态窗口中的产品名称
+    document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
+    document.getElementById('review-product-name').textContent = product.name;
+    
+      // 显示加载状态
+      const reviewsContainer = document.getElementById('reviews-container');
+      reviewsContainer.innerHTML = `
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading reviews...</p>
+        </div>
+      `;
+      
+      // 显示模态窗口
+    new bootstrap.Modal(document.getElementById('reviewsModal')).show();
+      
+      // 加载评论
+      loadProductReviews(productId);
+    } catch (error) {
+      console.error('查看产品评论时出错:', error);
+      showToast('加载产品数据时出错', 'danger');
+    }
+  }
+  
+  // 加载产品评论
+  async function loadProductReviews(productId) {
+    const reviewsContainer = document.getElementById('reviews-container');
+    const noReviewsMessage = document.getElementById('no-reviews-message');
+    
+    try {
+      // 从API获取评论
+      const result = await ApiService.get(`/api/reviews?productId=${productId}`);
+      const reviews = result.data || [];
+      
+      // 清除现有评论
+    reviewsContainer.innerHTML = '';
+    
+      if (reviews.length === 0) {
+        // 显示无评论消息
+      reviewsContainer.appendChild(noReviewsMessage);
+    } else {
+        // 获取用户数据
+        const usersResult = await AdminApiService.getAllUsers();
+        const users = usersResult.data || [];
+        
+        // 添加评论
+        reviews.forEach(review => {
+          // 查找用户
+        const userIdStr = String(review.userId);
+        const user = users.find(u => String(u.id) === userIdStr);
+        
+          // 从模板创建评论项
+        const template = document.getElementById('review-item-template');
+        const reviewItem = document.importNode(template.content, true).querySelector('.review-item');
+        
+          // 设置评论数据
+        reviewItem.setAttribute('data-review-id', review.id);
+        reviewItem.querySelector('.review-author').textContent = user 
+            ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) 
+            : 'Anonymous User';
+        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt || review.date).toLocaleDateString();
+        reviewItem.querySelector('.rating-value').textContent = review.rating;
+        reviewItem.querySelector('.review-content').textContent = review.content || review.comment || 'No comment provided.';
+        
+          // 设置评论头像
+        if (user && user.avatar) {
+          reviewItem.querySelector('.review-avatar img').src = user.avatar;
+        }
+        
+          // 根据评分设置评星
+        const ratingElement = reviewItem.querySelector('.review-rating');
+        ratingElement.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('i');
+          star.className = i <= review.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted';
+          ratingElement.appendChild(star);
+        }
+        
+          // 设置评论状态徽章
+        const badgeElement = reviewItem.querySelector('.review-status .badge');
+        let statusClass = '';
+        let statusText = '';
+        
+        switch (review.status) {
+          case 'pending':
+            statusClass = 'review-badge-pending';
+            statusText = 'Pending';
+            break;
+          case 'approved':
+            statusClass = 'review-badge-approved';
+            statusText = 'Approved';
+            break;
+          case 'rejected':
+            statusClass = 'review-badge-rejected';
+            statusText = 'Rejected';
+            break;
+          default:
+            statusClass = 'review-badge-pending';
+            statusText = 'Pending';
+        }
+        
+        badgeElement.className = `badge ${statusClass}`;
+        badgeElement.textContent = statusText;
+        
+          // 设置操作处理程序
+        reviewItem.querySelector('.approve-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          updateReviewStatus(review.id, 'approved');
+        });
+        
+        reviewItem.querySelector('.reject-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          updateReviewStatus(review.id, 'rejected');
+        });
+        
+        reviewItem.querySelector('.delete-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          deleteReview(review.id);
+        });
+        
+        reviewItem.querySelector('.reply-review').addEventListener('click', function(e) {
+          e.preventDefault();
+          replyToReview(review.id);
+        });
+        
+          // 添加到容器
+        reviewsContainer.appendChild(reviewItem);
+      });
+      
+        // 更新评论统计
+        updateReviewStats(reviews);
+      }
+    } catch (error) {
+      console.error('加载评论时出错:', error);
+      reviewsContainer.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          加载评论时出错，请刷新或稍后再试。
+        </div>
+      `;
+    }
+  }
+  
+  // 更新评论统计
+  function updateReviewStats(reviews) {
+    const statsElement = document.getElementById('review-stats');
+    
+    // 按状态计数评论
+    const total = reviews.length;
+    const pending = reviews.filter(r => r.status === 'pending' || !r.status).length;
+    const approved = reviews.filter(r => r.status === 'approved').length;
+    const rejected = reviews.filter(r => r.status === 'rejected').length;
+    
+    // 计算平均评分
+    let totalRating = 0;
+    reviews.forEach(review => {
+      totalRating += review.rating;
+    });
+    const averageRating = total > 0 ? (totalRating / total).toFixed(1) : '0.0';
+    
+    // 更新统计HTML
+    statsElement.innerHTML = `
+      <div class="review-stats">
+        <div class="review-stats-item" title="Average Rating">
+          <i class="bi bi-star-fill text-warning me-1"></i>
+          ${averageRating}
+        </div>
+        <div class="review-stats-item" title="Total Reviews">
+          <i class="bi bi-chat-left-text me-1"></i>
+          ${total}
+        </div>
+        <div class="review-stats-item" title="Pending Reviews">
+          <i class="bi bi-clock me-1"></i>
+          ${pending}
+        </div>
+        <div class="review-stats-item" title="Approved Reviews">
+          <i class="bi bi-check-circle me-1"></i>
+          ${approved}
+        </div>
+      </div>
+    `;
+  }
+  
+  // 更新评论状态
+  async function updateReviewStatus(reviewId, status) {
+    try {
+      showToast('正在更新评论状态...', 'info');
+      
+      // 通过API更新评论状态
+      const result = await ApiService.put(`/api/reviews/${reviewId}/status`, {
+        status: status
+      });
+      
+      if (result.success) {
+        showToast(`评论已${status === 'approved' ? '批准' : '拒绝'}`, 'success');
+        
+        // 重新加载评论
+      loadProductReviews(currentReviewProductId);
+    } else {
+        showToast(`更新失败: ${result.message || '未知错误'}`, 'danger');
+      }
+    } catch (error) {
+      console.error('更新评论状态时出错:', error);
+      showToast('更新评论状态时出错', 'danger');
+    }
+  }
+  
+  // 删除评论
+  async function deleteReview(reviewId) {
+    if (!confirm('确定要删除此评论吗？此操作无法撤消。')) {
+      return;
+    }
+    
+    try {
+      showToast('正在删除评论...', 'info');
+    
+      // 通过API删除评论
+      const result = await ApiService.delete(`/api/reviews/${reviewId}`);
+    
+      if (result.success) {
+        showToast('评论删除成功', 'success');
+        
+        // 重新加载评论
+    loadProductReviews(currentReviewProductId);
+    
+        // 更新产品行中的评论计数
+        loadProducts();
+      } else {
+        showToast(`删除失败: ${result.message || '未知错误'}`, 'danger');
+      }
+    } catch (error) {
+      console.error('删除评论时出错:', error);
+      showToast('删除评论时出错', 'danger');
+    }
+  }
+  
+  // 回复评论
+  async function replyToReview(reviewId) {
+    // 获取评论
+    try {
+      const result = await ApiService.get(`/api/reviews/${reviewId}`);
+      if (!result.success) {
+        showToast('评论未找到', 'danger');
+      return;
+    }
+    
+      const review = result.data;
+      
+      // 提示回复
+      const reply = prompt('输入您对此评论的回复:', review.adminReply || '');
+    
+    if (reply !== null) {
+        showToast('正在保存回复...', 'info');
+        
+        // 通过API更新评论回复
+        const updateResult = await ApiService.put(`/api/reviews/${reviewId}/reply`, {
+          adminReply: reply
+        });
+        
+        if (updateResult.success) {
+          showToast('回复添加成功', 'success');
+          
+          // 重新加载评论
+          loadProductReviews(currentReviewProductId);
+        } else {
+          showToast(`保存回复失败: ${updateResult.message || '未知错误'}`, 'danger');
+        }
+      }
+    } catch (error) {
+      console.error('回复评论时出错:', error);
+      showToast('回复评论时出错', 'danger');
+    }
+  }
+  
+  // 刷新评论
+  function refreshReviews() {
+    if (currentReviewProductId) {
+      loadProductReviews(currentReviewProductId);
+    }
+  }
+  
+  // 辅助函数：显示toast通知
   function showToast(message, type = 'primary') {
+    // 检查UIHelpers是否可用
+    if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.showToast === 'function') {
+      UIHelpers.showToast(message, type);
+      return;
+    }
+    
+    // 后备实现
     const toastContainer = document.querySelector('.toast-container');
     
     const toastElement = document.createElement('div');
@@ -1221,415 +1836,29 @@
       toastElement.remove();
     });
   }
-
-  // Get review count for a product
-  function getReviewCount(productId) {
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    // Convert productId to string to ensure type consistency
-    const productIdStr = String(productId);
-    return reviews.filter(review => String(review.productId) === productIdStr).length;
-  }
   
-  // View reviews for a product
-  function viewProductReviews(productId) {
-    // Set current product ID for reviews
-    currentReviewProductId = productId;
-    console.log('查看产品评论 - 产品ID:', productId, '类型:', typeof productId);
-    
-    // Get product details
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    console.log('可用产品数量:', products.length);
-    
-    // Convert productId to string to ensure type consistency
-    const productIdStr = String(productId);
-    const product = products.find(p => String(p.id) === productIdStr);
-    
-    if (!product) {
-      console.error('未找到产品, ID:', productId);
-      console.log('产品ID列表:', products.map(p => p.id));
-      showToast('产品未找到', 'danger');
-      return;
-    }
-    
-    console.log('找到产品:', product.name);
-    
-    // 检查reviews是否存在
-    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    console.log('localStorage中的评论总数:', allReviews.length);
-    console.log('评论数据示例:', allReviews.length > 0 ? allReviews[0] : '无评论');
-    
-    // Set product name in modal
-    document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
-    document.getElementById('review-product-name').textContent = product.name;
-    
-    // Load reviews
-    loadProductReviews(productId);
-    
-    // Show modal
-    new bootstrap.Modal(document.getElementById('reviewsModal')).show();
-  }
-  
-  // Load reviews for a product
-  function loadProductReviews(productId) {
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    console.log('正在加载产品评论, 产品ID:', productId, '总评论数:', reviews.length);
-    
-    // Convert productId to string to ensure type consistency
-    const productIdStr = String(productId);
-    const productReviews = reviews.filter(review => String(review.productId) === productIdStr);
-    
-    console.log('找到该产品的评论数:', productReviews.length);
-    if (productReviews.length > 0) {
-      console.log('该产品的第一条评论:', productReviews[0]);
-    }
-    
-    const reviewsContainer = document.getElementById('reviews-container');
-    const noReviewsMessage = document.getElementById('no-reviews-message');
-    
-    // Clear existing reviews
-    reviewsContainer.innerHTML = '';
-    
-    if (productReviews.length === 0) {
-      // Show no reviews message
-      reviewsContainer.appendChild(noReviewsMessage);
-    } else {
-      // Get users for lookup
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      // Add reviews
-      productReviews.forEach(review => {
-        // Find user - convert IDs to strings for comparison
-        const userIdStr = String(review.userId);
-        const user = users.find(u => String(u.id) === userIdStr);
-        
-        // Create review item from template
-        const template = document.getElementById('review-item-template');
-        const reviewItem = document.importNode(template.content, true).querySelector('.review-item');
-        
-        // Set review data
-        reviewItem.setAttribute('data-review-id', review.id);
-        reviewItem.querySelector('.review-author').textContent = user 
-            ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) 
-            : 'Anonymous User';
-        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt || review.date).toLocaleDateString();
-        reviewItem.querySelector('.rating-value').textContent = review.rating;
-        reviewItem.querySelector('.review-content').textContent = review.content || review.comment || 'No comment provided.';
-        
-        // Set review avatar
-        if (user && user.avatar) {
-          reviewItem.querySelector('.review-avatar img').src = user.avatar;
-        }
-        
-        // Set review stars based on rating
-        const ratingElement = reviewItem.querySelector('.review-rating');
-        ratingElement.innerHTML = '';
-        for (let i = 1; i <= 5; i++) {
-          const star = document.createElement('i');
-          star.className = i <= review.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted';
-          ratingElement.appendChild(star);
-        }
-        
-        // Set review status badge
-        const badgeElement = reviewItem.querySelector('.review-status .badge');
-        let statusClass = '';
-        let statusText = '';
-        
-        switch (review.status) {
-          case 'pending':
-            statusClass = 'review-badge-pending';
-            statusText = 'Pending';
-            break;
-          case 'approved':
-            statusClass = 'review-badge-approved';
-            statusText = 'Approved';
-            break;
-          case 'rejected':
-            statusClass = 'review-badge-rejected';
-            statusText = 'Rejected';
-            break;
-          default:
-            statusClass = 'review-badge-pending';
-            statusText = 'Pending';
-        }
-        
-        badgeElement.className = `badge ${statusClass}`;
-        badgeElement.textContent = statusText;
-        
-        // Set action handlers
-        reviewItem.querySelector('.approve-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          updateReviewStatus(review.id, 'approved');
-        });
-        
-        reviewItem.querySelector('.reject-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          updateReviewStatus(review.id, 'rejected');
-        });
-        
-        reviewItem.querySelector('.delete-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          deleteReview(review.id);
-        });
-        
-        reviewItem.querySelector('.reply-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          replyToReview(review.id);
-        });
-        
-        // Add to container
-        reviewsContainer.appendChild(reviewItem);
+  // 基本的导航栏和页脚加载函数（如果UIHelpers不可用）
+  function loadNavbar() {
+    fetch('/src/client/assets/layout/navbar.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('加载导航栏时出错:', error);
       });
-      
-      // Update review stats
-      updateReviewStats(productReviews);
-    }
   }
   
-  // Update review stats
-  function updateReviewStats(reviews) {
-    const statsElement = document.getElementById('review-stats');
-    
-    // Count reviews by status
-    const total = reviews.length;
-    const pending = reviews.filter(r => r.status === 'pending' || !r.status).length;
-    const approved = reviews.filter(r => r.status === 'approved').length;
-    const rejected = reviews.filter(r => r.status === 'rejected').length;
-    
-    // Calculate average rating
-    let totalRating = 0;
-    reviews.forEach(review => {
-      totalRating += review.rating;
-    });
-    const averageRating = total > 0 ? (totalRating / total).toFixed(1) : '0.0';
-    
-    // Update stats HTML
-    statsElement.innerHTML = `
-      <div class="review-stats">
-        <div class="review-stats-item" title="Average Rating">
-          <i class="bi bi-star-fill text-warning me-1"></i>
-          ${averageRating}
-        </div>
-        <div class="review-stats-item" title="Total Reviews">
-          <i class="bi bi-chat-left-text me-1"></i>
-          ${total}
-        </div>
-        <div class="review-stats-item" title="Pending Reviews">
-          <i class="bi bi-clock me-1"></i>
-          ${pending}
-        </div>
-        <div class="review-stats-item" title="Approved Reviews">
-          <i class="bi bi-check-circle me-1"></i>
-          ${approved}
-        </div>
-      </div>
-    `;
+  function loadFooter() {
+    fetch('/src/client/assets/layout/footer.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('footer-placeholder').innerHTML = html;
+      })
+      .catch(error => {
+        console.error('加载页脚时出错:', error);
+      });
   }
-  
-  // Update review status
-  function updateReviewStatus(reviewId, status) {
-    // Get reviews
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    
-    // Find review
-    const index = reviews.findIndex(r => r.id === reviewId);
-    
-    if (index !== -1) {
-      // Update status
-      reviews[index].status = status;
-      reviews[index].updatedAt = new Date().toISOString();
-      
-      // Save to localStorage
-      localStorage.setItem('reviews', JSON.stringify(reviews));
-      
-      // Reload reviews
-      loadProductReviews(currentReviewProductId);
-      
-      // Show toast
-      showToast(`Review ${status}`, 'success');
-    } else {
-      showToast('Review not found', 'danger');
-    }
-  }
-  
-  // Delete review
-  function deleteReview(reviewId) {
-    if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
-      return;
-    }
-    
-    // Get reviews
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    
-    // Remove review
-    const updatedReviews = reviews.filter(r => r.id !== reviewId);
-    localStorage.setItem('reviews', JSON.stringify(updatedReviews));
-    
-    // Reload reviews
-    loadProductReviews(currentReviewProductId);
-    
-    // Update review count for product in table
-    const productRow = document.querySelector(`tr[data-product-id="${currentReviewProductId}"]`);
-    if (productRow) {
-      const reviewCountElement = productRow.querySelector('.review-count');
-      reviewCountElement.textContent = getReviewCount(currentReviewProductId);
-    }
-    
-    showToast('Review deleted successfully', 'success');
-  }
-  
-  // Reply to review
-  function replyToReview(reviewId) {
-    // Get the review
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    const review = reviews.find(r => r.id === reviewId);
-    
-    if (!review) {
-      showToast('Review not found', 'danger');
-      return;
-    }
-    
-    // Prompt for reply
-    const reply = prompt('Enter your reply to this review:', review.adminReply || '');
-    
-    if (reply !== null) {
-      // Update review with reply
-      const index = reviews.findIndex(r => r.id === reviewId);
-      reviews[index].adminReply = reply;
-      reviews[index].adminReplyDate = new Date().toISOString();
-      reviews[index].updatedAt = new Date().toISOString();
-      
-      // Save to localStorage
-      localStorage.setItem('reviews', JSON.stringify(reviews));
-      
-      // Reload reviews
-      loadProductReviews(currentReviewProductId);
-      
-      showToast('Reply added successfully', 'success');
-    }
-  }
-  
-  // Refresh reviews
-  function refreshReviews() {
-    if (currentReviewProductId) {
-      loadProductReviews(currentReviewProductId);
-    }
-  }
-  
-  // 创建测试评论数据的函数
-  function createTestReviews() {
-    console.log('创建测试评论数据');
-    
-    // 获取产品
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    if (products.length === 0) {
-      console.error('没有找到产品，无法创建评论');
-      return;
-    }
-    
-    // 获取用户
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (users.length === 0) {
-      console.error('没有找到用户，无法创建评论');
-      return;
-    }
-    
-    // 获取现有评论
-    const existingReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    
-    // 创建新的测试评论
-    const testReviews = [
-      {
-        id: Date.now().toString() + '1',
-        productId: String(products[0].id),
-        userId: String(users[0].id),
-        rating: 5,
-        title: '非常棒的产品！',
-        content: '质量很好，做工精细，强烈推荐购买。',
-        status: 'approved',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: Date.now().toString() + '2',
-        productId: String(products[0].id),
-        userId: String(users[0].id),
-        rating: 4,
-        title: '性价比高',
-        content: '总体不错，但价格稍高。',
-        status: 'approved',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: Date.now().toString() + '3',
-        productId: String(products.length > 1 ? products[1].id : products[0].id),
-        userId: String(users.length > 1 ? users[1].id : users[0].id),
-        rating: 3,
-        title: '一般般',
-        content: '没什么特别的地方。',
-        status: 'pending',
-        createdAt: new Date().toISOString()
-      }
-    ];
-    
-    // 合并评论并保存
-    const allReviews = [...existingReviews, ...testReviews];
-    localStorage.setItem('reviews', JSON.stringify(allReviews));
-    
-    console.log('已创建测试评论数据:', testReviews);
-    console.log('现在可以刷新页面查看评论');
-    
-    return '创建了 ' + testReviews.length + ' 条测试评论';
-  }
-  
-  // 诊断和修复评论数据问题
-  function diagnoseReviews() {
-    console.log('开始诊断评论数据问题...');
-    
-    // 检查localStorage中的所有键
-    console.log('localStorage中的所有键:');
-    for (let i = 0; i < localStorage.length; i++) {
-      console.log(`${i}: ${localStorage.key(i)}`);
-    }
-    
-    // 检查reviews数据
-    const reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-    console.log('reviews键中的数据数量:', reviews.length);
-    if (reviews.length > 0) {
-      console.log('第一条评论样本:', reviews[0]);
-    }
-    
-    // 检查comments数据（可能是另一个键名）
-    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
-    console.log('comments键中的数据数量:', comments.length);
-    if (comments.length > 0) {
-      console.log('第一条comments样本:', comments[0]);
-    }
-    
-    // 检查所有可能的键名
-    const allPossibleKeys = ['reviews', 'comments', 'product_reviews', 'ratings'];
-    for (const key of allPossibleKeys) {
-      const data = JSON.parse(localStorage.getItem(key) || '[]');
-      console.log(`键 "${key}" 中的数据数量:`, data.length);
-    }
-    
-    // 尝试修复问题 - 将comments数据合并到reviews
-    if (comments.length > 0 && reviews.length === 0) {
-      console.log('修复: 将comments数据复制到reviews键');
-      localStorage.setItem('reviews', JSON.stringify(comments));
-      return '已将comments数据复制到reviews键，请刷新页面';
-    }
-    
-    // 如果什么都没有，创建测试数据
-    if (reviews.length === 0 && comments.length === 0) {
-      console.log('未找到任何评论数据，创建测试数据');
-      return createTestReviews();
-    }
-    
-    return '诊断完成。评论数量: ' + reviews.length;
-  }
-  
-  // 注册全局函数，以便在控制台中调用
-  window.createTestReviews = createTestReviews;
-  window.diagnoseReviews = diagnoseReviews;
 </script>
 </body>
 </html> 
