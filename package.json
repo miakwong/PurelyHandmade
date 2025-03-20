@@ -21,6 +21,7 @@
     "test:setup-db": "node tests/setup-test-db.js",
     "test:all": "npm run test:setup-db && npm test",
     "start": "./start-server.sh",
+    "dev": "node src/server/server.js",
     "seed": "node src/server/seed.js",
     "db-tool": "node tools/db-tool.js"
   }

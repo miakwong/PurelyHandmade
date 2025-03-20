@@ -223,6 +223,188 @@ async function main() {
     console.log(`评论创建成功: ID=${result.id}`);
   }
   
+  // 创建订单数据
+  console.log('开始创建订单数据...');
+  
+  // 使用之前获取的产品列表，不需要重新查询
+  // const allProducts = await prisma.product.findMany();
+  
+  // 创建订单
+  const orderData = [
+    {
+      userId: user.id,
+      orderDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30天前
+      status: 'delivered',
+      totalAmount: 548.00,
+      shippingInfo: {
+        fullName: 'Normal User',
+        streetAddress: '123 Main St',
+        city: '北京',
+        state: '北京',
+        zipCode: '100000',
+        country: '中国',
+        phone: '13800138000'
+      },
+      paymentInfo: {
+        method: 'creditCard',
+        cardLast4: '1234',
+        paid: true,
+        paidAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      },
+      notes: '请小心包装，谢谢！',
+      orderItems: {
+        create: [
+          {
+            productId: allProducts[0].id,
+            quantity: 1,
+            price: allProducts[0].price
+          },
+          {
+            productId: allProducts[1].id,
+            quantity: 1,
+            price: allProducts[1].price
+          }
+        ]
+      }
+    },
+    {
+      userId: user.id,
+      orderDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15天前
+      status: 'shipped',
+      totalAmount: 399.00,
+      shippingInfo: {
+        fullName: 'Normal User',
+        streetAddress: '123 Main St',
+        city: '北京',
+        state: '北京',
+        zipCode: '100000',
+        country: '中国',
+        phone: '13800138000'
+      },
+      paymentInfo: {
+        method: 'alipay',
+        paid: true,
+        paidAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+      },
+      orderItems: {
+        create: [
+          {
+            productId: allProducts[3].id,
+            quantity: 1,
+            price: allProducts[3].price
+          }
+        ]
+      }
+    },
+    {
+      userId: user.id,
+      orderDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5天前
+      status: 'processing',
+      totalAmount: 628.00,
+      shippingInfo: {
+        fullName: 'Normal User',
+        streetAddress: '123 Main St',
+        city: '北京',
+        state: '北京',
+        zipCode: '100000',
+        country: '中国',
+        phone: '13800138000'
+      },
+      paymentInfo: {
+        method: 'wechatPay',
+        paid: true,
+        paidAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      },
+      orderItems: {
+        create: [
+          {
+            productId: allProducts[5].id,
+            quantity: 1,
+            price: allProducts[5].price
+          },
+          {
+            productId: allProducts[4].id,
+            quantity: 1,
+            price: allProducts[4].price
+          }
+        ]
+      }
+    },
+    {
+      userId: user.id,
+      orderDate: new Date(), // 今天
+      status: 'pending',
+      totalAmount: 249.00,
+      shippingInfo: {
+        fullName: 'Normal User',
+        streetAddress: '123 Main St',
+        city: '北京',
+        state: '北京',
+        zipCode: '100000',
+        country: '中国',
+        phone: '13800138000'
+      },
+      paymentInfo: {
+        method: 'bankTransfer',
+        paid: false
+      },
+      orderItems: {
+        create: [
+          {
+            productId: allProducts[2].id,
+            quantity: 1,
+            price: allProducts[2].price
+          }
+        ]
+      }
+    },
+    {
+      userId: admin.id, // 管理员用户的订单
+      orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2天前
+      status: 'shipped',
+      totalAmount: 498.00,
+      shippingInfo: {
+        fullName: 'Admin User',
+        streetAddress: '456 Admin St',
+        city: '上海',
+        state: '上海',
+        zipCode: '200000',
+        country: '中国',
+        phone: '13900139000'
+      },
+      paymentInfo: {
+        method: 'creditCard',
+        cardLast4: '5678',
+        paid: true,
+        paidAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      },
+      orderItems: {
+        create: [
+          {
+            productId: allProducts[1].id,
+            quantity: 1,
+            price: allProducts[1].price
+          },
+          {
+            productId: allProducts[2].id,
+            quantity: 1,
+            price: allProducts[2].price
+          }
+        ]
+      }
+    }
+  ];
+
+  for (const order of orderData) {
+    const result = await prisma.order.create({
+      data: order,
+      include: {
+        orderItems: true
+      }
+    });
+    console.log(`订单创建成功: ID=${result.id}, 状态=${result.status}, 金额=${result.totalAmount}`);
+  }
+  
   console.log('数据库初始化完成');
 }
 
