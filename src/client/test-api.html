@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试API连接</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow: auto;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .loading {
+      color: #999;
+    }
+    .error {
+      color: #f44336;
+    }
+    .success {
+      color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <h1>API连接测试</h1>
+  
+  <div>
+    <h2>1. 基本API测试</h2>
+    <button id="testProducts">测试产品API</button>
+    <button id="testCategories">测试类别API</button>
+    <button id="testDesigners">测试设计师API</button>
+  </div>
+
+  <div>
+    <h2>2. 脚本加载测试</h2>
+    <button id="checkApiService">检查ApiService</button>
+    <button id="checkAdminService">检查AdminApiService</button>
+  </div>
+
+  <div>
+    <h2>3. AdminApiService测试</h2>
+    <button id="testAdminProducts">测试AdminApiService获取产品</button>
+    <button id="testAdminCategories">测试AdminApiService获取类别</button>
+  </div>
+  
+  <h2>结果：</h2>
+  <div id="results">点击按钮测试API连接</div>
+  
+  <script>
+    // 内联定义一个简单的日志函数
+    function logResult(message, type = 'info') {
+      const resultsDiv = document.getElementById('results');
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      logEntry.innerHTML = `<p>[${new Date().toLocaleTimeString()}] ${message}</p>`;
+      resultsDiv.appendChild(logEntry);
+    }
+
+    // 检查一个对象是否存在并可用
+    function checkObject(name, obj) {
+      if (typeof obj === 'undefined') {
+        logResult(`${name} 未定义`, 'error');
+        return false;
+      }
+      
+      logResult(`${name} 已正确加载`, 'success');
+      logResult(`${name} 方法: ${Object.keys(obj).join(', ')}`);
+      return true;
+    }
+  </script>
+
+  <!-- 手动内联 ApiService 的核心代码 -->
+  <script>
+    // 内联定义 ApiService，避免外部加载失败
+    const ApiService = {
+      baseUrl: '/api',
+      
+      handleResponse: async function(response) {
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+        
+        if (!response.ok) {
+          let errorData;
+          
+          try {
+            errorData = isJson ? await response.json() : await response.text();
+          } catch (error) {
+            errorData = 'Failed to parse error response';
+          }
+          
+          const error = new Error(
+            isJson && errorData.error 
+              ? errorData.error 
+              : 'API request failed'
+          );
+          
+          error.status = response.status;
+          error.statusText = response.statusText;
+          error.data = errorData;
+          
+          throw error;
+        }
+        
+        return isJson ? response.json() : response.text();
+      },
+      
+      request: async function(url, options = {}) {
+        const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+        
+        const defaultOptions = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+        };
+        
+        const fetchOptions = {
+          ...defaultOptions,
+          ...options,
+          headers: {
+            ...defaultOptions.headers,
+            ...options.headers,
+          },
+        };
+        
+        try {
+          const response = await fetch(fullUrl, fetchOptions);
+          return await this.handleResponse(response);
+        } catch (error) {
+          console.error('API request failed:', error);
+          throw error;
+        }
+      },
+      
+      get: function(url, params = {}) {
+        const queryParams = new URLSearchParams();
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            queryParams.append(key, params[key]);
+          }
+        });
+        
+        const queryString = queryParams.toString();
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
+        
+        return this.request(fullUrl, { method: 'GET' });
+      },
+      
+      post: function(url, data = {}) {
+        return this.request(url, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      },
+      
+      put: function(url, data = {}) {
+        return this.request(url, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      },
+      
+      delete: function(url) {
+        return this.request(url, { method: 'DELETE' });
+      }
+    };
+    
+    logResult('ApiService内联代码已加载', 'success');
+  </script>
+
+  <!-- 手动内联 AdminApiService 的核心代码 -->
+  <script>
+    // 内联定义 AdminApiService，依赖上面定义的 ApiService
+    const AdminApiService = {
+      getAllUsers: function() {
+        return ApiService.get('/users?all=1');
+      },
+      
+      getAllProducts: function() {
+        return ApiService.get('/products');
+      },
+      
+      addProduct: function(productData) {
+        return ApiService.post('/products', productData);
+      },
+      
+      updateProduct: function(productId, productData) {
+        return ApiService.put(`/products/${productId}`, productData);
+      },
+      
+      deleteProduct: function(productId) {
+        return ApiService.delete(`/products/${productId}`);
+      },
+      
+      getAllCategories: function() {
+        return ApiService.get('/categories');
+      },
+      
+      getAllDesigners: function() {
+        return ApiService.get('/designers');
+      }
+    };
+    
+    logResult('AdminApiService内联代码已加载', 'success');
+  </script>
+  
+  <!-- 主要测试脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const resultsDiv = document.getElementById('results');
+      
+      // 测试直接API调用
+      document.getElementById('testProducts').addEventListener('click', async function() {
+        logResult('正在直接调用产品API...');
+        try {
+          const response = await fetch('/api/products');
+          const data = await response.json();
+          logResult(`直接API调用结果: ${data.success ? '成功 ✅' : '失败 ❌'}`, data.success ? 'success' : 'error');
+          logResult(`产品数量: ${data.data ? data.data.length : 0}`);
+        } catch (error) {
+          logResult(`请求出错: ${error.message}`, 'error');
+        }
+      });
+      
+      document.getElementById('testCategories').addEventListener('click', async function() {
+        logResult('正在直接调用类别API...');
+        try {
+          const response = await fetch('/api/categories');
+          const data = await response.json();
+          logResult(`直接API调用结果: ${data.success ? '成功 ✅' : '失败 ❌'}`, data.success ? 'success' : 'error');
+          logResult(`类别数量: ${data.data ? data.data.length : 0}`);
+        } catch (error) {
+          logResult(`请求出错: ${error.message}`, 'error');
+        }
+      });
+      
+      document.getElementById('testDesigners').addEventListener('click', async function() {
+        logResult('正在直接调用设计师API...');
+        try {
+          const response = await fetch('/api/designers');
+          const data = await response.json();
+          logResult(`直接API调用结果: ${data.success ? '成功 ✅' : '失败 ❌'}`, data.success ? 'success' : 'error');
+          logResult(`设计师数量: ${data.data ? data.data.length : 0}`);
+        } catch (error) {
+          logResult(`请求出错: ${error.message}`, 'error');
+        }
+      });
+      
+      // 检查ApiService加载
+      document.getElementById('checkApiService').addEventListener('click', function() {
+        checkObject('ApiService', ApiService);
+      });
+      
+      // 检查AdminApiService加载
+      document.getElementById('checkAdminService').addEventListener('click', function() {
+        checkObject('AdminApiService', AdminApiService);
+      });
+      
+      // 使用AdminApiService进行测试
+      document.getElementById('testAdminProducts').addEventListener('click', async function() {
+        if (!checkObject('AdminApiService', AdminApiService)) return;
+        
+        logResult('正在使用AdminApiService获取产品...');
+        
+        try {
+          const result = await AdminApiService.getAllProducts();
+          logResult(`AdminApiService调用结果: ${result.success ? '成功 ✅' : '失败 ❌'}`, result.success ? 'success' : 'error');
+          logResult(`产品数量: ${result.data ? result.data.length : 0}`);
+        } catch (error) {
+          logResult(`AdminApiService调用出错: ${error.message}`, 'error');
+        }
+      });
+      
+      document.getElementById('testAdminCategories').addEventListener('click', async function() {
+        if (!checkObject('AdminApiService', AdminApiService)) return;
+        
+        logResult('正在使用AdminApiService获取类别...');
+        
+        try {
+          const result = await AdminApiService.getAllCategories();
+          logResult(`AdminApiService调用结果: ${result.success ? '成功 ✅' : '失败 ❌'}`, result.success ? 'success' : 'error');
+          logResult(`类别数量: ${result.data ? result.data.length : 0}`);
+        } catch (error) {
+          logResult(`AdminApiService调用出错: ${error.message}`, 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
