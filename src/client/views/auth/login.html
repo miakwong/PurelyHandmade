@@ -498,7 +498,8 @@
           id: user.id,
           username: user.username,
           email: user.email,
-          isAdmin: user.isAdmin || false
+          isAdmin: user.isAdmin || false,
+          isLoggedIn: true
         }));
 
         if (user.isAdmin) {
