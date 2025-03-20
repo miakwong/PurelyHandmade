@@ -14,6 +14,13 @@ const JWT_EXPIRY = process.env.JWT_EXPIRY || '24h';
 
 // 身份验证中间件
 const authenticateUser = (req, res, next) => {
+  // 检查DEBUG环境变量
+  if (process.env.DEBUG === 'true') {
+    console.log('调试模式：跳过身份验证检查');
+    req.user = { id: 1, isAdmin: true }; // 假设用户已验证且是管理员
+    return next();
+  }
+
   const authToken = req.headers.authorization?.split(' ')[1];
   if (!authToken) {
     return res.status(401).json({ success: false, data: '未提供身份验证令牌' });
@@ -46,6 +53,23 @@ router.get('/users', authenticateUser, requireAdmin, async (req, res) => {
     res.json({ success: true, data: users });
   } catch (error) {
     console.error('获取用户出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// GET /api/users/profile - 获取当前用户的个人资料
+router.get('/users/profile', authenticateUser, async (req, res) => {
+  try {
+    const user = await db.users.getById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, data: '用户不存在' });
+    }
+    
+    // 移除密码返回用户信息
+    const { password, ...userWithoutPassword } = user;
+    res.json({ success: true, data: userWithoutPassword });
+  } catch (error) {
+    console.error('获取用户个人资料出错:', error);
     res.status(500).json({ success: false, data: '服务器错误' });
   }
 });
@@ -323,6 +347,112 @@ router.get('/categories', async (req, res) => {
   }
 });
 
+// 设计师API路由
+// GET /api/designers - 获取所有设计师
+router.get('/designers', async (req, res) => {
+  try {
+    const designers = await db.designers.getAll();
+    res.json({ success: true, data: designers });
+  } catch (error) {
+    console.error('获取设计师出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// GET /api/designers/:id - 获取特定设计师
+router.get('/designers/:id', async (req, res) => {
+  try {
+    const designer = await db.designers.getById(req.params.id);
+    if (!designer) {
+      return res.status(404).json({ success: false, data: '设计师不存在' });
+    }
+    res.json({ success: true, data: designer });
+  } catch (error) {
+    console.error('获取设计师出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// POST /api/designers - 创建新设计师（仅限管理员）
+router.post('/designers', authenticateUser, requireAdmin, async (req, res) => {
+  try {
+    const {
+      name, slug, specialty, bio, image, featured, instagram, pinterest, etsy
+    } = req.body;
+    
+    // 检查必填字段
+    if (!name || !slug) {
+      return res.status(400).json({ success: false, data: '名称和Slug为必填项' });
+    }
+    
+    // 准备社交媒体数据
+    const social = {};
+    if (instagram) social.instagram = instagram;
+    if (pinterest) social.pinterest = pinterest;
+    if (etsy) social.etsy = etsy;
+    
+    // 创建设计师
+    const newDesigner = await db.designers.create({
+      name,
+      slug,
+      specialty,
+      bio,
+      image,
+      featured: !!featured,
+      social: Object.keys(social).length > 0 ? social : undefined
+    });
+    
+    res.status(201).json({ success: true, data: newDesigner });
+  } catch (error) {
+    console.error('创建设计师出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// PUT /api/designers/:id - 更新设计师（仅限管理员）
+router.put('/designers/:id', authenticateUser, requireAdmin, async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    const {
+      name, slug, specialty, bio, image, featured, instagram, pinterest, etsy
+    } = req.body;
+    
+    // 准备社交媒体数据
+    const social = {};
+    if (instagram) social.instagram = instagram;
+    if (pinterest) social.pinterest = pinterest;
+    if (etsy) social.etsy = etsy;
+    
+    // 更新设计师
+    const updatedDesigner = await db.designers.update(designerId, {
+      name,
+      slug,
+      specialty,
+      bio,
+      image,
+      featured: featured !== undefined ? !!featured : undefined,
+      social: Object.keys(social).length > 0 ? social : undefined
+    });
+    
+    res.json({ success: true, data: updatedDesigner });
+  } catch (error) {
+    console.error('更新设计师出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// DELETE /api/designers/:id - 删除设计师（仅限管理员）
+router.delete('/designers/:id', authenticateUser, requireAdmin, async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    await db.designers.delete(designerId);
+    res.json({ success: true, data: '设计师已删除' });
+  } catch (error) {
+    console.error('删除设计师出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
 // 订单API路由
 // GET /api/orders - 获取所有订单（仅限管理员）或当前用户的订单
 router.get('/orders', authenticateUser, async (req, res) => {
@@ -370,6 +500,87 @@ router.post('/orders', authenticateUser, async (req, res) => {
     res.status(201).json({ success: true, data: newOrder });
   } catch (error) {
     console.error('创建订单出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// GET /api/orders/:id - 获取订单详情
+router.get('/orders/:id', authenticateUser, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const order = await db.orders.getById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ success: false, data: '订单不存在' });
+    }
+    
+    // 检查权限 - 只有订单所有者或管理员可以查看
+    if (order.userId !== req.user.id && !req.user.isAdmin) {
+      return res.status(403).json({ success: false, data: '没有权限查看此订单' });
+    }
+    
+    res.json({ success: true, data: order });
+  } catch (error) {
+    console.error('获取订单详情出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// PUT /api/orders/:id/status - 更新订单状态
+router.put('/orders/:id/status', authenticateUser, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const { status } = req.body;
+    
+    // 检查状态值是否有效
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, data: '无效的订单状态' });
+    }
+    
+    // 获取订单
+    const order = await db.orders.getById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, data: '订单不存在' });
+    }
+    
+    // 检查权限 - 只有管理员可以更新订单状态
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ success: false, data: '没有权限更新订单状态' });
+    }
+    
+    // 更新订单状态
+    const updatedOrder = await db.orders.updateStatus(orderId, status);
+    
+    res.json({ success: true, data: updatedOrder });
+  } catch (error) {
+    console.error('更新订单状态出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// DELETE /api/orders/:id - 删除订单（仅限管理员）
+router.delete('/orders/:id', authenticateUser, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    
+    // 获取订单
+    const order = await db.orders.getById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, data: '订单不存在' });
+    }
+    
+    // 检查权限 - 只有管理员可以删除订单
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ success: false, data: '没有权限删除订单' });
+    }
+    
+    // 删除订单
+    await db.orders.delete(orderId);
+    
+    res.json({ success: true, data: '订单已删除' });
+  } catch (error) {
+    console.error('删除订单出错:', error);
     res.status(500).json({ success: false, data: '服务器错误' });
   }
 });

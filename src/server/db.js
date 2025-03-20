@@ -307,6 +307,22 @@ const DatabaseService = {
         where: { id: Number(id) },
         data: { status }
       });
+    },
+    
+    // 删除订单
+    delete: async (id) => {
+      // 事务操作，先删除订单项，再删除订单
+      return await prisma.$transaction(async (tx) => {
+        // 删除所有相关的订单项
+        await tx.orderItem.deleteMany({
+          where: { orderId: Number(id) }
+        });
+        
+        // 删除订单
+        return await tx.order.delete({
+          where: { id: Number(id) }
+        });
+      });
     }
   },
   
