@@ -421,12 +421,14 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
+    // 修改API路径，删除额外的参数，因为后端会自动根据用户角色返回所有订单
+    return ApiService.get('/orders');
   },
   
   // 更新订单状态
   updateOrderStatus: function(orderId, status) {
-    return ApiService.put(`/orders/${orderId}/status`, {
+    // 修改为直接使用PUT /orders/:id 端点
+    return ApiService.put(`/orders/${orderId}`, {
       status: status
     });
   },
@@ -434,6 +436,14 @@ const AdminApiService = {
   // 获取订单详情
   getOrderById: function(orderId) {
     return ApiService.get(`/orders/${orderId}`);
+  },
+  
+  // 处理订单
+  handleOrder: function(orderId, action) {
+    // 添加新的订单处理端点
+    return ApiService.post(`/orders/${orderId}/handle`, {
+      action: action
+    });
   },
   
   // 删除订单
@@ -730,24 +740,24 @@ const AdminApiService = {
                   <h6>Update Order Status</h6>
                   <div class="d-flex flex-wrap gap-2">
                     <button class="btn ${order.status === 'pending' ? 'btn-warning' : 'btn-outline-warning'}" 
-                            onclick="updateOrderStatus('${order.id}', 'pending')">
-                      <i class="bi bi-hourglass me-1"></i>Pending
+                            onclick="handleOrder('${order.id}', 'process')">
+                      <i class="bi bi-hourglass me-1"></i>Process
                     </button>
                     <button class="btn ${order.status === 'processing' ? 'btn-info' : 'btn-outline-info'}" 
-                            onclick="updateOrderStatus('${order.id}', 'processing')">
-                      <i class="bi bi-gear me-1"></i>Processing
+                            onclick="handleOrder('${order.id}', 'ship')">
+                      <i class="bi bi-gear me-1"></i>Ship
                     </button>
                     <button class="btn ${order.status === 'shipped' ? 'btn-primary' : 'btn-outline-primary'}" 
-                            onclick="updateOrderStatus('${order.id}', 'shipped')">
-                      <i class="bi bi-truck me-1"></i>Shipped
+                            onclick="handleOrder('${order.id}', 'deliver')">
+                      <i class="bi bi-truck me-1"></i>Deliver
                     </button>
                     <button class="btn ${order.status === 'delivered' ? 'btn-success' : 'btn-outline-success'}" 
-                            onclick="updateOrderStatus('${order.id}', 'delivered')">
-                      <i class="bi bi-check-circle me-1"></i>Delivered
+                            onclick="handleOrder('${order.id}', 'complete')">
+                      <i class="bi bi-check-circle me-1"></i>Complete
                     </button>
                     <button class="btn ${order.status === 'cancelled' ? 'btn-danger' : 'btn-outline-danger'}" 
-                            onclick="updateOrderStatus('${order.id}', 'cancelled')">
-                      <i class="bi bi-x-circle me-1"></i>Cancelled
+                            onclick="handleOrder('${order.id}', 'cancel')">
+                      <i class="bi bi-x-circle me-1"></i>Cancel
                     </button>
                   </div>
                 </div>
@@ -795,7 +805,9 @@ const AdminApiService = {
       
       // 关闭模态窗口
       const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
-      modal.hide();
+      if (modal) {
+        modal.hide();
+      }
       
       // 重新加载订单列表
       await loadOrders();
