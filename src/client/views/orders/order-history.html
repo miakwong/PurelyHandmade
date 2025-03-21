@@ -261,222 +261,61 @@
   </div>
 </div>
 
-<!-- Order History Container -->
-<div class="container mb-5">
-  <!-- Filter Section -->
-  <div class="filter-section">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <ul class="nav nav-pills">
-        <li class="nav-item">
-          <a class="nav-link active" href="#" data-filter="all">All Orders</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-filter="processing">Processing</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-filter="shipped">Shipped</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-filter="delivered">Delivered</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-filter="cancelled">Cancelled</a>
-        </li>
-      </ul>
-      <div class="d-none d-md-block">
-        <select class="form-select" id="orderSort">
-          <option value="date-desc">Most Recent</option>
-          <option value="date-asc">Oldest First</option>
-          <option value="price-desc">Highest Total</option>
-          <option value="price-asc">Lowest Total</option>
-        </select>
+<!-- Orders List Container -->
+<div class="container py-5">
+  <h1 class="h3 mb-4">My Orders</h1>
+  
+  <!-- Order Filters -->
+  <div class="order-filters mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <!-- Status Filter Pills -->
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-status="all">All Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="processing">Processing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="shipped">Shipped</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="delivered">Delivered</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-status="cancelled">Cancelled</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6 d-flex justify-content-md-end">
+        <!-- Sort Dropdown -->
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-sort-down me-1"></i>Sort By
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+            <li><a class="dropdown-item active" href="#" data-sort="date-desc">Date (Newest First)</a></li>
+            <li><a class="dropdown-item" href="#" data-sort="date-asc">Date (Oldest First)</a></li>
+            <li><a class="dropdown-item" href="#" data-sort="price-desc">Total (Highest First)</a></li>
+            <li><a class="dropdown-item" href="#" data-sort="price-asc">Total (Lowest First)</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
   
-  <!-- Orders List -->
+  <!-- Orders Container -->
   <div id="orders-container">
-    <!-- Order Card 1 - Processing -->
-    <div class="order-card" data-status="processing">
-      <div class="order-header">
-        <div class="row">
-          <div class="col-md-6">
-            <h5 class="mb-1">Order #PH20230003</h5>
-            <p class="order-date mb-0">Placed on March 8, 2023</p>
-          </div>
-          <div class="col-md-6 text-md-end">
-            <span class="order-status status-processing">Processing</span>
-          </div>
-        </div>
-      </div>
-      <div class="order-body">
-        <div class="product-list">
-          <div class="product-item">
-            <img src="/src/client/img/category-oils.jpg" alt="Essential Oil" class="product-image">
-            <div class="product-details">
-              <p class="product-name">Lavender Essential Oil</p>
-              <p class="product-qty mb-0">Qty: 1</p>
-            </div>
-          </div>
-          <div class="product-item">
-            <img src="/src/client/img/category-bath.jpg" alt="Bath Bomb" class="product-image">
-            <div class="product-details">
-              <p class="product-name">Rose Bath Bomb Set</p>
-              <p class="product-qty mb-0">Qty: 2</p>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <p class="mb-0"><strong>Total Items:</strong> 3</p>
-          </div>
-          <div class="col-6 text-md-end">
-            <p class="mb-0"><strong>Total:</strong> $48.95</p>
-          </div>
-        </div>
-      </div>
-      <div class="order-footer">
-        <div>
-          <span class="text-muted">Expected delivery: March 15, 2023</span>
-        </div>
-        <a href="order-details.html?id=PH20230003" class="btn btn-outline-primary">View Details</a>
-      </div>
-    </div>
-    
-    <!-- Order Card 2 - Shipped -->
-    <div class="order-card" data-status="shipped">
-      <div class="order-header">
-        <div class="row">
-          <div class="col-md-6">
-            <h5 class="mb-1">Order #PH20230002</h5>
-            <p class="order-date mb-0">Placed on March 6, 2023</p>
-          </div>
-          <div class="col-md-6 text-md-end">
-            <span class="order-status status-shipped">Shipped</span>
-          </div>
-        </div>
-      </div>
-      <div class="order-body">
-        <div class="product-list">
-          <div class="product-item">
-            <img src="/src/client/img/category-candles.jpg" alt="Candle" class="product-image">
-            <div class="product-details">
-              <p class="product-name">Vanilla Soy Candle</p>
-              <p class="product-qty mb-0">Qty: 1</p>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <p class="mb-0"><strong>Total Items:</strong> 1</p>
-          </div>
-          <div class="col-6 text-md-end">
-            <p class="mb-0"><strong>Total:</strong> $22.99</p>
-          </div>
-        </div>
-      </div>
-      <div class="order-footer">
-        <div>
-          <span class="text-muted">Tracking: <a href="#" class="text-decoration-none">TRACK987654321</a></span>
-        </div>
-        <a href="order-details.html?id=PH20230002" class="btn btn-outline-primary">View Details</a>
-      </div>
-    </div>
-    
-    <!-- Order Card 3 - Delivered -->
-    <div class="order-card" data-status="delivered">
-      <div class="order-header">
-        <div class="row">
-          <div class="col-md-6">
-            <h5 class="mb-1">Order #PH20230001</h5>
-            <p class="order-date mb-0">Placed on March 5, 2023</p>
-          </div>
-          <div class="col-md-6 text-md-end">
-            <span class="order-status status-delivered">Delivered</span>
-          </div>
-        </div>
-      </div>
-      <div class="order-body">
-        <div class="product-list">
-          <div class="product-item">
-            <img src="/src/client/img/category-soaps.jpg" alt="Handmade Soap" class="product-image">
-            <div class="product-details">
-              <p class="product-name">Lavender Handmade Soap</p>
-              <p class="product-qty mb-0">Qty: 2</p>
-            </div>
-          </div>
-          <div class="product-item">
-            <img src="/src/client/img/category-candles.jpg" alt="Handmade Candle" class="product-image">
-            <div class="product-details">
-              <p class="product-name">Vanilla Soy Candle</p>
-              <p class="product-qty mb-0">Qty: 1</p>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <p class="mb-0"><strong>Total Items:</strong> 3</p>
-          </div>
-          <div class="col-6 text-md-end">
-            <p class="mb-0"><strong>Total:</strong> $54.03</p>
-          </div>
-        </div>
-      </div>
-      <div class="order-footer">
-        <div>
-          <span class="text-muted">Delivered on March 10, 2023</span>
-        </div>
-        <div>
-          <a href="order-details.html?id=PH20230001" class="btn btn-outline-primary me-2">View Details</a>
-          <a href="#" class="btn btn-outline-secondary">Buy Again</a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Add more order cards as needed -->
-    
-    <!-- Empty states for different order filters -->
-    <div id="empty-state-processing" class="empty-state mt-4" style="display: none;">
-      <div class="empty-icon">
-        <i class="bi bi-hourglass-split" style="color: #0dcaf0;"></i>
-      </div>
-      <h3>No Processing Orders</h3>
-      <p class="text-muted mb-4">You don't have any orders currently being processed</p>
-    </div>
-    
-    <div id="empty-state-shipped" class="empty-state mt-4" style="display: none;">
-      <div class="empty-icon">
-        <i class="bi bi-truck" style="color: #20c997;"></i>
-      </div>
-      <h3>No Shipped Orders</h3>
-      <p class="text-muted mb-4">You don't have any orders currently in transit</p>
-    </div>
-    
-    <div id="empty-state-delivered" class="empty-state mt-4" style="display: none;">
-      <div class="empty-icon">
-        <i class="bi bi-check-circle" style="color: #198754;"></i>
-      </div>
-      <h3>No Delivered Orders</h3>
-      <p class="text-muted mb-4">You don't have any completed deliveries yet</p>
-    </div>
-    
-    <div id="empty-state-cancelled" class="empty-state mt-4" style="display: none;">
-      <div class="empty-icon">
-        <i class="bi bi-x-circle" style="color: #dc3545;"></i>
-      </div>
-      <h3>No Cancelled Orders</h3>
-      <p class="text-muted mb-4">You don't have any cancelled orders</p>
-    </div>
+    <!-- 动态加载的订单将显示在这里 -->
   </div>
   
-  <!-- Empty State (hidden by default) -->
-  <div class="empty-state" id="empty-state" style="display: none;">
-    <div class="empty-icon">
-      <i class="bi bi-box-seam"></i>
-    </div>
-    <h3>No Orders Found</h3>
-    <p class="text-muted mb-4">You haven't placed any orders yet</p>
-    <a href="/src/client/views/product/product-list.html" class="btn btn-primary">Start Shopping</a>
+  <!-- Empty State -->
+  <div id="empty-state" class="text-center py-5" style="display: none;">
+    <img src="/src/client/img/empty-orders.svg" alt="No orders" class="img-fluid mb-4" style="max-width: 200px;">
+    <h3 class="h4 mb-3">You don't have any orders yet</h3>
+    <p class="text-muted mb-4">Explore our products and place your first order!</p>
+    <a href="/src/client/index.html#products" class="btn btn-primary">Shop Now</a>
   </div>
 </div>
 
@@ -629,29 +468,181 @@
   }
   
   // Load order history
-  function loadOrderHistory() {
-    // In a real application, this would fetch order data from localStorage or server
-    // Here using example data
-    
-    // Check if there are any orders in localStorage
-    let userOrders = [];
+  async function loadOrderHistory() {
     try {
-      // Try to get orders from localStorage
-      const userData = JSON.parse(localStorage.getItem('currentUser'));
-      if (userData && userData.orders) {
-        userOrders = userData.orders;
+      // 检查用户登录状态
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Please login to view your order history', 'error');
+        return;
       }
+      
+      // 显示加载指示器
+      const ordersContainer = document.getElementById('orders-container');
+      const emptyState = document.getElementById('empty-state');
+      
+      ordersContainer.innerHTML = `
+        <div class="text-center my-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Loading your orders...</p>
+        </div>
+      `;
+      
+      // 从API获取订单数据
+      const response = await fetch('/api/orders', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load orders');
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success || !data.data || !Array.isArray(data.data)) {
+        throw new Error('Invalid response from server');
+      }
+      
+      const orders = data.data;
+      
+      // 检查是否有订单
+      if (orders.length === 0) {
+        ordersContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      // 显示订单容器，隐藏空状态
+      ordersContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+      
+      // 清空订单容器
+      ordersContainer.innerHTML = '';
+      
+      // 按日期降序排序订单
+      orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      // 渲染每个订单
+      orders.forEach(order => {
+        const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // 计算总商品数量
+        let totalItems = 0;
+        order.items.forEach(item => {
+          totalItems += item.quantity;
+        });
+        
+        // 创建订单卡片HTML
+        const orderCard = document.createElement('div');
+        orderCard.className = 'order-card';
+        orderCard.dataset.status = order.status;
+        
+        // 格式化订单状态显示
+        const statusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+        
+        orderCard.innerHTML = `
+          <div class="order-header">
+            <div class="row">
+              <div class="col-md-6">
+                <h5 class="mb-1">Order #${order.id}</h5>
+                <p class="order-date mb-0">Placed on ${orderDate}</p>
+              </div>
+              <div class="col-md-6 text-md-end">
+                <span class="order-status status-${order.status}">${statusText}</span>
+              </div>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="product-list">
+              ${renderOrderItems(order.items)}
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <p class="mb-0"><strong>Total Items:</strong> ${totalItems}</p>
+              </div>
+              <div class="col-6 text-md-end">
+                <p class="mb-0"><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="order-footer">
+            <div>
+              <span class="text-muted">Order ID: ${order.id}</span>
+            </div>
+            <a href="order-details.html?id=${order.id}" class="btn btn-outline-primary">View Details</a>
+          </div>
+        `;
+        
+        ordersContainer.appendChild(orderCard);
+      });
+      
+      // 应用当前过滤器
+      const activeFilter = document.querySelector('.nav-pills .nav-link.active');
+      if (activeFilter) {
+        filterOrders(activeFilter.dataset.status);
+      }
+      
     } catch (error) {
-      console.error('Error fetching user orders:', error);
+      console.error('Error loading order history:', error);
+      document.getElementById('orders-container').innerHTML = `
+        <div class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Error loading orders: ${error.message}
+        </div>
+        <button class="btn btn-outline-primary mt-3" onclick="loadOrderHistory()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+        </button>
+      `;
+    }
+  }
+  
+  // 渲染订单商品
+  function renderOrderItems(items) {
+    if (!items || items.length === 0) {
+      return '<p>No items in this order</p>';
     }
     
-    // For demo, we'll use the hardcoded orders if userOrders is empty
-    const hasOrders = document.querySelectorAll('.order-card').length > 0 || userOrders.length > 0;
+    // 限制显示的商品数量
+    const displayItems = items.slice(0, 2);
+    let html = '';
     
-    if (!hasOrders) {
-      document.getElementById('orders-container').style.display = 'none';
-      document.getElementById('empty-state').style.display = 'block';
+    displayItems.forEach(item => {
+      const productName = item.product ? item.product.name : 'Product';
+      const productImage = item.product && item.product.image 
+        ? item.product.image 
+        : '/src/client/img/product-placeholder.jpg';
+      
+      html += `
+        <div class="product-item">
+          <img src="${productImage}" alt="${productName}" class="product-image">
+          <div class="product-details">
+            <p class="product-name">${productName}</p>
+            <p class="product-qty mb-0">Qty: ${item.quantity}</p>
+          </div>
+        </div>
+      `;
+    });
+    
+    // 如果有更多商品，显示提示
+    if (items.length > 2) {
+      html += `
+        <div class="more-items">
+          <span>+${items.length - 2} more items</span>
+        </div>
+      `;
     }
+    
+    return html;
   }
   
   // Initialize filters
@@ -668,7 +659,7 @@
         this.classList.add('active');
         
         // Get filter value
-        const filter = this.getAttribute('data-filter');
+        const filter = this.getAttribute('data-status');
         
         // Filter orders
         filterOrders(filter);
@@ -676,7 +667,7 @@
     });
     
     // Sorting
-    document.getElementById('orderSort').addEventListener('change', function() {
+    document.getElementById('sortDropdown').addEventListener('change', function() {
       sortOrders(this.value);
     });
   }

@@ -51,10 +51,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`服务器运行在 http://localhost:${PORT}`);
-  console.log(`API可通过 http://localhost:${PORT}${API_PREFIX} 访问`);
-});
+// 只有在直接运行时才启动服务器
+if (require.main === module) {
+  // 启动服务器
+  app.listen(PORT, () => {
+    console.log(`服务器运行在 http://localhost:${PORT}`);
+    console.log(`API可通过 http://localhost:${PORT}${API_PREFIX} 访问`);
+  });
+}
 
+// 导出app对象
 module.exports = app; 

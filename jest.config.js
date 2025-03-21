@@ -17,6 +17,11 @@ module.exports = {
   coverageReporters: ['text', 'lcov'],
   
   // 每个测试文件运行前的设置
+  setupFiles: [
+    './tests/backend/utils/test-setup.js'
+  ],
+  
+  // 每个测试运行后的设置
   setupFilesAfterEnv: [
     './tests/setup.js'
   ],
