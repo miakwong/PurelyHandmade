@@ -337,6 +337,12 @@ const ApiService = {
       credentials: 'same-origin',
     };
     
+    // 添加授权令牌
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (token) {
+      defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     // 合并选项
     const fetchOptions = {
       ...defaultOptions,
