@@ -253,5 +253,9 @@ window.initializeData = function() {
 };
 
 // Call initialization function
-window.initializeData();
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof window.initializeData === 'function') {
+    window.initializeData();
+  }
+});
 console.log('init-data.js script completed'); 
