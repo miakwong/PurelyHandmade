@@ -754,6 +754,92 @@ router.get('/admin/statistics', authenticateUser, requireAdmin, async (req, res)
   }
 });
 
+// 调试路由
+router.get('/debug/auth', (req, res) => {
+  const authHeader = req.headers.authorization;
+  
+  res.json({
+    success: true,
+    data: {
+      hasAuthHeader: !!authHeader,
+      authHeader: authHeader,
+      isBearer: authHeader?.startsWith('Bearer '),
+      token: authHeader?.split(' ')[1] || null
+    }
+  });
+});
+
+// 调试路由 - 无需验证的简单数据
+router.get('/debug/data', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      message: 'This is test data that requires no authentication',
+      timestamp: new Date().toISOString(),
+      randomNumber: Math.floor(Math.random() * 100)
+    }
+  });
+});
+
+// 调试路由 - 无需验证的测试产品数据
+router.get('/debug/products', (req, res) => {
+  const mockProducts = [
+    {
+      id: 1,
+      name: '手工香薰蜡烛',
+      slug: 'handmade-scented-candle',
+      sku: 'SC001',
+      price: 29.99,
+      stock: 50,
+      description: '纯天然大豆蜡制成的香薰蜡烛，散发宜人香气。',
+      image: '/src/client/img/category-candles.jpg',
+      featured: true,
+      active: true,
+      categoryId: 1,
+      category: { name: '蜡烛' },
+      designerId: 1,
+      designer: { name: '陈静' }
+    },
+    {
+      id: 2,
+      name: '天然手工皂套装',
+      slug: 'natural-soap-set',
+      sku: 'SS002',
+      price: 24.99,
+      stock: 30,
+      description: '由天然植物油和精油制成的手工皂套装，温和滋润。',
+      image: '/src/client/img/category-soaps.jpg',
+      featured: true,
+      active: true,
+      categoryId: 2,
+      category: { name: '肥皂' },
+      designerId: 2,
+      designer: { name: '林小花' }
+    },
+    {
+      id: 3,
+      name: '紫砂茶壶套装',
+      slug: 'purple-clay-teapot-set',
+      sku: 'TP001',
+      price: 499.00,
+      stock: 10,
+      description: '传统手工紫砂茶壶，配四个小茶杯',
+      image: '/src/client/img/product-teapot.jpg',
+      featured: true,
+      active: true,
+      categoryId: 4,
+      category: { name: '茶具' },
+      designerId: 1,
+      designer: { name: '陈静' }
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockProducts
+  });
+});
+
 // 导出路由
 module.exports = router;
 

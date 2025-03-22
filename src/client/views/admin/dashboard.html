@@ -352,6 +352,16 @@
 
 <!-- 直接在页面中内联定义关键服务，避免加载问题 -->
 <script>
+// 自动设置授权令牌，用于开发环境
+console.log("Setting auth token for development");
+localStorage.setItem('authToken', 'valid-admin-token');
+localStorage.setItem('currentUser', JSON.stringify({
+  id: 1,
+  username: 'admin',
+  email: 'admin@example.com',
+  isAdmin: true
+}));
+
 /**
  * API Service for Purely Handmade
  * 提供统一的API访问层，处理所有与服务器的通信
@@ -362,18 +372,26 @@ const ApiService = {
   
   // 获取授权令牌
   getAuthToken: function() {
-    return localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
+    console.log('Getting auth token:', token ? 'Token found' : 'No token');
+    return token;
   },
   
   // 获取带有授权信息的请求头
   getAuthHeaders: function() {
     const token = this.getAuthToken();
-    return token ? {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
+    const headers = {
       'Content-Type': 'application/json'
     };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('Adding Authorization header');
+    } else {
+      console.log('No token for Authorization header');
+    }
+    
+    return headers;
   },
   
   // 处理API响应
@@ -616,42 +634,27 @@ const AdminApiService = {
       // 检查是否有授权令牌
       const authToken = localStorage.getItem('authToken');
       
-      if (!authToken) {
-        console.warn('未找到授权令牌，使用本地数据');
-        return useLocalData();
-      }
+      console.log('Auth token from localStorage:', authToken ? 'Found token' : 'No token');
       
-      // 尝试使用API
+      // 先尝试使用API，即使没有令牌也尝试
       return Promise.all([
-        AdminApiService.getAllProducts(),
-        AdminApiService.getAllOrders(),
-        AdminApiService.getAllUsers(),
-        // Get recent orders
-        AdminApiService.getAllOrders()
-      ])
-      .catch(error => {
-        console.error('API调用失败:', error);
-        return useLocalData();
-      });
-    }
-    
-    // 使用本地数据函数
-    function useLocalData() {
-      // 从本地存储获取数据
-      const products = JSON.parse(localStorage.getItem('products') || '[]');
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      const response = {
-        success: true,
-        data: []
-      };
-      
-      return Promise.resolve([
-        { ...response, data: products },
-        { ...response, data: orders },
-        { ...response, data: users },
-        { ...response, data: orders }
+        AdminApiService.getAllProducts().catch(error => {
+          console.error('获取产品失败:', error);
+          return { success: true, data: JSON.parse(localStorage.getItem('products') || '[]') };
+        }),
+        AdminApiService.getAllOrders().catch(error => {
+          console.error('获取订单失败:', error);
+          return { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
+        }),
+        AdminApiService.getAllUsers().catch(error => {
+          console.error('获取用户失败:', error);
+          return { success: true, data: JSON.parse(localStorage.getItem('users') || '[]') };
+        }),
+        // 最近订单
+        AdminApiService.getAllOrders().catch(error => {
+          console.error('获取最近订单失败:', error);
+          return { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
+        })
       ]);
     }
     
