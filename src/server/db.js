@@ -191,7 +191,31 @@ const mockData = {
   products: [],
   categories: [],
   designers: [],
-  orders: []
+  orders: [],
+  reviews: [
+    {
+      id: 1,
+      productId: 1,
+      userId: 2,
+      rating: 5,
+      title: "Great product!",
+      content: "This product exceeded my expectations. Highly recommended!",
+      status: "approved",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      productId: 1, 
+      userId: 2,
+      rating: 4,
+      title: "Pretty good",
+      content: "Good quality, but a bit pricey.",
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ]
 };
 
 // 通用查询函数 - 包含错误处理和回退到模拟数据
@@ -494,8 +518,8 @@ const DatabaseService = {
     getAll: async () => {
       const orders = await query(
         `SELECT o.*, u.firstName, u.lastName, u.email
-         FROM Order o
-         LEFT JOIN User u ON o.userId = u.id
+         FROM \`Order\` o
+         LEFT JOIN \`User\` u ON o.userId = u.id
          ORDER BY o.createdAt DESC`,
         [],
         mockData.orders
@@ -505,8 +529,8 @@ const DatabaseService = {
       for (const order of orders) {
         order.orderItems = await query(
           `SELECT oi.*, p.name as productName, p.price, p.image
-           FROM OrderItem oi
-           LEFT JOIN Product p ON oi.productId = p.id
+           FROM \`OrderItem\` oi
+           LEFT JOIN \`Product\` p ON oi.productId = p.id
            WHERE oi.orderId = ?`,
           [order.id],
           []
@@ -518,37 +542,201 @@ const DatabaseService = {
     
     // 通过ID获取订单
     getById: async (id) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      const orders = await query(
+        `SELECT o.*, u.firstName, u.lastName, u.email
+         FROM \`Order\` o
+         LEFT JOIN \`User\` u ON o.userId = u.id
+         WHERE o.id = ?`,
+        [id],
+        mockData.orders.filter(o => o.id == id)
+      );
+      
+      if (!orders[0]) return null;
+      
+      // 获取订单项
+      orders[0].orderItems = await query(
+        `SELECT oi.*, p.name as productName, p.price, p.image
+         FROM \`OrderItem\` oi
+         LEFT JOIN \`Product\` p ON oi.productId = p.id
+         WHERE oi.orderId = ?`,
+        [id],
+        []
+      );
+      
+      return orders[0];
     },
     
     // 获取用户订单
     getByUserId: async (userId) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      const orders = await query(
+        `SELECT o.*
+         FROM \`Order\` o
+         WHERE o.userId = ?
+         ORDER BY o.createdAt DESC`,
+        [userId],
+        mockData.orders.filter(o => o.userId == userId)
+      );
+      
+      // 获取每个订单的订单项
+      for (const order of orders) {
+        order.orderItems = await query(
+          `SELECT oi.*, p.name as productName, p.price, p.image
+           FROM \`OrderItem\` oi
+           LEFT JOIN \`Product\` p ON oi.productId = p.id
+           WHERE oi.orderId = ?`,
+          [order.id],
+          []
+        );
+      }
+      
+      return orders;
     },
     
     // 创建订单
     create: async (orderData) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      const { userId, status, totalAmount, shippingInfo, paymentInfo, notes, items } = orderData;
+      
+      // 插入订单
+      const result = await query(
+        `INSERT INTO \`Order\` (userId, status, totalAmount, shippingInfo, paymentInfo, notes, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [userId, status || 'pending', totalAmount, 
+         JSON.stringify(shippingInfo), 
+         JSON.stringify(paymentInfo), 
+         notes],
+        { insertId: mockData.orders.length + 1 }
+      );
+      
+      const orderId = result.insertId;
+      
+      // 如果有订单项，插入订单项
+      if (items && items.length > 0) {
+        for (const item of items) {
+          await query(
+            `INSERT INTO \`OrderItem\` (orderId, productId, quantity, price)
+             VALUES (?, ?, ?, ?)`,
+            [orderId, item.productId, item.quantity, item.price],
+            { insertId: 1 }
+          );
+          
+          // 更新产品库存
+          await query(
+            `UPDATE \`Product\` SET stock = stock - ?, updatedAt = NOW()
+             WHERE id = ?`,
+            [item.quantity, item.productId],
+            { affectedRows: 1 }
+          );
+        }
+      }
+      
+      return { id: orderId, ...orderData };
     },
     
     // 更新订单状态
     updateStatus: async (id, status) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      await query(
+        `UPDATE \`Order\` SET status = ?, updatedAt = NOW()
+         WHERE id = ?`,
+        [status, id],
+        { affectedRows: 1 }
+      );
+      
+      return await module.exports.orders.getById(id);
     },
     
     // 删除订单
     delete: async (id) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      // 先删除相关的订单项
+      await query(
+        `DELETE FROM \`OrderItem\` WHERE orderId = ?`,
+        [id],
+        { affectedRows: 1 }
+      );
+      
+      // 删除订单
+      await query(
+        `DELETE FROM \`Order\` WHERE id = ?`,
+        [id],
+        { affectedRows: 1 }
+      );
+      
+      return { id };
+    },
+    
+    // 获取订单数量
+    getCount: async () => {
+      const result = await query(
+        `SELECT COUNT(*) as count FROM \`Order\``,
+        [],
+        [{ count: mockData.orders.length }]
+      );
+      
+      return result[0].count;
+    },
+    
+    // 获取用户订单数量
+    getCountByUserId: async (userId) => {
+      const result = await query(
+        `SELECT COUNT(*) as count FROM \`Order\` WHERE userId = ?`,
+        [userId],
+        [{ count: mockData.orders.filter(o => o.userId == userId).length }]
+      );
+      
+      return result[0].count;
+    },
+    
+    // 分页获取订单
+    getPaginated: async (skip, limit) => {
+      const orders = await query(
+        `SELECT o.*, u.firstName, u.lastName, u.email
+         FROM \`Order\` o
+         LEFT JOIN \`User\` u ON o.userId = u.id
+         ORDER BY o.createdAt DESC
+         LIMIT ?, ?`,
+        [skip, limit],
+        mockData.orders.slice(skip, skip + limit)
+      );
+      
+      // 获取订单项
+      for (const order of orders) {
+        order.orderItems = await query(
+          `SELECT oi.*, p.name as productName, p.price, p.image
+           FROM \`OrderItem\` oi
+           LEFT JOIN \`Product\` p ON oi.productId = p.id
+           WHERE oi.orderId = ?`,
+          [order.id],
+          []
+        );
+      }
+      
+      return orders;
+    },
+    
+    // 分页获取用户订单
+    getPaginatedByUserId: async (userId, skip, limit) => {
+      const orders = await query(
+        `SELECT o.*
+         FROM \`Order\` o
+         WHERE o.userId = ?
+         ORDER BY o.createdAt DESC
+         LIMIT ?, ?`,
+        [userId, skip, limit],
+        mockData.orders.filter(o => o.userId == userId).slice(skip, skip + limit)
+      );
+      
+      // 获取订单项
+      for (const order of orders) {
+        order.orderItems = await query(
+          `SELECT oi.*, p.name as productName, p.price, p.image
+           FROM \`OrderItem\` oi
+           LEFT JOIN \`Product\` p ON oi.productId = p.id
+           WHERE oi.orderId = ?`,
+          [order.id],
+          []
+        );
+      }
+      
+      return orders;
     }
   },
   
@@ -556,37 +744,92 @@ const DatabaseService = {
   reviews: {
     // 获取所有评论
     getAll: async () => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      return await query(
+        `SELECT r.*, u.firstName, u.lastName, u.username, p.name as productName
+         FROM \`Review\` r
+         LEFT JOIN \`User\` u ON r.userId = u.id
+         LEFT JOIN \`Product\` p ON r.productId = p.id
+         ORDER BY r.createdAt DESC`,
+        [],
+        mockData.reviews
+      );
+    },
+    
+    // 通过ID获取评论
+    getById: async (id) => {
+      const reviews = await query(
+        `SELECT r.*, u.firstName, u.lastName, u.username, p.name as productName
+         FROM \`Review\` r
+         LEFT JOIN \`User\` u ON r.userId = u.id
+         LEFT JOIN \`Product\` p ON r.productId = p.id
+         WHERE r.id = ?`,
+        [id],
+        mockData.reviews.filter(r => r.id == id)
+      );
+      
+      return reviews[0] || null;
     },
     
     // 获取产品评论
     getByProductId: async (productId) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      return await query(
+        `SELECT r.*, u.firstName, u.lastName, u.username
+         FROM \`Review\` r
+         LEFT JOIN \`User\` u ON r.userId = u.id
+         WHERE r.productId = ? AND r.status = 'approved'
+         ORDER BY r.createdAt DESC`,
+        [productId],
+        mockData.reviews.filter(r => r.productId == productId && r.status === 'approved')
+      );
     },
     
     // 创建评论
     create: async (reviewData) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      const { productId, userId, rating, title, content, status } = reviewData;
+      
+      const result = await query(
+        `INSERT INTO \`Review\` (productId, userId, rating, title, content, status, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [productId, userId, rating, title, content, status || 'pending'],
+        { insertId: mockData.reviews.length + 1 }
+      );
+      
+      return { id: result.insertId, ...reviewData };
     },
     
     // 更新评论状态
     updateStatus: async (id, status) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      await query(
+        `UPDATE \`Review\` SET status = ?, updatedAt = NOW()
+         WHERE id = ?`,
+        [status, id],
+        { affectedRows: 1 }
+      );
+      
+      return await module.exports.reviews.getById(id);
+    },
+    
+    // 添加管理员回复
+    addReply: async (id, reply) => {
+      await query(
+        `UPDATE \`Review\` SET adminReply = ?, updatedAt = NOW()
+         WHERE id = ?`,
+        [reply, id],
+        { affectedRows: 1 }
+      );
+      
+      return await module.exports.reviews.getById(id);
     },
     
     // 删除评论
     delete: async (id) => {
-      // This method is not provided in the original code or the new implementation
-      // It's assumed to exist as it's called in the original code
-      throw new Error("Method not implemented");
+      await query(
+        `DELETE FROM \`Review\` WHERE id = ?`,
+        [id],
+        { affectedRows: 1 }
+      );
+      
+      return { id };
     }
   }
 };
