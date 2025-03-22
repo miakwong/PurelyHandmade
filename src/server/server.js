@@ -31,8 +31,30 @@ app.use(cors({
 app.use(express.json()); // 解析JSON请求体
 app.use(express.urlencoded({ extended: true })); // 解析URL编码请求体
 
+// 添加MIME类型
+app.use((req, res, next) => {
+  const url = req.url;
+  if (url.endsWith('.css')) {
+    res.type('text/css');
+  }
+  next();
+});
+
+// 专门处理CSS文件的路由 - 确保正确的MIME类型
+app.get('*.css', (req, res, next) => {
+  res.set('Content-Type', 'text/css');
+  next();
+});
+
 // 静态文件服务
-app.use(express.static(path.join(__dirname, '../../')));
+app.use(express.static(path.join(__dirname, '../../'), {
+  setHeaders: (res, filePath) => {
+    // 为CSS文件设置正确的MIME类型
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
 
 // API路由
 app.use(API_PREFIX, apiRoutes);

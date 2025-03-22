@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Set Admin Token</title>
+</head>
+<body>
+    <h1>Setting Admin Token</h1>
+    <script>
+        localStorage.setItem('authToken', 'valid-admin-token');
+        localStorage.setItem('currentUser', JSON.stringify({
+            id: 1,
+            username: 'admin',
+            email: 'admin@example.com',
+            isAdmin: true
+        }));
+        document.write('<p>Token set successfully!</p>');
+        document.write('<p><a href="/src/client/views/admin/dashboard.html">Go to Admin Dashboard</a></p>');
+    </script>
+</body>
+</html> 
