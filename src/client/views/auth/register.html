@@ -338,12 +338,6 @@
         showValidationError('terms-error', 'Please agree to the terms and conditions to complete the registration.');
       }
       
-      // Check for duplicate email
-      if (users.some(user => user.email === email)) {
-        isValid = false;
-        showValidationError('email-error', 'This email is already registered. Please use another email or log in directly.');
-      }
-      
       if (!isValid) {
         // Show overall error message
         const formError = document.getElementById('form-validation-error');
@@ -412,22 +406,6 @@
       }
     });
 
-    // 添加邮箱实时重复检测功能
-    document.getElementById('regEmail').addEventListener('blur', function() {
-      const email = this.value.trim();
-      if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        // 邮箱格式正确时，检查是否已被注册
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (users.some(user => user.email === email)) {
-          showValidationError('email-error', 'This email is already registered. Please use another email or log in directly.');
-        } else {
-          // 清除错误消息
-          document.getElementById('email-error').textContent = '';
-          document.getElementById('email-error').classList.remove('show');
-        }
-      }
-    });
-
     // 添加用户名实时重复检测功能
     document.getElementById('username').addEventListener('blur', function() {
       const username = this.value.trim();
@@ -449,6 +427,47 @@
         }
       }
     });
+
+    //0322邮箱验证
+    document.getElementById('regEmail').addEventListener('blur', async function() {
+      const email = this.value.trim();
+      if (!email) return;
+  
+      // 验证邮箱格式
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showValidationError('email-error', 'Please enter a valid email address.');
+          return;
+      }
+  
+      try {
+        const response = await fetch('/src/server/api/auth/check_email.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        // 确保返回 JSON
+        const text = await response.text();
+        try {
+            const result = JSON.parse(text);
+            if (result.error) {
+                showValidationError('email-error', result.error);
+            } else if (result.exists) {
+                showValidationError('email-error', 'This email is already registered.');
+            } else {
+                document.getElementById('email-error').textContent = '';
+                document.getElementById('email-error').classList.remove('show');
+            }
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', text);
+            showValidationError('email-error', 'Server error: Invalid response format.');
+        }
+    } catch (error) {
+        console.error('Error checking email:', error);
+        showValidationError('email-error', 'An error occurred while checking the email. Please try again.');
+    }
+});
+  
 
     // Toast notification function
     function showToast(message, type = 'info') {
