@@ -292,6 +292,9 @@
           localStorage.setItem('isAdmin', 'true');
         }
         
+        // Set auth token for API requests
+        localStorage.setItem('authToken', 'valid-token');
+        
         // Try immediately updating navigation bar status
         console.log('User login successful, attempting to update navigation bar...');
         
