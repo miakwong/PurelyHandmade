@@ -120,6 +120,94 @@ PurelyHandmade/
         └── views/        # View templates
 ```
 
+PurelyHandmade/              # Root project directory
+├── DATABASE_ACCESS.md       # Database access documentation
+├── README.md                # Project README
+├── src/                     # Source code directory
+│   ├── client/              # Frontend assets and views
+│   │   ├── css/             # CSS stylesheets
+│   │   │   ├── global.css   # Global styles
+│   │   │   ├── profile.css  # User profile styles
+│   │   │   ├── navbar.css   # Navbar styles
+│   │   │   ├── ...          # Other stylesheets
+│   │   ├── html/            # Static HTML pages (to be converted to PHP)
+│   │   │   ├── index.html   # Homepage
+│   │   │   ├── register.html # User registration page (to be converted to PHP)
+│   │   │   ├── ...          # Other static pages
+│   │   ├── js/              # Frontend JavaScript files
+│   │   │   ├── navbar-handler.js # Navbar logic
+│   │   │   ├── profile_script.js # Profile-related scripts
+│   │   │   ├── ...          # Other JavaScript files
+│   │   ├── views/           # Frontend views (to be connected with backend)
+│   │   │   ├── auth/        # Authentication-related pages
+│   │   │   │   ├── login.php   # User login page
+│   │   │   │   ├── register.php # User registration page
+│   │   │   │   ├── profile.php  # User profile page
+│   │   │   ├── admin/       # Admin dashboard and management pages
+│   │   │   │   ├── dashboard.php # Admin dashboard
+│   │   │   │   ├── users.php     # User management
+│   │   │   │   ├── ...           # Other admin-related pages
+│   │   │   ├── checkout/     # Checkout and order pages
+│   │   │   │   ├── cart.php  # Shopping cart page
+│   │   │   │   ├── checkout.php # Checkout page
+│   │   │   ├── product/      # Product-related pages
+│   │   │   │   ├── product-list.php  # List of products
+│   │   │   │   ├── product-detail.php # Product details page
+│   │   │   ├── ...          # Other views
+│   ├── server/              # Backend server directory
+│   │   ├── api/             # API endpoints for frontend interactions
+│   │   │   ├── auth/        # Authentication-related API endpoints
+│   │   │   │   ├── register.php   # User registration API
+│   │   │   │   ├── login.php      # User login API
+│   │   │   │   ├── profile.php    # User profile API
+│   │   │   ├── products/     # Product-related API endpoints
+│   │   │   │   ├── get_products.php # Fetch all products
+│   │   │   │   ├── get_product.php  # Fetch single product
+│   │   │   ├── orders/       # Order management API
+│   │   │   │   ├── create_order.php # Create an order
+│   │   │   │   ├── get_orders.php   # Retrieve user orders
+│   │   │   ├── admin/        # Admin-related API endpoints
+│   │   │   │   ├── dashboard.php    # Admin dashboard API
+│   │   │   │   ├── users.php        # Fetch users
+│   │   │   ├── utils/        # Helper utilities for API
+│   │   │   │   ├── sanitize.php     # Sanitize user inputs
+│   │   │   │   ├── response.php     # JSON response helper
+│   │   │   ├── ...          # Other API endpoints
+│   │   ├── controllers/      # Business logic controllers
+│   │   │   ├── AuthController.php  # Handles authentication
+│   │   │   ├── UserController.php  # User management
+│   │   │   ├── ProductController.php # Product management
+│   │   │   ├── ...          # Other controllers
+│   │   ├── db/              # Database-related files
+│   │   │   ├── db_example.php      # Database connection example
+│   │   │   ├── init_db.php         # Initialize database
+│   │   │   ├── schema.sql          # Database schema
+│   │   │   ├── ...          # Other database-related scripts
+│   │   ├── utils/           # Backend utilities and helpers
+│   │   │   ├── logger.php        # Logging system
+│   │   │   ├── jwt.php           # JWT token handling
+│   │   │   ├── session.php       # Session management
+│   │   │   ├── ...          # Other utilities
+│   │   ├── index.php        # Main API entry point
+│   │   ├── api.php          # API router
+│   │   ├── server.php       # Server entry file
+│   ├── tests/               # Automated tests
+│   │   ├── backend/         # Backend tests
+│   │   │   ├── auth.test.php      # Authentication tests
+│   │   │   ├── db.test.php        # Database tests
+│   │   │   ├── ...          # Other backend tests
+│   │   ├── frontend/        # Frontend tests
+│   │   │   ├── api-service.test.js  # API service tests
+│   │   │   ├── profile.test.js      # Profile page tests
+│   │   │   ├── ...          # Other frontend tests
+│   ├── tools/               # Developer tools
+│   │   ├── db-tool.js       # Database management tool
+│   │   ├── ...          # Other tools
+│   ├── start-server.sh      # Script to start the server
+├── package.json             # Node.js dependencies (if applicable)
+├── package-lock.json        # Dependency lock file
+└── jest.config.js           # Jest configuration for testing
+
 ## Installation and Configuration
 
 ### System Requirements
