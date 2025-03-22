@@ -460,36 +460,36 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有评论
   getAllReviews: function() {
-    return ApiService.get('/reviews');
+    return ApiService.get('/api/reviews');
   },
   
   // 通过ID获取评论
   getReviewById: function(reviewId) {
-    return ApiService.get(`/reviews/${reviewId}`);
+    return ApiService.get(`/api/reviews/${reviewId}`);
   },
   
   // 通过产品ID获取评论
   getReviewsByProductId: function(productId) {
-    return ApiService.get(`/reviews?productId=${productId}`);
+    return ApiService.get(`/api/reviews?productId=${productId}`);
   },
   
   // 更新评论状态
   updateReviewStatus: function(reviewId, status) {
-    return ApiService.put(`/reviews/${reviewId}/status`, {
+    return ApiService.put(`/api/reviews/${reviewId}/status`, {
       status: status
     });
   },
   
   // 添加管理员回复
   addReviewReply: function(reviewId, reply) {
-    return ApiService.put(`/reviews/${reviewId}/reply`, {
+    return ApiService.put(`/api/reviews/${reviewId}/reply`, {
       adminReply: reply
     });
   },
   
   // 删除评论
   deleteReview: function(reviewId) {
-    return ApiService.delete(`/reviews/${reviewId}`);
+    return ApiService.delete(`/api/reviews/${reviewId}`);
   },
   
   // 获取所有用户
@@ -693,10 +693,44 @@ const AdminApiService = {
   function loadReviews() {
     console.log('加载评论数据...');
     
+    // 尝试从API获取数据
+    console.log('正在尝试从API获取评论数据...');
+    
+    AdminApiService.getAllReviews()
+      .then(data => {
+        console.log('从API获取的数据:', data);
+        if (data && data.success && data.data && Array.isArray(data.data)) {
+          console.log(`成功从API获取${data.data.length}条评论`);
+          // 将API数据保存到localStorage
+          const reviews = data.data;
+          localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
+          
+          // 渲染评论列表
+          renderReviews(reviews);
+          updateReviewStats();
+          return;
+        } else {
+          console.log('API返回的数据格式不正确，回退到本地存储');
+        }
+        
+        // 如果API请求失败，回退到从localStorage获取
+        loadReviewsFromLocalStorage();
+      })
+      .catch(error => {
+        console.error('从API获取评论失败:', error);
+        console.log('回退到本地存储');
+        loadReviewsFromLocalStorage();
+      });
+  }
+  
+  /**
+   * 从localStorage加载评论数据
+   */
+  function loadReviewsFromLocalStorage() {
     // 获取评论数据
     let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
-    console.log(`找到${reviews.length}条评论`);
+    console.log(`从本地存储找到${reviews.length}条评论`);
     
     // 应用过滤器
     const filteredReviews = filterReviews(reviews);
@@ -871,7 +905,7 @@ const AdminApiService = {
       <div class="review-footer">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <span class="me-3">评论ID: ${review.id.slice(0, 8)}</span>
+            <span class="me-3">评论ID: ${String(review.id).slice(0, 8)}</span>
           </div>
           <div>
             ${review.status === 'pending' ? `
@@ -980,6 +1014,29 @@ const AdminApiService = {
   function updateReviewStatus(reviewId, status) {
     console.log(`更新评论 ${reviewId} 的状态为 ${status}`);
     
+    // 使用API服务更新状态
+    AdminApiService.updateReviewStatus(reviewId, status)
+      .then(response => {
+        console.log('状态更新成功:', response);
+        showToast(`评论状态已更新为：${status}`, 'success');
+        
+        // 重新加载评论
+        loadReviews();
+        updateReviewStats();
+      })
+      .catch(error => {
+        console.error('更新评论状态失败:', error);
+        showToast('更新评论状态失败', 'danger');
+        
+        // 在API失败的情况下，尝试本地更新
+        updateReviewStatusLocal(reviewId, status);
+      });
+  }
+  
+  /**
+   * 在本地更新评论状态（API失败的后备方案）
+   */
+  function updateReviewStatusLocal(reviewId, status) {
     // 获取评论数据
     const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
@@ -998,55 +1055,76 @@ const AdminApiService = {
     // 保存到主键
     localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
     
-    // 为了兼容性，同时保存到comments键
+    // 保存到comments键以确保兼容性
     localStorage.setItem('comments', JSON.stringify(reviews));
     
-    // 显示成功消息
-    showToast(`评论已${status === 'approved' ? '批准' : '拒绝'}`, 'success');
-    
-    // 重新加载评论和统计
+    // 重新加载评论
     loadReviews();
     updateReviewStats();
+    
+    showToast(`评论状态已本地更新为：${status}`, 'warning');
   }
   
   /**
    * 打开回复模态框
    */
   function openReplyModal(reviewId) {
-    // 获取评论数据
-    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
-    
-    // 查找评论
-    const review = reviews.find(r => r.id === reviewId);
-    
-    if (!review) {
-      showToast('找不到评论', 'danger');
-      return;
-    }
-    
-    // 设置评论ID到隐藏字段
     document.getElementById('reply-review-id').value = reviewId;
     
-    // 如果已有回复，填充文本框
-    document.getElementById('reply-text').value = review.reply || '';
+    // 获取评论数据
+    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+    const review = reviews.find(r => r.id === reviewId);
+    
+    if (review && review.reply) {
+      document.getElementById('reply-text').value = review.reply;
+    } else {
+      document.getElementById('reply-text').value = '';
+    }
     
     // 显示模态框
-    new bootstrap.Modal(document.getElementById('replyModal')).show();
+    const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+    replyModal.show();
   }
   
   /**
    * 提交回复
    */
   function submitReply() {
-    // 获取评论ID和回复文本
     const reviewId = document.getElementById('reply-review-id').value;
     const replyText = document.getElementById('reply-text').value.trim();
     
     if (!replyText) {
-      showToast('请输入回复内容', 'warning');
+      showToast('回复内容不能为空', 'warning');
       return;
     }
     
+    console.log(`提交对评论 ${reviewId} 的回复`);
+    
+    // 使用API服务提交回复
+    AdminApiService.addReviewReply(reviewId, replyText)
+      .then(response => {
+        console.log('回复提交成功:', response);
+        showToast('回复已发布', 'success');
+        
+        // 关闭模态框
+        bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+        
+        // 重新加载评论
+        loadReviews();
+      })
+      .catch(error => {
+        console.error('提交回复失败:', error);
+        showToast('提交回复失败', 'danger');
+        
+        // 在API失败的情况下，尝试本地提交
+        submitReplyLocal(reviewId, replyText);
+      });
+  }
+  
+  /**
+   * 在本地提交回复（API失败的后备方案）
+   */
+  function submitReplyLocal(reviewId, replyText) {
     // 获取评论数据
     const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
@@ -1058,68 +1136,80 @@ const AdminApiService = {
       return;
     }
     
-    // 更新回复
+    // 添加回复
     reviews[reviewIndex].reply = replyText;
-    
-    // 如果评论状态为待审核，自动设为已批准
-    if (reviews[reviewIndex].status === 'pending') {
-      reviews[reviewIndex].status = 'approved';
-    }
-    
-    // 更新时间戳
     reviews[reviewIndex].updatedAt = new Date().toISOString();
     
     // 保存到主键
     localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
     
-    // 为了兼容性，同时保存到comments键
+    // 保存到comments键以确保兼容性
     localStorage.setItem('comments', JSON.stringify(reviews));
     
     // 关闭模态框
     bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
     
-    // 显示成功消息
-    showToast('回复已提交', 'success');
-    
-    // 重新加载评论和统计
+    // 重新加载评论
     loadReviews();
-    updateReviewStats();
+    
+    showToast('回复已本地保存', 'warning');
   }
   
   /**
    * 删除评论
    */
   function deleteReview(reviewId) {
-    if (!confirm('确定要删除这条评论吗？此操作不可撤销。')) {
+    if (!confirm('确定要删除此评论吗？此操作不可撤销。')) {
       return;
     }
     
     console.log(`删除评论 ${reviewId}`);
     
+    // 使用API服务删除评论
+    AdminApiService.deleteReview(reviewId)
+      .then(response => {
+        console.log('评论删除成功:', response);
+        showToast('评论已删除', 'success');
+        
+        // 重新加载评论
+        loadReviews();
+        updateReviewStats();
+      })
+      .catch(error => {
+        console.error('删除评论失败:', error);
+        showToast('删除评论失败', 'danger');
+        
+        // 在API失败的情况下，尝试本地删除
+        deleteReviewLocal(reviewId);
+      });
+  }
+  
+  /**
+   * 在本地删除评论（API失败的后备方案）
+   */
+  function deleteReviewLocal(reviewId) {
     // 获取评论数据
     const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
-    // 过滤掉要删除的评论
-    const updatedReviews = reviews.filter(r => r.id !== reviewId);
+    // 查找并删除评论
+    const filteredReviews = reviews.filter(r => r.id !== reviewId);
     
-    // 检查是否找到并删除了评论
-    if (updatedReviews.length === reviews.length) {
+    if (filteredReviews.length === reviews.length) {
       showToast('找不到评论', 'danger');
       return;
     }
     
     // 保存到主键
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(updatedReviews));
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(filteredReviews));
     
-    // 为了兼容性，同时保存到comments键
-    localStorage.setItem('comments', JSON.stringify(updatedReviews));
+    // 保存到comments键以确保兼容性
+    localStorage.setItem('comments', JSON.stringify(filteredReviews));
     
-    // 显示成功消息
-    showToast('评论已删除', 'success');
-    
-    // 重新加载评论和统计
+    // 重新加载评论
     loadReviews();
     updateReviewStats();
+    
+    showToast('评论已本地删除', 'warning');
   }
   
   /**
