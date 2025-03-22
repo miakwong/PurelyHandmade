@@ -495,64 +495,12 @@ router.get('/health', (req, res) => {
 router.get('/orders', authenticateUser, async (req, res) => {
   try {
     let orders;
-    
-    try {
-      if (req.user.isAdmin) {
-        // 管理员可以看到所有订单
-        orders = await db.orders.getAll();
-      } else {
-        // 普通用户只能看到自己的订单
-        orders = await db.orders.getByUserId(req.user.id);
-      }
-    } catch (dbError) {
-      console.warn('数据库连接失败，使用模拟数据:', dbError.message);
-      // 提供模拟数据以测试前端
-      orders = [
-        {
-          id: 1001,
-          userId: req.user.id,
-          status: 'processing',
-          totalAmount: 78.50,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          items: [
-            {
-              id: 1,
-              productId: 1,
-              product: { name: '手工皂套装', image: '/src/client/img/category-soaps.jpg' },
-              quantity: 2,
-              price: 24.99,
-              subtotal: 49.98
-            },
-            {
-              id: 2,
-              productId: 2,
-              product: { name: '香薰蜡烛', image: '/src/client/img/category-candles.jpg' },
-              quantity: 1,
-              price: 28.52,
-              subtotal: 28.52
-            }
-          ]
-        },
-        {
-          id: 1002,
-          userId: req.user.id,
-          status: 'delivered',
-          totalAmount: 45.95,
-          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          items: [
-            {
-              id: 3,
-              productId: 3,
-              product: { name: '手工陶瓷杯', image: '/src/client/img/product-placeholder.jpg' },
-              quantity: 1,
-              price: 45.95,
-              subtotal: 45.95
-            }
-          ]
-        }
-      ];
+    if (req.user.isAdmin) {
+      // 管理员可以看到所有订单
+      orders = await db.orders.getAll();
+    } else {
+      // 普通用户只能看到自己的订单
+      orders = await db.orders.getByUserId(req.user.id);
     }
     
     res.json({ success: true, data: orders });
@@ -566,77 +514,7 @@ router.get('/orders', authenticateUser, async (req, res) => {
 router.get('/orders/:id', authenticateUser, async (req, res) => {
   try {
     const orderId = Number(req.params.id);
-    let order;
-    
-    try {
-      order = await db.orders.getById(orderId);
-    } catch (dbError) {
-      console.warn('数据库连接失败，使用模拟数据:', dbError.message);
-      // 提供模拟数据
-      if (orderId === 1001) {
-        order = {
-          id: 1001,
-          userId: req.user.id,
-          status: 'processing',
-          totalAmount: 78.50,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          items: [
-            {
-              id: 1,
-              productId: 1,
-              product: { name: '手工皂套装', image: '/src/client/img/category-soaps.jpg' },
-              quantity: 2,
-              price: 24.99,
-              subtotal: 49.98
-            },
-            {
-              id: 2,
-              productId: 2,
-              product: { name: '香薰蜡烛', image: '/src/client/img/category-candles.jpg' },
-              quantity: 1,
-              price: 28.52,
-              subtotal: 28.52
-            }
-          ],
-          shippingInfo: JSON.stringify({
-            addressLine1: '123 Main St',
-            city: 'Anytown',
-            state: 'CA',
-            zipCode: '90210',
-            country: 'United States'
-          })
-        };
-      } else if (orderId === 1002) {
-        order = {
-          id: 1002,
-          userId: req.user.id,
-          status: 'delivered',
-          totalAmount: 45.95,
-          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          items: [
-            {
-              id: 3,
-              productId: 3,
-              product: { name: '手工陶瓷杯', image: '/src/client/img/product-placeholder.jpg' },
-              quantity: 1,
-              price: 45.95,
-              subtotal: 45.95
-            }
-          ],
-          shippingInfo: JSON.stringify({
-            addressLine1: '456 Oak Ave',
-            city: 'Othertown',
-            state: 'NY',
-            zipCode: '10001',
-            country: 'United States'
-          })
-        };
-      } else {
-        order = null;
-      }
-    }
+    const order = await db.orders.getById(orderId);
     
     if (!order) {
       return res.status(404).json({ success: false, data: '订单不存在' });
@@ -844,6 +722,34 @@ router.get('/orders/page/:page', authenticateUser, async (req, res) => {
     });
   } catch (error) {
     console.error('分页获取订单列表出错:', error);
+    res.status(500).json({ success: false, data: '服务器错误' });
+  }
+});
+
+// 管理员API路由
+// GET /api/admin/statistics - 获取网站统计数据（仅限管理员）
+router.get('/admin/statistics', authenticateUser, requireAdmin, async (req, res) => {
+  try {
+    // 从数据库获取统计数据
+    const productsCount = (await db.products.getAll()).length;
+    const ordersCount = (await db.orders.getAll()).length;
+    const usersCount = (await db.users.getAll()).length;
+    
+    // 计算总收入
+    const orders = await db.orders.getAll();
+    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0);
+    
+    const statistics = {
+      productsCount,
+      ordersCount,
+      usersCount,
+      totalRevenue,
+      recentOrders: orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5)
+    };
+    
+    res.json({ success: true, data: statistics });
+  } catch (error) {
+    console.error('获取统计数据出错:', error);
     res.status(500).json({ success: false, data: '服务器错误' });
   }
 });

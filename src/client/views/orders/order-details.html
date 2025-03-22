@@ -589,117 +589,17 @@
       // 显示加载提示
       document.getElementById('loading-indicator').classList.remove('d-none');
       
-      let order;
-      
-      try {
-        // 尝试从API获取订单详情
-        const response = await ApiService.get(`/orders/${orderId}`);
-        console.log("API Response:", response);
-        
-        if (!response.success) {
-          console.error("API returned failure status:", response);
-          throw new Error(response.data || 'Failed to load order details');
-        }
-        
-        order = response.data;
-      } catch (apiError) {
-        console.error('API Error:', apiError);
-        showToast("Using demo data - database connection failed", "warning");
-        
-        // 提供模拟订单详情数据
-        const mockOrders = {
-          "ORD10001": {
-            id: "ORD10001",
-            status: "processing",
-            totalAmount: 78.99,
-            createdAt: new Date().toISOString(),
-            shippingInfo: JSON.stringify({
-              addressLine1: "123 Main Street",
-              addressLine2: "Apt 4B",
-              city: "New York",
-              state: "NY",
-              zipCode: "10001",
-              country: "United States"
-            }),
-            items: [
-              {
-                product: {
-                  name: "Handmade Soap Collection",
-                  image: "/src/client/img/category-soaps.jpg"
-                },
-                quantity: 2,
-                price: 24.99
-              },
-              {
-                product: {
-                  name: "Aromatic Candle",
-                  image: "/src/client/img/category-candles.jpg"
-                },
-                quantity: 1,
-                price: 29.01
-              }
-            ]
-          },
-          "ORD10002": {
-            id: "ORD10002",
-            status: "delivered",
-            totalAmount: 45.95,
-            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            shippingInfo: JSON.stringify({
-              addressLine1: "456 Oak Avenue",
-              city: "San Francisco",
-              state: "CA",
-              zipCode: "94102",
-              country: "United States"
-            }),
-            items: [
-              {
-                product: {
-                  name: "Ceramic Mug",
-                  image: "/src/client/img/product-placeholder.jpg"
-                },
-                quantity: 1,
-                price: 45.95
-              }
-            ]
-          },
-          "ORD10003": {
-            id: "ORD10003",
-            status: "shipped",
-            totalAmount: 120.50,
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-            shippingInfo: JSON.stringify({
-              addressLine1: "789 Pine Street",
-              city: "Chicago",
-              state: "IL",
-              zipCode: "60007",
-              country: "United States"
-            }),
-            items: [
-              {
-                product: {
-                  name: "Gift Basket",
-                  image: "/src/client/img/product-placeholder.jpg"
-                },
-                quantity: 1,
-                price: 120.50
-              }
-            ]
-          }
-        };
-        
-        // 检查模拟数据中是否有请求的订单ID
-        if (mockOrders[orderId]) {
-          order = mockOrders[orderId];
-        } else {
-          // 如果没有匹配的订单ID，使用模拟数据中的第一个订单
-          order = mockOrders["ORD10001"];
-          order.id = orderId; // 替换为请求的ID
-        }
-      }
+      // 从API获取订单详情
+      const response = await ApiService.get(`/orders/${orderId}`);
       
       // 隐藏加载提示
       document.getElementById('loading-indicator').classList.add('d-none');
+      
+      if (!response || !response.success) {
+        throw new Error(response?.data || 'Failed to load order details');
+      }
+      
+      const order = response.data;
       
       console.log("Order data:", order);
       
@@ -711,21 +611,9 @@
       
       // 更新页面上的订单信息
       document.getElementById('order-id').textContent = `Order #${order.id}`;
-      
-      // 安全地处理日期
-      let orderDate;
-      try {
-        orderDate = new Date(order.createdAt).toLocaleDateString();
-      } catch (e) {
-        console.warn("Invalid date format:", order.createdAt);
-        orderDate = "Unknown date";
-      }
-      document.getElementById('order-date').textContent = orderDate;
-      
-      // 安全地处理状态
-      const status = order.status || 'unknown';
-      document.getElementById('order-status').textContent = status.charAt(0).toUpperCase() + status.slice(1);
-      document.getElementById('order-status').className = `order-status status-${status}`;
+      document.getElementById('order-date').textContent = new Date(order.createdAt).toLocaleDateString();
+      document.getElementById('order-status').textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+      document.getElementById('order-status').className = `order-status status-${order.status}`;
       
       // 更新订单项目
       const orderItemsContainer = document.getElementById('order-items');
@@ -733,24 +621,14 @@
       
       let totalItems = 0;
       order.items.forEach(item => {
-        // 安全地增加数量
-        const quantity = parseInt(item.quantity) || 1;
-        totalItems += quantity;
-        
-        // 安全地处理价格
-        const price = parseFloat(item.price) || 0;
-        
-        // 安全地处理产品信息
-        const productName = item.product?.name || item.productName || 'Product';
-        const productImage = item.product?.image || item.productImage || '/src/client/img/product-placeholder.jpg';
-        
+        totalItems += item.quantity;
         const itemHTML = `
           <div class="product-item">
-            <img src="${productImage}" alt="${productName}" class="product-image">
+            <img src="${item.product?.image || '/src/client/img/product-placeholder.jpg'}" alt="${item.product?.name || 'Product'}" class="product-image">
             <div class="product-details">
-              <p class="product-name">${productName}</p>
-              <p class="product-price">$${price.toFixed(2)}</p>
-              <p class="product-qty mb-0">Qty: ${quantity}</p>
+              <p class="product-name">${item.product?.name || 'Product'}</p>
+              <p class="product-price">$${item.price.toFixed(2)}</p>
+              <p class="product-qty mb-0">Qty: ${item.quantity}</p>
             </div>
           </div>
         `;
@@ -759,56 +637,25 @@
       
       // 更新订单总计
       document.getElementById('order-total-items').textContent = totalItems;
-      
-      // 安全地处理总金额
-      const totalAmount = parseFloat(order.totalAmount) || 0;
-      document.getElementById('order-subtotal').textContent = `$${totalAmount.toFixed(2)}`;
+      document.getElementById('order-subtotal').textContent = `$${order.totalAmount.toFixed(2)}`;
       
       // 如果有配送信息，则更新
       if (order.shippingInfo) {
         try {
-          let shippingInfo;
-          
-          // 处理不同格式的配送信息
-          if (typeof order.shippingInfo === 'string') {
-            try {
-              shippingInfo = JSON.parse(order.shippingInfo);
-            } catch (e) {
-              console.warn("Failed to parse shipping info JSON:", e);
-              shippingInfo = { addressLine1: order.shippingInfo };
-            }
-          } else if (typeof order.shippingInfo === 'object') {
-            shippingInfo = order.shippingInfo;
-          } else {
-            shippingInfo = { addressLine1: "No detailed address available" };
-          }
-          
-          // 构建地址HTML，处理缺失的字段
-          const addressParts = [];
-          
-          if (shippingInfo.addressLine1) addressParts.push(shippingInfo.addressLine1);
-          if (shippingInfo.addressLine2) addressParts.push(shippingInfo.addressLine2);
-          
-          const cityStateParts = [];
-          if (shippingInfo.city) cityStateParts.push(shippingInfo.city);
-          if (shippingInfo.state) cityStateParts.push(shippingInfo.state);
-          if (shippingInfo.zipCode) cityStateParts.push(shippingInfo.zipCode);
-          
-          if (cityStateParts.length > 0) addressParts.push(cityStateParts.join(', '));
-          if (shippingInfo.country) addressParts.push(shippingInfo.country);
-          
-          // 如果没有有效地址，显示提示信息
-          if (addressParts.length === 0) {
-            addressParts.push("No address information available");
-          }
-          
-          document.getElementById('shipping-address').innerHTML = addressParts.join('<br>');
+          const shippingInfo = typeof order.shippingInfo === 'string' 
+            ? JSON.parse(order.shippingInfo) 
+            : order.shippingInfo;
+            
+          const shippingAddressHTML = `
+            ${shippingInfo.addressLine1}<br>
+            ${shippingInfo.addressLine2 ? shippingInfo.addressLine2 + '<br>' : ''}
+            ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}<br>
+            ${shippingInfo.country}
+          `;
+          document.getElementById('shipping-address').innerHTML = shippingAddressHTML;
         } catch (error) {
-          console.error('Error processing shipping info:', error);
-          document.getElementById('shipping-address').innerHTML = "Could not display shipping address";
+          console.error('Error parsing shipping info:', error);
         }
-      } else {
-        document.getElementById('shipping-address').innerHTML = "No shipping information provided";
       }
       
       console.log('Order details loaded successfully');
