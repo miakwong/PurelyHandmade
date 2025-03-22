@@ -1,11 +1,11 @@
 /* Page header styles */
-.page-header {
+  .page-header {
     background-color: #f8f9fa;
     padding: 40px 0;
     margin-bottom: 40px;
     text-align: center;
   }
-  
+
   .page-title {
     font-size: 2.5rem;
     font-weight: 600;
