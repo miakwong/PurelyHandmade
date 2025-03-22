@@ -391,14 +391,11 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/src/client/js/common.js"></script>
 
+  <script src="../../js/navbar-handler.js"></script>
 <script>
   // Single DOMContentLoaded event listener to handle all initialization
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM fully loaded - initializing page');
-    
-    // Load navbar and footer components
-    loadNavbar();
-    loadFooter();
     
     // Set up initial user data
     initUserProfile();
@@ -1250,52 +1247,6 @@
   </div>
 </div>
 
-<style>
-  .category-management-card {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  .category-table th {
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #555;
-  }
-  
-  .category-table tbody tr:hover {
-    background-color: rgba(134, 118, 102, 0.05);
-  }
-  
-  .empty-state-icon {
-    width: 70px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  /* Style for category featured badge */
-  .category-featured-badge {
-    background-color: var(--primary-light);
-    color: var(--accent-color);
-    border-radius: 4px;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
-  
-  /* Category image thumbnail */
-  .category-thumbnail {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #f8f9fa;
-    border: 1px solid #f0f0f0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-</style>
 
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
@@ -1385,7 +1336,6 @@
     window.location.reload();
   }
   
-  // Uncomment this line to automatically create an admin user when the page loads
-  // document.addEventListener('DOMContentLoaded', createTestAdminUser);
 </script>
+
 </html>

@@ -5,285 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register - Purely Homemade</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="/src/client/css/global.css" rel="stylesheet">
   <link href="/src/client/css/style.css" rel="stylesheet">
   <link href="/src/client/css/navbar.css" rel="stylesheet">
-  <style>
-    /* 使用与首页一致的颜色变量 */
-    :root {
-      --primary-color: #eae2d6; /* 更改为与首页相同的导航栏颜色 */
-      --secondary-color: #e1d7c6;
-      --accent-color: #867666;
-      --text-color: #5e4b3e;
-      --border-color: #bfb1a3;
-      --shadow: 0 4px 6px rgba(94, 75, 62, 0.1);
-      --border-radius: 8px;
-      
-      /* 保留注册页面需要的其他变量 */
-      --primary-light: rgba(134, 118, 102, 0.25);
-      --text-muted: #6c757d;
-      --bg-light: #f8f9fa;
-      --success-color: #5a8c70;
-      --danger-color: #a95e5e;
-      --background-color: #f8f5f0;
-    }
-    
-    body {
-      background-color: var(--background-color);
-    }
-    
-    .register-card {
-      border: none;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    
-    .card-header {
-      background-color: var(--primary-color);
-      color: var(--text-color);
-      text-align: center;
-      padding: 1.5rem 1rem;
-      border-bottom: none;
-    }
-    
-    .card-header h2 {
-      margin-bottom: 0;
-      font-weight: 600;
-    }
-    
-    .card-body {
-      padding: 2rem;
-    }
-    
-    /* Avatar Upload */
-    .avatar-container {
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-    
-    .avatar-wrapper {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      margin: 0 auto;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-    
-    .avatar-wrapper:hover {
-      transform: scale(1.05);
-    }
-    
-    .avatar-preview {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 2px solid var(--border-color);
-      background-color: var(--bg-light);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    
-    .avatar-wrapper:hover .avatar-preview {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px var(--primary-light);
-    }
-    
-    .avatar-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .avatar-placeholder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      font-size: 40px;
-      color: var(--text-muted);
-    }
-    
-    .avatar-camera-icon {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      background-color: var(--primary-color);
-      color: white;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      z-index: 2;
-      transition: background-color 0.2s ease;
-    }
-    
-    .avatar-wrapper:hover .avatar-camera-icon {
-      background-color: #0b5ed7;
-    }
-    
-    .avatar-input {
-      display: none;
-    }
-    
-    /* Form fields */
-    .form-label {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #495057;
-    }
-    
-    .form-control {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-    }
-    
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px var(--primary-light);
-    }
-    
-    .form-field-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    .form-check-input:checked {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    .gender-options {
-      display: flex;
-      gap: 1rem;
-    }
-    
-    .gender-option {
-      flex: 1;
-      text-align: center;
-    }
-    
-    .gender-option input[type="radio"] {
-      display: none;
-    }
-    
-    .gender-option label {
-      display: block;
-      padding: 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .gender-option input[type="radio"]:checked + label {
-      background-color: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-    
-    .gender-option i {
-      display: block;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .submit-btn {
-      padding: 0.75rem;
-      font-weight: 500;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-    
-    .login-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    
-    .login-link:hover {
-      text-decoration: underline;
-    }
-    
-    /* Password strength indicator */
-    .password-strength {
-      height: 4px;
-      border-radius: 2px;
-      margin-top: 0.5rem;
-      background-color: #e9ecef;
-      overflow: hidden;
-    }
-    
-    .password-strength-meter {
-      height: 100%;
-      width: 0;
-      transition: width 0.3s ease, background-color 0.3s ease;
-    }
-    
-    .strength-weak {
-      width: 33%;
-      background-color: var(--danger-color);
-    }
-    
-    .strength-medium {
-      width: 66%;
-      background-color: #ffc107;
-    }
-    
-    .strength-strong {
-      width: 100%;
-      background-color: var(--success-color);
-    }
+  <link href="/src/client/css/register.css" rel="stylesheet">
 
-    /* Validation messages */
-    .validation-message {
-      display: none;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-      color: var(--danger-color);
-    }
-    
-    .validation-message.show {
-      display: block;
-    }
-
-    /* Buttons */
-    .btn-primary {
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-primary:hover {
-      background-color: var(--text-color);
-      color: white;
-      transform: translateY(-2px);
-    }
-    
-    .btn-secondary {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-      background-color: var(--primary-color);
-      color: var(--text-color);
-      transform: translateY(-2px);
-    }
-  </style>
 </head>
 <body>
   <!-- Navbar Placeholder -->
@@ -320,20 +47,20 @@
               <!-- Personal Information -->
               <div class="row">
                 <div class="col-md-6">
-                  <div class="form-field-group">
+                  <div class="register-form-field-group">
                     <label for="firstName" class="form-label">First Name</label>
                     <input type="text" class="form-control" id="firstName" required />
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="form-field-group">
+                  <div class="register-form-field-group">
                     <label for="lastName" class="form-label">Last Name</label>
                     <input type="text" class="form-control" id="lastName" required />
                   </div>
                 </div>
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" required />
                 <small class="form-text text-muted">
@@ -342,18 +69,18 @@
                 <div id="username-error" class="validation-message"></div>
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label for="regEmail" class="form-label">Email Address</label>
                 <input type="email" class="form-control" id="regEmail" required />
                 <div id="email-error" class="validation-message"></div>
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label for="birthday" class="form-label">Birthday</label>
                 <input type="date" class="form-control" id="birthday" required />
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label class="form-label">Gender</label>
                 <div class="gender-options">
                   <div class="gender-option">
@@ -381,7 +108,7 @@
               </div>
 
               <!-- Password Section -->
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label for="regPassword" class="form-label">Password</label>
                 <input type="password" class="form-control" id="regPassword" required />
                 <div class="password-strength">
@@ -393,13 +120,13 @@
                 <div id="password-error" class="validation-message"></div>
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <label for="regPasswordConfirm" class="form-label">Confirm Password</label>
                 <input type="password" class="form-control" id="regPasswordConfirm" required />
                 <div id="password-match-error" class="validation-message"></div>
               </div>
 
-              <div class="form-field-group">
+              <div class="register-form-field-group">
                 <div class="form-check">
                   <input type="checkbox" class="form-check-input" id="termsCheck" required />
                   <label class="form-check-label" for="termsCheck">
@@ -422,9 +149,6 @@
     </div>
   </div>
 
-  <!-- Footer Placeholder -->
-  <div id="footer-placeholder" class="mt-5"></div>
-
   <!-- Toast for notifications -->
   <div class="position-fixed top-0 end-0 p-3" style="z-index: 1060">
     <div id="notification-toast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -437,11 +161,12 @@
     </div>
   </div>
 
-  <script>
-    // Load navbar and footer
-    fetch('/src/client/assets/layout/navbar.html').then(r => r.text()).then(html => document.getElementById('navbar-placeholder').innerHTML = html);
-    fetch('/src/client/assets/layout/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
 
+  <script src="/src/client/js/navbar-handler.js"></script>
+
+  <script>
     // Initialize toast
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize Bootstrap Toast

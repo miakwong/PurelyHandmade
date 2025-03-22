@@ -262,3 +262,48 @@
   padding: 0;
   border-radius: 4px;
 }
+
+.category-management-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.category-table th {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+}
+
+.category-table tbody tr:hover {
+  background-color: rgba(134, 118, 102, 0.05);
+}
+
+.empty-state-icon {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style for category featured badge */
+.category-featured-badge {
+  background-color: var(--primary-light);
+  color: var(--accent-color);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Category image thumbnail */
+.category-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}

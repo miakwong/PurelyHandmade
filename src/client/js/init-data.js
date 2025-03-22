@@ -21,9 +21,9 @@ window.initializeData = function() {
   
   // Categories
   const categories = [
-    { id: 1, name: 'Ceramics', slug: 'ceramics', description: 'Handcrafted ceramic items' },
-    { id: 2, name: 'Wood Crafts', slug: 'wood-crafts', description: 'Handmade wooden items and carvings' },
-    { id: 3, name: 'Textiles', slug: 'textiles', description: 'Handwoven and textile-based products' }
+    { id: 1, name: 'Ceramics', slug: 'ceramics', description: 'Handcrafted ceramic items', image: '/src/client/img/ceramics-bg.JPG' },
+    { id: 2, name: 'Wood Crafts', slug: 'wood-crafts', description: 'Handmade wooden items and carvings', image: '/src/client/img/wood-bg.JPG' },
+    { id: 3, name: 'Textiles', slug: 'textiles', description: 'Handwoven and textile-based products', image: '/src/client/img/textiles-bg.JPG' }
   ];
   
   // Initial Designers
