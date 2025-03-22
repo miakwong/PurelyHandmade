@@ -11,8 +11,8 @@ return [
     // 开发环境配置
     'development' => [
         'host' => 'localhost',
-        'username' => 'root',
-        'password' => '15879512',
+        'username' => 'no15438',
+        'password' => '158795',
         'dbname' => 'purely_handmade',
         'charset' => 'utf8mb4',
         'debug' => true
