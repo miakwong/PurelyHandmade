@@ -491,15 +491,6 @@ const AdminApiService = {
   function checkAdminPermissions() {
     // 检查用户是否为管理员
     const token = localStorage.getItem('authToken');
-    // 判断是否是开发环境
-    const isDevelopment = true; // 可以根据环境变量设置
-    
-    if (isDevelopment) {
-      // 在开发环境中，直接加载数据
-      console.log('开发环境：跳过管理员权限检查');
-      loadDesigners();
-      return;
-    }
     
     if (!token) {
       // 未登录，重定向到登录页面
