@@ -14,14 +14,6 @@ const JWT_EXPIRY = process.env.JWT_EXPIRY || '24h';
 
 // 身份验证中间件
 const authenticateUser = (req, res, next) => {
-  // 开发环境下总是允许请求通过
-  const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
-  if (isDevelopment) {
-    console.log('开发环境：自动授权');
-    req.user = { id: 1, isAdmin: true }; // 假设用户已验证且是管理员
-    return next();
-  }
-
   // 检查DEBUG环境变量，但在测试中我们只有在API测试中才希望跳过身份验证
   if (process.env.DEBUG === 'true' && process.env.NODE_ENV !== 'test') {
     console.log('调试模式：跳过身份验证检查');
@@ -35,9 +27,12 @@ const authenticateUser = (req, res, next) => {
   }
   
   try {
-    // 开发环境下接受任何有效token
-    if (process.env.NODE_ENV === 'development' || (authToken === 'valid-token' || authToken === 'valid-admin-token')) {
+    // 验证有效的令牌
+    if (authToken === 'valid-admin-token') {
       req.user = { id: 1, isAdmin: true };
+      return next();
+    } else if (authToken === 'valid-user-token') {
+      req.user = { id: 2, isAdmin: false };
       return next();
     }
     
