@@ -36,6 +36,7 @@ app.use((req, res, next) => {
   const url = req.url;
   if (url.endsWith('.css')) {
     res.type('text/css');
+    res.setHeader('Content-Type', 'text/css');
   }
   next();
 });
