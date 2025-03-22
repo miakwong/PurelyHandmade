@@ -210,10 +210,10 @@
 
     /* Validation messages */
     .validation-message {
+      color: red;
       display: none;
       font-size: 0.875rem;
       margin-top: 0.25rem;
-      color: var(--danger-color);
     }
     
     .validation-message.show {

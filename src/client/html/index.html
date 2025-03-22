@@ -20,343 +20,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/src/client/css/style.css">
   <link rel="stylesheet" href="/src/client/css/index.css">
   <link rel="stylesheet" href="/src/client/css/navbar.css">
   <link rel="stylesheet" href="/src/client/css/global.css">
 
-  <style>
-    /* 英雄区块样式 */
-    .hero-section {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/client/img/hero-bg.jpg');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      padding: 150px 0;
-      margin-bottom: 40px;
-      text-align: center;
-    }
-    
-    .hero-content {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-    
-    .hero-subtitle {
-      font-size: 1.5rem;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* 特色分类样式 */
-    .category-card {
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .category-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-    }
-    
-    .category-img-container {
-      height: 200px;
-      overflow: hidden;
-    }
-    
-    .category-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    
-    .category-card:hover .category-img {
-      transform: scale(1.1);
-    }
-    
-    .category-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-      padding: 20px;
-      color: white;
-    }
-    
-    /* 产品卡片样式 - 更新为与designer-page页面一致 */
-    .product-card {
-      border: none;
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 2rem;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-      height: 100%;
-      background-color: var(--card-background, #fff);
-    }
-    
-    .product-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-    
-    .product-img-wrapper {
-      position: relative;
-      overflow: hidden;
-      height: 240px;
-    }
-    
-    .product-img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-      transition: transform 0.8s ease;
-    }
-    
-    .product-card:hover .product-img {
-      transform: scale(1.05);
-    }
-    
-    .product-card-body {
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      height: calc(100% - 240px);
-    }
-    
-    .product-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      line-height: 1.4;
-    }
-    
-    .product-price-wrapper {
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .product-price {
-      font-weight: 600;
-      color: var(--accent-color, #d9534f);
-      font-size: 1.2rem;
-    }
-    
-    .product-desc {
-      margin-bottom: 1rem;
-      color: var(--light-text, #6c757d);
-      font-size: 0.9rem;
-      flex-grow: 1;
-    }
-    
-    .add-to-cart-btn {
-      position: relative;
-      width: 100%;
-      border-radius: 30px;
-      padding: 0.6rem 1.5rem;
-      font-weight: 500;
-      background-color: var(--accent-color, #d9534f);
-      border: none;
-      color: white;
-      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-      margin-top: auto;
-    }
-    
-    .add-to-cart-btn:hover {
-      background-color: var(--text-color, #333);
-      transform: translateY(-2px);
-    }
-    
-    .product-rating {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-    
-    .product-rating .bi-star-fill,
-    .product-rating .bi-star-half,
-    .product-rating .bi-star {
-      color: #FFD700;
-      font-size: 0.9rem;
-      margin-right: 2px;
-    }
-    
-    /* Add stronger styling for stars */
-    .product-rating .bi-star-fill {
-      color: #FFD700;
-      text-shadow: 0 0 1px rgba(0,0,0,0.3);
-    }
-    
-    .product-rating .bi-star-half {
-      color: #FFD700;
-      text-shadow: 0 0 1px rgba(0,0,0,0.3);
-    }
-    
-    .product-rating .bi-star {
-      color: #d1d1d1;
-      text-shadow: 0 0 1px rgba(0,0,0,0.1);
-    }
-    
-    .rating-text {
-      margin-left: 5px;
-      font-size: 0.8rem;
-      color: #6c757d;
-    }
-    
-    .product-badge {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      background-color: #dc3545;
-      color: white;
-      padding: 0.35rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      z-index: 2;
-    }
-    
-    .product-price-discount {
-      text-decoration: line-through;
-      color: #6c757d;
-      font-size: 0.9rem;
-      margin-left: 0.5rem;
-    }
-    
-    /* 设计师展示样式 */
-    .designer-section {
-      background-color: #f8f9fa;
-      padding: 60px 0;
-      margin: 40px 0;
-    }
-    
-    .designer-card {
-      display: flex;
-      background-color: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .designer-img {
-      width: 40%;
-      object-fit: cover;
-    }
-    
-    .designer-content {
-      width: 60%;
-      padding: 30px;
-    }
-    
-    /* 设计师卡片样式 */
-    .featured-designers-section {
-      padding: 60px 0;
-      background-color: #f8f9fa;
-    }
-    
-    .designer-card {
-      transition: transform 0.3s, box-shadow 0.3s;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    
-    .designer-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    
-    .designer-card-img {
-      border: 5px solid #f8f9fa;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-      transition: transform 0.3s;
-    }
-    
-    .designer-card:hover .designer-card-img {
-      transform: scale(1.05);
-    }
-    
-    .section-header h2 {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 15px;
-    }
-    
-    .section-header h2:after {
-      content: '';
-      display: block;
-      width: 60px;
-      height: 3px;
-      background-color: #0d6efd;
-      margin: 10px auto 0;
-    }
-    
-    .social-links-container {
-      position: relative;
-      z-index: 2;
-    }
-    
-    .social-link {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #f8f9fa;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-    
-    .social-link:hover {
-      transform: translateY(-3px);
-      background-color: #e9ecef;
-    }
-    
-    /* 响应式调整 */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      
-      .hero-subtitle {
-        font-size: 1.2rem;
-      }
-      
-      .hero-section {
-        padding: 100px 0;
-      }
-      
-      .designer-card {
-        flex-direction: column;
-      }
-      
-      .designer-img, .designer-content {
-        width: 100%;
-      }
-      
-      .designer-img {
-        height: 250px;
-      }
-      
-      .featured-designers-section {
-        padding: 40px 0;
-      }
-    }
-  </style>
 </head>
 <body>
 
@@ -393,7 +60,7 @@
 <section class="container mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>New Arrivals</h2>
-    <a href="/src/client/views/new-arrivals.html" class="btn btn-link">View All</a>
+    <a href="/src/client/views/new-arrivals.html" class="btn btn-outline-primary">View All</a>
   </div>
   <div class="row" id="new-arrivals-container">
     <!-- Products will be loaded dynamically -->
@@ -426,7 +93,7 @@
 <section class="container mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Best Sellers</h2>
-    <a href="/src/client/views/product/product-list.html" class="btn btn-link">View All</a>
+    <a href="/src/client/views/product/product-list.html" class="btn btn-outline-primary">View All</a>
   </div>
   <div class="row" id="best-sellers-container">
     <!-- Products will be loaded dynamically -->
@@ -467,15 +134,16 @@
     if (typeof window.initializeData === 'function') {
       window.initializeData();
     }
-    
+
+    // 加载分类
+    loadFeaturedCategories();
+
+        
     // 加载新品
     loadNewArrivals();
     
     // 加载畅销品
     loadBestSellers();
-    
-    // 加载分类
-    loadFeaturedCategories();
     
     // 加载设计师
     loadDesigners();
