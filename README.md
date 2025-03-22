@@ -17,6 +17,45 @@ A handcrafted products discussion and showcasing platform built with PHP, MySQL,
 - Enable/disable users
 - Edit/remove post items or complete posts
 
+## Project Timeline and Deliverables
+
+### 1. Proposal (February 7, 2025) - 5%
+- Initial project proposal
+
+### 2. Client-side Experience (March 1, 2025) - 30%
+- Develop pages with client-side validation
+- Develop styles for pages
+- Create examples of each page type in the proposed site
+- Create GitHub repository and add instructor and TAs
+- Submit link to GitHub repository
+
+### 3. Core Functionality (March 23, 2025) - 30%
+- Client-side security implementation
+- Server-side security implementation
+- Discussion thread storage in database
+- Asynchronous updates
+- Complete database functionality
+- Core functional components operational
+- Preliminary summary document indicating implemented functionality
+- Deployment to cosc360.ok.ubc.ca
+- Submit link to repository and PDF document describing implementation
+
+### 4. Full Site (April 10, 2025) - 35%
+- Complete styling as per design
+- Full deployment on server
+- Client-side validation and security
+- Complete server-side implementation
+- User account information stored in database
+- Items and associated details stored in database
+- Chats/threads maintained in database
+- Asynchronous updates for comments/posts/products
+- Complete database functionality
+- All core functional components operational
+- Final summary document (2-3 pages) indicating implemented functionality and features
+- User walkthrough document (2-3 pages) for site testing
+- Technical implementation description (2-3 pages) from a developer's perspective
+- 10% of this milestone is reserved for deployment, version control, and testing
+
 ## Functional Requirements
 
 ### Minimum Requirements:
