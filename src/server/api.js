@@ -377,7 +377,7 @@ router.get('/categories', async (req, res) => {
 
 // 设计师API路由
 // GET /api/designers - 获取所有设计师
-router.get('/designers', async (req, res) => {
+router.get('/designers', authenticateUser, requireAdmin, async (req, res) => {
   try {
     const designers = await db.designers.getAll();
     res.json({ success: true, data: designers });
@@ -388,7 +388,7 @@ router.get('/designers', async (req, res) => {
 });
 
 // GET /api/designers/:id - 获取特定设计师
-router.get('/designers/:id', async (req, res) => {
+router.get('/designers/:id', authenticateUser, requireAdmin, async (req, res) => {
   try {
     const designer = await db.designers.getById(req.params.id);
     if (!designer) {
@@ -583,7 +583,7 @@ router.post('/orders', authenticateUser, async (req, res) => {
 });
 
 // PUT /api/orders/:id - 更新订单状态（仅限管理员）
-router.put('/orders/:id', authenticateUser, async (req, res) => {
+router.put('/orders/:id', authenticateUser, requireAdmin, async (req, res) => {
   try {
     const orderId = Number(req.params.id);
     const { status } = req.body;
@@ -591,11 +591,6 @@ router.put('/orders/:id', authenticateUser, async (req, res) => {
     const order = await db.orders.getById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, data: '订单不存在' });
-    }
-    
-    // 检查权限：只有管理员可以更新订单状态
-    if (!req.user.isAdmin) {
-      return res.status(403).json({ success: false, data: '没有权限更新订单状态' });
     }
     
     // 更新订单状态
@@ -639,15 +634,10 @@ router.post('/orders/:id/cancel', authenticateUser, async (req, res) => {
 });
 
 // POST /api/orders/:id/handle - 处理订单（仅限管理员）
-router.post('/orders/:id/handle', authenticateUser, async (req, res) => {
+router.post('/orders/:id/handle', authenticateUser, requireAdmin, async (req, res) => {
   try {
     const orderId = Number(req.params.id);
     const { action } = req.body;
-    
-    // 检查权限：只有管理员可以处理订单
-    if (!req.user.isAdmin) {
-      return res.status(403).json({ success: false, data: '没有权限处理订单' });
-    }
     
     const order = await db.orders.getById(orderId);
     if (!order) {
