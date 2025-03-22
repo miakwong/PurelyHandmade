@@ -657,10 +657,10 @@ const AdminApiService = {
     
     // 加载数据并更新UI
     loadData().then(([productsResponse, ordersResponse, usersResponse, recentOrdersResponse]) => {
-      // Update statistics
+      // 更新统计卡片
       updateStatistics(productsResponse, ordersResponse, usersResponse);
       
-      // Update recent orders table
+      // 更新最近订单表格
       updateRecentOrders(recentOrdersResponse);
       
       hideLoadingState();
@@ -669,10 +669,18 @@ const AdminApiService = {
       console.error('Error loading dashboard data:', error);
       showError('Failed to load dashboard data. ' + (error.message || ''));
       hideLoadingState();
+      
+      // 即使出错，也尝试使用可用的本地数据
+      const mockProducts = { success: true, data: JSON.parse(localStorage.getItem('products') || '[]') };
+      const mockOrders = { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
+      const mockUsers = { success: true, data: JSON.parse(localStorage.getItem('users') || '[]') };
+      
+      updateStatistics(mockProducts, mockOrders, mockUsers);
+      updateRecentOrders(mockOrders);
     });
   }
   
-  // Update statistics cards
+  // 更新统计卡片
   function updateStatistics(productsResponse, ordersResponse, usersResponse) {
     if (productsResponse.success) {
       const products = productsResponse.data;
@@ -685,7 +693,7 @@ const AdminApiService = {
       document.getElementById('total-orders').textContent = orders.length;
       document.getElementById('orders-change').textContent = 'Updated just now';
       
-      // Calculate total revenue
+      // 计算总收入
       const revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
       document.getElementById('total-revenue').textContent = '$' + revenue.toFixed(2);
       document.getElementById('revenue-change').textContent = 'From all orders';
@@ -702,7 +710,7 @@ const AdminApiService = {
   function updateRecentOrders(response) {
     const tableBody = document.getElementById('recent-orders-table');
     
-    if (!response.success || !response.data || !response.data.length) {
+    if (!response || !response.success || !response.data || !response.data.length) {
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center">No recent orders found</td>
