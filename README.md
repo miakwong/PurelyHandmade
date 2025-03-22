@@ -1,107 +1,198 @@
 # Purely Handmade
 
-这是一个使用PHP作为后端的Web应用程序项目，采用前后端分离的结构。
+A handcrafted products discussion and showcasing platform built with PHP, MySQL, HTML5, CSS3, and JavaScript.
 
-## 项目结构
+## Project Objectives
+
+### Website User Objectives:
+- Browse site without registering
+- Search for items/posts by keyword without registering
+- Register at the site by providing name, email and image
+- Login by providing user ID and password
+- Create and comment on projects when logged in
+- View and edit personal profile
+
+### Website Administrator Objectives:
+- Search for users by name, email or post
+- Enable/disable users
+- Edit/remove post items or complete posts
+
+## Project Timeline and Deliverables
+
+### 1. Proposal (February 7, 2025) - 5%
+- Initial project proposal
+
+### 2. Client-side Experience (March 1, 2025) - 30%
+- Develop pages with client-side validation
+- Develop styles for pages
+- Create examples of each page type in the proposed site
+- Create GitHub repository and add instructor and TAs
+- Submit link to GitHub repository
+
+### 3. Core Functionality (March 23, 2025) - 30%
+- Client-side security implementation
+- Server-side security implementation
+- Discussion thread storage in database
+- Asynchronous updates
+- Complete database functionality
+- Core functional components operational
+- Preliminary summary document indicating implemented functionality
+- Deployment to cosc360.ok.ubc.ca
+- Submit link to repository and PDF document describing implementation
+
+### 4. Full Site (April 10, 2025) - 35%
+- Complete styling as per design
+- Full deployment on server
+- Client-side validation and security
+- Complete server-side implementation
+- User account information stored in database
+- Items and associated details stored in database
+- Chats/threads maintained in database
+- Asynchronous updates for comments/posts/products
+- Complete database functionality
+- All core functional components operational
+- Final summary document (2-3 pages) indicating implemented functionality and features
+- User walkthrough document (2-3 pages) for site testing
+- Technical implementation description (2-3 pages) from a developer's perspective
+- 10% of this milestone is reserved for deployment, version control, and testing
+
+## Functional Requirements
+
+### Minimum Requirements:
+- Hand-styled layout with contextual menus (changing when users log in)
+- 2-3 column responsive layout following design principles
+- Form validation with JavaScript
+- Server-side scripting with PHP
+- Data storage in MySQL
+- Appropriate security for data
+- State maintenance (user login sessions)
+- Responsive design for different display sizes
+- AJAX for asynchronous updates (real-time thread updates)
+- User images and profiles stored in database
+- Simple discussion topics grouping and display
+- Navigation breadcrumb strategy
+- Error handling for bad navigation
+
+### Additional Features:
+- Search and analysis for topics/items
+- Hot threads/items tracking
+- Visual display of site usage statistics
+- Activity tracking by date
+- Usage tracking with visualization tools
+- Collapsible items/threads without page reloading
+- Alerts on page changes
+- Admin reports with filtering
+- Styling flourishes
+- Mobile responsive layout
+- Comment history tracking for users
+- Accessibility features
+
+## Technology Stack
+
+- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap JS, jQuery
+- **Backend:** PHP
+- **Database:** MySQL
+
+## Project Structure
 
 ```
 PurelyHandmade/
-├── .htaccess             # Apache配置文件，URL重写规则
-└── src/                  # 源代码目录
-    ├── server/           # 后端代码
-    │   ├── index.php     # 后端入口文件
-    │   └── controllers/  # 控制器目录
-    │       ├── AuthController.php        # 认证控制器
-    │       ├── ProfileController.php     # 个人资料控制器
-    │       ├── AdminController.php       # 管理工具控制器
-    │       └── Database.php              # 数据库工具类
-    └── client/           # 前端代码
-        ├── html/         # HTML页面
-        │   ├── index.html               # 网站首页
-        │   ├── admin-tools.html         # 管理工具页面
-        │   └── 404.html                 # 404错误页面
-        ├── js/           # JavaScript代码
-        │   ├── test-login.js            # 登录测试脚本
-        │   ├── test-profile.js          # 用户资料测试脚本
-        │   └── ...                      # 其他JS文件
-        ├── css/          # CSS样式
-        ├── img/          # 图片资源
-        └── views/        # 视图模板
+├── .htaccess             # Apache configuration file, URL rewrite rules
+└── src/                  # Source code directory
+    ├── server/           # Backend code
+    │   ├── index.php     # Backend entry point
+    │   └── controllers/  # Controllers directory
+    │       ├── AuthController.php        # Authentication controller
+    │       ├── ProfileController.php     # Profile controller
+    │       ├── AdminController.php       # Admin tools controller
+    │       └── Database.php              # Database utility class
+    └── client/           # Frontend code
+        ├── html/         # HTML pages
+        │   ├── index.html               # Website homepage
+        │   ├── admin-tools.html         # Admin tools page
+        │   └── 404.html                 # 404 error page
+        ├── js/           # JavaScript code
+        │   ├── test-login.js            # Login test script
+        │   ├── test-profile.js          # User profile test script
+        │   └── ...                      # Other JS files
+        ├── css/          # CSS styles
+        ├── img/          # Image resources
+        └── views/        # View templates
 ```
 
-## 安装与配置
+## Installation and Configuration
 
-### 系统要求
+### System Requirements
 
 - PHP 7.4+
 - MySQL 5.7+
-- Apache Web服务器（带mod_rewrite模块）
+- Apache Web server (with mod_rewrite module)
 
-### 设置步骤
+### Setup Steps
 
-1. 克隆或下载本仓库到你的Web服务器目录
+1. Clone or download this repository to your web server directory
 
-2. 创建MySQL数据库
+2. Create MySQL database
 ```sql
 CREATE DATABASE purely_handmade;
 ```
 
-3. 配置数据库连接
-   编辑 `src/server/controllers/Database.php` 文件，设置你的数据库连接参数：
+3. Configure database connection
+   Edit `src/server/controllers/Database.php` file, set your database connection parameters:
 ```php
-private $host = 'localhost';      // 数据库主机
-private $db_name = 'purely_handmade'; // 数据库名称
-private $username = 'root';       // 数据库用户名
-private $password = '';           // 数据库密码
+private $host = 'localhost';      // Database host
+private $db_name = 'purely_handmade'; // Database name
+private $username = 'root';       // Database username
+private $password = '';           // Database password
 ```
 
-4. 设置Apache URL重写
-   确保Apache的mod_rewrite模块已启用，并且在你的Apache配置中允许.htaccess覆盖：
+4. Configure Apache URL rewriting
+   Ensure Apache's mod_rewrite module is enabled and allow .htaccess overrides in your Apache configuration:
 ```apache
 <Directory "/path/to/PurelyHandmade">
     AllowOverride All
 </Directory>
 ```
 
-5. 设置文件权限
+5. Set file permissions
 ```bash
 chmod -R 755 .
-chmod -R 777 src/client/uploads  # 如果存在上传目录
+chmod -R 777 src/client/uploads  # If upload directory exists
 ```
 
-### 访问应用程序
+### Accessing the Application
 
-设置完成后，通过Web浏览器访问应用程序：
+After setup, access the application via web browser:
 
-- 首页：http://你的域名/ 或 http://localhost/
-- 管理工具：http://你的域名/admin-tools.html 或 http://localhost/admin-tools.html
+- Homepage: http://your-domain/ or http://localhost/
+- Admin Tools: http://your-domain/admin-tools.html or http://localhost/admin-tools.html
 
-## 开发
+## Development Notes
 
-### 前后端分离的结构
+### Frontend-Backend Separation
 
-本项目采用了前后端分离的结构，但仍然在同一个代码库中：
+This project uses a frontend-backend separated structure within the same codebase:
 
-- **后端代码** (`src/server/`): 包含所有PHP处理逻辑，负责数据处理、业务逻辑和API响应
-- **前端代码** (`src/client/`): 包含所有JavaScript、CSS、HTML和图片等前端资源，负责用户界面和交互
+- **Backend code** (`src/server/`): Contains all PHP processing logic, responsible for data handling, business logic, and API responses
+- **Frontend code** (`src/client/`): Contains all JavaScript, CSS, HTML, and images, responsible for user interface and interactions
 
-### 添加新的控制器
+### Adding New Controllers
 
-1. 在 `src/server/controllers/` 目录中创建一个新的PHP类文件
-2. 在 `src/server/index.php` 中添加相应的路由规则
+1. Create a new PHP class file in the `src/server/controllers/` directory
+2. Add corresponding route rules in `src/server/index.php`
 
-### 添加新的前端页面
+### Adding New Frontend Pages
 
-1. 在 `src/client/html/` 目录中创建新的HTML文件
-2. 如果需要，在 `src/server/index.php` 中的 `$html_pages` 数组中添加新的路径映射
+1. Create new HTML files in the `src/client/html/` directory
+2. If necessary, add new path mappings in the `$html_pages` array in `src/server/index.php`
 
-### 测试
+### Testing
 
-项目包含测试脚本，用于测试登录功能和用户资料页面：
+The project includes test scripts for login functionality and user profile pages:
 
-- src/client/js/test-login.js：用于测试登录功能
-- src/client/js/test-profile.js：用于测试用户资料功能
+- src/client/js/test-login.js: For testing login functionality
+- src/client/js/test-profile.js: For testing user profile functionality
 
-## 许可证
+## License
 
-[MIT许可证](LICENSE) 
+[MIT License](LICENSE) 
