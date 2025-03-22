@@ -616,6 +616,31 @@ const ApiService = {
   // 基础API URL
   baseUrl: '/api',
   
+  // 获取授权令牌
+  getAuthToken: function() {
+    const token = localStorage.getItem('authToken');
+    console.log('Getting auth token:', token ? 'Token found' : 'No token');
+    return token;
+  },
+  
+  // 获取带有授权信息的请求头
+  getAuthHeaders: function() {
+    const token = this.getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('Adding Authorization header');
+    } else {
+      console.log('No token for Authorization header');
+    }
+    
+    return headers;
+  },
+  
   // 处理API响应
   handleResponse: async function(response) {
     const contentType = response.headers.get('content-type');
@@ -654,10 +679,7 @@ const ApiService = {
     
     // 默认选项
     const defaultOptions = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
       credentials: 'same-origin',
     };
     
@@ -1487,10 +1509,25 @@ const AdminApiService = {
     } else {
       // 后备实现
       setTimeout(() => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          // 显示一个友好的提示，引导用户设置token
+          document.body.innerHTML = `
+            <div class="container mt-5">
+              <div class="alert alert-warning text-center p-5">
+                <h4><i class="bi bi-exclamation-triangle me-2"></i>需要授权</h4>
+                <p class="mb-4">您需要设置管理员授权令牌才能访问此页面。</p>
+                <a href="/set-token.html" class="btn btn-primary">设置授权令牌</a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
         const currentUser = DataService.getCurrentUser();
         if (!currentUser || currentUser.isAdmin !== true) {
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-    } else {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        } else {
           // 初始化产品管理
           initProductManagement();
         }
