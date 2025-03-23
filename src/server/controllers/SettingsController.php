@@ -54,11 +54,15 @@ class SettingsController {
      */
     public function updateSettings($data) {
         try {
+            // Add more detailed debugging
+            error_log("Settings update starting with data: " . print_r($data, true));
+            
             // 验证数据结构
             if (!is_array($data)) {
+                error_log("Settings data is not an array: " . gettype($data));
                 return [
                     'success' => false,
-                    'message' => 'Invalid data format'
+                    'message' => 'Invalid data format: not an array'
                 ];
             }
             
@@ -66,8 +70,11 @@ class SettingsController {
             $settingsData = [];
             
             foreach ($data as $group => $groupSettings) {
+                error_log("Processing group: " . $group);
+                
                 if (!is_array($groupSettings)) {
                     // 如果组设置不是数组，尝试将其作为单个键值对处理
+                    error_log("Group settings is not an array: " . gettype($groupSettings));
                     $settingsData[$group] = [];
                     
                     // 如果值不是数组，作为单个设置处理
@@ -77,16 +84,27 @@ class SettingsController {
                     }
                 } else {
                     // 标准格式：$data['group']['key'] = 'value'
+                    error_log("Group settings is an array with " . count($groupSettings) . " items");
                     $settingsData[$group] = $groupSettings;
                 }
             }
             
             // 批量保存设置
-            $result = $this->settings->batchSet($settingsData);
+            error_log("Attempting to save settings: " . print_r($settingsData, true));
+            
+            try {
+                $result = $this->settings->batchSet($settingsData);
+                error_log("batchSet result: " . ($result ? "true" : "false"));
+            } catch (\Exception $e) {
+                error_log("Exception in batchSet: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
+                throw $e;
+            }
             
             if ($result) {
                 // 成功保存，返回更新后的设置
                 $settings = $this->settings->getAll();
+                error_log("Settings updated successfully");
                 
                 return [
                     'success' => true,
@@ -94,13 +112,16 @@ class SettingsController {
                     'settings' => $settings
                 ];
             } else {
+                error_log("batchSet returned false - no database errors but update failed");
                 return [
                     'success' => false,
-                    'message' => 'Failed to update settings'
+                    'message' => 'Failed to update settings (no errors reported)'
                 ];
             }
         } catch (\Exception $e) {
             $this->logger->error('Update settings failed', Logger::formatException($e));
+            error_log("Exception in updateSettings: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             
             return [
                 'success' => false,

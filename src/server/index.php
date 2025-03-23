@@ -70,7 +70,10 @@ $routes = [
     // Admin routes
     '/admin/users' => 'api/admin/users.php',
     '/admin/dashboard' => 'api/admin/dashboard.php',
-    '/admin/reports' => 'api/admin/reports.php'
+    '/admin/reports' => 'api/admin/reports.php',
+    
+    // Debug routes - remove in production
+    '/debug/settings_test' => 'api/debug/settings_test.php'
 ];
 
 // For debugging
