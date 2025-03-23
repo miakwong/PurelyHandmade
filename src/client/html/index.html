@@ -203,12 +203,13 @@
       return;
     }
     
-    // Pass the container ID directly
-    console.log('Calling window.loadCategories with container ID:', categoriesContainer.id);
-    window.loadCategories(categoriesContainer.id, {
+    // Pass the container ID directly - ensure it's a string
+    console.log('Calling window.loadCategories with container ID:', 'category-cards-container');
+    window.loadCategories('category-cards-container', {
       limit: 6,
       featured: true
     });
+    console.log('loadCategories() called with container ID: category-cards-container');
   }
   
   // 加载新品
@@ -228,12 +229,13 @@
       return;
     }
     
-    // Pass the container ID directly
-    console.log('Calling window.loadProducts with container ID:', newArrivalsContainer.id);
-    window.loadProducts(newArrivalsContainer.id, {
+    // Pass the container ID directly - ensure it's a string
+    console.log('Calling window.loadProducts with container ID:', 'new-arrivals-container');
+    window.loadProducts('new-arrivals-container', {
       limit: 4,
       newArrivals: true
     });
+    console.log('loadProducts() called with container ID: new-arrivals-container');
   }
   
   // 加载畅销品
@@ -255,7 +257,7 @@
         console.log('Retrying loadBestSellers after delay');
         if (typeof window.loadProducts === 'function') {
           // Pass the DOM element directly to avoid ID resolution issues
-          window.loadProducts(bestSellersContainer.id, {
+          window.loadProducts('best-sellers-container', {
             limit: 4,
             featured: true
           });
@@ -272,13 +274,13 @@
       return;
     }
     
-    // Pass the container ID directly
-    console.log('Calling window.loadProducts with container ID:', bestSellersContainer.id);
-    window.loadProducts(bestSellersContainer.id, {
+    // Pass the container ID directly - FIX: ensure it's passed as a string 'best-sellers-container'
+    console.log('Calling window.loadProducts with container ID:', 'best-sellers-container');
+    window.loadProducts('best-sellers-container', {
       limit: 4,
       featured: true
     });
-    console.log('loadProducts() called with container:', bestSellersContainer.id);
+    console.log('loadProducts() called with container ID: best-sellers-container');
   }
   
   // 加载设计师
@@ -300,7 +302,7 @@
         console.log('Retrying loadDesigners after delay');
         if (typeof window.loadDesigners === 'function') {
           // Pass the DOM element directly to avoid ID resolution issues
-          window.loadDesigners(designersContainer.id, {
+          window.loadDesigners('designers-container', {
             limit: 3,
             featured: true
           });
@@ -317,13 +319,13 @@
       return;
     }
     
-    // Pass the container ID directly
-    console.log('Calling window.loadDesigners with container ID:', designersContainer.id);
-    window.loadDesigners(designersContainer.id, {
+    // Pass the container ID directly - FIX: ensure it's passed as a string 'designers-container'
+    console.log('Calling window.loadDesigners with container ID:', 'designers-container');
+    window.loadDesigners('designers-container', {
       limit: 3,
       featured: true
     });
-    console.log('loadDesigners() called with container:', designersContainer.id);
+    console.log('loadDesigners() called with container ID: designers-container');
   }
   
   // 添加到购物车
