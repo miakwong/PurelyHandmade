@@ -187,7 +187,7 @@
       }
       console.warn(`Element with ID '${elementId}' not found.`);
       return true;
-  }
+    }
   
 
     // Helper function to clear validation errors
@@ -459,7 +459,7 @@
       });
     });
 
-    //0322邮箱验证
+  
     document.getElementById('regEmail').addEventListener('blur', async function() {
       const email = this.value.trim();
       if (!email) return;
@@ -483,7 +483,6 @@
             result = JSON.parse(text);
             console.log("Email check response:", result);
         
-            // 确保 result.data 存在，避免报错
             if (result.data && typeof result.data.exists !== "undefined") {
                 if (result.data.exists) {
                     // 如果 exists 是 true，说明邮箱已注册，显示错误

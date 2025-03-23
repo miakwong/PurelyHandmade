@@ -493,15 +493,15 @@ const DataService = {
   /**
    * 用户登录
    * User login
-   * @param {string} email 邮箱 Email
+   * @param {string} identifier 邮箱 Email or username
    * @param {string} password 密码 Password
    * @returns {Promise<Object>} 登录结果 Login result
    */
-  login: async function(email, password) {
+  login: async function(identifier, password) {
     try {
       const result = await this.apiRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ identifier, password })
       });
       
       if (result.success) {
