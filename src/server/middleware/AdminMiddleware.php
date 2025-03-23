@@ -9,30 +9,16 @@ class AdminMiddleware {
     public function handle() {
         $response = new Response();
         
-        // Check if the user is authenticated
+        // Check if the user is authenticated and get user data
         $authMiddleware = new AuthMiddleware();
-        $authMiddleware->handle();
-        
-        // Get the user ID
-        $userId = $_REQUEST['userId'] ?? null;
-        
-        if (!$userId) {
-            $response->unauthorized('Authentication required');
-            exit;
-        }
+        $userData = $authMiddleware->handle();
         
         // Check if the user is an admin
-        $db = new Database();
-        $db->connect();
-        
-        $user = new User($db);
-        $userData = $user->findById($userId);
-        
         if (!$userData || $userData['isAdmin'] != 1) {
             $response->forbidden('Admin access required');
             exit;
         }
         
-        return true;
+        return $userData;
     }
 } 

@@ -357,8 +357,20 @@
  * 提供统一的API访问层，处理所有与服务器的通信
  */
 const ApiService = {
-  // 基础API URL
   baseUrl: '/api',
+  
+  // 获取授权头
+  getAuthHeaders: function() {
+    // 从localStorage获取令牌
+    const token = localStorage.getItem('authToken');
+    
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  },
   
   // 获取授权令牌
   getAuthToken: function() {
@@ -367,23 +379,6 @@ const ApiService = {
     console.log('Auth token from localStorage: → ' + JSON.stringify(tokenStatus));
     console.log('Getting auth token: → ' + JSON.stringify(tokenStatus));
     return token;
-  },
-  
-  // 获取带有授权信息的请求头
-  getAuthHeaders: function() {
-    const token = this.getAuthToken();
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-      console.log('Adding Authorization header → True');
-    } else {
-      console.log('No token for Authorization header');
-    }
-    
-    return headers;
   },
   
   // 处理API响应
@@ -492,7 +487,7 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有用户
   getAllUsers: function() {
-    return ApiService.get('/users?all=1');
+    return ApiService.get('/admin/users');
   },
   
   // 获取所有产品
@@ -512,12 +507,12 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
+    return ApiService.get('/orders');
   },
   
   // 获取网站统计数据
   getSiteStatistics: function() {
-    return ApiService.get('/admin/statistics');
+    return ApiService.get('/admin/dashboard');
   }
 };
 </script>
@@ -647,31 +642,30 @@ const AdminApiService = {
       return Promise.all([
         AdminApiService.getAllProducts().catch(error => {
           console.error('获取产品失败:', error);
-          return { success: true, data: JSON.parse(localStorage.getItem('products') || '[]') };
+          return { success: true, data: { products: [], total: 0 } };
         }),
         AdminApiService.getAllOrders().catch(error => {
           console.error('获取订单失败:', error);
-          return { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
+          return { success: true, data: { orders: [], total: 0 } };
         }),
         AdminApiService.getAllUsers().catch(error => {
           console.error('获取用户失败:', error);
-          return { success: true, data: JSON.parse(localStorage.getItem('users') || '[]') };
+          return { success: true, data: { users: [], total: 0 } };
         }),
-        // 最近订单
-        AdminApiService.getAllOrders().catch(error => {
-          console.error('获取最近订单失败:', error);
-          return { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
+        AdminApiService.getSiteStatistics().catch(error => {
+          console.error('获取网站统计数据失败:', error);
+          return { success: true, data: {} };
         })
       ]);
     }
     
     // 加载数据并更新UI
-    loadData().then(([productsResponse, ordersResponse, usersResponse, recentOrdersResponse]) => {
+    loadData().then(([productsResponse, ordersResponse, usersResponse, statsResponse]) => {
       // 更新统计卡片
-      updateStatistics(productsResponse, ordersResponse, usersResponse);
+      updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
       
       // 更新最近订单表格
-      updateRecentOrders(recentOrdersResponse);
+      updateRecentOrders(ordersResponse);
       
       hideLoadingState();
     })
@@ -679,39 +673,68 @@ const AdminApiService = {
       console.error('Error loading dashboard data:', error);
       showError('Failed to load dashboard data. ' + (error.message || ''));
       hideLoadingState();
-      
-      // 即使出错，也尝试使用可用的本地数据
-      const mockProducts = { success: true, data: JSON.parse(localStorage.getItem('products') || '[]') };
-      const mockOrders = { success: true, data: JSON.parse(localStorage.getItem('orders') || '[]') };
-      const mockUsers = { success: true, data: JSON.parse(localStorage.getItem('users') || '[]') };
-      
-      updateStatistics(mockProducts, mockOrders, mockUsers);
-      updateRecentOrders(mockOrders);
     });
   }
   
   // 更新统计卡片
-  function updateStatistics(productsResponse, ordersResponse, usersResponse) {
-    if (productsResponse.success) {
-      const products = productsResponse.data;
-      document.getElementById('total-products').textContent = products.length;
+  function updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse) {
+    // 如果可用，优先使用统计API返回的数据
+    if (statsResponse && statsResponse.success && statsResponse.data) {
+      const stats = statsResponse.data;
+      
+      if (stats.products) {
+        document.getElementById('total-products').textContent = stats.products.total || 0;
+        document.getElementById('products-change').textContent = 'From API';
+      }
+      
+      if (stats.orders) {
+        document.getElementById('total-orders').textContent = stats.orders.total || 0;
+        document.getElementById('orders-change').textContent = 'From API';
+      }
+      
+      if (stats.revenue) {
+        document.getElementById('total-revenue').textContent = '$' + (stats.revenue.total || 0).toFixed(2);
+        document.getElementById('revenue-change').textContent = 'From all orders';
+      }
+      
+      if (stats.users) {
+        document.getElementById('total-users').textContent = stats.users.total || 0;
+        document.getElementById('users-change').textContent = 'From API';
+      }
+      
+      return;
+    }
+    
+    // 回退到个别API响应
+    if (productsResponse && productsResponse.success) {
+      const productsData = productsResponse.data || {};
+      const products = productsData.products || [];
+      const total = productsData.total || products.length || 0;
+      document.getElementById('total-products').textContent = total;
       document.getElementById('products-change').textContent = 'Updated just now';
     }
     
-    if (ordersResponse.success) {
-      const orders = ordersResponse.data;
-      document.getElementById('total-orders').textContent = orders.length;
+    if (ordersResponse && ordersResponse.success) {
+      const ordersData = ordersResponse.data || {};
+      const orders = ordersData.orders || [];
+      const total = ordersData.total || orders.length || 0;
+      document.getElementById('total-orders').textContent = total;
       document.getElementById('orders-change').textContent = 'Updated just now';
       
       // 计算总收入
-      const revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
+      let revenue = 0;
+      if (orders && orders.length > 0) {
+        revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
+      }
       document.getElementById('total-revenue').textContent = '$' + revenue.toFixed(2);
       document.getElementById('revenue-change').textContent = 'From all orders';
     }
     
-    if (usersResponse.success) {
-      const users = usersResponse.data;
-      document.getElementById('total-users').textContent = users.length;
+    if (usersResponse && usersResponse.success) {
+      const usersData = usersResponse.data || {};
+      const users = usersData.users || [];
+      const total = usersData.total || users.length || 0;
+      document.getElementById('total-users').textContent = total;
       document.getElementById('users-change').textContent = 'Updated just now';
     }
   }
@@ -720,7 +743,19 @@ const AdminApiService = {
   function updateRecentOrders(response) {
     const tableBody = document.getElementById('recent-orders-table');
     
-    if (!response || !response.success || !response.data || !response.data.length) {
+    if (!response || !response.success) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center">Failed to load orders data</td>
+        </tr>
+      `;
+      return;
+    }
+    
+    const data = response.data || {};
+    const orders = data.orders || [];
+    
+    if (!orders.length) {
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center">No recent orders found</td>
@@ -730,15 +765,15 @@ const AdminApiService = {
     }
     
     // Get 5 most recent orders
-    const recentOrders = response.data
-      .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+    const recentOrders = orders
+      .sort((a, b) => new Date(b.orderDate || b.createdAt) - new Date(a.orderDate || a.createdAt))
       .slice(0, 5);
     
     let html = '';
     
     recentOrders.forEach(order => {
       // Format date
-      const orderDate = new Date(order.orderDate);
+      const orderDate = new Date(order.orderDate || order.createdAt);
       const formattedDate = orderDate.toLocaleDateString();
       
       // Status badge class
@@ -749,8 +784,16 @@ const AdminApiService = {
       if (order.status === 'delivered') statusClass = 'bg-success';
       if (order.status === 'cancelled') statusClass = 'bg-danger';
       
-      // Get username from order.user if available
-      const username = order.user ? (order.user.username || `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || order.user.email) : 'Guest';
+      // Get username
+      let username = 'Guest';
+      // 尝试不同的格式，以适应不同的API响应结构
+      if (order.user) {
+        username = order.user.username || 
+                  `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 
+                  order.user.email || 'Guest';
+      } else if (order.userId) {
+        username = `User #${order.userId}`;
+      }
       
       html += `
         <tr>
@@ -758,7 +801,7 @@ const AdminApiService = {
           <td>${username}</td>
           <td>${formattedDate}</td>
           <td><span class="badge ${statusClass}">${order.status}</span></td>
-          <td>$${parseFloat(order.totalAmount).toFixed(2)}</td>
+          <td>$${parseFloat(order.totalAmount || 0).toFixed(2)}</td>
           <td>
             <a href="orders.html?id=${order.id}" class="btn btn-sm btn-outline-primary">View</a>
           </td>
@@ -802,8 +845,13 @@ const AdminApiService = {
     const errorContainer = document.getElementById('error-container');
     const errorMessage = document.getElementById('error-message');
     
-    errorMessage.textContent = message;
-    errorContainer.classList.remove('d-none');
+    if (errorContainer && errorMessage) {
+      errorMessage.textContent = message;
+      errorContainer.classList.remove('d-none');
+    } else {
+      console.error('Error containers not found in DOM');
+      alert('Error: ' + message);
+    }
   }
 </script>
 </body>
