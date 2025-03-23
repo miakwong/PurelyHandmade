@@ -169,9 +169,6 @@
       // 加载畅销品
       loadBestSellers();
       
-      // 加载设计师
-      loadDesigners();
-      
       // 再次尝试更新身份验证状态和购物车数量，以确保状态正确
       setTimeout(() => {
         console.log("Document fully loaded, updating auth state again");
@@ -281,51 +278,6 @@
       featured: true
     });
     console.log('loadProducts() called with container ID: best-sellers-container');
-  }
-  
-  // 加载设计师
-  function loadDesigners() {
-    console.log('Calling loadDesigners()');
-    console.log('window.loadDesigners exists:', typeof window.loadDesigners === 'function');
-    
-    // Get a direct reference to the container element 
-    const designersContainer = document.getElementById('designers-container');
-    if (!designersContainer) {
-      console.error('designers-container element not found in DOM');
-      return;
-    }
-    
-    if (typeof window.loadDesigners !== 'function') {
-      console.error('window.loadDesigners is not defined yet!');
-      // Try again after a small delay
-      setTimeout(() => {
-        console.log('Retrying loadDesigners after delay');
-        if (typeof window.loadDesigners === 'function') {
-          // Pass the DOM element directly to avoid ID resolution issues
-          window.loadDesigners('designers-container', {
-            limit: 3,
-            featured: true
-          });
-        } else {
-          console.error('window.loadDesigners is still not defined after delay');
-          // Fallback: Use the container element directly
-          designersContainer.innerHTML = `
-            <div class="col-12 text-center py-4">
-              <p class="text-danger">Error loading artisans: API function not available</p>
-            </div>
-          `;
-        }
-      }, 500);
-      return;
-    }
-    
-    // Pass the container ID directly - FIX: ensure it's passed as a string 'designers-container'
-    console.log('Calling window.loadDesigners with container ID:', 'designers-container');
-    window.loadDesigners('designers-container', {
-      limit: 3,
-      featured: true
-    });
-    console.log('loadDesigners() called with container ID: designers-container');
   }
   
   // 添加到购物车
