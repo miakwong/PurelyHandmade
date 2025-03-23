@@ -27,8 +27,14 @@
     @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css");
   </style>
 
-  <!-- API Helper -->
+  <!-- Core libraries first - Load in proper order -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/src/client/js/data-service.js"></script>
+  <script src="/src/client/js/api-data-loader.js"></script>
   <script src="/src/client/js/api-loader-helper.js"></script>
+  <script src="/src/client/js/init-data.js"></script>
+  <script src="/src/client/js/navbar-handler.js"></script>
 
 </head>
 <body>
@@ -200,14 +206,6 @@
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
-<!-- Bootstrap JS and jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- 初始化数据脚本 -->
-<script src="/src/client/js/init-data.js"></script>
-<script src="/src/client/js/navbar-handler.js"></script>
-
 <script>
   // 页面变量
   let products = [];
@@ -226,188 +224,395 @@
   
   // 页面加载完成后执行
   document.addEventListener('DOMContentLoaded', function() {
-    // 确保数据初始化
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
+    console.log("DOM Content Loaded - Starting initialization");
+    
+    // 确保数据服务已加载
+    if (typeof DataService === 'undefined') {
+      console.error('DataService is not defined - Check script loading order');
+      showError('DataService is not available. Please refresh the page or check console for errors.');
+      return;
     }
     
     // 初始化筛选器折叠功能 - 放在更前面执行
-    initializeFilterAccordion();
-    
-    // 加载分类
-    loadCategories();
-    
-    // 加载产品
-    loadProducts();
-    
-    // 添加事件监听器
-    document.getElementById('sort-select').addEventListener('change', applyFiltersAndSort);
-    document.getElementById('products-per-page').addEventListener('change', function() {
-      productsPerPage = parseInt(this.value);
-      currentPage = 1;
-      applyFiltersAndSort();
-    });
-    document.getElementById('apply-price-filter').addEventListener('click', applyFiltersAndSort);
-    document.getElementById('reset-filters').addEventListener('click', resetFilters);
-    
-    // 设置评分筛选事件
-    document.querySelectorAll('input[name="rating-filter"]').forEach(input => {
-      input.addEventListener('change', applyFiltersAndSort);
-    });
-    
-    // 设置特惠筛选事件
-    document.getElementById('filter-sale').addEventListener('change', applyFiltersAndSort);
-    
-    // 检查URL参数中的分类ID
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category');
-    if (categoryParam) {
-      activeCategoryId = parseInt(categoryParam);
+    try {
+      initializeFilterAccordion();
+      console.log("Filter accordion initialized");
+    } catch (error) {
+      console.error("Error initializing filter accordion:", error);
     }
+    
+    // 设置全局错误处理
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error("Global error:", message, "at", source, lineno, colno);
+      return false;
+    };
+    
+    // 确保数据初始化函数存在并运行
+    if (typeof window.initializeData === 'function') {
+      try {
+        window.initializeData();
+        console.log("Data initialization complete");
+      } catch (error) {
+        console.error("Error in data initialization:", error);
+      }
+    } else {
+      console.warn("initializeData function not found");
+    }
+    
+    // 添加常用事件监听
+    try {
+      addCommonEventListeners();
+      console.log("Common event listeners added");
+    } catch (error) {
+      console.error("Error adding event listeners:", error);
+    }
+    
+    // 加载分类，然后加载产品
+    console.log("Starting category and product loading sequence");
+    loadCategories()
+      .then(() => {
+        console.log("Categories loaded successfully, now loading products");
+        return loadProducts();
+      })
+      .catch(error => {
+        console.error('Error initializing page:', error);
+        showError('Failed to initialize the page. Please refresh and try again.');
+      });
   });
   
+  // 初始化筛选器折叠功能
+  function initializeFilterAccordion() {
+    document.querySelectorAll('.filter-group-title').forEach(function(title) {
+      title.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const icon = this.querySelector('i');
+        
+        // 切换内容显示状态
+        if (content.classList.contains('show')) {
+          content.classList.remove('show');
+          icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        } else {
+          content.classList.add('show');
+          icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+        }
+      });
+    });
+  }
+  
+  // 显示错误消息
+  function showError(message) {
+    const container = document.getElementById('products-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <div class="alert alert-danger" role="alert">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
+  }
+  
   // 加载分类
-  function loadCategories() {
-    const categoriesData = localStorage.getItem('categories');
-    if (categoriesData) {
-      categories = JSON.parse(categoriesData);
-      
-      // 生成分类筛选选项
+  async function loadCategories() {
+    try {
       const categoryFiltersContainer = document.getElementById('category-filters');
-      const allCategoriesCheckbox = document.getElementById('category-all');
+      if (!categoryFiltersContainer) {
+        console.error('Category filters container not found');
+        // 创建默认的筛选器以避免错误
+        createDefaultCategoryFilter();
+        return;
+      }
       
-      // 监听全部分类复选框
+      categoryFiltersContainer.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
+      
+      // 使用API获取分类
+      let categoryResponse;
+      try {
+        categoryResponse = await DataService.getAllCategories();
+        console.log('API Categories:', categoryResponse);
+      } catch (apiError) {
+        console.error('Error fetching categories from API:', apiError);
+        // API错误仍需确保UI正常
+        categoryResponse = { success: false, message: 'API error', data: { categories: [] } };
+      }
+      
+      // 确保至少有全部分类选项
+      if (categoryResponse.success) {
+        categories = categoryResponse.data.categories || [];
+        
+        // 清空现有内容并添加"全部"选项
+        categoryFiltersContainer.innerHTML = '';
+        addAllCategoriesCheckbox(categoryFiltersContainer);
+        
+        // 添加分类选项
+        if (categories.length > 0) {
+          categories.forEach(function(category) {
+            const categoryHtml = `
+              <div class="form-check">
+                <input class="form-check-input category-filter" type="checkbox" value="${category.id}" id="category-${category.id}">
+                <label class="form-check-label" for="category-${category.id}">
+                  ${category.name}
+                </label>
+              </div>
+            `;
+            categoryFiltersContainer.innerHTML += categoryHtml;
+          });
+          
+          // 添加分类点击事件
+          addCategoryEventListeners();
+        } else {
+          console.warn('No categories returned from API');
+        }
+        
+        // 检查URL参数中是否有categoryId
+        handleCategoryUrlParameters();
+        
+        // 添加评分筛选的事件监听
+        addRatingEventListeners();
+        
+        // 添加特惠筛选的事件监听
+        addSaleFilterEventListener();
+        
+        // 检查其他URL参数
+        checkUrlParameters();
+        
+      } else {
+        console.error('API category request failed:', categoryResponse.message);
+        createDefaultCategoryFilter();
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      createDefaultCategoryFilter();
+      throw error;
+    }
+  }
+  
+  // 创建默认的分类筛选器（确保UI可用）
+  function createDefaultCategoryFilter() {
+    const categoryFiltersContainer = document.getElementById('category-filters');
+    if (categoryFiltersContainer) {
+      categoryFiltersContainer.innerHTML = '';
+      addAllCategoriesCheckbox(categoryFiltersContainer);
+    }
+  }
+  
+  // 添加"全部"分类选项
+  function addAllCategoriesCheckbox(container) {
+    container.innerHTML += `
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="all" id="category-all" checked>
+        <label class="form-check-label" for="category-all">
+          All Categories
+        </label>
+      </div>
+    `;
+    
+    // 添加"全部"分类点击事件
+    const allCategoriesCheckbox = document.getElementById('category-all');
+    if (allCategoriesCheckbox) {
       allCategoriesCheckbox.addEventListener('change', function() {
         if (this.checked) {
-          // 取消选中其他所有分类
-          document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+          document.querySelectorAll('.category-filter').forEach(function(checkbox) {
             checkbox.checked = false;
           });
-          filterCriteria.categories = [];
         }
         applyFiltersAndSort();
       });
-      
-      // 添加各个分类复选框
-      categories.forEach(category => {
-        const checkboxDiv = document.createElement('div');
-        checkboxDiv.className = 'form-check';
-        
-        const checkbox = document.createElement('input');
-        checkbox.className = 'form-check-input category-checkbox';
-        checkbox.type = 'checkbox';
-        checkbox.id = `category-${category.id}`;
-        checkbox.value = category.id;
-        
-        // 如果URL参数中指定了此分类，选中它
-        if (activeCategoryId === category.id) {
-          checkbox.checked = true;
+    }
+  }
+  
+  // 添加分类筛选事件监听
+  function addCategoryEventListeners() {
+    document.querySelectorAll('.category-filter').forEach(function(checkbox) {
+      checkbox.addEventListener('change', function() {
+        // 当任何分类被选中时，取消选中"全部"
+        const allCategoriesCheckbox = document.getElementById('category-all');
+        if (this.checked && allCategoriesCheckbox) {
           allCategoriesCheckbox.checked = false;
-          filterCriteria.categories.push(category.id);
-          
-          // 更新面包屑和标题
-          document.getElementById('breadcrumb-category').textContent = category.name;
-          document.getElementById('product-list-title').textContent = category.name;
         }
         
-        checkbox.addEventListener('change', function() {
-          if (this.checked) {
-            // 取消选中"全部分类"
-            document.getElementById('category-all').checked = false;
-            
-            // 添加到筛选分类
-            filterCriteria.categories.push(parseInt(this.value));
-          } else {
-            // 从筛选分类中移除
-            const index = filterCriteria.categories.indexOf(parseInt(this.value));
-            if (index !== -1) {
-              filterCriteria.categories.splice(index, 1);
-            }
-            
-            // 如果没有选中任何分类，自动选中"全部分类"
-            if (document.querySelectorAll('.category-checkbox:checked').length === 0) {
-              document.getElementById('category-all').checked = true;
-            }
-          }
-          
-          applyFiltersAndSort();
-        });
+        // 如果没有分类被选中，则选中"全部"
+        if (document.querySelectorAll('.category-filter:checked').length === 0 && allCategoriesCheckbox) {
+          allCategoriesCheckbox.checked = true;
+        }
         
-        const label = document.createElement('label');
-        label.className = 'form-check-label';
-        label.htmlFor = `category-${category.id}`;
-        label.textContent = category.name;
-        
-        checkboxDiv.appendChild(checkbox);
-        checkboxDiv.appendChild(label);
-        categoryFiltersContainer.appendChild(checkboxDiv);
+        applyFiltersAndSort();
       });
+    });
+  }
+  
+  // 处理URL参数中的分类
+  function handleCategoryUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryId = urlParams.get('id');
+    
+    if (categoryId) {
+      activeCategoryId = parseInt(categoryId);
+      
+      // 更新对应的复选框
+      const allCategoriesCheckbox = document.getElementById('category-all');
+      if (allCategoriesCheckbox) {
+        allCategoriesCheckbox.checked = false;
+      }
+      
+      const categoryCheckbox = document.getElementById(`category-${categoryId}`);
+      if (categoryCheckbox) {
+        categoryCheckbox.checked = true;
+      }
+      
+      // 更新面包屑和标题
+      const category = categories.find(c => c.id === parseInt(categoryId));
+      if (category) {
+        const breadcrumbCategory = document.getElementById('breadcrumb-category');
+        const productListTitle = document.getElementById('product-list-title');
+        
+        if (breadcrumbCategory) {
+          breadcrumbCategory.textContent = category.name;
+        }
+        
+        if (productListTitle) {
+          productListTitle.textContent = category.name;
+        }
+      }
+    }
+  }
+  
+  // 添加评分筛选事件监听
+  function addRatingEventListeners() {
+    document.querySelectorAll('input[name="rating-filter"]').forEach(function(radio) {
+      radio.addEventListener('change', applyFiltersAndSort);
+    });
+  }
+  
+  // 添加特惠筛选事件监听
+  function addSaleFilterEventListener() {
+    const filterSaleEl = document.getElementById('filter-sale');
+    if (filterSaleEl) {
+      filterSaleEl.addEventListener('change', applyFiltersAndSort);
     }
   }
   
   // 加载产品
-  function loadProducts() {
-    const productsData = localStorage.getItem('products');
-    if (productsData) {
-      products = JSON.parse(productsData);
-      applyFiltersAndSort();
-    } else {
-      document.getElementById('products-container').innerHTML = '<p class="text-center w-100">No products found. Please try again later.</p>';
+  async function loadProducts() {
+    try {
+      const productsContainer = document.getElementById('products-container');
+      if (!productsContainer) {
+        console.error('Products container not found');
+        return;
+      }
+      
+      productsContainer.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading products...</span>
+          </div>
+          <p class="mt-2">Loading products...</p>
+        </div>
+      `;
+      
+      // 使用API获取产品
+      const productsResponse = await DataService.getAllProducts();
+      console.log('API Products:', productsResponse);
+      
+      if (productsResponse.success) {
+        products = productsResponse.data.products;
+        
+        // 应用筛选和排序 - 仅在有产品且UI已准备好的情况下执行
+        setTimeout(() => {
+          if (document.getElementById('category-all')) {
+            applyFiltersAndSort();
+          } else {
+            console.log('Waiting for filters to be ready before applying...');
+            // 产品已加载但筛选器尚未准备好，设置默认显示所有产品
+            renderAllProducts();
+          }
+        }, 100);
+      } else {
+        productsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>Unable to load products.</p></div>';
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+      document.getElementById('products-container').innerHTML = '<div class="col-12 text-center py-4"><p>Error loading products.</p></div>';
+      throw error;
     }
+  }
+  
+  // 显示所有产品（无筛选）
+  function renderAllProducts() {
+    filteredProducts = [...products];
+    
+    // 更新产品计数
+    const productCountEl = document.getElementById('product-count');
+    if (productCountEl) {
+      productCountEl.textContent = `Showing ${filteredProducts.length} products`;
+    }
+    
+    // 分页
+    renderPagination();
+    
+    // 渲染产品
+    renderProducts();
   }
   
   // 应用筛选和排序
   function applyFiltersAndSort() {
-    // 获取价格范围
-    const minPrice = document.getElementById('price-min').value;
-    const maxPrice = document.getElementById('price-max').value;
-    filterCriteria.priceMin = minPrice ? parseFloat(minPrice) : null;
-    filterCriteria.priceMax = maxPrice ? parseFloat(maxPrice) : null;
+    // 先检查UI元素是否已准备好
+    const categoryAllCheckbox = document.getElementById('category-all');
+    if (!categoryAllCheckbox) {
+      console.warn('Category "All" checkbox not found - displaying all products without filtering');
+      renderAllProducts();
+      return;
+    }
     
-    // 获取评分筛选
-    const ratingValue = document.querySelector('input[name="rating-filter"]:checked').value;
-    filterCriteria.rating = parseFloat(ratingValue);
+    // 获取所有筛选条件
+    // 分类筛选
+    const selectedCategories = [];
+    if (!categoryAllCheckbox.checked) {
+      const checkedCategories = document.querySelectorAll('.category-filter:checked');
+      if (checkedCategories && checkedCategories.length > 0) {
+        checkedCategories.forEach(function(checkbox) {
+          selectedCategories.push(parseInt(checkbox.value));
+        });
+      }
+    }
     
-    // 获取特惠筛选
-    filterCriteria.onSale = document.getElementById('filter-sale').checked;
+    // 价格筛选
+    const priceMinEl = document.getElementById('price-min');
+    const priceMaxEl = document.getElementById('price-max');
+    const minPrice = priceMinEl && priceMinEl.value ? parseFloat(priceMinEl.value) : null;
+    const maxPrice = priceMaxEl && priceMaxEl.value ? parseFloat(priceMaxEl.value) : null;
+    
+    // 评分筛选
+    const ratingFilterEl = document.querySelector('input[name="rating-filter"]:checked');
+    const ratingFilter = ratingFilterEl ? parseInt(ratingFilterEl.value) : 0;
+    
+    // 特惠筛选
+    const filterSaleEl = document.getElementById('filter-sale');
+    const onSaleFilter = filterSaleEl ? filterSaleEl.checked : false;
     
     // 应用筛选
-    filteredProducts = products.filter(product => {
-      // 过滤掉缺少必要字段的产品
-      if (!product.name || 
-          (product.onSale && !product.salePrice) || 
-          (!product.price) || 
-          (!product.images || !Array.isArray(product.images) || product.images.length === 0)) {
-        return false;
-      }
-      
+    filteredProducts = products.filter(function(product) {
       // 分类筛选
-      if (filterCriteria.categories.length > 0 && !filterCriteria.categories.includes(product.categoryId)) {
+      if (selectedCategories.length > 0 && !selectedCategories.includes(product.categoryId)) {
         return false;
       }
       
       // 价格筛选
-      if (filterCriteria.priceMin !== null) {
-        const price = product.onSale && product.salePrice ? product.salePrice : product.price;
-        if (price < filterCriteria.priceMin) {
-          return false;
-        }
+      if (minPrice !== null && product.price < minPrice) {
+        return false;
       }
-      
-      if (filterCriteria.priceMax !== null) {
-        const price = product.onSale && product.salePrice ? product.salePrice : product.price;
-        if (price > filterCriteria.priceMax) {
-          return false;
-        }
+      if (maxPrice !== null && product.price > maxPrice) {
+        return false;
       }
       
       // 评分筛选
-      if (filterCriteria.rating > 0 && product.rating < filterCriteria.rating) {
+      if (ratingFilter > 0 && (!product.rating || product.rating < ratingFilter)) {
         return false;
       }
       
       // 特惠筛选
-      if (filterCriteria.onSale && !product.onSale) {
+      if (onSaleFilter && !product.onSale) {
         return false;
       }
       
@@ -415,103 +620,131 @@
     });
     
     // 应用排序
-    const sortOption = document.getElementById('sort-select').value;
+    const sortSelect = document.getElementById('sort-select');
+    const sortOption = sortSelect ? sortSelect.value : 'featured';
     
     switch (sortOption) {
       case 'price-low':
-        filteredProducts.sort((a, b) => {
-          const priceA = a.onSale && a.salePrice ? a.salePrice : a.price;
-          const priceB = b.onSale && b.salePrice ? b.salePrice : b.price;
-          return priceA - priceB;
-        });
+        filteredProducts.sort((a, b) => a.price - b.price);
         break;
       case 'price-high':
-        filteredProducts.sort((a, b) => {
-          const priceA = a.onSale && a.salePrice ? a.salePrice : a.price;
-          const priceB = b.onSale && b.salePrice ? b.salePrice : b.price;
-          return priceB - priceA;
-        });
+        filteredProducts.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        filteredProducts.sort((a, b) => b.rating - a.rating);
+        filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'newest':
-        // 假设产品ID越大越新
-        filteredProducts.sort((a, b) => b.id - a.id);
+        filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
-      case 'featured':
-      default:
-        // 保持原顺序或根据某些特征排序
+      default: // 'featured'
+        filteredProducts.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
         break;
     }
     
     // 更新产品计数
-    document.getElementById('product-count').textContent = `Showing ${filteredProducts.length} products`;
+    const productCountEl = document.getElementById('product-count');
+    if (productCountEl) {
+      productCountEl.textContent = `Showing ${filteredProducts.length} products`;
+    }
     
-    // 显示分页后的产品
-    displayPaginatedProducts();
+    // 分页
+    renderPagination();
     
-    // 更新分页控件
-    updatePagination();
+    // 渲染产品
+    renderProducts();
   }
   
-  // 显示分页后的产品
-  function displayPaginatedProducts() {
-    const productsContainer = document.getElementById('products-container');
-    productsContainer.innerHTML = '';
+  // 渲染分页
+  function renderPagination() {
+    const paginationContainer = document.getElementById('pagination');
+    if (!paginationContainer) {
+      console.error('Pagination container not found');
+      return;
+    }
     
-    if (filteredProducts.length === 0) {
-      productsContainer.innerHTML = `
-        <div class="col-12 text-center py-5">
-          <div>
-            <i class="bi bi-search" style="font-size: 3rem; color: var(--border-color);"></i>
-            <p class="mt-3">No products found matching your criteria.</p>
-            <button class="btn btn-sm mt-2" id="clear-filters" style="background-color: var(--accent-color); color: white;">
-              Clear Filters
-            </button>
-          </div>
-        </div>
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+      currentPage = 1;
+    }
+    
+    paginationContainer.innerHTML = '';
+    
+    if (totalPages <= 1) {
+      return;
+    }
+    
+    // 上一页按钮
+    const prevDisabled = currentPage === 1;
+    paginationContainer.innerHTML += `
+      <li class="page-item ${prevDisabled ? 'disabled' : ''}">
+        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+    `;
+    
+    // 页码
+    for (let i = 1; i <= totalPages; i++) {
+      paginationContainer.innerHTML += `
+        <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
       `;
-      
-      document.getElementById('clear-filters').addEventListener('click', resetFilters);
+    }
+    
+    // 下一页按钮
+    const nextDisabled = currentPage === totalPages;
+    paginationContainer.innerHTML += `
+      <li class="page-item ${nextDisabled ? 'disabled' : ''}">
+        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    `;
+    
+    // 添加页码点击事件
+    document.querySelectorAll('.page-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = parseInt(this.getAttribute('data-page'));
+        if (page >= 1 && page <= totalPages) {
+          currentPage = page;
+          renderProducts();
+          // 滚动到产品列表顶部
+          const productsContainer = document.getElementById('products-container');
+          if (productsContainer) {
+            productsContainer.scrollIntoView();
+          }
+        }
+      });
+    });
+  }
+  
+  // 渲染产品
+  function renderProducts() {
+    const productsContainer = document.getElementById('products-container');
+    if (!productsContainer) {
+      console.error('Products container not found');
       return;
     }
     
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = Math.min(startIndex + productsPerPage, filteredProducts.length);
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
     
-    const productsToShow = filteredProducts.slice(startIndex, endIndex);
+    if (paginatedProducts.length === 0) {
+      productsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>No products match your filters. Please try different criteria.</p></div>';
+      return;
+    }
     
-    productsToShow.forEach(product => {
-      // Debug log for rating data
-      console.log(`Product ${product.name} - Rating: ${product.rating}`);
+    productsContainer.innerHTML = '';
+    
+    paginatedProducts.forEach(function(product) {
+      // 准备产品图片
+      const imgSrc = product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg';
       
-      // 生成星级评分HTML
-      const fullStars = Math.floor(product.rating || 0);
-      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
-      
-      console.log(`Star breakdown - Full stars: ${fullStars}, Half star: ${hasHalfStar}, Empty stars: ${5 - fullStars - (hasHalfStar ? 1 : 0)}`);
-      
-      let starsHtml = '<div class="product-rating">';
-      for (let j = 0; j < fullStars; j++) {
-        starsHtml += '<i class="bi bi-star-fill"></i>';
-      }
-      if (hasHalfStar) {
-        starsHtml += '<i class="bi bi-star-half"></i>';
-      }
-      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-      for (let j = 0; j < emptyStars; j++) {
-        starsHtml += '<i class="bi bi-star"></i>';
-      }
-      // Add text rating for clarity
-      starsHtml += `<span class="rating-text">(${product.rating ? product.rating.toFixed(1) : '0.0'})</span>`;
-      starsHtml += '</div>';
-      
-      // Log the generated HTML for verification
-      console.log('Generated stars HTML:', starsHtml);
-      
-      // 价格显示
-      let priceHtml = '';
+      // 准备价格显示
+      let priceHtml;
       if (product.onSale && product.salePrice) {
         priceHtml = `
           <div class="product-price-wrapper">
@@ -519,31 +752,36 @@
             <span class="product-price-discount">$${product.price.toFixed(2)}</span>
           </div>
         `;
-      } else if (product.price) {
-        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
       } else {
-        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
       }
       
-      // 创建产品卡片HTML
+      // 准备评分显示
+      const rating = product.rating || 0;
+      const starsHtml = `<div class="product-rating">
+        ${Array(5).fill().map((_, i) => 
+          `<i class="bi ${i < rating ? 'bi-star-fill' : 'bi-star'}"></i>`
+        ).join('')}
+      </div>`;
+      
+      // 创建产品卡片
       const productHtml = `
-        <div class="col-md-6 col-lg-4">
+        <div class="col-lg-4 col-md-6 col-sm-6 mb-4">
           <div class="product-card">
             <div class="product-img-wrapper">
-              <a href="product_detail.html?id=${product.id}">
-                <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+                <img src="${imgSrc}" class="product-img" alt="${product.name}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
-                ${product.stock && product.stock <= 5 ? '<div class="product-badge stock-badge">Low Stock</div>' : ''}
               </a>
             </div>
             <div class="product-card-body">
-              <a href="product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
                 <h2 class="product-title">${product.name}</h2>
               </a>
               ${priceHtml}
               ${starsHtml}
-              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
-              <button class="add-to-cart-btn" data-product-id="${product.id}" onclick="addToCart('${product.id}', 1); return false;">
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : ''}</p>
+              <button class="add-to-cart-btn" data-product-id="${product.id}">
                 <i class="bi bi-cart-plus me-2"></i> Add to Cart
               </button>
             </div>
@@ -553,344 +791,182 @@
       
       productsContainer.innerHTML += productHtml;
     });
-  }
-  
-  // 更新分页控件
-  function updatePagination() {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
     
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-    
-    if (totalPages <= 1) {
-      return;
-    }
-    
-    // 上一页按钮
-    const prevLi = document.createElement('li');
-    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    
-    const prevLink = document.createElement('a');
-    prevLink.className = 'page-link';
-    prevLink.href = '#';
-    prevLink.setAttribute('aria-label', 'Previous');
-    prevLink.innerHTML = '<i class="bi bi-chevron-left"></i>';
-    
-    if (currentPage > 1) {
-      prevLink.addEventListener('click', function(e) {
+    // 给"添加到购物车"按钮添加事件
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', function(e) {
         e.preventDefault();
-        currentPage--;
-        displayPaginatedProducts();
-        updatePagination();
-        window.scrollTo(0, 0);
-      });
-    }
-    
-    prevLi.appendChild(prevLink);
-    pagination.appendChild(prevLi);
-    
-    // 页码按钮
-    // 最多显示5个页码
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, startPage + 4);
-    
-    if (endPage - startPage < 4) {
-      startPage = Math.max(1, endPage - 4);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      const pageLi = document.createElement('li');
-      pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
-      
-      const pageLink = document.createElement('a');
-      pageLink.className = 'page-link';
-      pageLink.href = '#';
-      pageLink.textContent = i;
-      
-      if (i !== currentPage) {
-        pageLink.addEventListener('click', function(e) {
-          e.preventDefault();
-          currentPage = i;
-          displayPaginatedProducts();
-          updatePagination();
-          window.scrollTo(0, 0);
-        });
-      }
-      
-      pageLi.appendChild(pageLink);
-      pagination.appendChild(pageLi);
-    }
-    
-    // 下一页按钮
-    const nextLi = document.createElement('li');
-    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-    
-    const nextLink = document.createElement('a');
-    nextLink.className = 'page-link';
-    nextLink.href = '#';
-    nextLink.setAttribute('aria-label', 'Next');
-    nextLink.innerHTML = '<i class="bi bi-chevron-right"></i>';
-    
-    if (currentPage < totalPages) {
-      nextLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        currentPage++;
-        displayPaginatedProducts();
-        updatePagination();
-        window.scrollTo(0, 0);
-      });
-    }
-    
-    nextLi.appendChild(nextLink);
-    pagination.appendChild(nextLi);
-  }
-  
-  // 初始化筛选器折叠功能
-  function initializeFilterAccordion() {
-    const filterTitles = document.querySelectorAll('.filter-group-title');
-    
-    // 确保初始状态正确
-    document.querySelectorAll('.filter-group-content').forEach((content, index) => {
-      if (index === 0) {
-        // 第一个筛选器（Categories）默认展开
-        content.classList.add('show');
-        const arrow = content.previousElementSibling.querySelector('i');
-        arrow.classList.remove('bi-chevron-down');
-        arrow.classList.add('bi-chevron-up');
-      } else {
-        // 其他筛选器默认收起
-        content.classList.remove('show');
-        const arrow = content.previousElementSibling.querySelector('i');
-        arrow.classList.remove('bi-chevron-up');
-        arrow.classList.add('bi-chevron-down');
-      }
-    });
-    
-    // 添加点击事件
-    filterTitles.forEach(title => {
-      title.addEventListener('click', function(e) {
-        e.preventDefault();
-        const content = this.nextElementSibling;
-        
-        // 切换箭头方向
-        const arrow = this.querySelector('i');
-        arrow.classList.toggle('bi-chevron-down');
-        arrow.classList.toggle('bi-chevron-up');
-        
-        // 切换内容显示
-        content.classList.toggle('show');
+        const productId = this.getAttribute('data-product-id');
+        addToCart(productId, 1);
       });
     });
   }
   
-  // 重置筛选器
+  // 重置筛选
   function resetFilters() {
-    // 重置分类
-    document.getElementById('category-all').checked = true;
-    document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+    const categoryAllCheckbox = document.getElementById('category-all');
+    if (categoryAllCheckbox) {
+      categoryAllCheckbox.checked = true;
+    }
+    
+    document.querySelectorAll('.category-filter').forEach(function(checkbox) {
       checkbox.checked = false;
     });
-    filterCriteria.categories = [];
     
-    // 重置价格
-    document.getElementById('price-min').value = '';
-    document.getElementById('price-max').value = '';
-    filterCriteria.priceMin = null;
-    filterCriteria.priceMax = null;
+    // 重置价格筛选
+    const priceMinInput = document.getElementById('price-min');
+    const priceMaxInput = document.getElementById('price-max');
+    if (priceMinInput) priceMinInput.value = '';
+    if (priceMaxInput) priceMaxInput.value = '';
     
-    // 重置评分
-    document.getElementById('rating-all').checked = true;
-    filterCriteria.rating = 0;
+    // 重置评分筛选
+    const ratingAllRadio = document.getElementById('rating-all');
+    if (ratingAllRadio) ratingAllRadio.checked = true;
     
-    // 重置特惠
-    document.getElementById('filter-sale').checked = false;
-    filterCriteria.onSale = false;
+    // 重置特惠筛选
+    const filterSaleCheckbox = document.getElementById('filter-sale');
+    if (filterSaleCheckbox) filterSaleCheckbox.checked = false;
     
     // 重置排序
-    document.getElementById('sort-select').value = 'featured';
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) sortSelect.value = 'featured';
     
-    // 重置分页
-    currentPage = 1;
-    
-    // 更新产品显示
+    // 应用筛选和排序
     applyFiltersAndSort();
-    
-    // 更新面包屑和标题
-    if (activeCategoryId) {
-      activeCategoryId = null;
-      document.getElementById('breadcrumb-category').textContent = 'All Products';
-      document.getElementById('product-list-title').textContent = 'All Products';
-      
-      // 移除URL参数
-      const url = new URL(window.location);
-      url.searchParams.delete('category');
-      window.history.replaceState({}, '', url);
-    }
   }
   
   // 添加到购物车
   function addToCart(productId, quantity) {
-    console.log('addToCart called with productId:', productId, 'type:', typeof productId);
+    const product = products.find(p => p.id == productId);
     
-    const productsData = localStorage.getItem('products');
-    if (!productsData) {
-      console.error('No products data found in localStorage');
-      showToast('Error loading products', 'error');
+    if (!product) {
+      showToast('Product not found!', 'error');
       return;
     }
     
-    const products = JSON.parse(productsData);
-    
-    // Try to match by both string and number comparisons
-    let product = products.find(p => p.id === productId);
-    
-    // If not found, try parsing as integer
-    if (!product && !isNaN(parseInt(productId))) {
-      const numericId = parseInt(productId);
-      console.log('Trying numeric ID:', numericId);
-      product = products.find(p => p.id === numericId);
-    }
-    
-    // If still not found, try string comparison
-    if (!product) {
-      const stringId = String(productId);
-      console.log('Trying string ID:', stringId);
-      product = products.find(p => String(p.id) === stringId);
-    }
-    
-    if (!product) {
-      console.error('Product not found with ID:', productId);
-      showToast('Product not found', 'error');
-      return;
-    }
-    
-    console.log('Found product to add to cart:', product);
-    
-    // 获取现有购物车
-    let cart = [];
-    const cartData = localStorage.getItem('cart');
-    if (cartData) {
-      try {
-        cart = JSON.parse(cartData);
-        console.log('Existing cart:', cart);
-      } catch (e) {
-        console.error('Error parsing cart data:', e);
-        showToast('Error loading cart data', 'error');
-      }
-    }
-    
-    // 计算最终价格，确保不会出现NaN
-    const price = parseFloat(product.price) || 0;
-    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
-    console.log('Calculated price:', finalPrice);
-    
-    // 处理图片URL
-    let imageUrl = 'https://via.placeholder.com/80';
-    if (product.image) {
-      imageUrl = product.image;
-    } else if (Array.isArray(product.images) && product.images.length > 0) {
-      imageUrl = product.images[0];
-    }
+    // 获取购物车
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
     // 检查产品是否已在购物车中
-    const existingItem = cart.find(item => {
-      const itemMatch = (item.id === product.id) || 
-                       (parseInt(item.id) === parseInt(product.id)) || 
-                       (String(item.id) === String(product.id));
-      console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
-      return itemMatch;
-    });
+    const existingProduct = cart.find(item => item.id == productId);
     
-    if (existingItem) {
-      console.log('Product already in cart, updating quantity');
-      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+    if (existingProduct) {
+      // 更新数量
+      existingProduct.quantity += quantity;
     } else {
-      console.log('Adding new product to cart');
-      // 安全处理产品描述
-      let description = 'No description available';
-      if (product.description) {
-        description = product.description.substring(0, 100);
-        if (product.description.length > 100) {
-          description += '...';
-        }
-      } else if (product.details) {
-        description = product.details.substring(0, 100);
-        if (product.details.length > 100) {
-          description += '...';
-        }
-      }
-      
+      // 添加新产品
       cart.push({
-        id: product.id || 0,
-        name: product.name || 'Unnamed Product',
-        price: finalPrice,
-        image: imageUrl,
-        quantity: quantity || 1,
-        description: description,
-        categoryId: product.categoryId || null
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg'
       });
     }
     
-    // 保存到localStorage
-    console.log('Saving updated cart to localStorage:', cart);
+    // 保存购物车
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // 显示成功消息
-    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+    // 显示成功提示
+    showToast('Product added to cart!', 'success');
     
-    // 更新导航栏购物车计数
-    updateCartCount();
-  }
-  
-  // 更新购物车计数
-  function updateCartCount() {
-    const cartData = localStorage.getItem('cart');
-    const cartCount = document.getElementById('cart-count');
-    
-    if (!cartCount) return;
-    
-    if (cartData) {
-      const cart = JSON.parse(cartData);
-      const count = cart.reduce((total, item) => total + item.quantity, 0);
-      cartCount.textContent = count;
-      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-    } else {
-      cartCount.style.display = 'none';
+    // 如果有更新购物车徽章的函数，则调用它
+    if (typeof updateCartBadge === 'function') {
+      updateCartBadge();
     }
   }
   
   // 显示Toast通知
-  function showToast(message, type = 'success') {
+  function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      console.error('Toast container not found');
+      return;
+    }
     
-    if (!toastContainer) return;
+    const toastId = 'toast-' + Date.now();
     
-    // 创建toast元素
-    const toast = document.createElement('div');
-    toast.className = `modern-toast ${type}`;
-    
-    // 添加内容
-    toast.innerHTML = `
-      <div style="flex: 1; padding-right: 10px;">
-        <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
-        ${message}
+    const toastHtml = `
+      <div class="modern-toast ${type}" id="${toastId}">
+        <div class="modern-toast-icon">
+          <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle'}"></i>
+        </div>
+        <div class="modern-toast-content">${message}</div>
+        <button class="modern-toast-close" onclick="document.getElementById('${toastId}').remove()">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
-      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
-    // 添加到容器
-    toastContainer.appendChild(toast);
+    toastContainer.innerHTML += toastHtml;
     
-    // 添加关闭按钮事件
-    const closeBtn = toast.querySelector('div:last-child');
-    closeBtn.addEventListener('click', function() {
-      toast.remove();
-    });
-    
-    // 自动3秒后移除
+    // 自动消失
     setTimeout(() => {
-      toast.remove();
+      const toast = document.getElementById(toastId);
+      if (toast) {
+        toast.classList.add('fadeout');
+        setTimeout(() => toast.remove(), 500);
+      }
     }, 3000);
+  }
+  
+  // 检查URL参数
+  function checkUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // 检查是否有搜索查询
+    const searchQuery = urlParams.get('q');
+    if (searchQuery) {
+      // 实现搜索功能
+      // ...
+      
+      // 更新面包屑和标题
+      const breadcrumbCategory = document.getElementById('breadcrumb-category');
+      const productListTitle = document.getElementById('product-list-title');
+      
+      if (breadcrumbCategory) {
+        breadcrumbCategory.textContent = `Search Results: "${searchQuery}"`;
+      }
+      
+      if (productListTitle) {
+        productListTitle.textContent = `Search Results: "${searchQuery}"`;
+      }
+    }
+  }
+  
+  // 添加事件监听器
+  function addCommonEventListeners() {
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', applyFiltersAndSort);
+    } else {
+      console.warn("Sort select element not found");
+    }
+    
+    const productsPerPageSelect = document.getElementById('products-per-page');
+    if (productsPerPageSelect) {
+      productsPerPageSelect.addEventListener('change', function() {
+        productsPerPage = parseInt(this.value);
+        currentPage = 1;
+        applyFiltersAndSort();
+      });
+    } else {
+      console.warn("Products per page select not found");
+    }
+    
+    const applyPriceFilterBtn = document.getElementById('apply-price-filter');
+    if (applyPriceFilterBtn) {
+      applyPriceFilterBtn.addEventListener('click', applyFiltersAndSort);
+    } else {
+      console.warn("Apply price filter button not found");
+    }
+    
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', resetFilters);
+    } else {
+      console.warn("Reset filters button not found");
+    }
   }
 </script>
 </body>
