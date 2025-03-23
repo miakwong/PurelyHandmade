@@ -224,26 +224,35 @@
   
   // 页面加载完成后执行
   document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM Content Loaded - Starting initialization");
+    console.log("=== DOM Content Loaded - 开始初始化页面 ===");
+    console.log("页面URL:", window.location.href);
+    console.log("页面参数:", new URLSearchParams(window.location.search).toString());
     
     // 确保数据服务已加载
     if (typeof DataService === 'undefined') {
-      console.error('DataService is not defined - Check script loading order');
-      showError('DataService is not available. Please refresh the page or check console for errors.');
+      console.error('错误: DataService未定义 - 请检查脚本加载顺序');
+      showError('DataService不可用，请刷新页面或检查控制台错误。');
       return;
+    } else {
+      console.log("DataService已加载:", typeof DataService, Object.keys(DataService));
     }
+    
+    // 检查DOM元素状态
+    console.log("DOM检查 - 类别筛选容器:", document.getElementById('category-filters') ? '存在' : '不存在');
+    console.log("DOM检查 - 产品容器:", document.getElementById('products-container') ? '存在' : '不存在');
+    console.log("DOM检查 - 分页容器:", document.getElementById('pagination') ? '存在' : '不存在');
     
     // 初始化筛选器折叠功能 - 放在更前面执行
     try {
       initializeFilterAccordion();
-      console.log("Filter accordion initialized");
+      console.log("筛选器折叠功能初始化完成");
     } catch (error) {
-      console.error("Error initializing filter accordion:", error);
+      console.error("初始化筛选器折叠功能错误:", error);
     }
     
     // 设置全局错误处理
     window.onerror = function(message, source, lineno, colno, error) {
-      console.error("Global error:", message, "at", source, lineno, colno);
+      console.error("全局错误:", message, "at", source, lineno, colno);
       return false;
     };
     
@@ -251,32 +260,32 @@
     if (typeof window.initializeData === 'function') {
       try {
         window.initializeData();
-        console.log("Data initialization complete");
+        console.log("数据初始化完成");
       } catch (error) {
-        console.error("Error in data initialization:", error);
+        console.error("数据初始化错误:", error);
       }
     } else {
-      console.warn("initializeData function not found");
+      console.warn("initializeData函数未找到");
     }
     
     // 添加常用事件监听
     try {
       addCommonEventListeners();
-      console.log("Common event listeners added");
+      console.log("常用事件监听器添加完成");
     } catch (error) {
-      console.error("Error adding event listeners:", error);
+      console.error("添加事件监听器错误:", error);
     }
     
     // 加载分类，然后加载产品
-    console.log("Starting category and product loading sequence");
+    console.log("开始加载类别和产品数据");
     loadCategories()
       .then(() => {
-        console.log("Categories loaded successfully, now loading products");
+        console.log("类别加载成功，现在加载产品");
         return loadProducts();
       })
       .catch(error => {
-        console.error('Error initializing page:', error);
-        showError('Failed to initialize the page. Please refresh and try again.');
+        console.error('页面初始化错误:', error);
+        showError('页面初始化失败，请刷新后重试。');
       });
   });
   
@@ -315,10 +324,11 @@
   
   // 加载分类
   async function loadCategories() {
+    console.log("=== loadCategories() - 开始加载分类 ===");
     try {
       const categoryFiltersContainer = document.getElementById('category-filters');
       if (!categoryFiltersContainer) {
-        console.error('Category filters container not found');
+        console.error('分类筛选器容器未找到');
         // 创建默认的筛选器以避免错误
         createDefaultCategoryFilter();
         return;
@@ -329,21 +339,76 @@
       // 使用API获取分类
       let categoryResponse;
       try {
-        categoryResponse = await DataService.getAllCategories();
-        console.log('API Categories:', categoryResponse);
+        console.log("发送API请求获取分类数据...");
+        // 尝试使用fetch直接请求API - 用作备份机制
+        if (typeof DataService === 'undefined' || !DataService.getAllCategories) {
+          console.warn("DataService未定义或不可用，尝试使用fetch直接请求API");
+          const response = await fetch('/api/categories');
+          categoryResponse = await response.json();
+        } else {
+          categoryResponse = await DataService.getAllCategories();
+        }
+        
+        // 确保响应格式一致性，避免undefined错误
+        if (!categoryResponse) {
+          throw new Error("API返回空响应");
+        }
+        
+        console.log('API分类数据响应:', categoryResponse);
       } catch (apiError) {
-        console.error('Error fetching categories from API:', apiError);
-        // API错误仍需确保UI正常
-        categoryResponse = { success: false, message: 'API error', data: { categories: [] } };
+        console.error('从API获取分类数据错误:', apiError.message || apiError);
+        // API错误仍需确保UI正常 - 创建一个格式正确的失败响应
+        categoryResponse = { 
+          success: false, 
+          message: apiError.message || '请求分类数据时出错', 
+          data: { categories: [] } 
+        };
+      }
+      
+      // 检查响应格式并规范化
+      if (!categoryResponse.hasOwnProperty('success')) {
+        console.warn('API响应格式不规范，尝试规范化');
+        // 如果响应没有success字段，尝试重新格式化它
+        if (categoryResponse.data || categoryResponse.categories) {
+          // 如果有data.categories或直接有categories字段，认为成功
+          categoryResponse = {
+            success: true,
+            message: "成功获取分类",
+            data: {
+              categories: categoryResponse.data?.categories || categoryResponse.categories || []
+            }
+          };
+        } else {
+          // 无法识别的格式，创建失败响应
+          categoryResponse = {
+            success: false,
+            message: "响应格式不正确",
+            data: { categories: [] }
+          };
+        }
       }
       
       // 确保至少有全部分类选项
       if (categoryResponse.success) {
-        categories = categoryResponse.data.categories || [];
+        let categoriesData = [];
+        
+        // 确保categories数据存在且格式正确
+        if (categoryResponse.data && Array.isArray(categoryResponse.data.categories)) {
+          categoriesData = categoryResponse.data.categories;
+        } else if (categoryResponse.data && typeof categoryResponse.data === 'object') {
+          // 尝试从其他可能的位置获取categories
+          categoriesData = Object.values(categoryResponse.data);
+        } else if (Array.isArray(categoryResponse.categories)) {
+          categoriesData = categoryResponse.categories;
+        }
+        
+        categories = categoriesData;
+        console.log(`成功获取${categories.length}个分类:`, categories);
         
         // 清空现有内容并添加"全部"选项
         categoryFiltersContainer.innerHTML = '';
         addAllCategoriesCheckbox(categoryFiltersContainer);
+        console.log("已添加'全部'类别选项");
         
         // 添加分类选项
         if (categories.length > 0) {
@@ -358,11 +423,14 @@
             `;
             categoryFiltersContainer.innerHTML += categoryHtml;
           });
+          console.log(`已添加${categories.length}个分类选项`);
           
           // 添加分类点击事件
           addCategoryEventListeners();
+          console.log("已添加分类筛选事件监听器");
         } else {
-          console.warn('No categories returned from API');
+          console.warn('API返回的分类为空');
+          categoryFiltersContainer.innerHTML += '<p class="text-muted small mt-2">暂无分类数据</p>';
         }
         
         // 检查URL参数中是否有categoryId
@@ -377,28 +445,57 @@
         // 检查其他URL参数
         checkUrlParameters();
         
+        // 最终验证
+        const allCategoryCheckbox = document.getElementById('category-all');
+        console.log("分类加载完成后验证 - 全部分类复选框:", allCategoryCheckbox ? '存在' : '不存在');
+        if (allCategoryCheckbox) {
+          console.log("全部分类复选框状态: checked=", allCategoryCheckbox.checked);
+        }
+        
       } else {
-        console.error('API category request failed:', categoryResponse.message);
+        const errorMessage = categoryResponse.message || '未知错误';
+        console.error('API分类请求失败:', errorMessage);
+        categoryFiltersContainer.innerHTML = `
+          <div class="alert alert-warning small py-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>加载分类失败
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">重试</button>
+          </div>
+        `;
         createDefaultCategoryFilter();
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('加载分类错误:', error.message || error);
+      const categoryFiltersContainer = document.getElementById('category-filters');
+      if (categoryFiltersContainer) {
+        categoryFiltersContainer.innerHTML = `
+          <div class="alert alert-warning small py-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>加载分类出错: ${error.message || '未知错误'}
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">重试</button>
+          </div>
+        `;
+      }
       createDefaultCategoryFilter();
-      throw error;
+      // 使用空数组继续，不抛出错误，确保其他功能可以继续
+      categories = [];
     }
   }
   
   // 创建默认的分类筛选器（确保UI可用）
   function createDefaultCategoryFilter() {
+    console.log("=== createDefaultCategoryFilter() - 创建默认分类筛选器 ===");
     const categoryFiltersContainer = document.getElementById('category-filters');
     if (categoryFiltersContainer) {
       categoryFiltersContainer.innerHTML = '';
       addAllCategoriesCheckbox(categoryFiltersContainer);
+      console.log("已创建默认分类筛选器");
+    } else {
+      console.error("找不到类别筛选容器，无法创建默认筛选器");
     }
   }
   
   // 添加"全部"分类选项
   function addAllCategoriesCheckbox(container) {
+    console.log("=== addAllCategoriesCheckbox() - 添加'全部'分类选项 ===");
     container.innerHTML += `
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="all" id="category-all" checked>
@@ -407,11 +504,13 @@
         </label>
       </div>
     `;
+    console.log("DOM添加后验证 - '全部'分类复选框:", document.getElementById('category-all') ? '存在' : '不存在');
     
     // 添加"全部"分类点击事件
     const allCategoriesCheckbox = document.getElementById('category-all');
     if (allCategoriesCheckbox) {
       allCategoriesCheckbox.addEventListener('change', function() {
+        console.log("'全部'分类复选框变更 - 新状态:", this.checked);
         if (this.checked) {
           document.querySelectorAll('.category-filter').forEach(function(checkbox) {
             checkbox.checked = false;
@@ -419,6 +518,9 @@
         }
         applyFiltersAndSort();
       });
+      console.log("已添加'全部'分类复选框事件监听器");
+    } else {
+      console.error("无法添加'全部'分类复选框事件监听器 - 元素不存在");
     }
   }
   
@@ -495,10 +597,11 @@
   
   // 加载产品
   async function loadProducts() {
+    console.log("=== loadProducts() - 开始加载产品 ===");
     try {
       const productsContainer = document.getElementById('products-container');
       if (!productsContainer) {
-        console.error('Products container not found');
+        console.error('产品容器未找到');
         return;
       }
       
@@ -512,27 +615,34 @@
       `;
       
       // 使用API获取产品
+      console.log("发送API请求获取产品数据...");
       const productsResponse = await DataService.getAllProducts();
-      console.log('API Products:', productsResponse);
+      console.log('API产品数据响应:', productsResponse);
       
       if (productsResponse.success) {
         products = productsResponse.data.products;
+        console.log(`成功获取${products.length}个产品`);
         
         // 应用筛选和排序 - 仅在有产品且UI已准备好的情况下执行
         setTimeout(() => {
+          const categoryAllCheckbox = document.getElementById('category-all');
+          console.log("筛选前检查 - 全部分类复选框:", categoryAllCheckbox ? '存在' : '不存在');
+          
           if (document.getElementById('category-all')) {
+            console.log("应用筛选和排序 - UI已准备好");
             applyFiltersAndSort();
           } else {
-            console.log('Waiting for filters to be ready before applying...');
+            console.log('等待筛选器准备好 - 先显示所有产品');
             // 产品已加载但筛选器尚未准备好，设置默认显示所有产品
             renderAllProducts();
           }
         }, 100);
       } else {
+        console.error("获取产品失败:", productsResponse.message);
         productsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>Unable to load products.</p></div>';
       }
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('加载产品错误:', error);
       document.getElementById('products-container').innerHTML = '<div class="col-12 text-center py-4"><p>Error loading products.</p></div>';
       throw error;
     }
@@ -540,7 +650,9 @@
   
   // 显示所有产品（无筛选）
   function renderAllProducts() {
+    console.log("=== renderAllProducts() - 显示所有产品（无筛选） ===");
     filteredProducts = [...products];
+    console.log(`显示全部${filteredProducts.length}个产品`);
     
     // 更新产品计数
     const productCountEl = document.getElementById('product-count');
@@ -557,10 +669,13 @@
   
   // 应用筛选和排序
   function applyFiltersAndSort() {
+    console.log("=== applyFiltersAndSort() - 应用筛选和排序 ===");
+    console.log("DOM查询 - 全部分类复选框:", document.getElementById('category-all') ? '存在' : '不存在');
+    
     // 先检查UI元素是否已准备好
     const categoryAllCheckbox = document.getElementById('category-all');
     if (!categoryAllCheckbox) {
-      console.warn('Category "All" checkbox not found - displaying all products without filtering');
+      console.warn('未找到"全部"分类复选框 - 显示全部产品，不进行筛选');
       renderAllProducts();
       return;
     }
@@ -570,28 +685,37 @@
     const selectedCategories = [];
     if (!categoryAllCheckbox.checked) {
       const checkedCategories = document.querySelectorAll('.category-filter:checked');
+      console.log(`分类筛选 - "全部"未选中，找到${checkedCategories ? checkedCategories.length : 0}个选中的分类`);
+      
       if (checkedCategories && checkedCategories.length > 0) {
         checkedCategories.forEach(function(checkbox) {
           selectedCategories.push(parseInt(checkbox.value));
         });
       }
+    } else {
+      console.log("分类筛选 - '全部'已选中，不筛选分类");
     }
+    console.log("已选分类IDs:", selectedCategories);
     
     // 价格筛选
     const priceMinEl = document.getElementById('price-min');
     const priceMaxEl = document.getElementById('price-max');
     const minPrice = priceMinEl && priceMinEl.value ? parseFloat(priceMinEl.value) : null;
     const maxPrice = priceMaxEl && priceMaxEl.value ? parseFloat(priceMaxEl.value) : null;
+    console.log("价格筛选:", {min: minPrice, max: maxPrice});
     
     // 评分筛选
     const ratingFilterEl = document.querySelector('input[name="rating-filter"]:checked');
     const ratingFilter = ratingFilterEl ? parseInt(ratingFilterEl.value) : 0;
+    console.log("评分筛选:", ratingFilter, "星及以上");
     
     // 特惠筛选
     const filterSaleEl = document.getElementById('filter-sale');
     const onSaleFilter = filterSaleEl ? filterSaleEl.checked : false;
+    console.log("特惠筛选:", onSaleFilter ? "仅显示特惠" : "显示全部");
     
     // 应用筛选
+    console.log(`开始筛选 - 筛选前${products.length}个产品`);
     filteredProducts = products.filter(function(product) {
       // 分类筛选
       if (selectedCategories.length > 0 && !selectedCategories.includes(product.categoryId)) {
@@ -618,10 +742,12 @@
       
       return true;
     });
+    console.log(`筛选完成 - 筛选后${filteredProducts.length}个产品`);
     
     // 应用排序
     const sortSelect = document.getElementById('sort-select');
     const sortOption = sortSelect ? sortSelect.value : 'featured';
+    console.log("应用排序:", sortOption);
     
     switch (sortOption) {
       case 'price-low':
@@ -640,6 +766,7 @@
         filteredProducts.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
         break;
     }
+    console.log("排序完成");
     
     // 更新产品计数
     const productCountEl = document.getElementById('product-count');
@@ -656,20 +783,25 @@
   
   // 渲染分页
   function renderPagination() {
+    console.log("=== renderPagination() - 渲染分页 ===");
     const paginationContainer = document.getElementById('pagination');
     if (!paginationContainer) {
-      console.error('Pagination container not found');
+      console.error('分页容器未找到');
       return;
     }
     
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+    console.log(`分页信息: 共${filteredProducts.length}个产品，每页${productsPerPage}个，共${totalPages}页，当前第${currentPage}页`);
+    
     if (currentPage > totalPages && totalPages > 0) {
       currentPage = 1;
+      console.log("当前页超出范围，重置为第1页");
     }
     
     paginationContainer.innerHTML = '';
     
     if (totalPages <= 1) {
+      console.log("仅有1页或无数据，不显示分页");
       return;
     }
     
@@ -722,22 +854,26 @@
   
   // 渲染产品
   function renderProducts() {
+    console.log("=== renderProducts() - 渲染产品 ===");
     const productsContainer = document.getElementById('products-container');
     if (!productsContainer) {
-      console.error('Products container not found');
+      console.error('产品容器未找到');
       return;
     }
     
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = Math.min(startIndex + productsPerPage, filteredProducts.length);
     const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+    console.log(`渲染产品: 当前页${currentPage}，显示索引${startIndex}到${endIndex-1}，共${paginatedProducts.length}个产品`);
     
     if (paginatedProducts.length === 0) {
+      console.log("没有匹配筛选条件的产品");
       productsContainer.innerHTML = '<div class="col-12 text-center py-4"><p>No products match your filters. Please try different criteria.</p></div>';
       return;
     }
     
     productsContainer.innerHTML = '';
+    console.log(`开始渲染${paginatedProducts.length}个产品到DOM`);
     
     paginatedProducts.forEach(function(product) {
       // 准备产品图片
