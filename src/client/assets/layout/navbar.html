@@ -172,4 +172,69 @@
     updateAuthButton();
     updateCartCount();
   }
+  
+  // 立即初始化
+  setTimeout(function() {
+    console.log('Additional initialization for navbar buttons');
+    updateAuthButton();
+    updateCartCount();
+    
+    // 确保购物车按钮可点击
+    const cartButton = document.querySelector('a.btn[href="/src/client/views/checkout/cart.html"]');
+    if (cartButton) {
+      console.log('Cart button found, ensuring it is clickable');
+      cartButton.style.pointerEvents = 'auto';
+      cartButton.style.cursor = 'pointer';
+    }
+    
+    // 添加测试登录按钮（仅供开发测试用）
+    if (window.location.hostname === 'localhost') {
+      const testLoginBtn = document.createElement('button');
+      testLoginBtn.className = 'btn btn-sm btn-info ms-2';
+      testLoginBtn.innerHTML = 'Test Login';
+      testLoginBtn.onclick = function() {
+        const testUser = {
+          id: 1,
+          username: 'testuser',
+          email: 'test@example.com',
+          isAdmin: false
+        };
+        localStorage.setItem('currentUser', JSON.stringify(testUser));
+        localStorage.setItem('authToken', 'test-token-12345');
+        updateAuthButton();
+        console.log('Test user logged in');
+      };
+      
+      const testLogoutBtn = document.createElement('button');
+      testLogoutBtn.className = 'btn btn-sm btn-warning ms-2';
+      testLogoutBtn.innerHTML = 'Test Logout';
+      testLogoutBtn.onclick = function() {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        updateAuthButton();
+        console.log('Test user logged out');
+      };
+      
+      const testCartBtn = document.createElement('button');
+      testCartBtn.className = 'btn btn-sm btn-success ms-2';
+      testCartBtn.innerHTML = 'Add Test Item';
+      testCartBtn.onclick = function() {
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        cart.push({
+          id: Date.now(),
+          name: 'Test Product',
+          price: 9.99,
+          quantity: 1
+        });
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        console.log('Test item added to cart');
+      };
+      
+      const container = document.querySelector('.navbar .container');
+      container.appendChild(testLoginBtn);
+      container.appendChild(testLogoutBtn);
+      container.appendChild(testCartBtn);
+    }
+  }, 500);
 </script> 
