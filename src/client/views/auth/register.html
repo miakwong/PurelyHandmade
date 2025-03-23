@@ -177,13 +177,18 @@
     // Helper function to show validation errors
     function showValidationError(elementId, message) {
       const element = document.getElementById(elementId);
+      console.log(`Calling showValidationError for ${elementId} with message: ${message}`);
+
       if (element) {
-        element.textContent = message;
-        element.classList.add('show');
-        return false;
+          element.textContent = message;
+          element.classList.add('show', 'text-danger');
+          element.classList.remove('text-success', 'd-none');
+          return false;
       }
+      console.warn(`Element with ID '${elementId}' not found.`);
       return true;
-    }
+  }
+  
 
     // Helper function to clear validation errors
     function clearValidationErrors() {
@@ -466,33 +471,45 @@
       }
   
       try {
-        const response = await fetch('/src/server/api/auth/check_email.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        });
-
-        // 确保返回 JSON
-        const text = await response.text();
-        try {
-            const result = JSON.parse(text);
-            if (result.error) {
-                showValidationError('email-error', result.error);
-            } else if (result.exists) {
-                showValidationError('email-error', 'This email is already registered.');
+          const response = await fetch('/src/server/api/auth/check_email.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+          });
+  
+          const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+            console.log("Email check response:", result);
+        
+            // 确保 result.data 存在，避免报错
+            if (result.data && typeof result.data.exists !== "undefined") {
+                if (result.data.exists) {
+                    // 如果 exists 是 true，说明邮箱已注册，显示错误
+                    showValidationError('email-error', result.data.message);
+                } else {
+                    // 如果 exists 是 false，清除错误信息
+                    const emailErrorDiv = document.getElementById('email-error');
+                    emailErrorDiv.textContent = ''; // 清空文本
+                    emailErrorDiv.classList.remove('show', 'text-danger'); // 隐藏错误提示
+                }
             } else {
-                document.getElementById('email-error').textContent = '';
-                document.getElementById('email-error').classList.remove('show');
+                // JSON 数据格式不符合预期
+                console.warn("Unexpected response format:", result);
+                showValidationError('email-error', 'Unexpected response format.');
             }
         } catch (jsonError) {
             console.error('Error parsing JSON:', text);
             showValidationError('email-error', 'Server error: Invalid response format.');
+            return;
         }
-    } catch (error) {
-        console.error('Error checking email:', error);
-        showValidationError('email-error', 'An error occurred while checking the email. Please try again.');
-    }
-});
+      } catch (error) {
+          console.error('Error checking email:', error);
+          showValidationError('email-error', 'An error occurred while checking the email. Please try again.');
+      }
+  });
+  
   
     // 删除用户名实时重复检测本地存储部分
     document.getElementById('username').addEventListener('blur', async function() {
@@ -513,12 +530,30 @@
           body: JSON.stringify({ username })
         });
         
-        const data = await response.json();
-        if (data.exists) {
-          showValidationError('username-error', 'This username is already taken. Please choose another one.');
-        } else {
-          document.getElementById('username-error').textContent = '';
-          document.getElementById('username-error').classList.remove('show');
+        const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+            console.log("Username check response:", result);
+        
+            // 确保 result.data 存在，避免报错
+            if (result.data && typeof result.data.exists !== "undefined") {
+                if (result.data.exists) {
+                    showValidationError('username-error', result.data.message);
+                } else {
+                    const usernameErrorDiv = document.getElementById('username-error');
+                    usernameErrorDiv.textContent = ''; // 清空文本
+                    usernameErrorDiv.classList.remove('show', 'text-danger'); // 隐藏错误提示
+                }
+            } else {
+                // JSON 数据格式不符合预期
+                console.warn("Unexpected response format:", result);
+                showValidationError('email-error', 'Unexpected response format.');
+            }
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', text);
+            showValidationError('email-error', 'Server error: Invalid response format.');
+            return;
         }
       } catch (error) {
         console.error('Error checking username:', error);
