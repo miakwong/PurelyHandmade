@@ -24,7 +24,12 @@ try {
     
     // Get email from request
     $data = $request->getJson();
-    $email = $data['email'] ?? '';
+    if (!$data || !isset($data['email'])) {
+        $response->error('Missing email parameter', 400);
+        exit;
+    }
+    
+    $email = trim($data['email']);
     
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -35,10 +40,13 @@ try {
     // Check if email exists in database
     $user = $authController->findUserByEmail($email);
     
-    // Return response
-    $response->success([
-        'exists' => !empty($user)
-    ]);
+     // Ensure $user is checked properly
+     $exists = !empty($user);
+    
+     $response->success([
+         'exists' => $exists,
+         'message' => $exists ? 'This email is already registered.' : 'Email is available.'
+     ]);
     
 } catch (Exception $e) {
     $response = new Response();
