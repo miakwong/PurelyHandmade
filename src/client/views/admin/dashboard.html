@@ -519,154 +519,18 @@ const AdminApiService = {
 
 <script src="/src/client/js/data-service.js"></script>
 <script src="/src/client/js/ui-helpers.js"></script>
+<script src="/src/client/js/admin-auth.js"></script>
 
 <script>
-  // Fallback if AdminApiService is not available
-  if (typeof AdminApiService === 'undefined') {
-    console.warn('AdminApiService not found, using fallback implementation with DataService');
-    window.AdminApiService = {
-      getAllProducts: function() {
-        return Promise.resolve({
-          success: true,
-          data: JSON.parse(localStorage.getItem('products') || '[]')
-        });
-      },
-      getAllOrders: function() {
-        return Promise.resolve({
-          success: true,
-          data: JSON.parse(localStorage.getItem('orders') || '[]')
-        });
-      },
-      getAllUsers: function() {
-        return Promise.resolve({
-          success: true,
-          data: JSON.parse(localStorage.getItem('users') || '[]')
-        });
-      }
-    };
-  }
-
-  // 为API调用添加错误处理和回退功能
-  const originalGetAllProducts = AdminApiService.getAllProducts;
-  AdminApiService.getAllProducts = async function() {
-    try {
-      return await originalGetAllProducts();
-    } catch (error) {
-      console.warn('API调用失败，回退到localStorage:', error);
-      return {
-        success: true,
-        data: JSON.parse(localStorage.getItem('products') || '[]')
-      };
-    }
-  };
-
-  const originalGetAllOrders = AdminApiService.getAllOrders;
-  AdminApiService.getAllOrders = async function() {
-    try {
-      return await originalGetAllOrders();
-    } catch (error) {
-      console.warn('API调用失败，回退到localStorage:', error);
-      return {
-        success: true,
-        data: JSON.parse(localStorage.getItem('orders') || '[]')
-      };
-    }
-  };
-
-  const originalGetAllUsers = AdminApiService.getAllUsers;
-  AdminApiService.getAllUsers = async function() {
-    try {
-      return await originalGetAllUsers();
-    } catch (error) {
-      console.warn('API调用失败，回退到localStorage:', error);
-      return {
-        success: true,
-        data: JSON.parse(localStorage.getItem('users') || '[]')
-      };
-    }
-  };
-
-  // Ensure the user is logged in and is an admin
-  document.addEventListener('DOMContentLoaded', function() {
-    // Load navbar
-    fetch('/src/client/assets/layout/navbar.html')
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('navbar-placeholder').innerHTML = html;
-        
-        // Check if user is admin after navbar is loaded
-        setTimeout(() => {
-          const currentUser = DataService.getCurrentUser();
-          const authToken = localStorage.getItem('authToken');
-          
-          console.log('Current user:', currentUser ? 'Found' : 'Not found');
-          console.log('Auth token:', authToken ? 'Found' : 'Not found');
-          
-          // 如果用户未登录，但有token，尝试使用token获取用户信息
-          if (!currentUser && authToken) {
-            DataService.getUserProfile()
-              .then(userData => {
-                if (userData && (userData.isAdmin || userData.role === 'admin')) {
-                  console.log('Successfully retrieved user profile from API');
-                  loadDashboardData();
-                } else {
-                  redirectToLogin();
-                }
-              })
-              .catch(error => {
-                console.error('Error getting user profile:', error);
-                redirectToLogin();
-              });
-          } else if (!currentUser || (currentUser.isAdmin !== true && currentUser.role !== 'admin')) {
-            redirectToLogin();
-          } else {
-            // Load dashboard data
-            loadDashboardData();
-          }
-          
-          function redirectToLogin() {
-            // 检查是否有授权令牌
-            if (!authToken) {
-              // 显示一个友好的提示，引导用户设置token
-              document.body.innerHTML = `
-                <div class="container mt-5">
-                  <div class="alert alert-warning text-center p-5">
-                    <h4><i class="bi bi-exclamation-triangle me-2"></i>需要授权</h4>
-                    <p class="mb-4">您需要设置管理员授权令牌才能访问此页面。</p>
-                    <a href="/src/client/views/auth/login.html" class="btn btn-primary">登录管理员账户</a>
-                  </div>
-                </div>
-              `;
-            } else {
-              window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-            }
-          }
-        }, 100);
-      });
-    
-    // Refresh button event
-    document.getElementById('refreshData').addEventListener('click', function() {
-      loadDashboardData();
-    });
-  });
-  
-  // Load dashboard data from API
-  function loadDashboardData() {
+  // Main page data loading function
+  function loadDashboardData(userData) {
+    console.log('Loading dashboard data with user:', userData);
     showLoadingState();
     
-    // 检查身份验证状态
-    const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-      console.error('No auth token found');
-      showError('Authentication required. Please log in as an admin.');
-      hideLoadingState();
-      return;
-    }
-    
     // Debug output before API calls
-    console.log('Starting API calls with auth token:', authToken ? 'Token exists' : 'No token');
+    console.log('Starting API calls with admin user');
     
-    // 从本地测试数据或API获取数据
+    // 从API获取数据
     function loadData() {
       // 先尝试使用API，即使没有令牌也尝试
       return Promise.all([
@@ -705,6 +569,14 @@ const AdminApiService = {
       hideLoadingState();
     });
   }
+  
+  // Initialize dashboard with authentication
+  AdminAuth.initAdminPage(loadDashboardData);
+  
+  // Refresh button event
+  document.getElementById('refreshData').addEventListener('click', function() {
+    loadDashboardData();
+  });
   
   // 更新统计卡片
   function updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse) {
