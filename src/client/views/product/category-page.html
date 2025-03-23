@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="../../css/navbar.css">
   <link rel="stylesheet" href="../../css/global.css">
   <link rel="stylesheet" href="../../css/category-page.css">
+  
+  <!-- Data Services -->
+  <script src="/src/client/js/data-service.js"></script>
+  <script src="/src/client/js/api-data-loader.js"></script>
 
 </head>
 <body>
@@ -37,7 +41,7 @@
 <!-- Category Banner -->
 <div class="container">
   <div class="category-banner" id="category-banner">
-    <img src="../../img/category-placeholder.jpg" alt="Category" id="category-image">
+    <img src="/src/client/assets/placeholder.jpg" alt="Category" id="category-image">
     <div class="category-banner-overlay">
       <h1 class="category-banner-title" id="category-title">Loading Category...</h1>
       <p class="category-banner-description" id="category-description">Please wait while we load the category details.</p>
@@ -104,25 +108,27 @@
             </div>
           </div>
           
-          <!-- Availability Filter -->
+          <!-- Stock & Sale Filters -->
           <div class="filter-section">
             <h6 class="filter-title">Availability</h6>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="inStock" id="in-stock">
+              <input class="form-check-input" type="checkbox" value="" id="in-stock">
               <label class="form-check-label" for="in-stock">
                 In Stock
               </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="onSale" id="on-sale">
+              <input class="form-check-input" type="checkbox" value="" id="on-sale">
               <label class="form-check-label" for="on-sale">
                 On Sale
               </label>
             </div>
           </div>
           
-          <!-- Clear Filters Button -->
-          <button class="btn btn-outline-secondary w-100" id="clear-filters">Clear All Filters</button>
+          <!-- Clear All Filters -->
+          <button class="btn btn-outline-secondary w-100 mt-3" id="clear-filters">
+            <i class="bi bi-x-circle me-2"></i> Clear All Filters
+          </button>
         </div>
       </div>
     </div>
@@ -170,14 +176,15 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Initialize data script -->
-<script src="../../js/init-data.js"></script>
-
-<!-- Navbar handler script -->
-<script src="../../js/navbar-handler.js"></script>
+<!-- Load navbar and footer -->
+<script>
+  $(function() {
+    $("#navbar-placeholder").load("/src/client/assets/layout/navbar.html");
+    $("#footer-placeholder").load("/src/client/assets/layout/footer.html");
+  });
+</script>
 
 <script>
-
   // Global variables for filter state
   let allProducts = [];
   let filteredProducts = [];
@@ -193,11 +200,6 @@
 
   // Initialize page when DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
-    // Ensure data is initialized
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
-    }
-    
     // Get category ID from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = urlParams.get('id');
@@ -217,8 +219,8 @@
     setupFilterListeners();
   });
   
-  // Load category data
-  function loadCategory(categoryId) {
+  // Load category data from API
+  async function loadCategory(categoryId) {
     const loadingIndicator = document.getElementById('loading-indicator');
     const productsContainer = document.getElementById('products-container');
     
@@ -226,50 +228,56 @@
     if (loadingIndicator) loadingIndicator.style.display = 'flex';
     if (productsContainer) productsContainer.style.display = 'none';
     
-    // Get data from localStorage
-    const categoriesData = localStorage.getItem('categories');
-    const productsData = localStorage.getItem('products');
-    
-    if (!categoriesData || !productsData) {
-      showError('Failed to load data. Please try again later.');
-      return;
-    }
-    
-    const categories = JSON.parse(categoriesData);
-    const products = JSON.parse(productsData);
-    
-    // Find the selected category
-    const category = categories.find(c => c.id === categoryId);
-    
-    if (!category) {
-      showError('Category not found. Redirecting to categories page...');
-      setTimeout(() => {
-        window.location.href = 'category-list.html';
-      }, 2000);
-      return;
-    }
-    
-    // Store current category
-    currentCategory = category;
-    
-    // Update page with category data
-    updateCategoryDisplay(category);
-    
-    // Filter products by category
-    allProducts = products.filter(p => p.categoryId === categoryId);
-    filteredProducts = [...allProducts];
-    
-    // Wait 500ms to simulate loading (optional)
-    setTimeout(() => {
+    try {
+      // Get category data from API
+      const category = await DataService.getCategoryById(categoryId);
+      
+      if (!category) {
+        showError('Category not found. Redirecting to categories page...');
+        setTimeout(() => {
+          window.location.href = 'category-list.html';
+        }, 2000);
+        return;
+      }
+      
+      // Store current category
+      currentCategory = category;
+      
+      // Update page with category data
+      updateCategoryDisplay(category);
+      
+      // Get all products from API
+      const productsData = await DataService.getAllProducts();
+      
+      if (!productsData || !productsData.success) {
+        showError('Failed to load products. Please try again later.');
+        return;
+      }
+      
+      // Extract products array
+      let products = [];
+      if (productsData.data && productsData.data.products) {
+        products = productsData.data.products;
+      } else if (productsData.products) {
+        products = productsData.products;
+      }
+      
+      // Filter products by category
+      allProducts = products.filter(p => p.categoryId === categoryId || p.categoryId === String(categoryId));
+      filteredProducts = [...allProducts];
+      
       // Hide loading and show products
       if (loadingIndicator) loadingIndicator.style.display = 'none';
-      // Using empty string for display allows the Bootstrap grid classes to work properly
-      // Setting it to 'block' would override the flex layout needed for multi-column grid
       if (productsContainer) productsContainer.style.display = '';
       
       // Render products
       renderProducts(filteredProducts);
-    }, 500);
+    } catch (error) {
+      console.error('Error loading category data:', error);
+      showError('Failed to load data. Please try again later.');
+      
+      if (loadingIndicator) loadingIndicator.style.display = 'none';
+    }
   }
   
   // Update category display elements
@@ -280,30 +288,131 @@
       breadcrumbCategory.textContent = category.name;
     }
     
-    // Update title and description
+    // Update title & description
     const categoryTitle = document.getElementById('category-title');
     const categoryDescription = document.getElementById('category-description');
     
-    if (categoryTitle) {
-      categoryTitle.textContent = category.name;
-    }
+    if (categoryTitle) categoryTitle.textContent = category.name;
+    if (categoryDescription) categoryDescription.textContent = category.description || 'Browse our collection of handcrafted products.';
     
-    if (categoryDescription) {
-      categoryDescription.textContent = category.description || `Browse our collection of ${category.name.toLowerCase()} products`;
-    }
-    
-    // Update document title
-    document.title = `${category.name} - Purely Homemade`;
-    
-    // Update category image if available
+    // Update banner image
     const categoryImage = document.getElementById('category-image');
-    if (categoryImage && category.image) {
-      categoryImage.src = category.image;
+    if (categoryImage) {
+      if (category.image) {
+        categoryImage.src = category.image;
+      } else {
+        categoryImage.src = '/src/client/assets/placeholder.jpg';
+      }
       categoryImage.alt = category.name;
     }
+    
+    // Update page title
+    document.title = `${category.name} - Purely Homemade`;
   }
   
-  // Render products
+  // Apply filters to products
+  function applyFilters() {
+    // Start with all products for this category
+    let filtered = [...allProducts];
+    
+    // Apply price filter
+    if (filterOptions.minPrice !== null) {
+      filtered = filtered.filter(product => {
+        const price = product.onSale && product.salePrice 
+          ? parseFloat(product.salePrice) 
+          : parseFloat(product.price);
+        return price >= filterOptions.minPrice;
+      });
+    }
+    
+    if (filterOptions.maxPrice !== null) {
+      filtered = filtered.filter(product => {
+        const price = product.onSale && product.salePrice 
+          ? parseFloat(product.salePrice) 
+          : parseFloat(product.price);
+        return price <= filterOptions.maxPrice;
+      });
+    }
+    
+    // Apply rating filter
+    if (filterOptions.rating > 0) {
+      filtered = filtered.filter(product => {
+        const rating = parseFloat(product.rating) || 0;
+        return rating >= filterOptions.rating;
+      });
+    }
+    
+    // Apply stock filter
+    if (filterOptions.inStock) {
+      filtered = filtered.filter(product => {
+        return !product.stock || product.stock > 0;
+      });
+    }
+    
+    // Apply sale filter
+    if (filterOptions.onSale) {
+      filtered = filtered.filter(product => product.onSale);
+    }
+    
+    // Update filtered products
+    filteredProducts = filtered;
+    
+    // Sort products
+    sortProducts();
+  }
+  
+  // Sort products based on selected method
+  function sortProducts() {
+    switch (sortMethod) {
+      case 'price-asc':
+        filteredProducts.sort((a, b) => {
+          const priceA = a.onSale && a.salePrice ? parseFloat(a.salePrice) : parseFloat(a.price);
+          const priceB = b.onSale && b.salePrice ? parseFloat(b.salePrice) : parseFloat(b.price);
+          return priceA - priceB;
+        });
+        break;
+        
+      case 'price-desc':
+        filteredProducts.sort((a, b) => {
+          const priceA = a.onSale && a.salePrice ? parseFloat(a.salePrice) : parseFloat(a.price);
+          const priceB = b.onSale && b.salePrice ? parseFloat(b.salePrice) : parseFloat(b.price);
+          return priceB - priceA;
+        });
+        break;
+        
+      case 'rating-desc':
+        filteredProducts.sort((a, b) => {
+          const ratingA = parseFloat(a.rating) || 0;
+          const ratingB = parseFloat(b.rating) || 0;
+          return ratingB - ratingA;
+        });
+        break;
+        
+      case 'newest':
+        filteredProducts.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+          return dateB - dateA;
+        });
+        break;
+        
+      case 'featured':
+      default:
+        // Featured sorting: Featured products first, then by name
+        filteredProducts.sort((a, b) => {
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          // If both are featured or both are not featured, sort by name
+          return a.name.localeCompare(b.name);
+        });
+        break;
+    }
+    
+    // Update products display
+    renderProducts(filteredProducts);
+  }
+  
+  // Render products to the container
   function renderProducts(products) {
     const container = document.getElementById('products-container');
     if (!container) return;
@@ -311,42 +420,43 @@
     // Update results count
     updateResultsCount(products.length);
     
-    // Check if products exist
+    // If no products to display
     if (products.length === 0) {
       container.innerHTML = `
-        <div class="col-12">
+        <div class="col-12 text-center py-5">
           <div class="empty-state">
-            <i class="bi bi-search"></i>
+            <i class="bi bi-info-circle"></i>
             <h3>No Products Found</h3>
-            <p>We couldn't find any products matching your criteria.</p>
-            <button class="btn btn-primary" id="clear-all-filters">Clear All Filters</button>
+            <p>No products match your selected filters. Try adjusting or clearing your filters.</p>
+            <button class="btn btn-outline-primary mt-3" onclick="clearAllFilters()">Clear Filters</button>
           </div>
         </div>
       `;
-      
-      // Add event listener to clear filters button
-      const clearAllBtn = document.getElementById('clear-all-filters');
-      if (clearAllBtn) {
-        clearAllBtn.addEventListener('click', clearAllFilters);
-      }
-      
       return;
     }
     
-    // Create product cards
+    // Generate HTML for products
     let productsHTML = '';
     
     products.forEach(product => {
-      // Make sure product.id is treated as a string for consistent comparison
-      const productId = String(product.id);
-      
+      // Handle missing data gracefully
+      const productId = product.id;
+      const name = product.name || 'Unnamed Product';
       const price = parseFloat(product.price) || 0;
-      const salePrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : null;
+      const salePrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : null;
       
       // Get product image
-      let imageSrc = 'https://via.placeholder.com/250';
-      if (Array.isArray(product.images) && product.images.length > 0) {
-        imageSrc = product.images[0];
+      let imageSrc = '/src/client/assets/placeholder.jpg';
+      
+      if (product.gallery) {
+        try {
+          const gallery = typeof product.gallery === 'string' ? JSON.parse(product.gallery) : product.gallery;
+          if (Array.isArray(gallery) && gallery.length > 0) {
+            imageSrc = gallery[0];
+          }
+        } catch (e) {
+          console.error('Failed to parse gallery:', e);
+        }
       } else if (product.image) {
         imageSrc = product.image;
       }
@@ -358,14 +468,14 @@
       
       let starsHtml = '<div class="product-rating">';
       for (let i = 0; i < fullStars; i++) {
-        starsHtml += '<i class="bi bi-star-fill"></i>';
+        starsHtml += '<i class="bi bi-star-fill text-warning"></i>';
       }
       if (hasHalfStar) {
-        starsHtml += '<i class="bi bi-star-half"></i>';
+        starsHtml += '<i class="bi bi-star-half text-warning"></i>';
       }
       const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
       for (let i = 0; i < emptyStars; i++) {
-        starsHtml += '<i class="bi bi-star"></i>';
+        starsHtml += '<i class="bi bi-star text-muted"></i>';
       }
       starsHtml += '</div>';
       
@@ -404,7 +514,7 @@
               ${priceHtml}
               ${starsHtml}
               <p class="product-desc">${product.description || 'No description available'}</p>
-              <button class="add-to-cart-btn" data-product-id="${productId}" onclick="addToCart('${productId}', 1); return false;">
+              <button class="add-to-cart-btn" data-product-id="${productId}" onclick="addToCart('${productId}'); return false;">
                 <i class="bi bi-cart-plus me-2"></i> Add to Cart
               </button>
             </div>
@@ -503,183 +613,62 @@
       onSale: false
     };
     
-    // Reset form inputs
-    const priceMin = document.getElementById('price-min');
-    const priceMax = document.getElementById('price-max');
-    const ratingFilters = document.querySelectorAll('.rating-filter');
-    const inStockFilter = document.getElementById('in-stock');
-    const onSaleFilter = document.getElementById('on-sale');
-    const sortDropdown = document.getElementById('sort-by');
+    // Reset filter UI
+    document.getElementById('price-min').value = '';
+    document.getElementById('price-max').value = '';
+    document.querySelectorAll('.rating-filter').forEach(el => el.checked = false);
+    document.getElementById('in-stock').checked = false;
+    document.getElementById('on-sale').checked = false;
     
-    if (priceMin) priceMin.value = '';
-    if (priceMax) priceMax.value = '';
-    
-    ratingFilters.forEach(f => f.checked = false);
-    
-    if (inStockFilter) inStockFilter.checked = false;
-    if (onSaleFilter) onSaleFilter.checked = false;
-    if (sortDropdown) sortDropdown.value = 'featured';
-    
-    // Reset sort method
+    // Reset sort dropdown
+    document.getElementById('sort-by').value = 'featured';
     sortMethod = 'featured';
     
-    // Reset products and render
+    // Show all products for this category
     filteredProducts = [...allProducts];
-    renderProducts(filteredProducts);
-  }
-  
-  // Apply all filters
-  function applyFilters() {
-    filteredProducts = allProducts.filter(product => {
-      // Apply price filter
-      if (filterOptions.minPrice !== null) {
-        const productPrice = product.onSale && product.salePrice 
-          ? parseFloat(product.salePrice) 
-          : parseFloat(product.price);
-        
-        if (productPrice < filterOptions.minPrice) return false;
-      }
-      
-      if (filterOptions.maxPrice !== null) {
-        const productPrice = product.onSale && product.salePrice 
-          ? parseFloat(product.salePrice) 
-          : parseFloat(product.price);
-        
-        if (productPrice > filterOptions.maxPrice) return false;
-      }
-      
-      // Apply rating filter
-      if (filterOptions.rating > 0) {
-        if ((product.rating || 0) < filterOptions.rating) return false;
-      }
-      
-      // Apply in stock filter
-      if (filterOptions.inStock) {
-        if (!product.stock || product.stock <= 0) return false;
-      }
-      
-      // Apply on sale filter
-      if (filterOptions.onSale) {
-        if (!product.onSale) return false;
-      }
-      
-      return true;
-    });
-    
-    // Sort filtered products
     sortProducts();
   }
   
-  // Sort products based on current sort method
-  function sortProducts() {
-    switch (sortMethod) {
-      case 'price-asc':
-        filteredProducts.sort((a, b) => {
-          const priceA = a.onSale && a.salePrice ? parseFloat(a.salePrice) : parseFloat(a.price);
-          const priceB = b.onSale && b.salePrice ? parseFloat(b.salePrice) : parseFloat(b.price);
-          return priceA - priceB;
-        });
-        break;
-        
-      case 'price-desc':
-        filteredProducts.sort((a, b) => {
-          const priceA = a.onSale && a.salePrice ? parseFloat(a.salePrice) : parseFloat(a.price);
-          const priceB = b.onSale && b.salePrice ? parseFloat(b.salePrice) : parseFloat(b.price);
-          return priceB - priceA;
-        });
-        break;
-        
-      case 'rating-desc':
-        filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-        
-      case 'newest':
-        filteredProducts.sort((a, b) => {
-          const dateA = a.dateAdded ? new Date(a.dateAdded) : new Date(0);
-          const dateB = b.dateAdded ? new Date(b.dateAdded) : new Date(0);
-          return dateB - dateA;
-        });
-        break;
-        
-      case 'featured':
-      default:
-        // For featured, we'll use a combination of rating and sale status
-        filteredProducts.sort((a, b) => {
-          // Prioritize items on sale
-          if (a.onSale && !b.onSale) return -1;
-          if (!a.onSale && b.onSale) return 1;
-          
-          // Then by rating
-          return (b.rating || 0) - (a.rating || 0);
-        });
-        break;
-    }
+  // Add to cart functionality
+  function addToCart(productId) {
+    const product = allProducts.find(p => {
+      return p.id === productId || 
+             p.id === parseInt(productId) || 
+             String(p.id) === String(productId);
+    });
     
-    // Render sorted and filtered products
-    renderProducts(filteredProducts);
-  }
-  
-  // Add to cart function
-  function addToCart(productId, quantity) {
-    console.log('addToCart called with productId:', productId, 'type:', typeof productId);
-    
-    const productsData = localStorage.getItem('products');
-    if (!productsData) {
-      console.error('No products data found in localStorage');
+    if (!product) {
+      showError('Product not found.');
       return;
     }
     
-    const products = JSON.parse(productsData);
+    const quantity = 1;
     
-    // Try to match by both string and number comparisons
-    let product = products.find(p => p.id === productId);
-    
-    // If not found, try parsing as integer
-    if (!product && !isNaN(parseInt(productId))) {
-      const numericId = parseInt(productId);
-      console.log('Trying numeric ID:', numericId);
-      product = products.find(p => p.id === numericId);
-    }
-    
-    // If still not found, try string comparison
-    if (!product) {
-      const stringId = String(productId);
-      console.log('Trying string ID:', stringId);
-      product = products.find(p => String(p.id) === stringId);
-    }
-    
-    if (!product) {
-      console.error('Product not found with ID:', productId);
-      showToast('Product not found', 'error');
-      return;
-    }
-    
-    console.log('Found product to add to cart:', product);
-    
-    // Get existing cart
+    // Get current cart from localStorage
     let cart = [];
     const cartData = localStorage.getItem('cart');
     if (cartData) {
-      try {
-        cart = JSON.parse(cartData);
-        console.log('Existing cart:', cart);
-      } catch (e) {
-        console.error('Error parsing cart data:', e);
-        showToast('Error loading cart data', 'error');
-      }
+      cart = JSON.parse(cartData);
     }
     
-    // Calculate final price
+    // Calculate the final price
     const price = parseFloat(product.price) || 0;
-    const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
-    console.log('Calculated price:', finalPrice);
+    const finalPrice = product.onSale && product.salePrice ? parseFloat(product.salePrice) : price;
     
-    // Handle image URL
-    let imageUrl = 'https://via.placeholder.com/80';
-    if (product.image) {
+    // Get product image
+    let imageUrl = '/src/client/assets/placeholder.jpg';
+    
+    if (product.gallery) {
+      try {
+        const gallery = typeof product.gallery === 'string' ? JSON.parse(product.gallery) : product.gallery;
+        if (Array.isArray(gallery) && gallery.length > 0) {
+          imageUrl = gallery[0];
+        }
+      } catch (e) {
+        console.error('Failed to parse gallery:', e);
+      }
+    } else if (product.image) {
       imageUrl = product.image;
-    } else if (Array.isArray(product.images) && product.images.length > 0) {
-      imageUrl = product.images[0];
     }
     
     // Check if product is already in cart
@@ -687,15 +676,12 @@
       const itemMatch = (item.id === product.id) || 
                        (parseInt(item.id) === parseInt(product.id)) || 
                        (String(item.id) === String(product.id));
-      console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
       return itemMatch;
     });
     
     if (existingItem) {
-      console.log('Product already in cart, updating quantity');
       existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
     } else {
-      console.log('Adding new product to cart');
       // Safely handle product description
       let description = 'No description available';
       if (product.description) {
@@ -722,7 +708,6 @@
     }
     
     // Save to localStorage
-    console.log('Saving updated cart to localStorage:', cart);
     localStorage.setItem('cart', JSON.stringify(cart));
     
     // Show success toast
