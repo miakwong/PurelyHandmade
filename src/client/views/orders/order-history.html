@@ -312,10 +312,12 @@
   
   <!-- Empty State -->
   <div id="empty-state" class="text-center py-5" style="display: none;">
-    <img src="/src/client/img/empty-orders.svg" alt="No orders" class="img-fluid mb-4" style="max-width: 200px;">
+    <div class="mb-4 text-muted">
+      <i class="bi bi-bag-dash" style="font-size: 80px;"></i>
+    </div>
     <h3 class="h4 mb-3">You don't have any orders yet</h3>
     <p class="text-muted mb-4">Explore our products and place your first order!</p>
-    <a href="/src/client/index.html#products" class="btn btn-primary">Shop Now</a>
+    <a href="/src/client/html/index.html#products" class="btn btn-primary">Shop Now</a>
   </div>
 </div>
 
@@ -504,15 +506,30 @@
       }
       
       const data = await response.json();
+      console.log('API response:', data);
       
-      if (!data.success || !data.data) {
-        throw new Error('Invalid response from server');
+      if (!data.success) {
+        throw new Error(data.message || 'Invalid response from server');
       }
       
-      const orders = data.data;
+      // Handle different response formats
+      let orders;
+      if (data.data && Array.isArray(data.data)) {
+        // Format: { success: true, data: [...] }
+        orders = data.data;
+      } else if (data.data && data.data.orders && Array.isArray(data.data.orders)) {
+        // Format: { success: true, data: { orders: [...] } }
+        orders = data.data.orders;
+      } else if (data.orders && Array.isArray(data.orders)) {
+        // Format: { success: true, orders: [...] }
+        orders = data.orders;
+      } else {
+        // Fallback for any other format
+        orders = data.data || [];
+      }
       
       // 检查是否有订单
-      if (orders.length === 0) {
+      if (!orders || orders.length === 0) {
         ordersContainer.style.display = 'none';
         emptyState.style.display = 'block';
         return;
@@ -526,7 +543,22 @@
       ordersContainer.innerHTML = '';
       
       // 按日期降序排序订单
-      orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if (Array.isArray(orders)) {
+        orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else {
+        console.warn('Orders data is not an array:', orders);
+        // If orders is not an array, try to extract orders from the response
+        if (orders && typeof orders === 'object') {
+          if (orders.orders && Array.isArray(orders.orders)) {
+            console.log('Using orders.orders array instead');
+            orders = orders.orders;
+            orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          } else {
+            console.error('Could not find orders array in response');
+            throw new Error('Invalid orders data format');
+          }
+        }
+      }
       
       // 渲染每个订单
       orders.forEach(order => {
