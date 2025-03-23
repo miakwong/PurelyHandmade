@@ -4,6 +4,8 @@ namespace Middleware;
 use Utils\Auth;
 use Utils\Response;
 use Utils\Request;
+use Models\User;
+use Utils\Database;
 
 class AuthMiddleware {
     public function handle() {
@@ -36,6 +38,20 @@ class AuthMiddleware {
         // Store the user ID in the request for later use
         $_REQUEST['userId'] = $userId;
         
-        return true;
+        // Get user data from database
+        $db = new Database();
+        $db->connect();
+        $user = new User($db);
+        $userData = $user->findById($userId);
+        
+        if (!$userData) {
+            $response->unauthorized('User not found');
+            exit;
+        }
+        
+        // Update last login time
+        $user->updateLoginTime($userId);
+        
+        return $userData;
     }
 } 

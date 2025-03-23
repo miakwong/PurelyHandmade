@@ -162,4 +162,8 @@ class Database {
             throw new Exception("Delete error: " . $e->getMessage());
         }
     }
+    
+    public function lastInsertId() {
+        return $this->conn->lastInsertId();
+    }
 } 
