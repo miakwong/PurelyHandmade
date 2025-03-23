@@ -486,17 +486,16 @@ const AdminApiService = {
     // 显示加载状态
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center py-4">
+        <td colspan="6" class="text-center py-5">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <p class="mt-2 text-muted">Loading orders...</p>
+          <p class="mt-3 text-muted">Loading orders...</p>
         </td>
       </tr>
     `;
     
     try {
-      // 从API获取订单数据
       console.log('📡 发送API请求: 获取所有订单 - GET /orders');
       const response = await AdminApiService.getAllOrders();
       console.log('✅ 获取订单响应:', response);
@@ -505,7 +504,19 @@ const AdminApiService = {
         throw new Error(response?.data || 'Failed to load orders');
       }
       
-      let orders = response.data || [];
+      // 正确处理API返回结构
+      let orders = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          orders = response.data;
+        } else if (response.data.orders && Array.isArray(response.data.orders)) {
+          orders = response.data.orders;
+        } else {
+          console.error('API返回的orders格式不正确:', response.data);
+          throw new Error('Invalid orders data format');
+        }
+      }
+      
       console.log(`📊 获取到${orders.length}个订单`);
       
       // 应用筛选
@@ -516,7 +527,17 @@ const AdminApiService = {
           console.log('📡 获取用户数据用于订单筛选');
           const usersResponse = await AdminApiService.getAllUsers();
           console.log('✅ 获取用户响应:', usersResponse);
-          const users = (usersResponse && usersResponse.success) ? usersResponse.data : [];
+          
+          // 正确处理用户API返回结构
+          let users = [];
+          if (usersResponse && usersResponse.success && usersResponse.data) {
+            if (Array.isArray(usersResponse.data)) {
+              users = usersResponse.data;
+            } else if (usersResponse.data.users && Array.isArray(usersResponse.data.users)) {
+              users = usersResponse.data.users;
+            }
+          }
+          
           orders = filterOrders(orders, users);
           console.log(`📊 筛选后剩余${orders.length}个订单`);
         } catch (error) {
@@ -674,7 +695,20 @@ const AdminApiService = {
         throw new Error(response?.data || 'Failed to load order details');
       }
       
-      const order = response.data;
+      // 正确处理API返回结构
+      let order = null;
+      if (response.data) {
+        if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+          // 直接使用对象
+          order = response.data;
+        } else if (response.data.order && typeof response.data.order === 'object') {
+          // 使用嵌套的order对象
+          order = response.data.order;
+        } else {
+          console.error('API返回的order格式不正确:', response.data);
+          throw new Error('Invalid order data format');
+        }
+      }
       
       if (!order) {
         throw new Error('Order not found');
@@ -687,10 +721,17 @@ const AdminApiService = {
       } else if (order.userId) {
         try {
           console.log(`📡 获取订单用户信息 - userId: ${order.userId}`);
-          const userResponse = await ApiService.get(`/users/${order.userId}`);
+          const userResponse = await ApiService.get(`/auth/users/detail?id=${order.userId}`);
           console.log('✅ 获取用户信息响应:', userResponse);
-          if (userResponse && userResponse.success && userResponse.data) {
-            user = userResponse.data;
+          if (userResponse && userResponse.success) {
+            // 正确处理用户API返回
+            if (userResponse.data) {
+              if (typeof userResponse.data === 'object' && !Array.isArray(userResponse.data)) {
+                user = userResponse.data;
+              } else if (userResponse.data.user && typeof userResponse.data.user === 'object') {
+                user = userResponse.data.user;
+              }
+            }
           }
         } catch (error) {
           console.error('❌ 获取用户数据时出错:', error);
@@ -1124,6 +1165,39 @@ const AdminApiService = {
         </tr>
       `;
     }).join('');
+  }
+
+  // 处理订单状态更新
+  async function handleOrder(orderId, action) {
+    try {
+      // 显示加载提示
+      showToast('Processing order...', 'info');
+      
+      // 通过API更新订单状态
+      console.log(`📡 发送API请求: 处理订单 - POST /orders/update (id: ${orderId}, action: ${action})`);
+      const response = await AdminApiService.handleOrder(orderId, action);
+      console.log('✅ 处理订单响应:', response);
+      
+      if (!response || !response.success) {
+        throw new Error(response?.data || 'Failed to process order');
+      }
+      
+      // 关闭模态窗口
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      // 重新加载订单列表
+      await loadOrders();
+      
+      // 显示成功消息
+      showToast(`Order ${action}ed successfully`, 'success');
+      
+    } catch (error) {
+      console.error('❌ 处理订单时出错:', error);
+      showToast(`Error processing order: ${error.message}`, 'danger');
+    }
   }
 </script>
 

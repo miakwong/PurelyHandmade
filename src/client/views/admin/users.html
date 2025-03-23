@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link href="/src/client/css/global.css" rel="stylesheet">
-  <link href="/src/client/css/style.css" rel="stylesheet">
   <link href="/src/client/css/navbar.css" rel="stylesheet">
   <link href="/src/client/css/admin.css" rel="stylesheet">
   
@@ -388,7 +387,7 @@
           <!-- User Profile Header -->
           <div class="bg-light p-4 text-center border-bottom">
             <div class="user-preview mb-3 mx-auto">
-              <img id="user-img-preview" src="../../../img/user-placeholder.png" alt="User preview">
+              <img id="user-img-preview" src="/src/client/img/profile.png" alt="User preview">
             </div>
             <h4 id="user-full-name" class="mb-1">User Name</h4>
             <p id="user-email-display" class="text-muted mb-0">user@example.com</p>
@@ -680,29 +679,35 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有用户
   getAllUsers: function() {
-    return ApiService.get('/users?all=1');
+    return ApiService.get('/admin/users');
   },
   
   // 获取用户详情
   getUserById: function(userId) {
-    return ApiService.get(`/users/${userId}`);
+    return ApiService.get(`/admin/users/detail?id=${userId}`);
+  },
+  
+  // 创建新用户
+  createUser: function(userData) {
+    return ApiService.post('/admin/users/create', userData);
   },
   
   // 更新用户
   updateUser: function(userId, userData) {
-    return ApiService.put(`/users/${userId}`, userData);
+    return ApiService.put(`/admin/users/update`, { id: userId, ...userData });
   },
   
   // 禁用/启用用户
   toggleUserStatus: function(userId, isEnabled) {
-    return ApiService.put(`/users/${userId}/status`, {
+    return ApiService.put(`/admin/users/status`, {
+      id: userId,
       isEnabled: isEnabled
     });
   },
   
   // 删除用户
   deleteUser: function(userId) {
-    return ApiService.delete(`/users/${userId}`);
+    return ApiService.delete(`/admin/users?id=${userId}`);
   },
   
   // 获取所有产品
@@ -834,59 +839,66 @@ const AdminApiService = {
   
   // User management functions
   function loadUsers() {
+    const tableBody = document.getElementById('user-table-body');
+    const noUsers = document.getElementById('no-users-message');
+    
+    if (!tableBody || !noUsers) {
+      console.error('Required DOM elements not found');
+      return;
+    }
+    
     try {
       // Show loading state
-      const tableBody = document.getElementById('user-table-body');
-      const noUsers = document.getElementById('no-users-message');
-      
-      if (!tableBody) {
-        console.error('user-table-body element not found! DOM may not be fully loaded.');
-        return; // Exit the function early if tableBody doesn't exist
-      }
-      
-      // Show loading indicator
       tableBody.innerHTML = `
         <tr>
           <td colspan="7" class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2 text-muted">Loading user data...</p>
+            <p class="mt-2 text-muted">Loading users...</p>
           </td>
         </tr>
       `;
       
-      console.log('📡 发送API请求: 获取所有用户 - GET /users');
+      console.log('📡 发送API请求: 获取所有用户 - GET /admin/users');
       
       // Use the ApiService to fetch users from the database
       AdminApiService.getAllUsers()
         .then(response => {
-          // Clear the loading indicator
+          if (!response.success) {
+            throw new Error('Failed to load users from API');
+          }
+          
+          // 正确处理API返回结构
+          let users = [];
+          if (response.data) {
+            if (Array.isArray(response.data)) {
+              users = response.data;
+            } else if (response.data.users && Array.isArray(response.data.users)) {
+              users = response.data.users;
+            } else {
+              console.error('API返回的users格式不正确:', response.data);
+              throw new Error('Invalid API response format');
+            }
+          }
+          
+          // Clear existing rows
           tableBody.innerHTML = '';
           
-          console.log('✅ 获取用户响应:', response);
+          // Normalize and filter data
+          users = normalizeUserData(users);
+          users = filterUsers(users);
           
-          if (!response.success || !response.data || response.data.length === 0) {
-            // No users found, show empty state message
-            console.log('⚠️ 没有找到用户数据');
+          // Check if we have users to display
+          if (users.length === 0) {
             tableBody.parentElement.classList.add('d-none');
             noUsers.classList.remove('d-none');
             return;
           }
           
-          console.log(`📊 获取到${response.data.length}个用户`);
-          
           // Show table and hide empty state
           tableBody.parentElement.classList.remove('d-none');
           noUsers.classList.add('d-none');
-          
-          // Normalize the data
-          let users = normalizeUserData(response.data);
-          
-          // Apply filters if any
-          users = filterUsers(users);
-          
-          console.log(`🔍 应用过滤器后剩余${users.length}个用户`);
           
           // Render users
           users.forEach(user => {
@@ -923,7 +935,7 @@ const AdminApiService = {
               <td>
                 <div class="d-flex align-items-center">
                   <div class="user-avatar me-3">
-                    <img src="${user.avatar || '../../../img/user-placeholder.png'}" alt="${user.name || 'User'}">
+                    <img src="${user.avatar || '/src/client/img/profile.png'}" alt="${user.name || 'User'}">
                   </div>
                   <div>
                     <div class="fw-medium">${user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.name || 'Unnamed User')}</div>
@@ -1060,48 +1072,52 @@ const AdminApiService = {
     try {
       console.log('📊 更新用户统计信息');
       
+      // Check if stats elements exist
+      const totalElement = document.getElementById('total-users-count');
+      const activeElement = document.getElementById('active-users-count');
+      const adminElement = document.getElementById('admin-users-count');
+      
+      if (!totalElement || !activeElement || !adminElement) {
+        console.log('❓ 用户统计元素不存在，跳过更新');
+        return; // Exit if elements don't exist
+      }
+      
       // Fetch users from API
       AdminApiService.getAllUsers()
         .then(response => {
-          if (!response.success || !response.data) {
+          if (!response.success) {
             console.error('❌ 无法获取用户统计数据');
             return;
           }
           
-          const users = response.data;
+          // 正确处理API返回结构
+          let users = [];
+          if (response.data) {
+            if (Array.isArray(response.data)) {
+              users = response.data;
+            } else if (response.data.users && Array.isArray(response.data.users)) {
+              users = response.data.users;
+            } else {
+              console.error('API返回的users格式不正确:', response.data);
+              return;
+            }
+          }
           
           // Update stats
           const totalUsers = users.length;
           const activeUsers = users.filter(user => user.status === 'active').length;
-          const inactiveUsers = users.filter(user => user.status === 'inactive').length;
           const adminUsers = users.filter(user => user.role === 'admin' || user.isAdmin === true).length;
           
-          console.log(`📊 统计数据: 总用户=${totalUsers}, 活跃=${activeUsers}, 不活跃=${inactiveUsers}, 管理员=${adminUsers}`);
+          console.log(`📊 统计数据: 总用户=${totalUsers}, 活跃=${activeUsers}, 管理员=${adminUsers}`);
           
           // Update DOM elements
-          document.getElementById('total-users-count').textContent = totalUsers;
-          document.getElementById('active-users-count').textContent = activeUsers;
-          document.getElementById('inactive-users-count').textContent = inactiveUsers;
-          document.getElementById('admin-users-count').textContent = adminUsers;
+          totalElement.textContent = totalUsers;
+          activeElement.textContent = activeUsers;
+          adminElement.textContent = adminUsers;
         })
         .catch(error => {
           console.error('❌ 获取用户统计数据出错:', error);
-          
-          // Fallback to localStorage if API fails
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          if (users.length > 0) {
-            // Update stats with localStorage data
-            const totalUsers = users.length;
-            const activeUsers = users.filter(user => user.status === 'active').length;
-            const inactiveUsers = users.filter(user => user.status === 'inactive').length;
-            const adminUsers = users.filter(user => user.role === 'admin' || user.isAdmin === true).length;
-            
-            // Update DOM elements
-            document.getElementById('total-users-count').textContent = totalUsers;
-            document.getElementById('active-users-count').textContent = activeUsers;
-            document.getElementById('inactive-users-count').textContent = inactiveUsers;
-            document.getElementById('admin-users-count').textContent = adminUsers;
-          }
+          // Error state handling
         });
     } catch (error) {
       console.error('Error in updateUserStats:', error);
@@ -1163,24 +1179,40 @@ const AdminApiService = {
   function resetUserImage() {
     // Reset the image to default placeholder
     document.getElementById('user-image-file').value = '';
-    document.getElementById('user-img-preview').src = '../../../img/user-placeholder.png';
+    document.getElementById('user-img-preview').src = '/src/client/img/profile.png';
   }
 
   function editUser(userId) {
     // First, get the user data
     try {
-      console.log(`📡 获取用户详情 - GET /users/${userId}`);
+      console.log(`📡 获取用户详情 - GET /admin/users/detail?id=${userId}`);
       
       // Use API to get user by ID
       AdminApiService.getUserById(userId)
         .then(response => {
           console.log('✅ 获取用户详情响应:', response);
           
-          if (!response.success || !response.data) {
+          if (!response.success) {
             throw new Error('Failed to fetch user data');
           }
           
-          const user = response.data;
+          // 正确处理API返回结构
+          let user = null;
+          if (response.data) {
+            if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+              user = response.data;
+            } else if (response.data.user && typeof response.data.user === 'object') {
+              user = response.data.user;
+            } else {
+              console.error('API返回的user格式不正确:', response.data);
+              throw new Error('Invalid user data format');
+            }
+          }
+          
+          if (!user) {
+            throw new Error('User not found');
+          }
+          
           populateEditForm(user);
         })
         .catch(error => {
@@ -1262,7 +1294,7 @@ const AdminApiService = {
         response = await AdminApiService.updateUser(userId, userData);
       } else {
         // Create new user
-        response = await ApiService.post('/users', userData);
+        response = await AdminApiService.createUser(userData);
       }
       
       console.log(`✅ ${userId ? '更新' : '创建'}用户响应:`, response);
@@ -1345,7 +1377,7 @@ const AdminApiService = {
       return;
     }
     
-    console.log(`📡 删除用户 - DELETE /users/${userId}`);
+    console.log(`📡 删除用户 - DELETE /admin/users?id=${userId}`);
     
     try {
       // Use API to delete user

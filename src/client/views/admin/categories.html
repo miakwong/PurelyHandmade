@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link href="/src/client/css/global.css" rel="stylesheet">
-  <link href="/src/client/css/style.css" rel="stylesheet">
   <link href="/src/client/css/navbar.css" rel="stylesheet">
   <link href="/src/client/css/admin.css" rel="stylesheet">
   
@@ -235,7 +234,7 @@
             <div class="mb-3 text-center">
               <label for="category-image-file" class="form-label">Category Image</label>
               <div class="img-upload-container" onclick="document.getElementById('category-image-file').click()">
-                <img id="category-img-preview" src="../../../img/profile.png" alt="Category Image">
+                <img id="category-img-preview" src="/src/client/img/profile.png" alt="Category Image">
               </div>
               <input type="file" class="category-img-input" id="category-image-file" accept="image/*" onchange="previewImage(this)">
               <button type="button" class="btn btn-link btn-sm" onclick="resetCategoryImage()">Reset Image</button>
@@ -612,7 +611,20 @@
             return;
           }
           
-          const categories = response.data;
+          // 正确处理API返回结构
+          let categories = [];
+          if (response.data) {
+            if (Array.isArray(response.data)) {
+              categories = response.data;
+            } else if (response.data.categories && Array.isArray(response.data.categories)) {
+              categories = response.data.categories;
+            } else {
+              console.error('API返回的categories格式不正确:', response.data);
+              showError('Invalid data format received from server');
+              return;
+            }
+          }
+          
           console.log(`📊 获取到${categories.length}个分类`);
           renderCategories(categories);
         })
@@ -627,7 +639,7 @@
     function renderCategories(categories) {
       const container = document.getElementById('categories-container');
       
-      if (categories.length === 0) {
+      if (!Array.isArray(categories) || categories.length === 0) {
         container.innerHTML = `
           <div class="col-12 text-center py-5">
             <i class="bi bi-tags" style="font-size: 3rem; opacity: 0.3;"></i>
@@ -640,7 +652,7 @@
       let html = '';
       
       categories.forEach(category => {
-        const categoryImage = category.image || '../../../img/profile.png';
+        const categoryImage = category.image || '/src/client/img/profile.png';
         
         html += `
           <div class="col">
@@ -695,7 +707,7 @@
       document.getElementById('categoryModalLabel').textContent = 'Add Category';
       document.getElementById('category-id').value = '';
       document.getElementById('category-slug').value = '';
-      document.getElementById('category-img-preview').src = '../../../img/profile.png';
+      document.getElementById('category-img-preview').src = '/src/client/img/profile.png';
       
       // Show the modal
       new bootstrap.Modal(document.getElementById('categoryModal')).show();
@@ -705,7 +717,7 @@
     function resetCategoryImage() {
       // Reset the image to default placeholder
       document.getElementById('category-image-file').value = '';
-      document.getElementById('category-img-preview').src = '../../../img/profile.png';
+      document.getElementById('category-img-preview').src = '/src/client/img/profile.png';
     }
     
     // Edit category
@@ -720,7 +732,20 @@
             return;
           }
           
-          const categories = response.data;
+          // 正确处理API返回结构
+          let categories = [];
+          if (response.data) {
+            if (Array.isArray(response.data)) {
+              categories = response.data;
+            } else if (response.data.categories && Array.isArray(response.data.categories)) {
+              categories = response.data.categories;
+            } else {
+              console.error('API返回的categories格式不正确:', response.data);
+              showError('Invalid data format received from server');
+              return;
+            }
+          }
+          
           const category = categories.find(c => c.id == categoryId);
           
           if (category) {
@@ -740,7 +765,7 @@
             if (category.image) {
               imgPreview.src = category.image;
             } else {
-              imgPreview.src = '../../../img/profile.png';
+              imgPreview.src = '/src/client/img/profile.png';
             }
             
             // Show the modal
