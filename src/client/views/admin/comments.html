@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link href="/src/client/css/global.css" rel="stylesheet">
-  <link href="/src/client/css/style.css" rel="stylesheet">
   <link href="/src/client/css/navbar.css" rel="stylesheet">
   <link href="/src/client/css/admin.css" rel="stylesheet">
   
@@ -722,46 +721,56 @@ const AdminApiService = {
     AdminApiService.getAllReviews()
       .then(data => {
         console.log('从API获取的数据:', data);
-        if (data && data.success && data.data && Array.isArray(data.data)) {
-          console.log(`成功从API获取${data.data.length}条评论`);
-          // 将API数据保存到localStorage
-          const reviews = data.data;
-          localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
-          
-          // 渲染评论列表
-          renderReviews(reviews);
-          updateReviewStats();
-          return;
-        } else {
-          console.log('API返回的数据格式不正确，回退到本地存储');
+        
+        // 确保我们有一个成功的响应
+        if (!data || !data.success) {
+          throw new Error('API返回失败状态');
         }
         
-        // 如果API请求失败，回退到从localStorage获取
-        loadReviewsFromLocalStorage();
+        // 正确处理API响应结构
+        let reviews = [];
+        if (data.data) {
+          if (Array.isArray(data.data)) {
+            reviews = data.data;
+          } else if (data.data.reviews && Array.isArray(data.data.reviews)) {
+            reviews = data.data.reviews;
+          } else {
+            console.error('API返回的数据格式不正确:', data.data);
+            throw new Error('API返回的数据格式无效');
+          }
+        }
+        
+        console.log(`成功从API获取${reviews.length}条评论`);
+        
+        // 应用过滤器
+        const filteredReviews = filterReviews(reviews);
+        console.log(`过滤后剩余${filteredReviews.length}条评论`);
+        
+        // 渲染评论列表
+        renderReviews(filteredReviews);
+        updateReviewStats(reviews);
       })
       .catch(error => {
         console.error('从API获取评论失败:', error);
-        console.log('回退到本地存储');
-        loadReviewsFromLocalStorage();
+        
+        // 显示错误消息
+        const reviewsContainer = document.getElementById('reviews-container');
+        reviewsContainer.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            无法从服务器加载评论数据: ${error.message}
+          </div>
+        `;
+        
+        // 显示无评论信息
+        document.getElementById('no-reviews-message').classList.remove('d-none');
+        
+        // 重置统计信息
+        document.getElementById('total-reviews').textContent = '0';
+        document.getElementById('pending-reviews').textContent = '0';
+        document.getElementById('approved-reviews').textContent = '0';
+        document.getElementById('avg-rating').textContent = '0.0';
       });
-  }
-  
-  /**
-   * 从localStorage加载评论数据
-   */
-  function loadReviewsFromLocalStorage() {
-    // 获取评论数据
-    let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
-    
-    console.log(`从本地存储找到${reviews.length}条评论`);
-    
-    // 应用过滤器
-    const filteredReviews = filterReviews(reviews);
-    
-    console.log(`过滤后剩余${filteredReviews.length}条评论`);
-    
-    // 渲染评论列表
-    renderReviews(filteredReviews);
   }
   
   /**
@@ -845,7 +854,7 @@ const AdminApiService = {
     const productIdStr = String(review.productId);
     const product = products.find(p => String(p.id) === productIdStr) || { 
       name: '未知产品', 
-      image: '../../../img/product-placeholder.jpg' 
+      image: '/src/client/img/product-placeholder.jpg' 
     };
     
     // 查找用户信息 - 确保ID类型一致
@@ -854,7 +863,7 @@ const AdminApiService = {
       name: '匿名用户',
       firstName: '',
       lastName: '匿名用户',
-      avatar: '../../../img/profile.png' 
+      avatar: '/src/client/img/profile.png' 
     };
     
     // 用户显示名称优先级：name > firstName+lastName > 默认值
@@ -894,7 +903,7 @@ const AdminApiService = {
         <div class="d-flex justify-content-between align-items-center">
           <div class="d-flex align-items-center">
             <div class="me-3">
-              <img src="${product.image || '../../../img/product-placeholder.jpg'}" class="review-product-image" alt="${product.name}">
+              <img src="${product.image || '/src/client/img/product-placeholder.jpg'}" class="review-product-image" alt="${product.name}">
             </div>
             <div>
               <h5 class="mb-0">${product.name}</h5>
@@ -908,7 +917,7 @@ const AdminApiService = {
       </div>
       <div class="review-body">
         <div class="d-flex align-items-center mb-3">
-          <img src="${user.avatar || '../../../img/profile.png'}" alt="${userName}" class="user-avatar me-3">
+          <img src="${user.avatar || '/src/client/img/profile.png'}" alt="${userName}" class="user-avatar me-3">
           <div>
             <h6 class="mb-0">${userName}</h6>
             <div class="rating-stars">${starsHtml}</div>
@@ -963,9 +972,10 @@ const AdminApiService = {
   /**
    * 更新评论统计信息
    */
-  function updateReviewStats() {
-    // 获取评论数据
-    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+  function updateReviewStats(reviews) {
+    if (!reviews || !Array.isArray(reviews)) {
+      reviews = [];
+    }
     
     // 总评论数
     document.getElementById('total-reviews').textContent = reviews.length;
@@ -1049,29 +1059,10 @@ const AdminApiService = {
       .catch(error => {
         console.error('更新评论状态失败:', error);
         showToast('更新评论状态失败: ' + error.message, 'error');
-        
-        // 回退到本地存储
-        updateReviewStatusLocalOnly(reviewId, newStatus);
       })
       .finally(() => {
         hideLoading();
       });
-  }
-  
-  /**
-   * 本地存储的评论状态更新（API失败后的回退方案）
-   */
-  function updateReviewStatusLocalOnly(reviewId, newStatus) {
-    let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
-    
-    const reviewIndex = reviews.findIndex(review => review.id == reviewId);
-    if (reviewIndex !== -1) {
-      reviews[reviewIndex].status = newStatus;
-      localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
-      renderReviews(reviews);
-      updateReviewStats();
-      showToast('评论状态已在本地更新', 'warning');
-    }
   }
   
   /**
@@ -1118,53 +1109,13 @@ const AdminApiService = {
         // 关闭模态框
         bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
         
-        // 在本地更新评论的回复内容
-        submitReplyLocal(reviewId, replyText);
-        
         // 重新加载评论
         loadReviews();
       })
       .catch(error => {
         console.error('提交回复失败:', error);
         showToast('提交回复失败', 'danger');
-        
-        // 在API失败的情况下，尝试本地提交
-        submitReplyLocal(reviewId, replyText);
       });
-  }
-  
-  /**
-   * 在本地提交回复（API失败的后备方案）
-   */
-  function submitReplyLocal(reviewId, replyText) {
-    // 获取评论数据
-    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
-    
-    // 查找评论
-    const reviewIndex = reviews.findIndex(r => r.id === reviewId);
-    
-    if (reviewIndex === -1) {
-      showToast('找不到评论', 'danger');
-      return;
-    }
-    
-    // 添加回复
-    reviews[reviewIndex].reply = replyText;
-    reviews[reviewIndex].updatedAt = new Date().toISOString();
-    
-    // 保存到主键
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
-    
-    // 保存到comments键以确保兼容性
-    localStorage.setItem('comments', JSON.stringify(reviews));
-    
-    // 关闭模态框
-    bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
-    
-    // 重新加载评论
-    loadReviews();
-    
-    showToast('回复已本地保存', 'warning');
   }
   
   /**
@@ -1189,28 +1140,10 @@ const AdminApiService = {
       .catch(error => {
         console.error('删除评论失败:', error);
         showToast('删除评论失败: ' + error.message, 'error');
-        
-        // 回退到本地存储
-        deleteReviewLocalOnly(reviewId);
       })
       .finally(() => {
         hideLoading();
       });
-  }
-  
-  /**
-   * 本地存储的评论删除（API失败后的回退方案）
-   */
-  function deleteReviewLocalOnly(reviewId) {
-    let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
-    
-    const filteredReviews = reviews.filter(review => review.id != reviewId);
-    if (filteredReviews.length < reviews.length) {
-      localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(filteredReviews));
-      renderReviews(filteredReviews);
-      updateReviewStats();
-      showToast('评论已在本地删除', 'warning');
-    }
   }
   
   /**
@@ -1369,6 +1302,39 @@ const AdminApiService = {
     // 重新加载评论
     loadReviews();
     updateReviewStats();
+  }
+  
+  /**
+   * 显示加载状态
+   */
+  function showLoading() {
+    // 创建加载器元素（如果不存在）
+    let loader = document.getElementById('global-loader');
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = 'global-loader';
+      loader.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center';
+      loader.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+      loader.style.zIndex = '9999';
+      loader.innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `;
+      document.body.appendChild(loader);
+    } else {
+      loader.style.display = 'flex';
+    }
+  }
+  
+  /**
+   * 隐藏加载状态
+   */
+  function hideLoading() {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+      loader.style.display = 'none';
+    }
   }
 </script>
 </body>

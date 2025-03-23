@@ -445,7 +445,7 @@
             <label class="admin-form-label">Main Product Image<span class="text-danger">*</span></label>
             <div class="d-flex align-items-start mb-2">
               <div class="product-preview me-3" style="width: 120px; height: 120px;">
-                <img id="product-img-preview" src="../../../img/profile.png" alt="Product preview">
+                <img id="product-img-preview" src="/src/client/img/profile.png" alt="Product preview">
               </div>
               <div class="flex-grow-1">
                 <input type="file" class="admin-form-control mb-2" id="product-image-file" accept="image/*">
@@ -550,7 +550,7 @@
       <div class="d-flex justify-content-between align-items-start mb-2">
         <div class="d-flex align-items-center">
           <div class="review-avatar me-2">
-            <img src="../../../img/profile.png" alt="User" class="rounded-circle" width="40" height="40">
+            <img src="/src/client/img/profile.png" alt="User" class="rounded-circle" width="40" height="40">
           </div>
           <div>
             <div class="fw-medium review-author">Customer Name</div>
@@ -619,7 +619,7 @@ const ApiService = {
   // 获取授权令牌
   getAuthToken: function() {
     const token = localStorage.getItem('authToken');
-    console.log('Getting auth token:', token ? 'Token found' : 'No token');
+    // 移除日志，避免频繁输出
     return token;
   },
   
@@ -633,9 +633,7 @@ const ApiService = {
     
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('Adding Authorization header');
-    } else {
-      console.log('No token for Authorization header');
+      // 移除日志，避免频繁输出
     }
     
     return headers;
@@ -985,22 +983,38 @@ const AdminApiService = {
     try {
       // 从API获取产品数据
       const result = await AdminApiService.getAllProducts();
-      let products = result.data || [];
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load products');
+      }
       
-      // 应用过滤器
-      products = filterProducts(products);
+      // 正确处理API返回结构
+      let products = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          products = result.data;
+        } else if (result.data.products && Array.isArray(result.data.products)) {
+          products = result.data.products;
+        } else {
+          console.error('API返回的products格式不正确:', result.data);
+        }
+      }
+      
+      // 应用过滤器（如果有产品）
+      if (products.length > 0) {
+        products = filterProducts(products);
+      }
       
       // 清空现有行
-    tableBody.innerHTML = '';
+      tableBody.innerHTML = '';
     
-    if (products.length === 0) {
+      if (products.length === 0) {
         // 没有产品，显示空状态消息
-      tableBody.parentElement.classList.add('d-none');
-      noProducts.classList.remove('d-none');
-    } else {
+        tableBody.parentElement.classList.add('d-none');
+        noProducts.classList.remove('d-none');
+      } else {
         // 显示表格，隐藏空状态
-      tableBody.parentElement.classList.remove('d-none');
-      noProducts.classList.add('d-none');
+        tableBody.parentElement.classList.remove('d-none');
+        noProducts.classList.add('d-none');
       
         // 获取类别和设计师数据-使用缓存避免重复请求
         let categories = window.adminCachedCategories || [];
@@ -1008,78 +1022,78 @@ const AdminApiService = {
         
         if (!categories.length) {
           const catResult = await AdminApiService.getAllCategories();
-          categories = catResult.data || [];
+          categories = Array.isArray(catResult.data) ? catResult.data : [];
           window.adminCachedCategories = categories;
         }
         
         if (!designers.length) {
           const designerResult = await AdminApiService.getAllDesigners();
-          designers = designerResult.data || [];
+          designers = Array.isArray(designerResult.data) ? designerResult.data : [];
           window.adminCachedDesigners = designers;
         }
         
         // 添加产品行
-      products.forEach(product => {
+        products.forEach(product => {
           // 查找类别和设计师名称
           const category = categories.find(c => c.id == product.categoryId);
           const designer = designers.find(d => d.id == product.designerId);
           
           // 确定库存状态徽章
-        let stockBadge;
-        if (product.stock <= 0) {
-          stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
-        } else if (product.stock <= 5) {
-          stockBadge = '<span class="badge badge-warning">Low Stock</span>';
-        } else {
-          stockBadge = '<span class="badge badge-success">In Stock</span>';
-        }
-        
-        const row = document.createElement('tr');
-        row.setAttribute('data-product-id', product.id);
-        row.innerHTML = `
-          <td>
-            <div class="product-image-small">
-              <img src="${product.image || '../../../img/profile.png'}" 
-                   alt="${product.name}" 
-                   style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-          </td>
-          <td>
-            <div class="d-flex flex-column">
-              <div class="fw-medium">${product.name || 'Unnamed Product'}</div>
-              <small class="text-muted">${product.sku || 'No SKU'}</small>
-              ${product.featured ? '<span class="badge badge-success mt-1"><i class="bi bi-star-fill me-1"></i>Featured</span>' : ''}
-              ${!product.active ? '<span class="badge bg-secondary mt-1">Inactive</span>' : ''}
-            </div>
-          </td>
-          <td class="product-price">$${parseFloat(product.price).toFixed(2)}</td>
-          <td>${stockBadge}</td>
-          <td>${category ? category.name : '<span class="text-muted">Uncategorized</span>'}</td>
-          <td>${designer ? designer.name : '<span class="text-muted">No Designer</span>'}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-secondary" onclick="viewProductReviews('${product.id}')">
-              <i class="bi bi-chat-left-text me-1"></i>
-                <span class="review-count">${product.reviewCount || 0}</span>
-            </button>
-          </td>
-          <td class="text-center">
-            <div class="action-buttons">
-              <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editProduct('${product.id}')" data-bs-toggle="tooltip" title="Edit Product">
-                <i class="bi bi-pencil-square"></i>
+          let stockBadge;
+          if (product.stock <= 0) {
+            stockBadge = '<span class="badge badge-danger">Out of Stock</span>';
+          } else if (product.stock <= 5) {
+            stockBadge = '<span class="badge badge-warning">Low Stock</span>';
+          } else {
+            stockBadge = '<span class="badge badge-success">In Stock</span>';
+          }
+          
+          const row = document.createElement('tr');
+          row.setAttribute('data-product-id', product.id);
+          row.innerHTML = `
+            <td>
+              <div class="product-image-small">
+                <img src="${product.image || '/src/client/img/profile.png'}" 
+                     alt="${product.name}" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            </td>
+            <td>
+              <div class="d-flex flex-column">
+                <div class="fw-medium">${product.name || 'Unnamed Product'}</div>
+                <small class="text-muted">${product.sku || 'No SKU'}</small>
+                ${product.featured ? '<span class="badge badge-success mt-1"><i class="bi bi-star-fill me-1"></i>Featured</span>' : ''}
+                ${!product.active ? '<span class="badge bg-secondary mt-1">Inactive</span>' : ''}
+              </div>
+            </td>
+            <td class="product-price">$${parseFloat(product.price).toFixed(2)}</td>
+            <td>${stockBadge}</td>
+            <td>${category ? category.name : '<span class="text-muted">Uncategorized</span>'}</td>
+            <td>${designer ? designer.name : '<span class="text-muted">No Designer</span>'}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary" onclick="viewProductReviews('${product.id}')">
+                <i class="bi bi-chat-left-text me-1"></i>
+                  <span class="review-count">${product.reviewCount || 0}</span>
               </button>
-              <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteProduct('${product.id}')" data-bs-toggle="tooltip" title="Delete Product">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </td>
-        `;
+            </td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editProduct('${product.id}')" data-bs-toggle="tooltip" title="Edit Product">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteProduct('${product.id}')" data-bs-toggle="tooltip" title="Delete Product">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
         
-        tableBody.appendChild(row);
-      });
-      
         // 初始化提示工具
-      const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+        const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
       }
     } catch (error) {
       console.error('加载产品时出错:', error);
@@ -1097,6 +1111,11 @@ const AdminApiService = {
   }
 
   function filterProducts(products) {
+    if (!Array.isArray(products)) {
+      console.error('filterProducts: 参数不是数组', products);
+      return [];
+    }
+    
     return products.filter(product => {
       // Apply category filter
       if (currentFilters.category && product.categoryId != currentFilters.category) {
@@ -1166,39 +1185,52 @@ const AdminApiService = {
     
     try {
       const result = await AdminApiService.getAllCategories();
-      const categories = result.data || [];
+      
+      // 正确处理API返回结构
+      let categories = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          categories = result.data;
+        } else if (result.data.categories && Array.isArray(result.data.categories)) {
+          categories = result.data.categories;
+        } else {
+          console.error('API返回的categories格式不正确:', result.data);
+        }
+      }
       
       // 缓存类别数据
       window.adminCachedCategories = categories;
       
       // 填充产品表单下拉菜单
-    if (categoryDropdown) {
+      if (categoryDropdown) {
         // 保留第一个选项并添加类别
-      const defaultOption = categoryDropdown.options[0];
-      categoryDropdown.innerHTML = '';
-      categoryDropdown.appendChild(defaultOption);
+        const defaultOption = categoryDropdown.options[0];
+        categoryDropdown.innerHTML = '';
+        categoryDropdown.appendChild(defaultOption);
+        
+        if (categories.length > 0) {
+          categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categoryDropdown.appendChild(option);
+          });
+        }
+      }
       
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        categoryDropdown.appendChild(option);
-      });
-    }
-    
       // 填充筛选下拉菜单
-    if (filterDropdown) {
+      if (filterDropdown) {
         // 保留第一个选项并添加类别
-      const defaultOption = filterDropdown.options[0];
-      filterDropdown.innerHTML = '';
-      filterDropdown.appendChild(defaultOption);
-      
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        filterDropdown.appendChild(option);
-      });
+        const defaultOption = filterDropdown.options[0];
+        filterDropdown.innerHTML = '';
+        filterDropdown.appendChild(defaultOption);
+        
+        categories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          filterDropdown.appendChild(option);
+        });
       }
     } catch (error) {
       console.error('加载类别时出错:', error);
@@ -1212,39 +1244,52 @@ const AdminApiService = {
     
     try {
       const result = await AdminApiService.getAllDesigners();
-      const designers = result.data || [];
+      
+      // 正确处理API返回结构
+      let designers = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          designers = result.data;
+        } else if (result.data.designers && Array.isArray(result.data.designers)) {
+          designers = result.data.designers;
+        } else {
+          console.error('API返回的designers格式不正确:', result.data);
+        }
+      }
       
       // 缓存设计师数据
       window.adminCachedDesigners = designers;
       
       // 填充产品表单下拉菜单
-    if (designerDropdown) {
+      if (designerDropdown) {
         // 保留第一个选项并添加设计师
-      const defaultOption = designerDropdown.options[0];
-      designerDropdown.innerHTML = '';
-      designerDropdown.appendChild(defaultOption);
+        const defaultOption = designerDropdown.options[0];
+        designerDropdown.innerHTML = '';
+        designerDropdown.appendChild(defaultOption);
+        
+        if (designers.length > 0) {
+          designers.forEach(designer => {
+            const option = document.createElement('option');
+            option.value = designer.id;
+            option.textContent = designer.name;
+            designerDropdown.appendChild(option);
+          });
+        }
+      }
       
-      designers.forEach(designer => {
-        const option = document.createElement('option');
-        option.value = designer.id;
-        option.textContent = designer.name;
-        designerDropdown.appendChild(option);
-      });
-    }
-    
       // 填充筛选下拉菜单
-    if (filterDropdown) {
+      if (filterDropdown) {
         // 保留第一个选项并添加设计师
-      const defaultOption = filterDropdown.options[0];
-      filterDropdown.innerHTML = '';
-      filterDropdown.appendChild(defaultOption);
-      
-      designers.forEach(designer => {
-        const option = document.createElement('option');
-        option.value = designer.id;
-        option.textContent = designer.name;
-        filterDropdown.appendChild(option);
-      });
+        const defaultOption = filterDropdown.options[0];
+        filterDropdown.innerHTML = '';
+        filterDropdown.appendChild(defaultOption);
+        
+        designers.forEach(designer => {
+          const option = document.createElement('option');
+          option.value = designer.id;
+          option.textContent = designer.name;
+          filterDropdown.appendChild(option);
+        });
       }
     } catch (error) {
       console.error('加载设计师时出错:', error);
@@ -1257,7 +1302,7 @@ const AdminApiService = {
     document.getElementById('product-form').reset();
     document.getElementById('productModalLabel').textContent = 'Add Product';
     document.getElementById('product-id').value = '';
-    document.getElementById('product-img-preview').src = '../../../img/profile.png';
+    document.getElementById('product-img-preview').src = '/src/client/img/profile.png';
     
     // 清除画廊图片
     productGalleryImages = [];
@@ -1273,7 +1318,7 @@ const AdminApiService = {
   function resetProductImage() {
     // 将图像重置为默认占位符
     document.getElementById('product-image-file').value = '';
-    document.getElementById('product-img-preview').src = '../../../img/profile.png';
+    document.getElementById('product-img-preview').src = '/src/client/img/profile.png';
   }
   
   function updateGalleryPreview() {
@@ -1308,46 +1353,57 @@ const AdminApiService = {
     try {
       // 获取产品数据
       const result = await AdminApiService.getAllProducts();
-      const products = result.data || [];
       
-      // 查找指定ID的产品
-    const productIdStr = String(productId);
-    const product = products.find(p => String(p.id) === productIdStr);
-    
-    if (product) {
-        console.log('找到产品:', product);
-        // 用产品数据填充表单
-      document.getElementById('productModalLabel').textContent = 'Edit Product';
-      document.getElementById('product-id').value = product.id;
-      document.getElementById('product-name').value = product.name || '';
-      document.getElementById('product-sku').value = product.sku || '';
-      document.getElementById('product-price').value = product.price || '';
-      document.getElementById('product-stock').value = product.stock || '';
-      document.getElementById('product-category').value = product.categoryId || '';
-      document.getElementById('product-designer').value = product.designerId || '';
-      document.getElementById('product-description').value = product.description || '';
-      document.getElementById('product-featured').checked = product.featured || false;
-        document.getElementById('product-active').checked = product.active !== false; // 如果未指定，则默认为true
-      
-        // 重置文件输入
-      document.getElementById('product-image-file').value = '';
-      document.getElementById('product-gallery-file').value = '';
-      
-        // 更新图像预览
-      const imgPreview = document.getElementById('product-img-preview');
-      if (product.image) {
-        imgPreview.src = product.image;
-      } else {
-        imgPreview.src = '../../../img/profile.png';
+      // 正确处理API返回结构
+      let products = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          products = result.data;
+        } else if (result.data.products && Array.isArray(result.data.products)) {
+          products = result.data.products;
+        } else {
+          console.error('API返回的products格式不正确:', result.data);
+        }
       }
       
-        // 加载图库图像
-      productGalleryImages = product.gallery || [];
-      updateGalleryPreview();
+      // 查找指定ID的产品
+      const productIdStr = String(productId);
+      const product = products.find(p => String(p.id) === productIdStr);
       
+      if (product) {
+        console.log('找到产品:', product);
+        // 用产品数据填充表单
+        document.getElementById('productModalLabel').textContent = 'Edit Product';
+        document.getElementById('product-id').value = product.id;
+        document.getElementById('product-name').value = product.name || '';
+        document.getElementById('product-sku').value = product.sku || '';
+        document.getElementById('product-price').value = product.price || '';
+        document.getElementById('product-stock').value = product.stock || '';
+        document.getElementById('product-category').value = product.categoryId || '';
+        document.getElementById('product-designer').value = product.designerId || '';
+        document.getElementById('product-description').value = product.description || '';
+        document.getElementById('product-featured').checked = product.featured || false;
+        document.getElementById('product-active').checked = product.active !== false; // 如果未指定，则默认为true
+        
+        // 重置文件输入
+        document.getElementById('product-image-file').value = '';
+        document.getElementById('product-gallery-file').value = '';
+        
+        // 更新图像预览
+        const imgPreview = document.getElementById('product-img-preview');
+        if (product.image) {
+          imgPreview.src = product.image;
+        } else {
+          imgPreview.src = '/src/client/img/profile.png';
+        }
+        
+        // 加载图库图像
+        productGalleryImages = product.gallery || [];
+        updateGalleryPreview();
+        
         // 显示模态窗口
-      new bootstrap.Modal(document.getElementById('productModal')).show();
-    } else {
+        new bootstrap.Modal(document.getElementById('productModal')).show();
+      } else {
         console.error('未找到ID为以下ID的产品:', productId);
         console.log('数据库中的产品ID:', products.map(p => p.id));
         showToast('未找到产品', 'danger');
@@ -1409,15 +1465,15 @@ const AdminApiService = {
     
     // 准备产品数据
     const productData = {
-          name,
-          sku,
-          price,
-          stock,
-          categoryId: categoryId || null,
-          designerId: designerId || null,
-          description,
-          featured,
-          active,
+      name,
+      sku,
+      price,
+      stock,
+      categoryId: categoryId || null,
+      designerId: designerId || null,
+      description,
+      featured,
+      active,
       gallery: productGalleryImages
     };
     
@@ -1442,21 +1498,21 @@ const AdminApiService = {
         showToast(productId ? '产品更新成功' : '产品创建成功', 'success');
         
         // 关闭模态窗口
-    try {
-      const modalElement = document.getElementById('productModal');
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      } else {
+        try {
+          const modalElement = document.getElementById('productModal');
+          const modalInstance = bootstrap.Modal.getInstance(modalElement);
+          if (modalInstance) {
+            modalInstance.hide();
+          } else {
             console.warn('未找到模态实例，创建新实例以隐藏');
-        new bootstrap.Modal(modalElement).hide();
-      }
-    } catch (error) {
+            new bootstrap.Modal(modalElement).hide();
+          }
+        } catch (error) {
           console.error('关闭模态窗口时出错:', error);
-    }
-    
+        }
+        
         // 刷新产品列表
-    loadProducts();
+        loadProducts();
       } else {
         showToast(`操作失败: ${result.message || '未知错误'}`, 'danger');
       }
@@ -1490,7 +1546,7 @@ const AdminApiService = {
       if (result.success) {
         showToast('产品删除成功', 'success');
         // 重新加载产品
-    loadProducts();
+        loadProducts();
       } else {
         showToast(`删除失败: ${result.message || '未知错误'}`, 'danger');
       }
@@ -1548,22 +1604,33 @@ const AdminApiService = {
     try {
       // 获取产品详情
       const productsResult = await AdminApiService.getAllProducts();
-      const products = productsResult.data || [];
+      
+      // 正确处理API返回结构
+      let products = [];
+      if (productsResult.data) {
+        if (Array.isArray(productsResult.data)) {
+          products = productsResult.data;
+        } else if (productsResult.data.products && Array.isArray(productsResult.data.products)) {
+          products = productsResult.data.products;
+        } else {
+          console.error('API返回的products格式不正确:', productsResult.data);
+        }
+      }
       
       // 查找指定ID的产品
-    const productIdStr = String(productId);
-    const product = products.find(p => String(p.id) === productIdStr);
-    
-    if (!product) {
-      console.error('未找到产品, ID:', productId);
-      showToast('产品未找到', 'danger');
-      return;
-    }
-    
+      const productIdStr = String(productId);
+      const product = products.find(p => String(p.id) === productIdStr);
+      
+      if (!product) {
+        console.error('未找到产品, ID:', productId);
+        showToast('产品未找到', 'danger');
+        return;
+      }
+      
       // 设置模态窗口中的产品名称
-    document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
-    document.getElementById('review-product-name').textContent = product.name;
-    
+      document.getElementById('reviewsModalLabel').textContent = `Reviews for ${product.name}`;
+      document.getElementById('review-product-name').textContent = product.name;
+      
       // 显示加载状态
       const reviewsContainer = document.getElementById('reviews-container');
       reviewsContainer.innerHTML = `
@@ -1576,7 +1643,7 @@ const AdminApiService = {
       `;
       
       // 显示模态窗口
-    new bootstrap.Modal(document.getElementById('reviewsModal')).show();
+      new bootstrap.Modal(document.getElementById('reviewsModal')).show();
       
       // 加载评论
       loadProductReviews(productId);
@@ -1594,103 +1661,125 @@ const AdminApiService = {
     try {
       // 从API获取评论
       const result = await ApiService.get(`/api/reviews?productId=${productId}`);
-      const reviews = result.data || [];
+      
+      // 正确处理API返回结构
+      let reviews = [];
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          reviews = result.data;
+        } else if (result.data.reviews && Array.isArray(result.data.reviews)) {
+          reviews = result.data.reviews;
+        } else {
+          console.error('API返回的reviews格式不正确:', result.data);
+        }
+      }
       
       // 清除现有评论
-    reviewsContainer.innerHTML = '';
-    
+      reviewsContainer.innerHTML = '';
+      
       if (reviews.length === 0) {
         // 显示无评论消息
-      reviewsContainer.appendChild(noReviewsMessage);
-    } else {
+        reviewsContainer.appendChild(noReviewsMessage);
+      } else {
         // 获取用户数据
         const usersResult = await AdminApiService.getAllUsers();
-        const users = usersResult.data || [];
+        
+        // 正确处理API返回结构
+        let users = [];
+        if (usersResult.data) {
+          if (Array.isArray(usersResult.data)) {
+            users = usersResult.data;
+          } else if (usersResult.data.users && Array.isArray(usersResult.data.users)) {
+            users = usersResult.data.users;
+          } else {
+            console.error('API返回的users格式不正确:', usersResult.data);
+          }
+        }
         
         // 添加评论
         reviews.forEach(review => {
           // 查找用户
-        const userIdStr = String(review.userId);
-        const user = users.find(u => String(u.id) === userIdStr);
-        
+          const userIdStr = String(review.userId);
+          const user = users.find(u => String(u.id) === userIdStr);
+          
           // 从模板创建评论项
-        const template = document.getElementById('review-item-template');
-        const reviewItem = document.importNode(template.content, true).querySelector('.review-item');
-        
+          const template = document.getElementById('review-item-template');
+          const reviewItem = document.importNode(template.content, true).querySelector('.review-item');
+          
           // 设置评论数据
-        reviewItem.setAttribute('data-review-id', review.id);
-        reviewItem.querySelector('.review-author').textContent = user 
-            ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) 
-            : 'Anonymous User';
-        reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt || review.date).toLocaleDateString();
-        reviewItem.querySelector('.rating-value').textContent = review.rating;
-        reviewItem.querySelector('.review-content').textContent = review.content || review.comment || 'No comment provided.';
-        
+          reviewItem.setAttribute('data-review-id', review.id);
+          reviewItem.querySelector('.review-author').textContent = user 
+              ? (user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim()) 
+              : 'Anonymous User';
+          reviewItem.querySelector('.review-date').textContent = new Date(review.createdAt || review.date).toLocaleDateString();
+          reviewItem.querySelector('.rating-value').textContent = review.rating;
+          reviewItem.querySelector('.review-content').textContent = review.content || review.comment || 'No comment provided.';
+          
           // 设置评论头像
-        if (user && user.avatar) {
-          reviewItem.querySelector('.review-avatar img').src = user.avatar;
-        }
-        
+          if (user && user.avatar) {
+            reviewItem.querySelector('.review-avatar img').src = user.avatar;
+          }
+          
           // 根据评分设置评星
-        const ratingElement = reviewItem.querySelector('.review-rating');
-        ratingElement.innerHTML = '';
-        for (let i = 1; i <= 5; i++) {
-          const star = document.createElement('i');
-          star.className = i <= review.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted';
-          ratingElement.appendChild(star);
-        }
-        
+          const ratingElement = reviewItem.querySelector('.review-rating');
+          ratingElement.innerHTML = '';
+          for (let i = 1; i <= 5; i++) {
+            const star = document.createElement('i');
+            star.className = i <= review.rating ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted';
+            ratingElement.appendChild(star);
+          }
+          
           // 设置评论状态徽章
-        const badgeElement = reviewItem.querySelector('.review-status .badge');
-        let statusClass = '';
-        let statusText = '';
-        
-        switch (review.status) {
-          case 'pending':
-            statusClass = 'review-badge-pending';
-            statusText = 'Pending';
-            break;
-          case 'approved':
-            statusClass = 'review-badge-approved';
-            statusText = 'Approved';
-            break;
-          case 'rejected':
-            statusClass = 'review-badge-rejected';
-            statusText = 'Rejected';
-            break;
-          default:
-            statusClass = 'review-badge-pending';
-            statusText = 'Pending';
-        }
-        
-        badgeElement.className = `badge ${statusClass}`;
-        badgeElement.textContent = statusText;
-        
+          const badgeElement = reviewItem.querySelector('.review-status .badge');
+          let statusClass = '';
+          let statusText = '';
+          
+          switch (review.status) {
+            case 'pending':
+              statusClass = 'review-badge-pending';
+              statusText = 'Pending';
+              break;
+            case 'approved':
+              statusClass = 'review-badge-approved';
+              statusText = 'Approved';
+              break;
+            case 'rejected':
+              statusClass = 'review-badge-rejected';
+              statusText = 'Rejected';
+              break;
+            default:
+              statusClass = 'review-badge-pending';
+              statusText = 'Pending';
+          }
+          
+          badgeElement.className = `badge ${statusClass}`;
+          badgeElement.textContent = statusText;
+          
           // 设置操作处理程序
-        reviewItem.querySelector('.approve-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          updateReviewStatus(review.id, 'approved');
-        });
-        
-        reviewItem.querySelector('.reject-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          updateReviewStatus(review.id, 'rejected');
-        });
-        
-        reviewItem.querySelector('.delete-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          deleteReview(review.id);
-        });
-        
-        reviewItem.querySelector('.reply-review').addEventListener('click', function(e) {
-          e.preventDefault();
-          replyToReview(review.id);
-        });
-        
+          reviewItem.querySelector('.approve-review').addEventListener('click', function(e) {
+            e.preventDefault();
+            updateReviewStatus(review.id, 'approved');
+          });
+          
+          reviewItem.querySelector('.reject-review').addEventListener('click', function(e) {
+            e.preventDefault();
+            updateReviewStatus(review.id, 'rejected');
+          });
+          
+          reviewItem.querySelector('.delete-review').addEventListener('click', function(e) {
+            e.preventDefault();
+            deleteReview(review.id);
+          });
+          
+          reviewItem.querySelector('.reply-review').addEventListener('click', function(e) {
+            e.preventDefault();
+            replyToReview(review.id);
+          });
+          
           // 添加到容器
-        reviewsContainer.appendChild(reviewItem);
-      });
-      
+          reviewsContainer.appendChild(reviewItem);
+        });
+        
         // 更新评论统计
         updateReviewStats(reviews);
       }
@@ -1759,8 +1848,8 @@ const AdminApiService = {
         showToast(`评论已${status === 'approved' ? '批准' : '拒绝'}`, 'success');
         
         // 重新加载评论
-      loadProductReviews(currentReviewProductId);
-    } else {
+        loadProductReviews(currentReviewProductId);
+      } else {
         showToast(`更新失败: ${result.message || '未知错误'}`, 'danger');
       }
     } catch (error) {
@@ -1785,10 +1874,7 @@ const AdminApiService = {
         showToast('评论删除成功', 'success');
         
         // 重新加载评论
-    loadProductReviews(currentReviewProductId);
-    
-        // 更新产品行中的评论计数
-        loadProducts();
+        loadProductReviews(currentReviewProductId);
       } else {
         showToast(`删除失败: ${result.message || '未知错误'}`, 'danger');
       }
@@ -1805,8 +1891,8 @@ const AdminApiService = {
       const result = await ApiService.get(`/api/reviews/${reviewId}`);
       if (!result.success) {
         showToast('评论未找到', 'danger');
-      return;
-    }
+        return;
+      }
     
       const review = result.data;
       
