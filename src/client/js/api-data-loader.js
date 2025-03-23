@@ -279,7 +279,7 @@ window.loadCategories = async function(containerId, options = {}) {
       const imgSrc = category.image || '/src/client/assets/placeholder.jpg';
       
       const categoryHtml = `
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-4 mb-4">
           <a href="/src/client/views/product/products.html?category=${category.id}" class="category-card">
             <div class="category-img-overlay"></div>
             <img src="${imgSrc}" alt="${category.name}" class="category-img">
