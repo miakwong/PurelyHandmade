@@ -65,7 +65,7 @@ const DataService = {
       return result;
     } catch (error) {
       console.error(`API请求失败 (${endpoint}):`, error);
-      return { success: false, data: '网络错误或服务器无响应' };
+      return { success: false, message: '网络错误或服务器无响应' };
     }
   },
   
@@ -78,11 +78,10 @@ const DataService = {
     try {
       const result = await this.apiRequest('/products');
       if (result.success) {
-        return result.data;
+        return result.data.products || [];
       }
-      // 如果API请求失败，尝试从localStorage获取
-      const products = JSON.parse(localStorage.getItem('products')) || [];
-      return products;
+      console.error('API request failed:', result.message);
+      return [];
     } catch (e) {
       console.error('Error getting products:', e);
       return [];
@@ -97,14 +96,12 @@ const DataService = {
    */
   getProductById: async function(id) {
     try {
-      const result = await this.apiRequest(`/products/${id}`);
+      const result = await this.apiRequest(`/products/detail?id=${id}`);
       if (result.success) {
         return result.data;
       }
-      
-      // 如果API请求失败，尝试从localStorage获取
-      const products = JSON.parse(localStorage.getItem('products')) || [];
-      return products.find(p => p.id == id) || null;
+      console.error('API request failed:', result.message);
+      return null;
     } catch (e) {
       console.error('Error getting product by ID:', e);
       return null;
@@ -120,12 +117,10 @@ const DataService = {
     try {
       const result = await this.apiRequest('/categories');
       if (result.success) {
-        return result.data;
+        return result.data.categories || [];
       }
-      
-      // 如果API请求失败，尝试从localStorage获取
-      const categories = JSON.parse(localStorage.getItem('categories')) || [];
-      return categories;
+      console.error('API request failed:', result.message);
+      return [];
     } catch (e) {
       console.error('Error getting categories:', e);
       return [];
@@ -140,9 +135,12 @@ const DataService = {
    */
   getCategoryById: async function(id) {
     try {
-      // 获取所有类别，然后过滤
-      const categories = await this.getAllCategories();
-      return categories.find(c => c.id == id) || null;
+      const result = await this.apiRequest(`/categories/detail?id=${id}`);
+      if (result.success) {
+        return result.data;
+      }
+      console.error('API request failed:', result.message);
+      return null;
     } catch (e) {
       console.error('Error getting category by ID:', e);
       return null;
@@ -158,12 +156,10 @@ const DataService = {
     try {
       const result = await this.apiRequest('/designers');
       if (result.success) {
-        return result.data;
+        return result.data.designers || [];
       }
-      
-      // 如果API请求失败，尝试从localStorage获取
-      const designers = JSON.parse(localStorage.getItem('designers')) || [];
-      return designers;
+      console.error('API request failed:', result.message);
+      return [];
     } catch (e) {
       console.error('Error getting designers:', e);
       return [];
@@ -178,9 +174,12 @@ const DataService = {
    */
   getDesignerById: async function(id) {
     try {
-      // 获取所有设计师，然后过滤
-      const designers = await this.getAllDesigners();
-      return designers.find(d => d.id == id) || null;
+      const result = await this.apiRequest(`/designers/detail?id=${id}`);
+      if (result.success) {
+        return result.data;
+      }
+      console.error('API request failed:', result.message);
+      return null;
     } catch (e) {
       console.error('Error getting designer by ID:', e);
       return null;
@@ -387,7 +386,7 @@ const DataService = {
    */
   register: async function(userData) {
     try {
-      const result = await this.apiRequest('/users', {
+      const result = await this.apiRequest('/auth/register', {
         method: 'POST',
         body: JSON.stringify(userData)
       });
@@ -395,7 +394,7 @@ const DataService = {
       if (result.success) {
         return { success: true, user: result.data };
       } else {
-        return { success: false, message: result.data };
+        return { success: false, message: result.message || '注册失败' };
       }
     } catch (e) {
       console.error('Error during registration:', e);
@@ -423,7 +422,7 @@ const DataService = {
         this.setAuthToken(token);
         return { success: true, user };
       } else {
-        return { success: false, message: result.data };
+        return { success: false, message: result.message || '登录失败' };
       }
     } catch (e) {
       console.error('Error during login:', e);
@@ -442,6 +441,29 @@ const DataService = {
       return userStr ? JSON.parse(userStr) : null;
     } catch (e) {
       console.error('Error getting current user:', e);
+      return null;
+    }
+  },
+  
+  /**
+   * 获取当前用户信息（从API）
+   * Get current user profile from API
+   * @returns {Promise<Object|null>} 用户对象或null User object or null
+   */
+  getUserProfile: async function() {
+    try {
+      const result = await this.apiRequest('/auth/profile', {
+        method: 'GET'
+      });
+      
+      if (result.success) {
+        // 更新本地存储的用户信息
+        this.setCurrentUser(result.data);
+        return result.data;
+      }
+      return null;
+    } catch (e) {
+      console.error('Error getting user profile:', e);
       return null;
     }
   },
@@ -484,18 +506,36 @@ const DataService = {
    * @returns {Promise<Array>} 订单列表 Order list
    */
   getUserOrders: async function() {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) return [];
-    
     try {
       const result = await this.apiRequest('/orders');
       if (result.success) {
-        return result.data;
+        return result.data.orders || [];
       }
+      console.error('Failed to get orders:', result.message);
       return [];
     } catch (e) {
       console.error('Error getting user orders:', e);
       return [];
+    }
+  },
+  
+  /**
+   * 获取订单详情
+   * Get order details
+   * @param {number} orderId 订单ID
+   * @returns {Promise<Object|null>} 订单详情
+   */
+  getOrderDetails: async function(orderId) {
+    try {
+      const result = await this.apiRequest(`/orders/detail?id=${orderId}`);
+      if (result.success) {
+        return result.data;
+      }
+      console.error('Failed to get order details:', result.message);
+      return null;
+    } catch (e) {
+      console.error('Error getting order details:', e);
+      return null;
     }
   },
   
@@ -506,24 +546,16 @@ const DataService = {
    * @returns {Promise<Object>} 创建结果 Creation result
    */
   createOrder: async function(orderData) {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) {
-      return { success: false, message: '您需要登录才能创建订单' };
-    }
-    
     try {
-      const result = await this.apiRequest('/orders', {
+      const result = await this.apiRequest('/orders/create', {
         method: 'POST',
         body: JSON.stringify(orderData)
       });
       
       if (result.success) {
-        // 清空购物车
-        this.clearCart();
         return { success: true, order: result.data };
-      } else {
-        return { success: false, message: result.data };
       }
+      return { success: false, message: result.message || '创建订单失败' };
     } catch (e) {
       console.error('Error creating order:', e);
       return { success: false, message: '创建订单时发生错误，请稍后再试' };
@@ -538,22 +570,19 @@ const DataService = {
    * @returns {Promise<Object>} 提交结果 Submission result
    */
   submitReview: async function(productId, reviewData) {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser) {
-      return { success: false, message: '您需要登录才能提交评论' };
-    }
-    
     try {
-      const result = await this.apiRequest('/reviews', {
+      const result = await this.apiRequest('/reviews/create', {
         method: 'POST',
         body: JSON.stringify({
           productId,
-          userId: currentUser.id,
           ...reviewData
         })
       });
       
-      return result;
+      if (result.success) {
+        return { success: true, review: result.data };
+      }
+      return { success: false, message: result.message || '提交评论失败' };
     } catch (e) {
       console.error('Error submitting review:', e);
       return { success: false, message: '提交评论时发生错误，请稍后再试' };
@@ -570,8 +599,9 @@ const DataService = {
     try {
       const result = await this.apiRequest(`/reviews?productId=${productId}`);
       if (result.success) {
-        return result.data;
+        return result.data.reviews || [];
       }
+      console.error('Failed to get reviews:', result.message);
       return [];
     } catch (e) {
       console.error('Error getting product reviews:', e);
