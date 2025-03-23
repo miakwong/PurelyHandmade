@@ -236,7 +236,7 @@
     
     const categoryLink = document.getElementById('breadcrumb-category-link');
     if (product.categoryName) {
-      categoryLink.querySelector('a').href = `/src/client/views/product/products.html?category=${product.categoryId}`;
+      categoryLink.querySelector('a').href = `/src/client/views/product/category-page.html?id=${product.categoryId}`;
       categoryLink.querySelector('a').textContent = product.categoryName;
     } else {
       categoryLink.querySelector('a').href = `/src/client/views/product/category-list.html`;
