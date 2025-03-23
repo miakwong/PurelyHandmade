@@ -324,7 +324,7 @@ window.loadCategories = async function(containerId, options = {}) {
       console.log(`API loadCategories() - 渲染分类:`, category.id, category.name);
       
       // 处理图像
-      const imgSrc = category.image || '/src/client/assets/category-placeholder.jpg';
+      const imgSrc = category.image || '/src/client/img/category-placeholder.jpg';
       
       // 创建分类卡片
       const categoryHtml = `
