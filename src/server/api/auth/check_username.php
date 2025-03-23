@@ -35,9 +35,13 @@ try {
     // Check if username exists in database
     $user = $authController->findUserByUsername($username);
     
+    // Ensure $user is checked properly
+     $exists = !empty($user);
+     
     // Return response
     $response->success([
-        'exists' => !empty($user)
+        'exists' => $exists,
+        'message' => $exists ? 'This username is already registered.' : 'Username is available.'
     ]);
     
 } catch (Exception $e) {
