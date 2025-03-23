@@ -61,8 +61,28 @@ class AuthController {
             // Create user
             $userId = $this->user->create($data);
             
+            // 确保userId是有效的
+            if (!$userId || !is_numeric($userId)) {
+                $this->logger->error('Registration failed', ['error' => 'Invalid user ID returned', 'userId' => $userId]);
+                return [
+                    'success' => false,
+                    'message' => 'Registration failed: Could not create user'
+                ];
+            }
+            
+            // 确保转换为整数
+            $userId = intval($userId);
+            
             // Get the created user
             $user = $this->user->findById($userId);
+            
+            if (!$user) {
+                $this->logger->error('Registration failed', ['error' => 'User not found after creation', 'userId' => $userId]);
+                return [
+                    'success' => false,
+                    'message' => 'Registration failed: User created but could not be retrieved'
+                ];
+            }
             
             // Remove sensitive data
             unset($user['password']);
@@ -285,6 +305,36 @@ class AuthController {
                 'success' => false,
                 'message' => 'Failed to change password: ' . $e->getMessage()
             ];
+        }
+    }
+    
+    /**
+     * Find a user by email
+     * 
+     * @param string $email
+     * @return array|null User data or null if not found
+     */
+    public function findUserByEmail($email) {
+        try {
+            return $this->user->findByEmail($email);
+        } catch (\Exception $e) {
+            $this->logger->error('Find user by email failed', Logger::formatException($e));
+            return null;
+        }
+    }
+    
+    /**
+     * Find a user by username
+     * 
+     * @param string $username
+     * @return array|null User data or null if not found
+     */
+    public function findUserByUsername($username) {
+        try {
+            return $this->user->findByUsername($username);
+        } catch (\Exception $e) {
+            $this->logger->error('Find user by username failed', Logger::formatException($e));
+            return null;
         }
     }
 } 
