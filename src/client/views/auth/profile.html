@@ -48,8 +48,8 @@
         <p id="user-email" class="text-muted"></p>
         <p class="mb-0"><small class="text-muted">Member since <span id="join-date">January 2023</span></small></p>
         
-        <!-- Admin Dashboard Link -->
-        <div id="admin-tab-container" class="mt-2" style="display: none;">
+        <!-- Admin Dashboard Link - Updated with better styling -->
+        <div id="admin-tab-container" class="mt-3" style="display: none;">
           <a href="/src/client/views/admin/dashboard.html" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
           </a>
@@ -753,7 +753,7 @@
       adminTabContainer.style.display = 'none';
       
       // 只有当用户存在且是管理员时才显示
-      if (currentUser && currentUser.isAdmin === true) {
+      if (currentUser && (currentUser.isAdmin === true || currentUser.role === "admin")) {
         adminTabContainer.style.display = 'block';
         console.log('Admin status detected, showing admin dashboard button');
       } else {
