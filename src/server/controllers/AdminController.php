@@ -297,4 +297,104 @@ class AdminController {
             ];
         }
     }
+    
+    public function getSettings($group = null) {
+        try {
+            $sql = "SELECT * FROM Setting";
+            $params = [];
+            
+            if ($group) {
+                $sql .= " WHERE `group` = :group";
+                $params['group'] = $group;
+            }
+            
+            $settings = $this->db->fetchAll($sql, $params);
+            
+            // Convert settings to key-value format grouped by their group
+            $settingsGrouped = [];
+            
+            foreach ($settings as $setting) {
+                $group = $setting['group'];
+                
+                if (!isset($settingsGrouped[$group])) {
+                    $settingsGrouped[$group] = [];
+                }
+                
+                $settingsGrouped[$group][$setting['key']] = [
+                    'id' => $setting['id'],
+                    'key' => $setting['key'],
+                    'value' => $setting['value'],
+                    'type' => $setting['type'],
+                    'description' => $setting['description']
+                ];
+            }
+            
+            return [
+                'success' => true,
+                'settings' => $settingsGrouped
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Admin get settings failed', Logger::formatException($e));
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to get settings: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    public function updateSettings($data) {
+        try {
+            $this->db->beginTransaction();
+            
+            $updatedSettings = [];
+            
+            foreach ($data as $key => $value) {
+                // Skip if the key is not valid
+                if (!is_string($key)) {
+                    continue;
+                }
+                
+                // Find if the setting exists
+                $sql = "SELECT id FROM Setting WHERE `key` = :key";
+                $setting = $this->db->fetch($sql, ['key' => $key]);
+                
+                if ($setting) {
+                    // Update the setting
+                    $updateSql = "UPDATE Setting SET `value` = :value, `updated_at` = NOW() WHERE id = :id";
+                    $this->db->execute($updateSql, [
+                        'id' => $setting['id'],
+                        'value' => $value
+                    ]);
+                } else {
+                    // Skip creation of non-existent settings for security reasons
+                    $this->logger->warning('Attempted to update non-existent setting', ['key' => $key]);
+                    continue;
+                }
+                
+                $updatedSettings[$key] = $value;
+            }
+            
+            $this->db->commit();
+            
+            // Get all updated settings
+            $result = $this->getSettings();
+            
+            $this->logger->info('Admin updated settings', ['count' => count($updatedSettings)]);
+            
+            return [
+                'success' => true,
+                'message' => 'Settings updated successfully',
+                'settings' => $result['settings']
+            ];
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            $this->logger->error('Admin update settings failed', Logger::formatException($e));
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to update settings: ' . $e->getMessage()
+            ];
+        }
+    }
 } 
