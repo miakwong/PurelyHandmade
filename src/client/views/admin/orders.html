@@ -427,7 +427,7 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    return ApiService.get('/orders');
+    return ApiService.get('/orders?all=1');
   },
   
   // 更新订单状态
@@ -466,7 +466,6 @@ const AdminApiService = {
     loadNavbar();
     loadFooter();
     checkAdminPermissions();
-    loadOrders();
     
     // Setup for filter collapse toggle icon
     document.querySelector('.filter-toggle').addEventListener('click', function() {
@@ -496,12 +495,29 @@ const AdminApiService = {
     `;
     
     try {
+      // 预先获取所有用户数据，避免每个订单都要单独请求
+      console.log('📡 发送API请求: 获取所有用户 - GET /auth/profile?all=1');
+      const usersResponse = await AdminApiService.getAllUsers();
+      console.log('✅ 获取用户列表响应:', usersResponse);
+      
+      // 创建用户ID映射表
+      const userMap = {};
+      if (usersResponse && usersResponse.success && usersResponse.data) {
+        const users = Array.isArray(usersResponse.data) ? usersResponse.data : (usersResponse.data.users || []);
+        users.forEach(user => {
+          if (user && user.id) {
+            userMap[String(user.id)] = user;
+          }
+        });
+      }
+      console.log(`📊 创建了包含${Object.keys(userMap).length}个用户的映射表`);
+      
       console.log('📡 发送API请求: 获取所有订单 - GET /orders');
       const response = await AdminApiService.getAllOrders();
       console.log('✅ 获取订单响应:', response);
       
       if (!response || !response.success) {
-        throw new Error(response?.data || 'Failed to load orders');
+        throw new Error(response?.message || 'Failed to load orders');
       }
       
       // 正确处理API返回结构
@@ -513,7 +529,14 @@ const AdminApiService = {
           orders = response.data.orders;
         } else {
           console.error('API返回的orders格式不正确:', response.data);
-          throw new Error('Invalid orders data format');
+          // 尝试其他可能的数据格式
+          const dataKeys = Object.keys(response.data);
+          if (dataKeys.length > 0 && Array.isArray(response.data[dataKeys[0]])) {
+            orders = response.data[dataKeys[0]];
+            console.log('尝试使用替代数据格式:', dataKeys[0]);
+          } else {
+            throw new Error('Invalid orders data format');
+          }
         }
       }
       
@@ -522,28 +545,8 @@ const AdminApiService = {
       // 应用筛选
       if (Object.values(currentFilters).some(v => v)) {
         console.log('🔍 应用订单筛选条件:', currentFilters);
-        try {
-          // 获取所有用户，用于筛选
-          console.log('📡 获取用户数据用于订单筛选');
-          const usersResponse = await AdminApiService.getAllUsers();
-          console.log('✅ 获取用户响应:', usersResponse);
-          
-          // 正确处理用户API返回结构
-          let users = [];
-          if (usersResponse && usersResponse.success && usersResponse.data) {
-            if (Array.isArray(usersResponse.data)) {
-              users = usersResponse.data;
-            } else if (usersResponse.data.users && Array.isArray(usersResponse.data.users)) {
-              users = usersResponse.data.users;
-            }
-          }
-          
-          orders = filterOrders(orders, users);
-          console.log(`📊 筛选后剩余${orders.length}个订单`);
-        } catch (error) {
-          console.error('❌ 获取用户用于筛选时出错:', error);
-          orders = filterOrders(orders, []);
-        }
+        orders = filterOrders(orders, Object.values(userMap));
+        console.log(`📊 筛选后剩余${orders.length}个订单`);
       }
       
       // 清空表格
@@ -561,7 +564,7 @@ const AdminApiService = {
       
       // 渲染订单数据
       console.log('🖌️ 渲染订单表格');
-      renderOrdersTable(orders, tableBody);
+      renderOrdersTable(orders, tableBody, userMap);
       
     } catch (error) {
       console.error('❌ 加载订单出错:', error);
@@ -582,32 +585,35 @@ const AdminApiService = {
   }
 
   // 渲染订单表格
-  function renderOrdersTable(orders, tableBody) {
+  function renderOrdersTable(orders, tableBody, userMap) {
     if (!orders || !orders.length) return;
     
     // 按时间降序排序订单（最新的在前面）
     orders.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
     
+    // 创建一个已渲染订单ID的集合，避免重复渲染
+    const renderedOrderIds = new Set();
+    
     // 渲染每个订单行
-    orders.forEach(async (order) => {
+    orders.forEach(order => {
       try {
+        // 检查是否已经渲染过这个订单
+        if (renderedOrderIds.has(order.id)) {
+          console.log(`⚠️ 跳过重复的订单ID: ${order.id}`);
+          return;
+        }
+        renderedOrderIds.add(order.id);
+        
         // 获取用户名称
         let userName = 'Unknown User';
         if (order.user) {
           userName = order.user.name || `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Unknown User';
+        } else if (order.userId && userMap[String(order.userId)]) {
+          // 从预先获取的用户映射中查找用户
+          const user = userMap[String(order.userId)];
+          userName = user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User';
         } else if (order.userId) {
-          // 如果订单上没有用户信息，尝试获取
-          try {
-            console.log(`📡 获取订单用户信息 - userId: ${order.userId}`);
-            const userResponse = await ApiService.get(`/users/${order.userId}`);
-            console.log('✅ 获取用户信息响应:', userResponse);
-            if (userResponse && userResponse.success && userResponse.data) {
-              const user = userResponse.data;
-              userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
-            }
-          } catch (error) {
-            console.error('❌ 获取用户数据时出错:', error);
-          }
+          userName = `User #${order.userId}`;
         }
         
         // 确定订单状态的样式

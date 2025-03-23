@@ -79,21 +79,49 @@ class Order {
             $params['status'] = $filters['status'];
         }
         
+        // 添加日期范围过滤
+        if (isset($filters['start_date']) && !empty($filters['start_date'])) {
+            $startDate = $filters['start_date'] . ' 00:00:00';
+            $whereConditions[] = 'orderDate >= :start_date';
+            $params['start_date'] = $startDate;
+        }
+        
+        if (isset($filters['end_date']) && !empty($filters['end_date'])) {
+            $endDate = $filters['end_date'] . ' 23:59:59';
+            $whereConditions[] = 'orderDate <= :end_date';
+            $params['end_date'] = $endDate;
+        }
+        
         $whereClause = !empty($whereConditions) 
             ? 'WHERE ' . implode(' AND ', $whereConditions)
             : '';
         
         // Count total orders matching the filters
-        $countSql = "SELECT COUNT(*) as total FROM $this->table $whereClause";
+        $countSql = "SELECT COUNT(*) as total FROM {$this->table} $whereClause";
         $totalResult = $this->db->fetch($countSql, $params);
         $total = $totalResult['total'] ?? 0;
         
         // Get orders with pagination
-        $sql = "SELECT * FROM $this->table $whereClause ORDER BY createdAt DESC LIMIT :limit OFFSET :offset";
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
+        $sql = "SELECT * FROM {$this->table} $whereClause ORDER BY createdAt DESC";
+        
+        if ($limit > 0) {
+            $sql .= " LIMIT :limit OFFSET :offset";
+            $params['limit'] = $limit;
+            $params['offset'] = $offset;
+        }
         
         $orders = $this->db->fetchAll($sql, $params);
+        
+        // 记录SQL查询，帮助调试
+        if (class_exists('Utils\Logger')) {
+            $logger = new \Utils\Logger('order.log');
+            $logger->info('SQL查询', [
+                'count_sql' => $countSql,
+                'data_sql' => $sql,
+                'params' => $params,
+                'result_count' => count($orders)
+            ]);
+        }
         
         // Decode JSON data
         foreach ($orders as &$order) {

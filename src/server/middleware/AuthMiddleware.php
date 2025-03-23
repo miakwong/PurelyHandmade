@@ -49,6 +49,10 @@ class AuthMiddleware {
             exit;
         }
         
+        // 添加用户角色和管理员信息到请求
+        $_REQUEST['isAdmin'] = (bool)$userData['isAdmin'];
+        $_REQUEST['userRole'] = $userData['role'] ?? 'user';
+        
         // Update last login time
         $user->updateLoginTime($userId);
         

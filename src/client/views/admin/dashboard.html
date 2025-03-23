@@ -487,7 +487,7 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有用户
   getAllUsers: function() {
-    return ApiService.get('/admin/users');
+    return ApiService.get('/auth/profile?all=1');
   },
   
   // 获取所有产品
@@ -507,7 +507,7 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    return ApiService.get('/orders');
+    return ApiService.get('/orders?all=1');
   },
   
   // 获取网站统计数据
@@ -524,7 +524,8 @@ const AdminApiService = {
 <script>
   // Main page data loading function
   function loadDashboardData(userData) {
-    console.log('Loading dashboard data with user:', userData);
+    console.log('🔄 loadDashboardData被调用，时间:', new Date().toISOString());
+    console.log('📊 加载仪表盘数据，用户:', userData ? `ID: ${userData.id}, 名称: ${userData.username || userData.firstName}` : '未知用户');
     showLoadingState();
     
     // Debug output before API calls
@@ -558,8 +559,13 @@ const AdminApiService = {
       // 更新统计卡片
       updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
       
-      // 更新最近订单表格
-      updateRecentOrders(ordersResponse);
+      // 提取用户数据用于订单表格
+      const userData = usersResponse && usersResponse.success ? 
+        (Array.isArray(usersResponse.data) ? usersResponse.data : 
+        (usersResponse.data?.users || [])) : [];
+      
+      // 更新最近订单表格，同时传入订单数据和用户数据
+      updateRecentOrders(ordersResponse, userData);
       
       hideLoadingState();
     })
@@ -642,7 +648,7 @@ const AdminApiService = {
   }
   
   // Update recent orders table
-  function updateRecentOrders(response) {
+  function updateRecentOrders(response, userData) {
     const tableBody = document.getElementById('recent-orders-table');
     
     if (!response || !response.success) {
@@ -655,7 +661,8 @@ const AdminApiService = {
     }
     
     const data = response.data || {};
-    const orders = data.orders || [];
+    // 支持多种可能的API返回格式
+    const orders = data.orders || (Array.isArray(data) ? data : []);
     
     if (!orders.length) {
       tableBody.innerHTML = `
@@ -666,14 +673,46 @@ const AdminApiService = {
       return;
     }
     
+    console.log(`📊 Dashboard: 获取到${orders.length}个订单`);
+    
     // Get 5 most recent orders
     const recentOrders = orders
       .sort((a, b) => new Date(b.orderDate || b.createdAt) - new Date(a.orderDate || a.createdAt))
       .slice(0, 5);
     
+    // 直接渲染订单表格，不再重复请求用户数据
+    renderOrdersTable(recentOrders, userData);
+  }
+  
+  // 渲染订单表格的辅助函数
+  function renderOrdersTable(orders, userData) {
+    const tableBody = document.getElementById('recent-orders-table');
     let html = '';
     
-    recentOrders.forEach(order => {
+    // 创建用户ID到用户信息的映射
+    const userMap = {};
+    if (Array.isArray(userData)) {
+      userData.forEach(user => {
+        if (user && user.id) {
+          // 将ID转换为字符串作为键，避免类型不匹配问题
+          userMap[String(user.id)] = user;
+        }
+      });
+    }
+    
+    console.log(`🔍 找到${userData.length}个用户，创建映射: ${Object.keys(userMap).length}个键`);
+    
+    // 跟踪已渲染的订单ID，避免重复渲染
+    const renderedOrderIds = new Set();
+    
+    orders.forEach(order => {
+      // 避免重复渲染相同的订单
+      if (renderedOrderIds.has(order.id)) {
+        console.log(`⚠️ 跳过重复订单 #${order.id}`);
+        return;
+      }
+      renderedOrderIds.add(order.id);
+      
       // Format date
       const orderDate = new Date(order.orderDate || order.createdAt);
       const formattedDate = orderDate.toLocaleDateString();
@@ -693,6 +732,12 @@ const AdminApiService = {
         username = order.user.username || 
                   `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 
                   order.user.email || 'Guest';
+      } else if (order.userId && userMap[String(order.userId)]) {
+        // 从用户映射中获取用户信息，确保将userId转换为字符串
+        const user = userMap[String(order.userId)];
+        username = user.username || 
+                  `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
+                  user.email || `User #${order.userId}`;
       } else if (order.userId) {
         username = `User #${order.userId}`;
       }
