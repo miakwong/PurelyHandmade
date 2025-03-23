@@ -99,7 +99,7 @@
               <h2 class="login-title text-center">Log In</h2>
               <form id="login-form" class="login-form" novalidate>
                 <div class="mb-3">
-                  <input type="text" class="form-control" id="loginIdentifier" placeholder="Username or Email" required />
+                  <input type="text" class="form-control" id="loginEmail" placeholder="Username or Email" required />
                 </div>
                 <div class="mb-3">
                   <input type="password" class="form-control" id="loginPassword" placeholder="Password" required minlength="6" />
@@ -169,249 +169,94 @@
   <!-- Navbar -->
   <script src="/src/client/js/navbar-handler.js"></script>
 
+  <!-- Bootstrap and other scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../js/data-service.js"></script>
+  <script src="../../js/ui-helpers.js"></script>
+  
   <script>
-    // Initialize Toast component
-    function initToast() {
-      try {
-        const toastEl = document.getElementById('notification-toast');
-        window.toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-        
-        // Initialize password reset modal
-        const passwordResetModal = new bootstrap.Modal(document.getElementById('passwordResetModal'));
-        
-        // Set event listener for "Send Reset Link" button
-        document.getElementById('sendResetLink').addEventListener('click', function() {
-          const email = document.getElementById('resetEmail').value.trim();
-          if (email) {
-            // Close modal
-            passwordResetModal.hide();
-            
-            // Show notification
-            document.getElementById('toast-message').textContent = "Password reset instructions have been sent to your email.";
-            window.toast.show();
-          }
-        });
-      } catch (err) {
-        console.error("Failed to initialize Toast component or modal:", err);
-      }
-    }
-
-    function ensureAdminAccount() {
-        try {
-            let usersData = localStorage.getItem('users');
-            let users = [];
-            
-            // Make sure users is always an array
-            if (usersData) {
-                try {
-                    users = JSON.parse(usersData);
-                    // Additional check to ensure users is an array
-                    if (!Array.isArray(users)) {
-                        console.error("Users data is not an array:", users);
-                        users = [];
-                    }
-                } catch (e) {
-                    console.error("Error parsing users data:", e);
-                    users = [];
-                }
-            }
-
-            // If `admin` account does not exist, create it
-            if (!users.some(user => user.username === "admin")) {
-                const adminUser = {
-                    id: 1,
-                    username: "admin",
-                    email: "admin@example.com",
-                    password: "admin123",  // Default password
-                    isAdmin: true,
-                    createdAt: new Date().toISOString()
-                };
-
-                users.push(adminUser);
-                localStorage.setItem('users', JSON.stringify(users));
-                console.log("✅ Default admin account created!");
-            }
-        } catch (error) {
-            console.error("Error in ensureAdminAccount:", error);
-        }
-    }
-
-    // Login logic
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-
-      const identifier = document.getElementById('loginIdentifier').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      const loginError = document.getElementById('login-error');
-
-      function isEmail(input) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
-      }
-
-      // Make sure users is always an array
-      let usersData = localStorage.getItem('users');
-      let users = [];
-      
-      if (usersData) {
-          try {
-              users = JSON.parse(usersData);
-              // Additional check to ensure users is an array
-              if (!Array.isArray(users)) {
-                  console.error("Users data is not an array:", users);
-                  users = [];
-              }
-          } catch (e) {
-              console.error("Error parsing users data:", e);
-              users = [];
-          }
-      }
-
-      // Find matching user
-      const user = users.find(u => 
-        (isEmail(identifier) ? u.email === identifier : u.username === identifier) &&
-        u.password === password
-      );
-
-      if (user) {
-        // Store current user info
-        localStorage.setItem('currentUser', JSON.stringify({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          isAdmin: user.isAdmin || false,
-          isLoggedIn: true
-        }));
-
-        if (user.isAdmin) {
-          localStorage.setItem('isAdmin', 'true');
-        }
-        
-        // Set auth token for API requests
-        localStorage.setItem('authToken', 'valid-token');
-        
-        // Try immediately updating navigation bar status
-        console.log('User login successful, attempting to update navigation bar...');
-        
-        // Update navigation bar directly with global function
-        try {
-          // The function is now defined globally so we can call it directly
-          window.updateAuthButton();
-          console.log('Updated navigation bar after successful login');
-          
-          // Additional attempt with delayed call to ensure DOM updates are complete
-          setTimeout(() => {
-            window.updateAuthButton();
-            console.log('Updated navigation bar with delayed call');
-          }, 300);
-        } catch (err) {
-          console.error('Error updating navigation bar:', err);
-        }
-
-        // Trigger events to notify all components of login
-        try {
-          // Manual storage event
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'currentUser',
-            newValue: localStorage.getItem('currentUser'),
-            url: window.location.href
-          }));
-          
-          // Custom login event for more reliable communication
-          const loginEvent = new CustomEvent('userLoggedIn', {
-            detail: {
-              username: user.username,
-              isAdmin: user.isAdmin || false,
-              userId: user.id
-            }
-          });
-          window.dispatchEvent(loginEvent);
-          
-          console.log('Triggered login events');
-        } catch (err) {
-          console.error('Error triggering login events:', err);
-        }
-        
-        // Show login success message
-        try {
-          const message = `Welcome back, ${user.username}!`;
-          console.log('Attempting to show toast message:', message); // Debug message
-          if (typeof window.showToast === 'function') {
-            console.log('Using window.showToast function'); // Debug message
-            window.showToast(message, 'success');
-          } else if (window.toast) {
-            console.log('Using window.toast object'); // Debug message
-            document.getElementById('toast-message').textContent = message;
-            window.toast.show();
-          } else {
-            console.log('No toast function or object available'); // Debug message
-          }
-          console.log('Success message displayed');
-        } catch (err) {
-          console.error('Error displaying message:', err);
-        }
-
-        // Hide error message if visible
-        loginError.classList.add('d-none');
-        
-        // Delay redirect to profile page
-        console.log('Preparing to redirect to profile page...');
-        setTimeout(() => {
-          window.location.href = 'profile.html';
-        }, 1200);
-      } else {
-        // Check if username exists to provide more specific error information
-        const usernameExists = users.some(u => 
-          isEmail(identifier) ? u.email === identifier : u.username === identifier
-        );
-        
-        const errorMessageElement = document.getElementById('login-error-message');
-        if (!usernameExists) {
-          // Account does not exist
-          errorMessageElement.textContent = "Account does not exist. Please check your username/email or create a new account.";
-          console.log("Login failed: Account does not exist");
-        } else {
-          // Incorrect password
-          errorMessageElement.textContent = "Incorrect password. Please try again or use the forgot password feature.";
-          console.log("Login failed: Incorrect password");
-        }
-        
-        // Show error message and add shake effect
-        loginError.classList.remove('d-none');
-        loginError.style.animation = "none";
-        setTimeout(() => {
-          loginError.style.animation = "shake 0.5s";
-        }, 10);
-        
-        // Focus on password field for user to re-enter
-        document.getElementById('loginPassword').focus();
-      }
-    });
-
-    // Forgot password functionality
-    document.getElementById('forgot-password').addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      // Show the password reset modal
-      try {
-        const passwordResetModal = new bootstrap.Modal(document.getElementById('passwordResetModal'));
-        passwordResetModal.show();
-      } catch (err) {
-        console.error('Error displaying password reset modal:', err);
-        alert('Forgot password feature is temporarily unavailable. Please try again later.');
-      }
-    });
-
-    // Initialize Toast component on page load
     document.addEventListener('DOMContentLoaded', function() {
-      initToast();
+      // Load navbar and footer
+      UIHelpers.loadNavbar().then(() => {
+        // Check for current user and show appropriate buttons
+        UIHelpers.updateAuthButtons();
+      });
+      UIHelpers.loadFooter();
+      
+      // Check if the form was submitted
+      const loginForm = document.getElementById('login-form');
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const identifier = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const loginError = document.getElementById('login-error');
+
+        if (!identifier || !password) {
+          // Show validation error
+          const errorMessageElement = document.getElementById('login-error-message');
+          errorMessageElement.textContent = "Please enter both email and password.";
+          loginError.classList.remove('d-none');
+          return;
+        }
+        
+        try {
+          // Show loading state
+          const submitButton = document.querySelector('button[type="submit"]');
+          const originalButtonText = submitButton.innerHTML;
+          submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
+          submitButton.disabled = true;
+          
+          // Use API for login
+          const result = await DataService.login(identifier, password);
+          
+          if (result.success) {
+            console.log('Login successful via API');
+            
+            // 显示成功消息
+            UIHelpers.showToast(`Welcome back, ${result.user.username || 'User'}!`, 'success');
+            
+            // 检查是否有重定向参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirect');
+            
+            // 在重定向前稍微延迟，让用户看到成功消息
+            setTimeout(() => {
+              if (redirectTo === 'admin') {
+                window.location.href = '/src/client/views/admin/dashboard.html';
+              } else {
+                window.location.href = 'profile.html';
+              }
+            }, 1000);
+          } else {
+            // 显示错误消息
+            const errorMessageElement = document.getElementById('login-error-message');
+            errorMessageElement.textContent = result.message || "Login failed. Please check your credentials.";
+            loginError.classList.remove('d-none');
+            loginError.style.animation = "none";
+            setTimeout(() => {
+              loginError.style.animation = "shake 0.5s";
+            }, 10);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          const errorMessageElement = document.getElementById('login-error-message');
+          errorMessageElement.textContent = "An error occurred during login. Please try again.";
+          loginError.classList.remove('d-none');
+        } finally {
+          // 恢复按钮状态
+          const submitButton = document.querySelector('button[type="submit"]');
+          submitButton.innerHTML = 'Log In';
+          submitButton.disabled = false;
+        }
+      });
+
+      // 忘记密码功能
+      document.getElementById('forgot-password').addEventListener('click', function(e) {
+        e.preventDefault();
+        UIHelpers.showToast('Password reset functionality is not available yet.', 'info');
+      });
     });
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

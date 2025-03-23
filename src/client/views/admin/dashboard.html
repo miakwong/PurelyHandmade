@@ -597,9 +597,35 @@ const AdminApiService = {
         // Check if user is admin after navbar is loaded
         setTimeout(() => {
           const currentUser = DataService.getCurrentUser();
-          if (!currentUser || currentUser.isAdmin !== true) {
+          const authToken = localStorage.getItem('authToken');
+          
+          console.log('Current user:', currentUser ? 'Found' : 'Not found');
+          console.log('Auth token:', authToken ? 'Found' : 'Not found');
+          
+          // 如果用户未登录，但有token，尝试使用token获取用户信息
+          if (!currentUser && authToken) {
+            DataService.getUserProfile()
+              .then(userData => {
+                if (userData && (userData.isAdmin || userData.role === 'admin')) {
+                  console.log('Successfully retrieved user profile from API');
+                  loadDashboardData();
+                } else {
+                  redirectToLogin();
+                }
+              })
+              .catch(error => {
+                console.error('Error getting user profile:', error);
+                redirectToLogin();
+              });
+          } else if (!currentUser || (currentUser.isAdmin !== true && currentUser.role !== 'admin')) {
+            redirectToLogin();
+          } else {
+            // Load dashboard data
+            loadDashboardData();
+          }
+          
+          function redirectToLogin() {
             // 检查是否有授权令牌
-            const authToken = localStorage.getItem('authToken');
             if (!authToken) {
               // 显示一个友好的提示，引导用户设置token
               document.body.innerHTML = `
@@ -607,16 +633,13 @@ const AdminApiService = {
                   <div class="alert alert-warning text-center p-5">
                     <h4><i class="bi bi-exclamation-triangle me-2"></i>需要授权</h4>
                     <p class="mb-4">您需要设置管理员授权令牌才能访问此页面。</p>
-                    <a href="set-token.html" class="btn btn-primary">设置授权令牌</a>
+                    <a href="/src/client/views/auth/login.html" class="btn btn-primary">登录管理员账户</a>
                   </div>
                 </div>
               `;
-              return;
+            } else {
+              window.location.href = '/src/client/views/auth/login.html?redirect=admin';
             }
-            window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-          } else {
-            // Load dashboard data
-            loadDashboardData();
           }
         }, 100);
       });
@@ -631,13 +654,20 @@ const AdminApiService = {
   function loadDashboardData() {
     showLoadingState();
     
+    // 检查身份验证状态
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      console.error('No auth token found');
+      showError('Authentication required. Please log in as an admin.');
+      hideLoadingState();
+      return;
+    }
+    
+    // Debug output before API calls
+    console.log('Starting API calls with auth token:', authToken ? 'Token exists' : 'No token');
+    
     // 从本地测试数据或API获取数据
     function loadData() {
-      // 检查是否有授权令牌
-      const authToken = localStorage.getItem('authToken');
-      
-      console.log('Auth token from localStorage:', authToken ? 'Found token' : 'No token');
-      
       // 先尝试使用API，即使没有令牌也尝试
       return Promise.all([
         AdminApiService.getAllProducts().catch(error => {
