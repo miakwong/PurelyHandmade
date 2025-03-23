@@ -26,6 +26,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- API Helper -->
+  <script src="/src/client/js/api-loader-helper.js"></script>
+
 </head>
 <body>
 
@@ -146,85 +149,40 @@
       return;
     }
     
-    // 从 localStorage 获取产品数据
-    const productsData = localStorage.getItem('products');
-    console.log('Products data from localStorage:', productsData ? 'Found' : 'Not found');
+    // Show loading state
+    productsContainer.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading products...</span>
+        </div>
+        <p class="mt-2">Loading new arrivals...</p>
+      </div>
+    `;
     
-    if (!productsData) {
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products found. Please check back later.</p></div>';
-      return;
-    }
-    
-    try {
-      const products = JSON.parse(productsData);
-      console.log('Parsed products:', products.length, 'products found');
+    // Check if the API method is available
+    if (typeof window.loadProducts === 'function') {
+      console.log('Using API loadProducts function');
       
-      // 计算一个月前的日期
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      console.log('One month ago date:', oneMonthAgo.toISOString());
-      
-      // 筛选一个月内上架的产品，并排除空产品
-      const newArrivals = products.filter(product => {
-        // 排除没有名称或图片的产品
-        if (!product.name || !product.images || product.images.length === 0) {
-          console.log('Excluding product due to missing name or images:', product.id);
-          return false;
-        }
-        
-        // 检查上架日期
-        const listingDate = new Date(product.listingDate);
-        console.log(`Product ${product.id} listing date:`, product.listingDate, 'parsed as', listingDate);
-        return !isNaN(listingDate) && listingDate >= oneMonthAgo;
+      window.loadProducts('new-products-container', {
+        newArrivals: true,
+        limit: 20
       });
+    } else {
+      console.error('API loadProducts function not available. Ensure api-data-loader.js is loaded');
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Cannot load products: API unavailable</p></div>';
       
-      console.log('Filtered new arrivals:', newArrivals.length, 'products');
-      
-      // 按上架日期降序排序（最新的在前）
-      newArrivals.sort((a, b) => new Date(b.listingDate) - new Date(a.listingDate));
-      
-      if (newArrivals.length === 0) {
-        console.log('No new arrivals found after filtering');
-        productsContainer.innerHTML = '<div class="col-12 text-center"><p>No new arrivals found. Please check back later for our latest products.</p></div>';
-        return;
-      }
-      
-      // 清空产品容器
-      productsContainer.innerHTML = '';
-      
-      // 计算每个产品的平均评分
-      newArrivals.forEach(product => {
-        if (product.reviews && product.reviews.length > 0) {
-          const totalRating = product.reviews.reduce((sum, review) => sum + review.rating, 0);
-          product.rating = totalRating / product.reviews.length;
-          console.log(`Product ${product.id} rating:`, product.rating);
-        } else {
-          product.rating = 0;
-          console.log(`Product ${product.id} has no reviews, rating set to 0`);
-        }
-      });
-      
-      // 显示产品
-      console.log('Displaying products...');
-      newArrivals.forEach(product => {
-        const productHTML = createProductCard(product);
-        productsContainer.innerHTML += productHTML;
-        console.log(`Added product ${product.id} to container`);
-      });
-      
-      // 添加"添加到购物车"按钮事件
-      document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          const productId = parseInt(this.getAttribute('data-id'));
-          addToCart(productId, 1);
+      // Try to load the API scripts and retry
+      if (typeof window.ensureApiScriptsLoaded === 'function') {
+        window.ensureApiScriptsLoaded().then(() => {
+          if (typeof window.loadProducts === 'function') {
+            console.log('API loaded successfully, retrying loadNewArrivals');
+            window.loadProducts('new-products-container', {
+              newArrivals: true,
+              limit: 20
+            });
+          }
         });
-      });
-      
-      console.log('New arrivals loaded successfully');
-    } catch (error) {
-      console.error('Error loading new arrivals:', error);
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p>Error loading products. Please try again later.</p></div>';
+      }
     }
   }
   
