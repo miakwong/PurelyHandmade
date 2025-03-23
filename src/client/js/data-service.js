@@ -182,6 +182,31 @@ const DataService = {
   },
   
   /**
+   * 获取精选设计师
+   * Get featured designers
+   * @returns {Promise<Array>} 精选设计师列表 Featured designer list
+   */
+  getFeaturedDesigners: async function() {
+    try {
+      console.log('DataService: getFeaturedDesigners() - Calling API...');
+      const result = await this.apiRequest('/designers/featured');
+      console.log('DataService: getFeaturedDesigners() - API response:', result);
+      
+      if (result.success) {
+        console.log('DataService: getFeaturedDesigners() - Successfully fetched featured designers');
+        
+        // Return the full response to allow for consistent handling at the API data loader
+        return result;
+      }
+      console.error('DataService: getFeaturedDesigners() - API request failed:', result.message);
+      return { success: false, message: result.message };
+    } catch (e) {
+      console.error('DataService: getFeaturedDesigners() - Error getting featured designers:', e);
+      return { success: false, message: e.message };
+    }
+  },
+  
+  /**
    * 按ID获取设计师
    * Get designer by ID
    * @param {number|string} id 设计师ID Designer ID
