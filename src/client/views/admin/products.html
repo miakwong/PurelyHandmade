@@ -747,7 +747,7 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有用户
   getAllUsers: function() {
-    return ApiService.get('/users?all=1');
+    return ApiService.get('/auth/profile?all=1');
   },
   
   // 获取所有产品
@@ -757,17 +757,17 @@ const AdminApiService = {
   
   // 添加新产品
   addProduct: function(productData) {
-    return ApiService.post('/products', productData);
+    return ApiService.post('/products/create', productData);
   },
   
   // 更新产品
   updateProduct: function(productId, productData) {
-    return ApiService.put(`/products/${productId}`, productData);
+    return ApiService.put(`/products/update`, { id: productId, ...productData });
   },
   
   // 删除产品
   deleteProduct: function(productId) {
-    return ApiService.delete(`/products/${productId}`);
+    return ApiService.delete(`/products?id=${productId}`);
   },
   
   // 获取所有类别
@@ -777,17 +777,17 @@ const AdminApiService = {
   
   // 添加新类别
   addCategory: function(categoryData) {
-    return ApiService.post('/categories', categoryData);
+    return ApiService.post('/categories/create', categoryData);
   },
   
   // 更新类别
   updateCategory: function(categoryId, categoryData) {
-    return ApiService.put(`/categories/${categoryId}`, categoryData);
+    return ApiService.put(`/categories/update`, { id: categoryId, ...categoryData });
   },
   
   // 删除类别
   deleteCategory: function(categoryId) {
-    return ApiService.delete(`/categories/${categoryId}`);
+    return ApiService.delete(`/categories?id=${categoryId}`);
   },
   
   // 获取所有设计师
@@ -797,7 +797,7 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
+    return ApiService.get('/orders');
   },
   
   // 获取所有评论
@@ -1501,38 +1501,43 @@ const AdminApiService = {
   }
   
   function checkAdminPermissions() {
-    if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.checkAdminPermissions === 'function') {
-      // 使用UIHelpers检查权限
-      if (UIHelpers.checkAdminPermissions()) {
-        initProductManagement();
-      }
-    } else {
-      // 后备实现
-      setTimeout(() => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          // 显示一个友好的提示，引导用户设置token
-          document.body.innerHTML = `
-            <div class="container mt-5">
-              <div class="alert alert-warning text-center p-5">
-                <h4><i class="bi bi-exclamation-triangle me-2"></i>需要授权</h4>
-                <p class="mb-4">您需要设置管理员授权令牌才能访问此页面。</p>
-                <a href="/set-token.html" class="btn btn-primary">设置授权令牌</a>
-              </div>
-            </div>
-          `;
-          return;
-        }
-        
-        const currentUser = DataService.getCurrentUser();
-        if (!currentUser || currentUser.isAdmin !== true) {
-          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+    
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      return;
+    }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
         } else {
           // 初始化产品管理
+          console.log('✅ 用户是管理员，初始化产品管理');
           initProductManagement();
         }
-      }, 100);
-    }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
   }
   
   // 查看产品评论
