@@ -154,24 +154,44 @@ class OrderController {
                 
                 // Update total amount
                 $totalAmount += $product['price'] * $item['quantity'];
-                
-                // Update product stock
-                $this->product->updateStock($item['productId'], $item['quantity']);
             }
             
             // Create order
             $orderData = [
                 'userId' => $data['userId'],
                 'totalAmount' => $totalAmount,
-                'shippingInfo' => $data['shippingInfo'] ?? null,
-                'paymentInfo' => $data['paymentInfo'] ?? null,
-                'notes' => $data['notes'] ?? null
+                'status' => 'pending'
             ];
+            
+            // Add shipping info if present
+            if (isset($data['shippingInfo'])) {
+                $orderData['shippingInfo'] = $data['shippingInfo'];
+            }
+            
+            // Add payment info if present
+            if (isset($data['paymentInfo'])) {
+                $orderData['paymentInfo'] = $data['paymentInfo'];
+            }
+            
+            // Add notes if present
+            if (isset($data['notes'])) {
+                $orderData['notes'] = $data['notes'];
+            }
             
             $orderId = $this->order->create($orderData);
             
             // Create order items
-            $this->orderItem->createOrderItems($orderId, $orderItems);
+            foreach ($orderItems as $item) {
+                $this->orderItem->create([
+                    'orderId' => $orderId,
+                    'productId' => $item['productId'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
+                
+                // Update product stock
+                $this->product->updateStock($item['productId'], $item['quantity']);
+            }
             
             // Commit transaction
             $this->db->query('COMMIT');
