@@ -279,7 +279,7 @@ window.loadCategories = async function(containerId, options = {}) {
       const imgSrc = category.image || '/src/client/assets/placeholder.jpg';
       
       const categoryHtml = `
-        <div class="col-lg-4 col-md-6 mb-4">
+        <div class="col-lg-3 col-md-4 mb-4">
           <a href="/src/client/views/product/products.html?category=${category.id}" class="category-card">
             <div class="category-img-overlay"></div>
             <img src="${imgSrc}" alt="${category.name}" class="category-img">
@@ -343,8 +343,17 @@ window.loadDesigners = async function(containerId, options = {}) {
     `;
     
     console.log(`API loadDesigners() - Fetching designers from API...`);
-    // Fetch designers from API
-    const designersData = await DataService.getAllDesigners();
+    
+    // Use the appropriate API endpoint based on options
+    let designersData;
+    if (options.featured) {
+      console.log(`API loadDesigners() - Using featured designers endpoint`);
+      designersData = await DataService.getFeaturedDesigners();
+    } else {
+      console.log(`API loadDesigners() - Using all designers endpoint`);
+      designersData = await DataService.getAllDesigners();
+    }
+    
     console.log(`API loadDesigners() - API response:`, designersData);
     
     // Initialize designers array
@@ -374,12 +383,6 @@ window.loadDesigners = async function(containerId, options = {}) {
     }
     
     console.log(`API loadDesigners() - Final designers array:`, designers);
-    
-    if (options.featured) {
-      console.log(`API loadDesigners() - Filtering for featured designers`);
-      designers = designers.filter(designer => designer.featured);
-      console.log(`API loadDesigners() - Featured designers count:`, designers.length);
-    }
     
     if (options.limit && designers.length > options.limit) {
       console.log(`API loadDesigners() - Limiting to ${options.limit} designers`);

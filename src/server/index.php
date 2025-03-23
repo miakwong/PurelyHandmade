@@ -51,6 +51,7 @@ $routes = [
     '/designers/detail' => 'api/designers/detail.php',
     '/designers/create' => 'api/designers/create.php',
     '/designers/update' => 'api/designers/update.php',
+    '/designers/featured' => 'api/designers/featured.php',
     
     // Review routes
     '/reviews' => 'api/reviews/index.php',
