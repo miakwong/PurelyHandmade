@@ -139,8 +139,11 @@ class Product {
         $offset = ($page - 1) * $limit;
         $searchTerm = "%$keyword%";
         
-        $whereClause = "WHERE p.active = 1 AND (p.name LIKE :search OR p.description LIKE :search)";
-        $params = ['search' => $searchTerm];
+        $whereClause = "WHERE p.active = 1 AND (p.name LIKE :search_name OR p.description LIKE :search_desc)";
+        $params = [
+            'search_name' => $searchTerm,
+            'search_desc' => $searchTerm
+        ];
         
         // Count total products matching the search
         $countSql = "SELECT COUNT(*) as total FROM $this->table p $whereClause";
