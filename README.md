@@ -259,4 +259,49 @@ The project includes test scripts for login functionality and user profile pages
 
 ## License
 
-[MIT License](LICENSE) 
+[MIT License](LICENSE)
+
+# PurelyHandmade 网站导航指南
+
+## 网站页面访问链接
+
+本网站通过PHP本地服务器提供服务，主要页面的访问链接如下：
+
+### 产品相关页面
+
+- **产品列表页面**：
+  http://localhost:8000/src/client/views/product/product-list.html
+
+- **产品详情页面**：
+  http://localhost:8000/src/client/views/product/product_detail.html?id=17
+  (可将ID替换为其他产品ID)
+
+- **分类列表页面**：
+  http://localhost:8000/src/client/views/product/category-list.html
+
+- **分类产品页面**：
+  http://localhost:8000/src/client/views/product/category-page.html?id=10
+  (可将ID替换为其他分类ID)
+
+### 其他页面
+
+- **特卖页面**：
+  http://localhost:8000/src/client/views/on-sale.html
+
+- **关于我们**：
+  http://localhost:8000/src/client/views/about.html
+
+## API访问
+
+API基础URL为：`http://localhost:8000/api`
+
+可用的API端点：
+- `/products` - 获取所有产品
+- `/products/detail?id=17` - 获取特定产品详情
+- `/categories` - 获取所有分类
+- `/designers` - 获取所有设计师
+- `/designers/featured` - 获取精选设计师
+
+## 开发说明
+
+本网站现已完成从localStorage本地存储到后端API数据获取的迁移，所有页面都能够正确地从后端数据库获取数据并显示。 
