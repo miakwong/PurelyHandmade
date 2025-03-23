@@ -36,3 +36,5 @@ Thumbs.db
 # Log files
 logs/
 *.log
+.env
+logs/order.log
