@@ -66,8 +66,10 @@ if (document.readyState === 'complete') {
         console.log(`Found container: ${containerId}, triggering data load`);
         // Try to trigger the appropriate load function based on the container
         if (containerId.includes('product') && typeof window.loadProducts === 'function') {
+          console.log(`Auto-loading products for container: "${containerId}"`);
           window.loadProducts(containerId);
         } else if (containerId.includes('designer') && typeof window.loadDesigners === 'function') {
+          console.log(`Auto-loading designers for container: "${containerId}"`);
           window.loadDesigners(containerId);
         }
       }
