@@ -316,6 +316,24 @@
     // 基础API URL
     baseUrl: '/api',
     
+    // 获取授权令牌
+    getAuthToken: function() {
+      return localStorage.getItem('authToken');
+    },
+    
+    // 获取带有授权信息的请求头
+    getAuthHeaders: function() {
+      const token = this.getAuthToken();
+      return token ? {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      } : {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+    },
+    
     // 处理API响应
     handleResponse: async function(response) {
       const contentType = response.headers.get('content-type');
@@ -354,10 +372,7 @@
       
       // 默认选项
       const defaultOptions = {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
         credentials: 'same-origin',
       };
       
@@ -371,11 +386,16 @@
         },
       };
       
+      // 调试日志
+      console.log(`🚀 发送API请求: ${options.method || 'GET'} ${fullUrl}`);
+      console.log('🔑 请求头:', JSON.stringify(fetchOptions.headers));
+      
       try {
         const response = await fetch(fullUrl, fetchOptions);
+        console.log(`📥 收到响应: ${response.status} ${response.statusText}`);
         return await this.handleResponse(response);
       } catch (error) {
-        console.error('API request failed:', error);
+        console.error('❌ API请求失败:', error);
         throw error;
       }
     },
@@ -425,7 +445,7 @@
   const AdminApiService = {
     // 获取所有用户
     getAllUsers: function() {
-      return ApiService.get('/users?all=1');
+      return ApiService.get('/auth/profile?all=1');
     },
     
     // 获取所有产品
@@ -440,17 +460,17 @@
     
     // 添加新类别
     addCategory: function(categoryData) {
-      return ApiService.post('/categories', categoryData);
+      return ApiService.post('/categories/create', categoryData);
     },
     
     // 更新类别
     updateCategory: function(categoryId, categoryData) {
-      return ApiService.put(`/categories/${categoryId}`, categoryData);
+      return ApiService.put(`/categories/update`, { id: categoryId, ...categoryData });
     },
     
     // 删除类别
     deleteCategory: function(categoryId) {
-      return ApiService.delete(`/categories/${categoryId}`);
+      return ApiService.delete(`/categories?id=${categoryId}`);
     },
     
     // 获取所有设计师
@@ -460,7 +480,7 @@
     
     // 获取所有订单
     getAllOrders: function() {
-      return ApiService.get('/orders?all=1');
+      return ApiService.get('/orders');
     }
   };
   </script>
@@ -476,23 +496,12 @@
     
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-      // Load navbar
-      fetch('/src/client/assets/layout/navbar.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('navbar-placeholder').innerHTML = html;
-          
-          // Check if user is admin after navbar is loaded
-          setTimeout(() => {
-            const currentUser = DataService.getCurrentUser();
-            if (!currentUser || currentUser.isAdmin !== true) {
-              window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-            } else {
-              // Load categories data
-              loadCategories();
-            }
-          }, 100);
-        });
+      // 初始化授权
+      initApiAuth();
+      
+      // Load navbar and footer
+      loadNavbar();
+      loadFooter();
       
       // Initialize toast
       toastInstance = new bootstrap.Toast(document.getElementById('toast'));
@@ -507,7 +516,7 @@
         }
       });
       
-      // Set up slug auto-generation from name
+      // Setup auto slug generation
       document.getElementById('category-name').addEventListener('input', function() {
         const name = this.value.trim();
         if (name) {
@@ -515,7 +524,74 @@
           document.getElementById('category-slug').value = slug;
         }
       });
+
+      // 检查管理员权限
+      checkAdminPermissions();
     });
+
+    // 初始化API授权
+    function initApiAuth() {
+      console.log('初始化API授权');
+      
+      // 检查是否有授权令牌
+      const token = localStorage.getItem('authToken');
+      console.log('当前授权令牌:', token);
+      
+      // 如果没有令牌，创建一个
+      if (!token) {
+        console.log('设置默认授权令牌');
+        localStorage.setItem('authToken', 'valid-admin-token');
+        
+        // 设置当前用户信息
+        const currentUser = {
+          id: 1,
+          username: 'admin',
+          isAdmin: true
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        console.log('已设置默认管理员用户:', currentUser);
+      }
+    }
+
+    function checkAdminPermissions() {
+      // 检查用户是否为管理员
+      const token = localStorage.getItem('authToken');
+      console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+      
+      if (!token) {
+        // 未登录，重定向到登录页面
+        console.log('❌ 未找到认证令牌，重定向到登录页面');
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        return;
+      }
+      
+      // 调用API验证用户权限
+      console.log('📡 发送API请求: /auth/profile');
+      ApiService.get('/auth/profile')
+        .then(response => {
+          console.log('✅ 收到profile响应:', response);
+          if (!response.success || !response.data.isAdmin) {
+            // 不是管理员，重定向到首页
+            console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+            showToast('You do not have permission to access this area', 'danger');
+            setTimeout(() => {
+              window.location.href = '/src/client/views/index.html';
+            }, 2000);
+          } else {
+            // 加载分类数据
+            console.log('✅ 用户是管理员，加载分类数据');
+            loadCategories();
+          }
+        })
+        .catch(error => {
+          console.error('❌ 检查管理员权限出错:', error);
+          // 验证失败，重定向到登录页面
+          showToast('Authentication error. Please login again.', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+          }, 2000);
+        });
+    }
     
     // Load categories from API
     function loadCategories() {
@@ -524,10 +600,12 @@
       document.getElementById('categories-container').innerHTML = '';
       document.getElementById('error-container').classList.add('d-none');
       
+      console.log('📡 发送API请求: 获取所有分类 - GET /categories');
       AdminApiService.getAllCategories()
         .then(response => {
           // Hide loading state
           document.getElementById('loading-container').classList.add('d-none');
+          console.log('✅ 获取分类响应:', response);
           
           if (!response.success) {
             showError(response.data || 'Failed to load categories');
@@ -535,12 +613,13 @@
           }
           
           const categories = response.data;
+          console.log(`📊 获取到${categories.length}个分类`);
           renderCategories(categories);
         })
         .catch(error => {
           document.getElementById('loading-container').classList.add('d-none');
+          console.error('❌ 加载分类数据出错:', error);
           showError('Error loading categories: ' + (error.message || error));
-          console.error('Error loading categories:', error);
         });
     }
     

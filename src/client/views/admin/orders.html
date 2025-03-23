@@ -407,7 +407,7 @@ const ApiService = {
 const AdminApiService = {
   // 获取所有用户
   getAllUsers: function() {
-    return ApiService.get('/users?all=1');
+    return ApiService.get('/auth/profile?all=1');
   },
   
   // 获取所有产品
@@ -427,34 +427,33 @@ const AdminApiService = {
   
   // 获取所有订单
   getAllOrders: function() {
-    // 修改API路径，删除额外的参数，因为后端会自动根据用户角色返回所有订单
     return ApiService.get('/orders');
   },
   
   // 更新订单状态
   updateOrderStatus: function(orderId, status) {
-    // 修改为直接使用PUT /orders/:id 端点
-    return ApiService.put(`/orders/${orderId}`, {
+    return ApiService.put(`/orders/update`, {
+      id: orderId,
       status: status
     });
   },
   
   // 获取订单详情
   getOrderById: function(orderId) {
-    return ApiService.get(`/orders/${orderId}`);
+    return ApiService.get(`/orders/detail?id=${orderId}`);
   },
   
   // 处理订单
   handleOrder: function(orderId, action) {
-    // 添加新的订单处理端点
-    return ApiService.post(`/orders/${orderId}/handle`, {
+    return ApiService.post(`/orders/update`, {
+      id: orderId,
       action: action
     });
   },
   
   // 删除订单
   deleteOrder: function(orderId) {
-    return ApiService.delete(`/orders/${orderId}`);
+    return ApiService.delete(`/orders?id=${orderId}`);
   }
 };
 </script>
@@ -484,37 +483,44 @@ const AdminApiService = {
     const tableBody = document.getElementById('order-table-body');
     const noOrdersMessage = document.getElementById('no-orders-message');
     
-    // 显示加载中
+    // 显示加载状态
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center py-5">
+        <td colspan="6" class="text-center py-4">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <p class="mt-3">Loading orders...</p>
+          <p class="mt-2 text-muted">Loading orders...</p>
         </td>
       </tr>
     `;
     
     try {
       // 从API获取订单数据
+      console.log('📡 发送API请求: 获取所有订单 - GET /orders');
       const response = await AdminApiService.getAllOrders();
+      console.log('✅ 获取订单响应:', response);
       
       if (!response || !response.success) {
         throw new Error(response?.data || 'Failed to load orders');
       }
       
       let orders = response.data || [];
+      console.log(`📊 获取到${orders.length}个订单`);
       
       // 应用筛选
       if (Object.values(currentFilters).some(v => v)) {
+        console.log('🔍 应用订单筛选条件:', currentFilters);
         try {
           // 获取所有用户，用于筛选
+          console.log('📡 获取用户数据用于订单筛选');
           const usersResponse = await AdminApiService.getAllUsers();
+          console.log('✅ 获取用户响应:', usersResponse);
           const users = (usersResponse && usersResponse.success) ? usersResponse.data : [];
           orders = filterOrders(orders, users);
+          console.log(`📊 筛选后剩余${orders.length}个订单`);
         } catch (error) {
-          console.error('Error fetching users for filtering:', error);
+          console.error('❌ 获取用户用于筛选时出错:', error);
           orders = filterOrders(orders, []);
         }
       }
@@ -524,6 +530,7 @@ const AdminApiService = {
       
       // 显示没有订单的消息（如果没有订单）
       if (!orders || !orders.length) {
+        console.log('📊 没有找到订单');
         noOrdersMessage.classList.remove('d-none');
         return;
       }
@@ -532,10 +539,11 @@ const AdminApiService = {
       noOrdersMessage.classList.add('d-none');
       
       // 渲染订单数据
+      console.log('🖌️ 渲染订单表格');
       renderOrdersTable(orders, tableBody);
       
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.error('❌ 加载订单出错:', error);
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center py-4">
@@ -569,13 +577,15 @@ const AdminApiService = {
         } else if (order.userId) {
           // 如果订单上没有用户信息，尝试获取
           try {
+            console.log(`📡 获取订单用户信息 - userId: ${order.userId}`);
             const userResponse = await ApiService.get(`/users/${order.userId}`);
+            console.log('✅ 获取用户信息响应:', userResponse);
             if (userResponse && userResponse.success && userResponse.data) {
               const user = userResponse.data;
               userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
             }
           } catch (error) {
-            console.error('Error fetching user data:', error);
+            console.error('❌ 获取用户数据时出错:', error);
           }
         }
         
@@ -656,7 +666,9 @@ const AdminApiService = {
       showToast('Loading order details...', 'info');
       
       // 从API获取订单详情
+      console.log(`📡 发送API请求: 获取订单详情 - GET /orders/detail?id=${orderId}`);
       const response = await AdminApiService.getOrderById(orderId);
+      console.log('✅ 获取订单详情响应:', response);
       
       if (!response || !response.success) {
         throw new Error(response?.data || 'Failed to load order details');
@@ -674,12 +686,14 @@ const AdminApiService = {
         user = order.user;
       } else if (order.userId) {
         try {
+          console.log(`📡 获取订单用户信息 - userId: ${order.userId}`);
           const userResponse = await ApiService.get(`/users/${order.userId}`);
+          console.log('✅ 获取用户信息响应:', userResponse);
           if (userResponse && userResponse.success && userResponse.data) {
             user = userResponse.data;
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          console.error('❌ 获取用户数据时出错:', error);
         }
       }
       
@@ -800,10 +814,12 @@ const AdminApiService = {
   async function updateOrderStatus(orderId, newStatus) {
     try {
       // 显示加载提示
-      showToast(`Updating order status to ${newStatus}...`, 'info');
+      showToast('Updating order status...', 'info');
       
       // 通过API更新订单状态
+      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, status: ${newStatus})`);
       const response = await AdminApiService.updateOrderStatus(orderId, newStatus);
+      console.log('✅ 更新订单状态响应:', response);
       
       if (!response || !response.success) {
         throw new Error(response?.data || 'Failed to update order status');
@@ -819,10 +835,10 @@ const AdminApiService = {
       await loadOrders();
       
       // 显示成功消息
-      showToast(`Order status updated to ${newStatus}`, 'success');
+      showToast('Order status updated successfully', 'success');
       
     } catch (error) {
-      console.error('Error updating order status:', error);
+      console.error('❌ 更新订单状态时出错:', error);
       showToast(`Error updating order status: ${error.message}`, 'danger');
     }
   }
@@ -835,7 +851,9 @@ const AdminApiService = {
         showToast('Deleting order...', 'info');
         
         // 通过API删除订单
+        console.log(`📡 发送API请求: 删除订单 - DELETE /orders?id=${orderId}`);
         const response = await AdminApiService.deleteOrder(orderId);
+        console.log('✅ 删除订单响应:', response);
         
         if (!response || !response.success) {
           throw new Error(response?.data || 'Failed to delete order');
@@ -848,7 +866,7 @@ const AdminApiService = {
         showToast('Order deleted successfully', 'success');
         
       } catch (error) {
-        console.error('Error deleting order:', error);
+        console.error('❌ 删除订单时出错:', error);
         showToast(`Error deleting order: ${error.message}`, 'danger');
       }
     }
@@ -857,29 +875,35 @@ const AdminApiService = {
   function checkAdminPermissions() {
     // 检查用户是否为管理员
     const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
     
     if (!token) {
       // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
       return;
     }
     
     // 调用API验证用户权限
-    ApiService.get('/users/profile')
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
       .then(response => {
+        console.log('✅ 收到profile响应:', response);
         if (!response.success || !response.data.isAdmin) {
           // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
           showToast('You do not have permission to access this area', 'danger');
           setTimeout(() => {
             window.location.href = '/src/client/views/index.html';
           }, 2000);
         } else {
           // 加载订单数据
+          console.log('✅ 用户是管理员，加载订单数据');
           loadOrders();
         }
       })
       .catch(error => {
-        console.error('Error checking admin permissions:', error);
+        console.error('❌ 检查管理员权限出错:', error);
         // 验证失败，重定向到登录页面
         showToast('Authentication error. Please login again.', 'danger');
         setTimeout(() => {

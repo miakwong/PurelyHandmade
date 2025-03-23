@@ -255,127 +255,175 @@ const DataService = {
   },
   
   /**
+   * 获取当前登录用户信息
+   * @returns {Object|null} 当前用户信息或null
+   */
+  getCurrentUser: function() {
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      console.error('Error parsing current user:', e);
+      return null;
+    }
+  },
+  
+  /**
+   * 获取当前用户信息（从API）
+   * Get current user profile from API
+   * @returns {Promise<Object|null>} 用户对象或null User object or null
+   */
+  getUserProfile: async function() {
+    try {
+      const result = await this.apiRequest('/auth/profile', {
+        method: 'GET'
+      });
+      
+      if (result.success) {
+        // 更新本地存储的用户信息
+        this.setCurrentUser(result.data, this.getAuthToken());
+        return result.data;
+      }
+      return null;
+    } catch (e) {
+      console.error('Error getting user profile:', e);
+      return null;
+    }
+  },
+  
+  /**
+   * 设置当前登录用户
+   * @param {Object} user 用户信息对象
+   * @param {string} token JWT令牌
+   */
+  setCurrentUser: function(user, token) {
+    if (user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    }
+    
+    if (token) {
+      localStorage.setItem('authToken', token);
+    }
+  },
+  
+  /**
+   * 清除当前用户登录状态
+   */
+  clearCurrentUser: function() {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authToken');
+  },
+  
+  /**
    * 获取购物车数据
-   * Get cart data
-   * @returns {Array} 购物车项目列表 Cart items list
+   * @returns {Array} 购物车项目数组
    */
   getCart: function() {
     try {
-      return JSON.parse(localStorage.getItem('cart')) || [];
+      const cartStr = localStorage.getItem('cart');
+      return cartStr ? JSON.parse(cartStr) : [];
     } catch (e) {
-      console.error('Error getting cart:', e);
+      console.error('Error parsing cart:', e);
       return [];
     }
   },
   
   /**
-   * 更新购物车
-   * Update cart
-   * @param {Array} cart 购物车数据 Cart data
-   * @returns {boolean} 成功状态 Success status
+   * 保存购物车数据
+   * @param {Array} cartItems 购物车项目数组
    */
-  updateCart: function(cart) {
-    try {
-      localStorage.setItem('cart', JSON.stringify(cart));
-      return true;
-    } catch (e) {
-      console.error('Error updating cart:', e);
-      return false;
-    }
+  saveCart: function(cartItems) {
+    localStorage.setItem('cart', JSON.stringify(cartItems || []));
   },
   
   /**
-   * 添加产品到购物车
-   * Add product to cart
-   * @param {string} productId 产品ID Product ID
-   * @param {number} quantity 数量 Quantity
-   * @returns {boolean} 成功状态 Success status
+   * 添加商品到购物车
+   * @param {Object} product 产品信息
+   * @param {number} quantity 数量
    */
-  addToCart: async function(productId, quantity = 1) {
-    try {
-      const product = await this.getProductById(productId);
-      if (!product) {
-        console.error('Product not found:', productId);
-        return false;
-      }
-      
-      const cart = this.getCart();
-      const existingItem = cart.find(item => item.productId == productId);
-      
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        cart.push({
-          productId: productId,
-          quantity: quantity
-        });
-      }
-      
-      return this.updateCart(cart);
-    } catch (e) {
-      console.error('Error adding to cart:', e);
-      return false;
+  addToCart: function(product, quantity = 1) {
+    if (!product || !product.id) return false;
+    
+    const cart = this.getCart();
+    
+    // 检查产品是否已在购物车中
+    const existingItemIndex = cart.findIndex(item => item.id === product.id);
+    
+    if (existingItemIndex >= 0) {
+      // 更新现有商品数量
+      cart[existingItemIndex].quantity += quantity;
+    } else {
+      // 添加新商品
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: quantity
+      });
     }
+    
+    this.saveCart(cart);
+    return true;
   },
   
   /**
-   * 从购物车中移除产品
-   * Remove product from cart
-   * @param {string} productId 产品ID Product ID
-   * @returns {boolean} 成功状态 Success status
+   * 从购物车移除商品
+   * @param {string} productId 产品ID
    */
   removeFromCart: function(productId) {
-    try {
-      const cart = this.getCart();
-      const updatedCart = cart.filter(item => item.productId != productId);
-      return this.updateCart(updatedCart);
-    } catch (e) {
-      console.error('Error removing from cart:', e);
-      return false;
-    }
+    if (!productId) return false;
+    
+    let cart = this.getCart();
+    cart = cart.filter(item => item.id !== productId);
+    
+    this.saveCart(cart);
+    return true;
   },
   
   /**
-   * 更新购物车中产品数量
-   * Update product quantity in cart
-   * @param {string} productId 产品ID Product ID
-   * @param {number} quantity 新数量 New quantity
-   * @returns {boolean} 成功状态 Success status
+   * 更新购物车中商品数量
+   * @param {string} productId 产品ID
+   * @param {number} quantity 新数量
    */
   updateCartItemQuantity: function(productId, quantity) {
-    try {
-      if (quantity <= 0) {
-        return this.removeFromCart(productId);
-      }
-      
-      const cart = this.getCart();
-      const item = cart.find(item => item.productId == productId);
-      
-      if (item) {
-        item.quantity = quantity;
-        return this.updateCart(cart);
-      }
-      
-      return false;
-    } catch (e) {
-      console.error('Error updating cart item quantity:', e);
-      return false;
+    if (!productId || quantity < 1) return false;
+    
+    const cart = this.getCart();
+    const itemIndex = cart.findIndex(item => item.id === productId);
+    
+    if (itemIndex >= 0) {
+      cart[itemIndex].quantity = quantity;
+      this.saveCart(cart);
+      return true;
     }
+    
+    return false;
   },
   
   /**
    * 清空购物车
-   * Clear cart
-   * @returns {boolean} 成功状态 Success status
    */
   clearCart: function() {
-    try {
-      localStorage.setItem('cart', '[]');
-      return true;
-    } catch (e) {
-      console.error('Error clearing cart:', e);
-      return false;
-    }
+    localStorage.removeItem('cart');
+  },
+  
+  /**
+   * 获取购物车总金额
+   * @returns {number} 总金额
+   */
+  getCartTotal: function() {
+    const cart = this.getCart();
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  },
+  
+  /**
+   * 获取购物车商品总数
+   * @returns {number} 商品总数
+   */
+  getCartItemCount: function() {
+    const cart = this.getCart();
+    return cart.reduce((count, item) => count + item.quantity, 0);
   },
   
   /**
@@ -418,8 +466,7 @@ const DataService = {
       
       if (result.success) {
         const { user, token } = result.data;
-        this.setCurrentUser(user);
-        this.setAuthToken(token);
+        this.setCurrentUser(user, token);
         return { success: true, user };
       } else {
         return { success: false, message: result.message || '登录失败' };
@@ -427,76 +474,6 @@ const DataService = {
     } catch (e) {
       console.error('Error during login:', e);
       return { success: false, message: '登录时发生错误，请稍后再试' };
-    }
-  },
-  
-  /**
-   * 获取当前用户
-   * Get current user
-   * @returns {Object|null} 用户对象或null User object or null
-   */
-  getCurrentUser: function() {
-    try {
-      const userStr = localStorage.getItem('currentUser');
-      return userStr ? JSON.parse(userStr) : null;
-    } catch (e) {
-      console.error('Error getting current user:', e);
-      return null;
-    }
-  },
-  
-  /**
-   * 获取当前用户信息（从API）
-   * Get current user profile from API
-   * @returns {Promise<Object|null>} 用户对象或null User object or null
-   */
-  getUserProfile: async function() {
-    try {
-      const result = await this.apiRequest('/auth/profile', {
-        method: 'GET'
-      });
-      
-      if (result.success) {
-        // 更新本地存储的用户信息
-        this.setCurrentUser(result.data);
-        return result.data;
-      }
-      return null;
-    } catch (e) {
-      console.error('Error getting user profile:', e);
-      return null;
-    }
-  },
-  
-  /**
-   * 设置当前用户
-   * Set current user
-   * @param {Object} user 用户对象 User object
-   * @returns {boolean} 成功状态 Success status
-   */
-  setCurrentUser: function(user) {
-    try {
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      return true;
-    } catch (e) {
-      console.error('Error setting current user:', e);
-      return false;
-    }
-  },
-  
-  /**
-   * 用户登出
-   * User logout
-   * @returns {boolean} 成功状态 Success status
-   */
-  logout: function() {
-    try {
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('authToken');
-      return true;
-    } catch (e) {
-      console.error('Error during logout:', e);
-      return false;
     }
   },
   

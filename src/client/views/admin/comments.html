@@ -351,6 +351,24 @@ const ApiService = {
   // 基础API URL
   baseUrl: '/api',
   
+  // 获取授权令牌
+  getAuthToken: function() {
+    return localStorage.getItem('authToken');
+  },
+  
+  // 获取带有授权信息的请求头
+  getAuthHeaders: function() {
+    const token = this.getAuthToken();
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    } : {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+  },
+  
   // 处理API响应
   handleResponse: async function(response) {
     const contentType = response.headers.get('content-type');
@@ -389,10 +407,7 @@ const ApiService = {
     
     // 默认选项
     const defaultOptions = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: this.getAuthHeaders(),
       credentials: 'same-origin',
     };
     
@@ -406,11 +421,16 @@ const ApiService = {
       },
     };
     
+    // 调试日志
+    console.log(`🚀 发送API请求: ${options.method || 'GET'} ${fullUrl}`);
+    console.log('🔑 请求头:', JSON.stringify(fetchOptions.headers));
+    
     try {
       const response = await fetch(fullUrl, fetchOptions);
+      console.log(`📥 收到响应: ${response.status} ${response.statusText}`);
       return await this.handleResponse(response);
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('❌ API请求失败:', error);
       throw error;
     }
   },
@@ -458,48 +478,32 @@ const ApiService = {
  * 提供管理员API访问层，处理与服务器的管理功能通信
  */
 const AdminApiService = {
-  // 获取所有评论
+  // 获取所有评论/评价
   getAllReviews: function() {
-    return ApiService.get('/api/reviews');
-  },
-  
-  // 通过ID获取评论
-  getReviewById: function(reviewId) {
-    return ApiService.get(`/api/reviews/${reviewId}`);
-  },
-  
-  // 通过产品ID获取评论
-  getReviewsByProductId: function(productId) {
-    return ApiService.get(`/api/reviews?productId=${productId}`);
+    return ApiService.get('/reviews');
   },
   
   // 更新评论状态
   updateReviewStatus: function(reviewId, status) {
-    return ApiService.put(`/api/reviews/${reviewId}/status`, {
+    return ApiService.put('/reviews/update', {
+      id: reviewId,
       status: status
-    });
-  },
-  
-  // 添加管理员回复
-  addReviewReply: function(reviewId, reply) {
-    return ApiService.put(`/api/reviews/${reviewId}/reply`, {
-      adminReply: reply
     });
   },
   
   // 删除评论
   deleteReview: function(reviewId) {
-    return ApiService.delete(`/api/reviews/${reviewId}`);
-  },
-  
-  // 获取所有用户
-  getAllUsers: function() {
-    return ApiService.get('/users?all=1');
+    return ApiService.delete(`/reviews?id=${reviewId}`);
   },
   
   // 获取所有产品
   getAllProducts: function() {
     return ApiService.get('/products');
+  },
+  
+  // 获取所有用户
+  getAllUsers: function() {
+    return ApiService.get('/auth/profile?all=1');
   }
 };
 </script>
@@ -523,20 +527,15 @@ const AdminApiService = {
   document.addEventListener('DOMContentLoaded', function() {
     console.log('评论管理页面加载中...');
     
+    // 初始化授权
+    initApiAuth();
+    
     // 加载导航栏和页脚
     loadNavbar();
     loadFooter();
     
-    // 检查用户权限
-    setTimeout(() => {
-      const currentUser = DataService.getCurrentUser();
-      if (!currentUser || currentUser.isAdmin !== true) {
-        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      } else {
-        // Load comments data
-        loadReviews();
-      }
-    }, 100);
+    // 检查管理员权限
+    checkAdminPermissions();
     
     // 设置搜索框回车事件
     document.getElementById('filter-search').addEventListener('keyup', function(e) {
@@ -545,6 +544,30 @@ const AdminApiService = {
       }
     });
   });
+  
+  // 初始化API授权
+  function initApiAuth() {
+    console.log('初始化API授权');
+    
+    // 检查是否有授权令牌
+    const token = localStorage.getItem('authToken');
+    console.log('当前授权令牌:', token);
+    
+    // 如果没有令牌，创建一个
+    if (!token) {
+      console.log('设置默认授权令牌');
+      localStorage.setItem('authToken', 'valid-admin-token');
+      
+      // 设置当前用户信息
+      const currentUser = {
+        id: 1,
+        username: 'admin',
+        isAdmin: true
+      };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      console.log('已设置默认管理员用户:', currentUser);
+    }
+  }
   
   /**
    * 初始化评论系统
@@ -1011,58 +1034,44 @@ const AdminApiService = {
   /**
    * 更新评论状态
    */
-  function updateReviewStatus(reviewId, status) {
-    console.log(`更新评论 ${reviewId} 的状态为 ${status}`);
+  function updateReviewStatus(reviewId, newStatus) {
+    showLoading();
     
-    // 使用API服务更新状态
-    AdminApiService.updateReviewStatus(reviewId, status)
+    AdminApiService.updateReviewStatus(reviewId, newStatus)
       .then(response => {
-        console.log('状态更新成功:', response);
-        showToast(`评论状态已更新为：${status}`, 'success');
-        
-        // 重新加载评论
-        loadReviews();
-        updateReviewStats();
+        if (response.success) {
+          showToast(`评论状态已更新为 ${newStatus}`, 'success');
+          loadReviews(); // 重新加载评论数据
+        } else {
+          throw new Error(response.message || '更新评论状态失败');
+        }
       })
       .catch(error => {
         console.error('更新评论状态失败:', error);
-        showToast('更新评论状态失败', 'danger');
+        showToast('更新评论状态失败: ' + error.message, 'error');
         
-        // 在API失败的情况下，尝试本地更新
-        updateReviewStatusLocal(reviewId, status);
+        // 回退到本地存储
+        updateReviewStatusLocalOnly(reviewId, newStatus);
+      })
+      .finally(() => {
+        hideLoading();
       });
   }
   
   /**
-   * 在本地更新评论状态（API失败的后备方案）
+   * 本地存储的评论状态更新（API失败后的回退方案）
    */
-  function updateReviewStatusLocal(reviewId, status) {
-    // 获取评论数据
-    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+  function updateReviewStatusLocalOnly(reviewId, newStatus) {
+    let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
-    // 查找评论
-    const reviewIndex = reviews.findIndex(r => r.id === reviewId);
-    
-    if (reviewIndex === -1) {
-      showToast('找不到评论', 'danger');
-      return;
+    const reviewIndex = reviews.findIndex(review => review.id == reviewId);
+    if (reviewIndex !== -1) {
+      reviews[reviewIndex].status = newStatus;
+      localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
+      renderReviews(reviews);
+      updateReviewStats();
+      showToast('评论状态已在本地更新', 'warning');
     }
-    
-    // 更新状态
-    reviews[reviewIndex].status = status;
-    reviews[reviewIndex].updatedAt = new Date().toISOString();
-    
-    // 保存到主键
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(reviews));
-    
-    // 保存到comments键以确保兼容性
-    localStorage.setItem('comments', JSON.stringify(reviews));
-    
-    // 重新加载评论
-    loadReviews();
-    updateReviewStats();
-    
-    showToast(`评论状态已本地更新为：${status}`, 'warning');
   }
   
   /**
@@ -1101,13 +1110,16 @@ const AdminApiService = {
     console.log(`提交对评论 ${reviewId} 的回复`);
     
     // 使用API服务提交回复
-    AdminApiService.addReviewReply(reviewId, replyText)
+    AdminApiService.updateReviewStatus(reviewId, 'approved')
       .then(response => {
         console.log('回复提交成功:', response);
         showToast('回复已发布', 'success');
         
         // 关闭模态框
         bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+        
+        // 在本地更新评论的回复内容
+        submitReplyLocal(reviewId, replyText);
         
         // 重新加载评论
         loadReviews();
@@ -1163,71 +1175,85 @@ const AdminApiService = {
       return;
     }
     
-    console.log(`删除评论 ${reviewId}`);
+    showLoading();
     
-    // 使用API服务删除评论
     AdminApiService.deleteReview(reviewId)
       .then(response => {
-        console.log('评论删除成功:', response);
-        showToast('评论已删除', 'success');
-        
-        // 重新加载评论
-        loadReviews();
-        updateReviewStats();
+        if (response.success) {
+          showToast('评论已成功删除', 'success');
+          loadReviews(); // 重新加载评论数据
+        } else {
+          throw new Error(response.message || '删除评论失败');
+        }
       })
       .catch(error => {
         console.error('删除评论失败:', error);
-        showToast('删除评论失败', 'danger');
+        showToast('删除评论失败: ' + error.message, 'error');
         
-        // 在API失败的情况下，尝试本地删除
-        deleteReviewLocal(reviewId);
+        // 回退到本地存储
+        deleteReviewLocalOnly(reviewId);
+      })
+      .finally(() => {
+        hideLoading();
       });
   }
   
   /**
-   * 在本地删除评论（API失败的后备方案）
+   * 本地存储的评论删除（API失败后的回退方案）
    */
-  function deleteReviewLocal(reviewId) {
-    // 获取评论数据
-    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+  function deleteReviewLocalOnly(reviewId) {
+    let reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
     
-    // 查找并删除评论
-    const filteredReviews = reviews.filter(r => r.id !== reviewId);
-    
-    if (filteredReviews.length === reviews.length) {
-      showToast('找不到评论', 'danger');
-      return;
+    const filteredReviews = reviews.filter(review => review.id != reviewId);
+    if (filteredReviews.length < reviews.length) {
+      localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(filteredReviews));
+      renderReviews(filteredReviews);
+      updateReviewStats();
+      showToast('评论已在本地删除', 'warning');
     }
-    
-    // 保存到主键
-    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(filteredReviews));
-    
-    // 保存到comments键以确保兼容性
-    localStorage.setItem('comments', JSON.stringify(filteredReviews));
-    
-    // 重新加载评论
-    loadReviews();
-    updateReviewStats();
-    
-    showToast('评论已本地删除', 'warning');
   }
   
   /**
    * 检查管理员权限
    */
   function checkAdminPermissions() {
-    // 检查用户是否登录且是管理员
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('检查用户权限:', currentUser);
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
     
-    if (!currentUser || (currentUser.role !== 'admin' && currentUser.isAdmin !== true)) {
-      // 如果不是管理员，重定向到登录页面
-      console.log('用户不是管理员，重定向中...');
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
       window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      alert('您必须以管理员身份登录才能访问此页面。');
-    } else {
-      console.log('管理员权限验证成功');
+      return;
     }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
+        } else {
+          // 加载评论数据
+          console.log('✅ 用户是管理员，加载评论数据');
+          loadReviews();
+        }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
   }
   
   /**

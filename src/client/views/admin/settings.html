@@ -157,23 +157,261 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/src/client/js/common.js"></script>
 <script>
+  /**
+   * API Service for Purely Handmade
+   */
+  const ApiService = {
+    // 基础API URL
+    baseUrl: '/api',
+    
+    // 处理API响应
+    handleResponse: async function(response) {
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      
+      // 如果状态码不在2xx范围内，抛出错误
+      if (!response.ok) {
+        let errorData;
+        
+        try {
+          errorData = isJson ? await response.json() : await response.text();
+        } catch (error) {
+          errorData = 'Failed to parse error response';
+        }
+        
+        const error = new Error(
+          isJson && errorData.error 
+            ? errorData.error 
+            : 'API request failed'
+        );
+        
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = errorData;
+        
+        throw error;
+      }
+      
+      // 解析成功响应
+      return isJson ? response.json() : response.text();
+    },
+    
+    // 发送请求
+    request: async function(url, options = {}) {
+      const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+      
+      // 默认选项
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'same-origin',
+      };
+      
+      // 添加授权令牌
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (token) {
+        defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // 合并选项
+      const fetchOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+          ...defaultOptions.headers,
+          ...options.headers,
+        },
+      };
+      
+      try {
+        const response = await fetch(fullUrl, fetchOptions);
+        return await this.handleResponse(response);
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+    },
+    
+    // GET请求
+    get: function(url, params = {}) {
+      // 构建查询字符串
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          queryParams.append(key, params[key]);
+        }
+      });
+      
+      const queryString = queryParams.toString();
+      const fullUrl = queryString ? `${url}?${queryString}` : url;
+      
+      return this.request(fullUrl, { method: 'GET' });
+    },
+    
+    // POST请求
+    post: function(url, data = {}) {
+      return this.request(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // PUT请求
+    put: function(url, data = {}) {
+      return this.request(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // DELETE请求
+    delete: function(url) {
+      return this.request(url, { method: 'DELETE' });
+    }
+  };
+
+  /**
+   * Admin API Service
+   */
+  const AdminApiService = {
+    // 获取设置
+    getSettings: function(group = null) {
+      // 由于后端没有单独的settings API，暂时从本地存储中获取
+      return Promise.resolve({
+        success: true,
+        settings: getLocalSettings()
+      });
+    },
+    
+    // 更新设置
+    updateSettings: function(settingsData) {
+      // 由于后端没有单独的settings API，暂时保存到本地存储
+      saveToLocalStorageOnly(settingsData);
+      return Promise.resolve({
+        success: true,
+        message: "设置已成功保存到本地"
+      });
+    }
+  };
+
+  function getLocalSettings() {
+    const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+    return {
+      general: {
+        site_name: { value: settings.siteName || '' },
+        contact_email: { value: settings.contactEmail || '' },
+        phone_number: { value: settings.phoneNumber || '' },
+        address: { value: settings.address || '' },
+        facebook_link: { value: settings.facebookLink || '' },
+        twitter_link: { value: settings.twitterLink || '' },
+        instagram_link: { value: settings.instagramLink || '' }
+      }
+    };
+  }
+
+  function saveToLocalStorageOnly(settingsData) {
+    const settings = {
+      siteName: settingsData.general.site_name || '',
+      contactEmail: settingsData.general.contact_email || '',
+      phoneNumber: settingsData.general.phone_number || '',
+      address: settingsData.general.address || '',
+      facebookLink: settingsData.general.facebook_link || '',
+      twitterLink: settingsData.general.twitter_link || '',
+      instagramLink: settingsData.general.instagram_link || ''
+    };
+    
+    localStorage.setItem('settings', JSON.stringify(settings));
+    return settings;
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     // Load navbar and footer
     loadNavbar();
     loadFooter();
     
-    // Load existing settings
-    setTimeout(() => {
-      const currentUser = DataService.getCurrentUser();
-      if (!currentUser || currentUser.isAdmin !== true) {
-        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      } else {
-        loadSettings();
-      }
-    }, 100);
+    // 检查管理员权限
+    checkAdminPermissions();
   });
 
+  function checkAdminPermissions() {
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+    
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      return;
+    }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
+        } else {
+          // 加载设置数据
+          console.log('✅ 用户是管理员，加载设置数据');
+          loadSettings();
+        }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
+  }
+
   function loadSettings() {
+    // 显示加载中状态
+    showToast('Loading settings...', 'info');
+    
+    // 尝试从API获取设置
+    AdminApiService.getSettings()
+      .then(response => {
+        if (response.success && response.settings) {
+          const settings = response.settings;
+          
+          // 根据设置组来填充表单
+          const generalSettings = settings.general || {};
+          
+          document.getElementById('site-name').value = generalSettings.site_name?.value || '';
+          document.getElementById('contact-email').value = generalSettings.contact_email?.value || '';
+          document.getElementById('phone-number').value = generalSettings.phone_number?.value || '';
+          document.getElementById('address').value = generalSettings.address?.value || '';
+          document.getElementById('facebook-link').value = generalSettings.facebook_link?.value || '';
+          document.getElementById('twitter-link').value = generalSettings.twitter_link?.value || '';
+          document.getElementById('instagram-link').value = generalSettings.instagram_link?.value || '';
+          
+          showToast('Settings loaded successfully', 'success');
+        } else {
+          // 如果API请求失败，从localStorage加载
+          loadSettingsFromLocalStorage();
+          showToast('Failed to load settings from API, using local data', 'warning');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading settings:', error);
+        // 如果API请求失败，从localStorage加载
+        loadSettingsFromLocalStorage();
+        showToast('Error loading settings from API, using local data', 'warning');
+      });
+  }
+  
+  function loadSettingsFromLocalStorage() {
     const settings = JSON.parse(localStorage.getItem('settings') || '{}');
     document.getElementById('site-name').value = settings.siteName || '';
     document.getElementById('contact-email').value = settings.contactEmail || '';
@@ -185,26 +423,92 @@
   }
 
   function saveSettings() {
-    const settings = {
-      siteName: document.getElementById('site-name').value.trim(),
-      contactEmail: document.getElementById('contact-email').value.trim(),
-      phoneNumber: document.getElementById('phone-number').value.trim(),
-      address: document.getElementById('address').value.trim(),
-      facebookLink: document.getElementById('facebook-link').value.trim(),
-      twitterLink: document.getElementById('twitter-link').value.trim(),
-      instagramLink: document.getElementById('instagram-link').value.trim()
+    // 获取表单值
+    const settingsData = {
+      general: {
+        site_name: document.getElementById('site-name').value.trim(),
+        contact_email: document.getElementById('contact-email').value.trim(),
+        phone_number: document.getElementById('phone-number').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        facebook_link: document.getElementById('facebook-link').value.trim(),
+        twitter_link: document.getElementById('twitter-link').value.trim(),
+        instagram_link: document.getElementById('instagram-link').value.trim()
+      }
     };
     
-    localStorage.setItem('settings', JSON.stringify(settings));
-    showToast('Settings saved successfully', 'success');
+    // 保存到API
+    AdminApiService.updateSettings(settingsData)
+      .then(response => {
+        if (response.success) {
+          showToast('Settings saved successfully', 'success');
+          
+          // 同时保存到localStorage作为备份
+          const localSettings = {
+            siteName: settingsData.general.site_name,
+            contactEmail: settingsData.general.contact_email,
+            phoneNumber: settingsData.general.phone_number,
+            address: settingsData.general.address,
+            facebookLink: settingsData.general.facebook_link,
+            twitterLink: settingsData.general.twitter_link,
+            instagramLink: settingsData.general.instagram_link
+          };
+          localStorage.setItem('settings', JSON.stringify(localSettings));
+        } else {
+          showToast('Failed to save settings to API, saved locally only', 'warning');
+          // 保存到localStorage
+          saveToLocalStorageOnly(settingsData);
+        }
+      })
+      .catch(error => {
+        console.error('Error saving settings:', error);
+        showToast('Error saving settings to API, saved locally only', 'warning');
+        // 保存到localStorage
+        saveToLocalStorageOnly(settingsData);
+      });
   }
 
   function resetSettings() {
     if (confirm('Are you sure you want to reset all settings to their default values?')) {
-      localStorage.removeItem('settings');
-      loadSettings();
-      showToast('Settings reset to default', 'info');
+      // 同时清除API和本地存储的设置
+      AdminApiService.updateSettings({
+        general: {
+          site_name: '',
+          contact_email: '',
+          phone_number: '',
+          address: '',
+          facebook_link: '',
+          twitter_link: '',
+          instagram_link: ''
+        }
+      }).then(() => {
+        localStorage.removeItem('settings');
+        loadSettings();
+        showToast('Settings reset to default', 'info');
+      }).catch(() => {
+        localStorage.removeItem('settings');
+        loadSettingsFromLocalStorage();
+        showToast('Settings reset locally only', 'warning');
+      });
     }
+  }
+  
+  function showToast(message, type = 'success') {
+    // 简单的toast实现，仅用于展示
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 3000);
   }
 </script>
 </body>
