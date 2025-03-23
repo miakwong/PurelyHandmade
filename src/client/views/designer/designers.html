@@ -23,14 +23,19 @@
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
 
-  <!-- 先加载核心库 -->
+  <!-- Bootstrap JS and jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- API相关脚本 - 确保正确的加载顺序 -->
-  <script src="/src/client/js/data-service.js"></script>
-  <script src="/src/client/js/api-data-loader.js"></script>
-  <script src="/src/client/js/api-loader-helper.js"></script>
+
+  <!-- Data Service scripts - Must load before init-data.js -->
+  <script src="../../js/data-service.js"></script>
+  <script src="../../js/api-data-loader.js"></script>
+
+  <!-- 初始化数据脚本 -->
+  <script src="../../js/init-data.js"></script>
+
+  <!-- Navbar Handler -->
+  <script src="../../js/navbar-handler.js"></script>
 </head>
 <body>
   <!-- Navbar Placeholder -->
@@ -95,11 +100,6 @@
 
   <!-- Toast通知容器 -->
   <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
-
-  <!-- Initialize data -->
-  <script src="../../js/init-data.js"></script>
-  <script src="../../js/product-navbar-handler.js"></script>
-  <script src="../../js/navbar-handler.js"></script>
 
   <script>
     // 初始化页面
