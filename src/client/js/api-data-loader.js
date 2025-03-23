@@ -5,6 +5,386 @@
  * the localStorage-based functions in the original codebase.
  */
 
+// Log when this script is loaded
+console.log('api-data-loader.js loaded at', new Date().toISOString());
+
+// Define API functions globally so they're available immediately
+ 
+/**
+ * Load products for homepage or other product listing pages
+ * @param {string} containerId - ID of the container element to populate
+ * @param {Object} options - Options for filtering products
+ * @param {number} options.limit - Maximum number of products to display
+ * @param {boolean} options.featured - Whether to show only featured products
+ * @param {string} options.category - Category ID to filter by
+ * @param {boolean} options.newArrivals - Whether to show only new arrivals
+ * @param {boolean} options.onSale - Whether to show only products on sale
+ */
+window.loadProducts = async function(containerId, options = {}) {
+  console.log(`API loadProducts() - Starting with parameters:`, { containerId, options });
+  
+  if (!DataService) {
+    console.error('API loadProducts() - DataService is not defined');
+    return;
+  }
+  
+  // Make sure containerId is defined
+  if (!containerId) {
+    console.error('API loadProducts() - containerId parameter is undefined or empty');
+    return;
+  }
+  
+  // Get the container element
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`API loadProducts() - Container with ID "${containerId}" not found`);
+    return;
+  }
+  
+  try {
+    // Show loading state
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading products...</span>
+        </div>
+        <p class="mt-2">Loading products...</p>
+      </div>
+    `;
+    
+    console.log(`API loadProducts() - Fetching products from API...`);
+    // Fetch products from API
+    const products = await DataService.getAllProducts();
+    console.log(`API loadProducts() - API response:`, products);
+    
+    // Apply filters if specified in options
+    let filteredProducts = products.products || [];
+    // Check if response is wrapped in data property
+    if (products.data && products.data.products) {
+      filteredProducts = products.data.products;
+      console.log(`API loadProducts() - Products from data.products:`, filteredProducts.length);
+    }
+    console.log(`API loadProducts() - Total products before filtering:`, filteredProducts.length);
+    
+    if (options.featured) {
+      console.log(`API loadProducts() - Filtering for featured products`);
+      filteredProducts = filteredProducts.filter(product => product.featured);
+      console.log(`API loadProducts() - Featured products count:`, filteredProducts.length);
+    }
+    
+    if (options.newArrivals) {
+      console.log(`API loadProducts() - Filtering for new arrivals`);
+      // Get products created in the last 30 days
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 30);
+      filteredProducts = filteredProducts.filter(product => {
+        const createdAt = new Date(product.createdAt);
+        const isNewArrival = createdAt >= cutoffDate;
+        console.log(`API loadProducts() - Product ${product.id} created at ${product.createdAt}, is new: ${isNewArrival}`);
+        return isNewArrival;
+      });
+      console.log(`API loadProducts() - New arrivals count:`, filteredProducts.length);
+    }
+    
+    if (options.limit && filteredProducts.length > options.limit) {
+      console.log(`API loadProducts() - Limiting to ${options.limit} products`);
+      filteredProducts = filteredProducts.slice(0, options.limit);
+    }
+    
+    if (filteredProducts.length === 0) {
+      console.log(`API loadProducts() - No products available after filtering`);
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No products available at the moment</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Render products
+    console.log(`API loadProducts() - Rendering ${filteredProducts.length} products`);
+    container.innerHTML = '';
+    
+    filteredProducts.forEach(product => {
+      console.log(`API loadProducts() - Rendering product:`, product.id, product.name);
+      // Generate stars based on rating if available
+      const rating = product.rating || 0;
+      const starsHtml = `<div class="product-rating">
+        ${Array(5).fill().map((_, i) => 
+          `<i class="bi ${i < rating ? 'bi-star-fill' : 'bi-star'}"></i>`
+        ).join('')}
+      </div>`;
+      
+      // Price display
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
+          <div class="product-price-wrapper">
+            <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+            <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+          </div>
+        `;
+      } else {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
+      }
+      
+      // Product image
+      const imgSrc = product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg';
+      
+      // Create product card
+      const productHtml = `
+        <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+          <div class="product-card">
+            <div class="product-img-wrapper">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+                <img src="${imgSrc}" class="product-img" alt="${product.name || 'Product'}">
+                ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
+              </a>
+            </div>
+            <div class="product-card-body">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                <h2 class="product-title">${product.name}</h2>
+              </a>
+              ${priceHtml}
+              ${starsHtml}
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
+              <button class="add-to-cart-btn" data-product-id="${product.id}" onclick="addToCart('${product.id}', 1); return false;">
+                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += productHtml;
+    });
+    
+    console.log(`API loadProducts() - Finished rendering products for ${containerId}`);
+  } catch (error) {
+    console.error('API loadProducts() - Error loading products:', error);
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <p class="text-danger">Error loading products</p>
+      </div>
+    `;
+  }
+};
+
+/**
+ * Load categories for the homepage or category browsing pages
+ * @param {string} containerId - ID of the container element to populate
+ * @param {Object} options - Options for filtering categories
+ * @param {number} options.limit - Maximum number of categories to display
+ * @param {boolean} options.featured - Whether to show only featured categories
+ */
+window.loadCategories = async function(containerId, options = {}) {
+  if (!DataService) {
+    console.error('loadCategories: DataService is not defined');
+    return;
+  }
+  
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  try {
+    // Show loading state
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading categories...</span>
+        </div>
+        <p class="mt-2">Loading categories...</p>
+      </div>
+    `;
+    
+    // Fetch categories from API
+    const categoriesData = await DataService.getAllCategories();
+    
+    let categories = categoriesData || [];
+    
+    if (options.featured) {
+      categories = categories.filter(cat => cat.featured);
+    }
+    
+    if (options.limit && categories.length > options.limit) {
+      categories = categories.slice(0, options.limit);
+    }
+    
+    if (categories.length === 0) {
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No categories available at the moment</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Render categories
+    container.innerHTML = '';
+    
+    categories.forEach(category => {
+      const imgSrc = category.image || '/src/client/assets/placeholder.jpg';
+      
+      const categoryHtml = `
+        <div class="col-lg-4 col-md-6 mb-4">
+          <a href="/src/client/views/product/products.html?category=${category.id}" class="category-card">
+            <div class="category-img-overlay"></div>
+            <img src="${imgSrc}" alt="${category.name}" class="category-img">
+            <div class="category-title">
+              <h3>${category.name}</h3>
+              <p>${category.description || ''}</p>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      container.innerHTML += categoryHtml;
+    });
+  } catch (error) {
+    console.error('Error loading categories:', error);
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <p class="text-danger">Error loading categories</p>
+      </div>
+    `;
+  }
+};
+
+/**
+ * Load designers/artisans for homepage or designer browsing pages
+ * @param {string} containerId - ID of the container element to populate
+ * @param {Object} options - Options for filtering designers
+ * @param {number} options.limit - Maximum number of designers to display
+ * @param {boolean} options.featured - Whether to show only featured designers
+ */
+window.loadDesigners = async function(containerId, options = {}) {
+  console.log(`API loadDesigners() - Starting with parameters:`, { containerId, options });
+  
+  if (!DataService) {
+    console.error('API loadDesigners() - DataService is not defined');
+    return;
+  }
+  
+  // TEMPORARY FIX: Hardcode the container ID to ensure we get the right element
+  // This bypasses any issues with parameter passing
+  const container = document.getElementById('designers-container');
+  console.log('API loadDesigners() - Using hardcoded container ID: designers-container');
+
+  if (!container) {
+    console.error(`API loadDesigners() - Container with ID "designers-container" not found`);
+    // Try another common approach - query by class 
+    const containers = document.querySelectorAll('.row');
+    console.log(`API loadDesigners() - Found ${containers.length} .row elements`);
+    return;
+  }
+  
+  try {
+    // Show loading state
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading artisans...</span>
+        </div>
+        <p class="mt-2">Loading artisans...</p>
+      </div>
+    `;
+    
+    console.log(`API loadDesigners() - Fetching designers from API...`);
+    // Fetch designers from API
+    const designersData = await DataService.getAllDesigners();
+    console.log(`API loadDesigners() - API response:`, designersData);
+    
+    // Initialize designers array
+    let designers = [];
+    
+    // Handle different possible response formats
+    if (designersData && designersData.success === true) {
+      // Format 1: { success: true, data: { designers: [...] } }
+      if (designersData.data && Array.isArray(designersData.data.designers)) {
+        designers = designersData.data.designers;
+        console.log(`API loadDesigners() - Found designers in data.designers:`, designers.length);
+      } 
+      // Format 2: { success: true, designers: [...] }
+      else if (designersData.designers && Array.isArray(designersData.designers)) {
+        designers = designersData.designers;
+        console.log(`API loadDesigners() - Found designers in designers property:`, designers.length);
+      }
+      // Format 3: { success: true, data: [...] }
+      else if (designersData.data && Array.isArray(designersData.data)) {
+        designers = designersData.data;
+        console.log(`API loadDesigners() - Found designers in data array:`, designers.length);
+      }
+    } else if (Array.isArray(designersData)) {
+      // Format 4: Direct array response
+      designers = designersData;
+      console.log(`API loadDesigners() - Response is direct array:`, designers.length);
+    }
+    
+    console.log(`API loadDesigners() - Final designers array:`, designers);
+    
+    if (options.featured) {
+      console.log(`API loadDesigners() - Filtering for featured designers`);
+      designers = designers.filter(designer => designer.featured);
+      console.log(`API loadDesigners() - Featured designers count:`, designers.length);
+    }
+    
+    if (options.limit && designers.length > options.limit) {
+      console.log(`API loadDesigners() - Limiting to ${options.limit} designers`);
+      designers = designers.slice(0, options.limit);
+    }
+    
+    if (designers.length === 0) {
+      console.log(`API loadDesigners() - No designers available after filtering`);
+      container.innerHTML = `
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No artisans available at the moment</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Render designers
+    console.log(`API loadDesigners() - Rendering ${designers.length} designers`);
+    container.innerHTML = '';
+    
+    designers.forEach(designer => {
+      console.log(`API loadDesigners() - Rendering designer:`, designer.id, designer.name);
+      const imgSrc = designer.image || '/src/client/assets/placeholder.jpg';
+      
+      // Truncate bio if too long
+      const shortenedBio = designer.bio 
+        ? (designer.bio.length > 120 ? designer.bio.substring(0, 120) + '...' : designer.bio)
+        : 'No bio available';
+      
+      const designerHtml = `
+        <div class="col-lg-3 col-md-6 mb-4">
+          <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
+            <div class="card designer-card h-100 shadow-sm">
+              <div class="text-center pt-4">
+                <img src="${imgSrc}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
+              </div>
+              <div class="card-body text-center">
+                <h5 class="card-title">${designer.name}</h5>
+                <p class="text-primary mb-2">${designer.specialty || 'Artisan'}</p>
+                <p class="card-text small">${shortenedBio}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      
+      container.innerHTML += designerHtml;
+    });
+  } catch (error) {
+    console.error('Error loading designers:', error);
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <p class="text-danger">Error loading artisans</p>
+      </div>
+    `;
+  }
+};
+
 // Wait until DataService is loaded
 document.addEventListener('DOMContentLoaded', function() {
   // Ensure DataService exists
@@ -13,273 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  /**
-   * Load products for homepage or other product listing pages
-   * @param {string} containerId - ID of the container element to populate
-   * @param {Object} options - Options for filtering products
-   * @param {number} options.limit - Maximum number of products to display
-   * @param {boolean} options.featured - Whether to show only featured products
-   * @param {string} options.category - Category ID to filter by
-   * @param {boolean} options.newArrivals - Whether to show only new arrivals
-   * @param {boolean} options.onSale - Whether to show only products on sale
-   */
-  window.loadProducts = async function(containerId, options = {}) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    try {
-      // Show loading state
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading products...</span>
-          </div>
-          <p class="mt-2">Loading products...</p>
-        </div>
-      `;
-      
-      // Fetch products from API
-      const products = await DataService.getAllProducts();
-      
-      // Apply filters if specified in options
-      let filteredProducts = products.products || [];
-      
-      if (options.limit && filteredProducts.length > options.limit) {
-        filteredProducts = filteredProducts.slice(0, options.limit);
-      }
-      
-      if (filteredProducts.length === 0) {
-        container.innerHTML = `
-          <div class="col-12 text-center py-4">
-            <p class="text-muted">No products available at the moment</p>
-          </div>
-        `;
-        return;
-      }
-      
-      // Render products
-      container.innerHTML = '';
-      
-      filteredProducts.forEach(product => {
-        // Generate stars based on rating if available
-        const rating = product.rating || 0;
-        const starsHtml = `<div class="product-rating">
-          ${Array(5).fill().map((_, i) => 
-            `<i class="bi ${i < rating ? 'bi-star-fill' : 'bi-star'}"></i>`
-          ).join('')}
-        </div>`;
-        
-        // Price display
-        let priceHtml = '';
-        if (product.onSale && product.salePrice) {
-          priceHtml = `
-            <div class="product-price-wrapper">
-              <span class="product-price">$${product.salePrice.toFixed(2)}</span>
-              <span class="product-price-discount">$${product.price.toFixed(2)}</span>
-            </div>
-          `;
-        } else {
-          priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
-        }
-        
-        // Product image
-        const imgSrc = product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg';
-        
-        // Create product card
-        const productHtml = `
-          <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-            <div class="product-card">
-              <div class="product-img-wrapper">
-                <a href="/src/client/views/product/product_detail.html?id=${product.id}">
-                  <img src="${imgSrc}" class="product-img" alt="${product.name || 'Product'}">
-                  ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
-                </a>
-              </div>
-              <div class="product-card-body">
-                <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
-                  <h2 class="product-title">${product.name}</h2>
-                </a>
-                ${priceHtml}
-                ${starsHtml}
-                <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
-                <button class="add-to-cart-btn" data-product-id="${product.id}" onclick="addToCart('${product.id}', 1); return false;">
-                  <i class="bi bi-cart-plus me-2"></i> Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-        
-        container.innerHTML += productHtml;
-      });
-    } catch (error) {
-      console.error('Error loading products:', error);
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <p class="text-danger">Error loading products</p>
-        </div>
-      `;
-    }
-  };
-  
-  /**
-   * Load categories for the homepage or category browsing pages
-   * @param {string} containerId - ID of the container element to populate
-   * @param {Object} options - Options for filtering categories
-   * @param {number} options.limit - Maximum number of categories to display
-   * @param {boolean} options.featured - Whether to show only featured categories
-   */
-  window.loadCategories = async function(containerId, options = {}) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    try {
-      // Show loading state
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading categories...</span>
-          </div>
-          <p class="mt-2">Loading categories...</p>
-        </div>
-      `;
-      
-      // Fetch categories from API
-      const categoriesData = await DataService.getAllCategories();
-      
-      let categories = categoriesData || [];
-      
-      if (options.featured) {
-        categories = categories.filter(cat => cat.featured);
-      }
-      
-      if (options.limit && categories.length > options.limit) {
-        categories = categories.slice(0, options.limit);
-      }
-      
-      if (categories.length === 0) {
-        container.innerHTML = `
-          <div class="col-12 text-center py-4">
-            <p class="text-muted">No categories available at the moment</p>
-          </div>
-        `;
-        return;
-      }
-      
-      // Render categories
-      container.innerHTML = '';
-      
-      categories.forEach(category => {
-        const imgSrc = category.image || '/src/client/assets/placeholder.jpg';
-        
-        const categoryHtml = `
-          <div class="col-lg-4 col-md-6 mb-4">
-            <a href="/src/client/views/product/products.html?category=${category.id}" class="category-card">
-              <div class="category-img-overlay"></div>
-              <img src="${imgSrc}" alt="${category.name}" class="category-img">
-              <div class="category-title">
-                <h3>${category.name}</h3>
-                <p>${category.description || ''}</p>
-              </div>
-            </a>
-          </div>
-        `;
-        
-        container.innerHTML += categoryHtml;
-      });
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <p class="text-danger">Error loading categories</p>
-        </div>
-      `;
-    }
-  };
-  
-  /**
-   * Load designers/artisans for homepage or designer browsing pages
-   * @param {string} containerId - ID of the container element to populate
-   * @param {Object} options - Options for filtering designers
-   * @param {number} options.limit - Maximum number of designers to display
-   * @param {boolean} options.featured - Whether to show only featured designers
-   */
-  window.loadDesigners = async function(containerId, options = {}) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    try {
-      // Show loading state
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading artisans...</span>
-          </div>
-          <p class="mt-2">Loading artisans...</p>
-        </div>
-      `;
-      
-      // Fetch designers from API
-      const designersData = await DataService.getAllDesigners();
-      
-      let designers = designersData || [];
-      
-      if (options.featured) {
-        designers = designers.filter(designer => designer.featured);
-      }
-      
-      if (options.limit && designers.length > options.limit) {
-        designers = designers.slice(0, options.limit);
-      }
-      
-      if (designers.length === 0) {
-        container.innerHTML = `
-          <div class="col-12 text-center py-4">
-            <p class="text-muted">No artisans available at the moment</p>
-          </div>
-        `;
-        return;
-      }
-      
-      // Render designers
-      container.innerHTML = '';
-      
-      designers.forEach(designer => {
-        const imgSrc = designer.image || '/src/client/assets/placeholder.jpg';
-        
-        // Truncate bio if too long
-        const shortenedBio = designer.bio 
-          ? (designer.bio.length > 120 ? designer.bio.substring(0, 120) + '...' : designer.bio)
-          : 'No bio available';
-        
-        const designerHtml = `
-          <div class="col-lg-3 col-md-6 mb-4">
-            <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
-              <div class="card designer-card h-100 shadow-sm">
-                <div class="text-center pt-4">
-                  <img src="${imgSrc}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
-                </div>
-                <div class="card-body text-center">
-                  <h5 class="card-title">${designer.name}</h5>
-                  <p class="text-primary mb-2">${designer.specialty || 'Artisan'}</p>
-                  <p class="card-text small">${shortenedBio}</p>
-                </div>
-              </div>
-            </a>
-          </div>
-        `;
-        
-        container.innerHTML += designerHtml;
-      });
-    } catch (error) {
-      console.error('Error loading designers:', error);
-      container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <p class="text-danger">Error loading artisans</p>
-        </div>
-      `;
-    }
-  };
+  console.log('API Data Loader: Ready and initialized');
   
   /**
    * Add product to cart
