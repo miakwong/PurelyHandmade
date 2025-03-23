@@ -1,14 +1,16 @@
-
 .designer-card {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
   transition: transform 0.3s;
+  height: 100%;
+  background-color: #fff;
 }
 
 .designer-card:hover {
   transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .designer-img {
@@ -60,7 +62,7 @@
 
 .featured-products {
   background-color: #f8f9fa;
-  padding: 40px 0;
+  padding: 60px 0;
   margin-top: 30px;
 }
 
@@ -90,4 +92,104 @@
 .empty-state h3 {
   margin-bottom: 15px;
   color: #6c757d;
+}
+
+/* 特色设计卡片 */
+.featured-design-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-design-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+}
+
+.featured-design-card:before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 4px;
+  background-color: var(--accent-color, #0d6efd);
+  top: 0;
+  left: 25px;
+  border-radius: 0 0 4px 4px;
+}
+
+.featured-design-card h4 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.featured-design-card p {
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.featured-design-card .btn-primary {
+  background-color: var(--primary-color, #0d6efd);
+  border-color: var(--primary-color, #0d6efd);
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.featured-design-card .btn-primary:hover {
+  background-color: var(--primary-dark, #0b5ed7);
+  border-color: var(--primary-dark, #0b5ed7);
+  transform: translateY(-2px);
+}
+
+/* 设计师卡片替代样式 */
+.designer-card-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.designer-card-alt:hover {
+  transform: translateY(-10px);
+}
+
+.designer-card-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 加载状态样式 */
+.loading-spinner-container {
+  text-align: center;
+  padding: 50px 0;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color, #0d6efd);
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
