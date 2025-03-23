@@ -104,15 +104,19 @@ class AuthController {
         }
     }
     
-    public function login($email, $password) {
+    public function login($identifier, $password) {
         try {
-            // Find user by email
-            $user = $this->user->findByEmail($email);
+             // 先检查是否是邮箱
+            if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+                $user = $this->user->findByEmail($identifier);
+            } else {
+                $user = $this->user->findByUsername($identifier);
+            }
             
             if (!$user) {
                 return [
                     'success' => false,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Invalid username/email or password'
                 ];
             }
             
@@ -141,7 +145,7 @@ class AuthController {
             // Remove sensitive data
             unset($user['password']);
             
-            $this->logger->info('User logged in', ['id' => $user['id'], 'email' => $email]);
+            $this->logger->info('User logged in', ['id' => $user['id'], 'identifier' => $identifier]);
             
             return [
                 'success' => true,

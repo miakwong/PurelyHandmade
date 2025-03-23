@@ -23,17 +23,17 @@ try {
     $authController = new AuthController();
     
     // Get login credentials
-    $email = $request->getParam('email');
+    $identifier = $request->getParam('identifier'); // Support both email and username
     $password = $request->getParam('password');
     
     // Validate required fields
-    if (!$email || !$password) {
-        $response->error('Email and password are required');
+    if (!$identifier || !$password) {
+        $response->error('Username/Email and password are required');
         exit;
     }
     
     // Login user
-    $result = $authController->login($email, $password);
+    $result = $authController->login($identifier, $password);
     
     if ($result['success']) {
         $response->success([
