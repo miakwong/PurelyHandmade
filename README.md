@@ -96,30 +96,6 @@ A handcrafted products discussion and showcasing platform built with PHP, MySQL,
 ## Project Structure
 
 ```
-PurelyHandmade/
-├── .htaccess             # Apache configuration file, URL rewrite rules
-└── src/                  # Source code directory
-    ├── server/           # Backend code
-    │   ├── index.php     # Backend entry point
-    │   └── controllers/  # Controllers directory
-    │       ├── AuthController.php        # Authentication controller
-    │       ├── ProfileController.php     # Profile controller
-    │       ├── AdminController.php       # Admin tools controller
-    │       └── Database.php              # Database utility class
-    └── client/           # Frontend code
-        ├── html/         # HTML pages
-        │   ├── index.html               # Website homepage
-        │   ├── admin-tools.html         # Admin tools page
-        │   └── 404.html                 # 404 error page
-        ├── js/           # JavaScript code
-        │   ├── test-login.js            # Login test script
-        │   ├── test-profile.js          # User profile test script
-        │   └── ...                      # Other JS files
-        ├── css/          # CSS styles
-        ├── img/          # Image resources
-        └── views/        # View templates
-```
-
 PurelyHandmade/              # Root project directory
 ├── DATABASE_ACCESS.md       # Database access documentation
 ├── README.md                # Project README
