@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Template - Purely Handmade</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/navbar.css">
+  <link rel="stylesheet" href="../../css/global.css">
+  
+  <style>
+    /* Sidebar styles */
+    .sidebar {
+      position: fixed;
+      top: 56px;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+    
+    .sidebar-sticky {
+      position: relative;
+      top: 0;
+      height: calc(100vh - 48px);
+      padding-top: .5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    
+    .sidebar .nav-link {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .sidebar .nav-link.active {
+      color: var(--accent-color);
+    }
+    
+    /* Dashboard icon */
+    .dashboard-icon {
+      font-size: 2rem;
+      color: var(--accent-color);
+    }
+    
+    /* Stats card */
+    .stats-card {
+      transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Error message */
+    .error-message {
+      padding: 1rem;
+      border-radius: 0.25rem;
+      background-color: rgba(220, 53, 69, 0.1);
+      border: 1px solid #dc3545;
+      color: #dc3545;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Page Title</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshData">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error message container -->
+      <div id="error-container" class="error-message d-none">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="error-message">Unable to load data from API. Please try again later.</span>
+      </div>
+      
+      <!-- Page content goes here -->
+      <div id="main-content">
+        <!-- Loading state -->
+        <div id="loading-indicator" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading data...</p>
+        </div>
+        
+        <!-- Content will be loaded here -->
+        <div id="content-container" style="display: none;">
+          <!-- Your page-specific content -->
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- API Service -->
+<script>
+  // API Service for admin endpoints
+  const ApiService = {
+    baseUrl: '/api',
+    
+    // 获取授权头
+    getAuthHeaders: function() {
+      // 从localStorage获取令牌
+      const token = localStorage.getItem('authToken');
+      
+      return token ? {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      } : {
+        'Content-Type': 'application/json'
+      };
+    },
+    
+    // 获取授权令牌
+    getAuthToken: function() {
+      return localStorage.getItem('authToken');
+    },
+    
+    // 处理API响应
+    handleResponse: async function(response) {
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      
+      // 如果状态码不在2xx范围内，抛出错误
+      if (!response.ok) {
+        let errorData;
+        
+        try {
+          errorData = isJson ? await response.json() : await response.text();
+        } catch (error) {
+          errorData = 'Failed to parse error response';
+        }
+        
+        const error = new Error(
+          isJson && errorData.message 
+            ? errorData.message 
+            : 'API request failed'
+        );
+        
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = errorData;
+        
+        throw error;
+      }
+      
+      // 解析成功响应
+      return isJson ? response.json() : response.text();
+    },
+    
+    // 发送请求
+    request: async function(url, options = {}) {
+      const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+      
+      // 默认选项
+      const defaultOptions = {
+        headers: this.getAuthHeaders(),
+        credentials: 'same-origin',
+      };
+      
+      // 合并选项
+      const fetchOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+          ...defaultOptions.headers,
+          ...options.headers,
+        },
+      };
+      
+      try {
+        const response = await fetch(fullUrl, fetchOptions);
+        return await this.handleResponse(response);
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+    },
+    
+    // GET请求
+    get: function(url, params = {}) {
+      // 构建查询字符串
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          queryParams.append(key, params[key]);
+        }
+      });
+      
+      const queryString = queryParams.toString();
+      const fullUrl = queryString ? `${url}?${queryString}` : url;
+      
+      return this.request(fullUrl, { method: 'GET' });
+    },
+    
+    // POST请求
+    post: function(url, data = {}) {
+      return this.request(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // PUT请求
+    put: function(url, data = {}) {
+      return this.request(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // DELETE请求
+    delete: function(url) {
+      return this.request(url, { method: 'DELETE' });
+    }
+  };
+
+  /**
+   * Admin API Service for Purely Handmade
+   * 提供管理员API访问层，处理与服务器的管理功能通信
+   */
+  const AdminApiService = {
+    // 获取所有用户
+    getAllUsers: function() {
+      return ApiService.get('/admin/users');
+    },
+    
+    // 获取所有产品
+    getAllProducts: function() {
+      return ApiService.get('/products');
+    },
+    
+    // 获取所有类别
+    getAllCategories: function() {
+      return ApiService.get('/categories');
+    },
+    
+    // 获取所有设计师
+    getAllDesigners: function() {
+      return ApiService.get('/designers');
+    },
+    
+    // 获取所有订单
+    getAllOrders: function() {
+      return ApiService.get('/orders');
+    },
+    
+    // 获取网站统计数据
+    getSiteStatistics: function() {
+      return ApiService.get('/admin/dashboard');
+    }
+  };
+</script>
+
+<!-- Load scripts -->
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/ui-helpers.js"></script>
+<script src="/src/client/js/admin-auth.js"></script>
+
+<!-- Page specific script -->
+<script>
+  // Show/hide loading state
+  function showLoading() {
+    document.getElementById('loading-indicator').style.display = 'block';
+    document.getElementById('content-container').style.display = 'none';
+  }
+  
+  function hideLoading() {
+    document.getElementById('loading-indicator').style.display = 'none';
+    document.getElementById('content-container').style.display = 'block';
+  }
+  
+  // Show error message
+  function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    const errorMessage = document.getElementById('error-message');
+    
+    if (errorContainer && errorMessage) {
+      errorMessage.textContent = message;
+      errorContainer.classList.remove('d-none');
+    } else {
+      console.error('Error containers not found in DOM');
+      alert('Error: ' + message);
+    }
+  }
+  
+  // Main page data loading function
+  function loadPageData(userData) {
+    console.log('Loading page data with user:', userData);
+    showLoading();
+    
+    // Here you would make your API calls to load the page data
+    // Example:
+    // AdminApiService.getSomeData()
+    //   .then(response => {
+    //     if (response.success) {
+    //       // Process and display the data
+    //       hideLoading();
+    //     } else {
+    //       showError(response.message || 'Failed to load data');
+    //       hideLoading();
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.error('Error loading data:', error);
+    //     showError('An error occurred while loading data: ' + error.message);
+    //     hideLoading();
+    //   });
+    
+    // For demonstration, we'll just hide loading after a delay
+    setTimeout(() => {
+      document.getElementById('content-container').innerHTML = `
+        <div class="alert alert-success">
+          <h4>Authentication Successful</h4>
+          <p>You are logged in as: ${userData.username || userData.email}</p>
+          <p>Role: ${userData.role || (userData.isAdmin ? 'admin' : 'user')}</p>
+        </div>
+      `;
+      hideLoading();
+    }, 1000);
+  }
+  
+  // Initialize page with authentication
+  AdminAuth.initAdminPage(loadPageData);
+  
+  // Refresh button event
+  document.getElementById('refreshData').addEventListener('click', function() {
+    AdminAuth.checkAdminAccess(
+      userData => loadPageData(userData),
+      errorMessage => showError(errorMessage)
+    );
+  });
+</script>
+
+</body>
+</html> 
