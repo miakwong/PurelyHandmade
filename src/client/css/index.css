@@ -1,4 +1,3 @@
-
     /* 英雄区块样式 */
     .hero-section {
       background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/client/img/hero-bg.jpg');
@@ -32,18 +31,21 @@
     .category-card {
       border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: block;
+      position: relative;
+      height: 200px;
     }
     
     .category-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
     
     .category-img-container {
-      height: 200px;
+      height: 150px;
       overflow: hidden;
     }
     
@@ -58,14 +60,28 @@
       transform: scale(1.1);
     }
     
-    .category-overlay {
+    .category-title {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
       background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-      padding: 20px;
+      padding: 15px;
       color: white;
+    }
+    
+    .category-title h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .category-title p {
+      font-size: 0.8rem;
+      margin-bottom: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     
     /* 产品卡片样式 - 更新为与designer-page页面一致 */
@@ -239,6 +255,10 @@
     .featured-designers-section {
       padding: 60px 0;
       background-color: #f8f9fa;
+      width: 100%;
+      margin: 0;
+      margin-bottom: 3rem;
+      margin-top: 3rem;
     }
     
     .designer-card {
@@ -246,6 +266,7 @@
       border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
+      background-color: #fff;
     }
     
     .designer-card:hover {
