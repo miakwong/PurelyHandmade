@@ -59,12 +59,15 @@ const DataService = {
       const fetchOptions = {...defaultOptions, ...options};
       
       // 执行请求
+      console.log(`DataService: apiRequest() - Making request to ${url}`);
       const response = await fetch(url, fetchOptions);
+      console.log(`DataService: apiRequest() - Response status: ${response.status}`);
       const result = await response.json();
+      console.log(`DataService: apiRequest() - Response data:`, result);
       
       return result;
     } catch (error) {
-      console.error(`API请求失败 (${endpoint}):`, error);
+      console.error(`DataService: apiRequest() - Request failed (${endpoint}):`, error);
       return { success: false, message: '网络错误或服务器无响应' };
     }
   },
@@ -76,15 +79,21 @@ const DataService = {
    */
   getAllProducts: async function() {
     try {
+      console.log('DataService: getAllProducts() - Calling API...');
       const result = await this.apiRequest('/products');
+      console.log('DataService: getAllProducts() - API response:', result);
+      
       if (result.success) {
-        return result.data.products || [];
+        console.log('DataService: getAllProducts() - Successfully fetched products');
+        
+        // Return the full response to allow for consistent handling at the API data loader
+        return result;
       }
-      console.error('API request failed:', result.message);
-      return [];
+      console.error('DataService: getAllProducts() - API request failed:', result.message);
+      return { success: false, message: result.message };
     } catch (e) {
-      console.error('Error getting products:', e);
-      return [];
+      console.error('DataService: getAllProducts() - Error getting products:', e);
+      return { success: false, message: e.message };
     }
   },
   
@@ -154,15 +163,21 @@ const DataService = {
    */
   getAllDesigners: async function() {
     try {
+      console.log('DataService: getAllDesigners() - Calling API...');
       const result = await this.apiRequest('/designers');
+      console.log('DataService: getAllDesigners() - API response:', result);
+      
       if (result.success) {
-        return result.data.designers || [];
+        console.log('DataService: getAllDesigners() - Successfully fetched designers');
+        
+        // Return the full response to allow for consistent handling at the API data loader
+        return result;
       }
-      console.error('API request failed:', result.message);
-      return [];
+      console.error('DataService: getAllDesigners() - API request failed:', result.message);
+      return { success: false, message: result.message };
     } catch (e) {
-      console.error('Error getting designers:', e);
-      return [];
+      console.error('DataService: getAllDesigners() - Error getting designers:', e);
+      return { success: false, message: e.message };
     }
   },
   
