@@ -33,10 +33,14 @@ const AdminAuth = {
       return;
     }
     
+    // 添加一个标志变量，避免重复调用onSuccess
+    let successCallbackCalled = false;
+    
     // 如果有用户信息并且已经是管理员，直接成功
     if (currentUser && (currentUser.isAdmin === true || currentUser.role === 'admin')) {
       console.log('User is already verified as admin in local storage');
-      if (typeof onSuccess === 'function') {
+      if (typeof onSuccess === 'function' && !successCallbackCalled) {
+        successCallbackCalled = true;
         onSuccess(currentUser);
       }
       return;
@@ -50,7 +54,8 @@ const AdminAuth = {
         
         if (userData && (userData.isAdmin || userData.role === 'admin')) {
           console.log('API verified user as admin');
-          if (typeof onSuccess === 'function') {
+          if (typeof onSuccess === 'function' && !successCallbackCalled) {
+            successCallbackCalled = true;
             onSuccess(userData);
           }
         } else {

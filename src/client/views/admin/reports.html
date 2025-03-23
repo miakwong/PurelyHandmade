@@ -392,6 +392,9 @@
 
 <div id="footer-placeholder"></div>
 
+<!-- Toast容器 -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/src/client/js/common.js"></script>
 <script>
@@ -400,6 +403,13 @@
   
   // Current filter settings
   let dateRange = 30; // Default to 30 days
+  // 存储API获取的数据
+  let apiData = {
+    orders: [],
+    products: [],
+    users: [],
+    categories: []
+  };
   
   document.addEventListener('DOMContentLoaded', function() {
     // Load navbar and footer
@@ -409,20 +419,346 @@
     // Initialize charts
     initializeCharts();
     
-    // Load data based on filters
-    loadData();
-    
-    // Check user permissions
-    setTimeout(() => {
-      const currentUser = DataService.getCurrentUser();
-      if (!currentUser || currentUser.isAdmin !== true) {
-        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      } else {
-        // Load report data
-        initReports();
-      }
-    }, 100);
+    // 检查用户是否为管理员
+    checkAdminPermissions();
   });
+
+  // 检查管理员权限
+  function checkAdminPermissions() {
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+    
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      return;
+    }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
+        } else {
+          // 加载报表数据
+          console.log('✅ 用户是管理员，加载报表数据');
+          initReports();
+        }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
+  }
+  
+  // API服务对象
+  const ApiService = {
+    // 基础API URL
+    baseUrl: '/api',
+    
+    // 处理API响应
+    handleResponse: async function(response) {
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      
+      // 如果状态码不在2xx范围内，抛出错误
+      if (!response.ok) {
+        let errorData;
+        
+        try {
+          errorData = isJson ? await response.json() : await response.text();
+        } catch (error) {
+          errorData = 'Failed to parse error response';
+        }
+        
+        const error = new Error(
+          isJson && errorData.error 
+            ? errorData.error 
+            : 'API request failed'
+        );
+        
+        error.status = response.status;
+        error.statusText = response.statusText;
+        error.data = errorData;
+        
+        throw error;
+      }
+      
+      // 解析成功响应
+      return isJson ? response.json() : response.text();
+    },
+    
+    // 发送请求
+    request: async function(url, options = {}) {
+      const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+      
+      // 默认选项
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'same-origin',
+      };
+      
+      // 添加授权令牌
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (token) {
+        defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // 合并选项
+      const fetchOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+          ...defaultOptions.headers,
+          ...options.headers,
+        },
+      };
+      
+      try {
+        const response = await fetch(fullUrl, fetchOptions);
+        return await this.handleResponse(response);
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+    },
+    
+    // GET请求
+    get: function(url, params = {}) {
+      // 构建查询字符串
+      const queryParams = new URLSearchParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          queryParams.append(key, params[key]);
+        }
+      });
+      
+      const queryString = queryParams.toString();
+      const fullUrl = queryString ? `${url}?${queryString}` : url;
+      
+      return this.request(fullUrl, { method: 'GET' });
+    },
+    
+    // POST请求
+    post: function(url, data = {}) {
+      return this.request(url, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // PUT请求
+    put: function(url, data = {}) {
+      return this.request(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    
+    // DELETE请求
+    delete: function(url) {
+      return this.request(url, { method: 'DELETE' });
+    }
+  };
+  
+  /**
+   * Admin API Service for Purely Handmade
+   * 提供管理员API访问层，处理与服务器的管理功能通信
+   */
+  const AdminApiService = {
+    // 获取所有用户
+    getAllUsers: function() {
+      return ApiService.get('/auth/profile?all=1');
+    },
+    
+    // 获取所有产品
+    getAllProducts: function() {
+      return ApiService.get('/products');
+    },
+    
+    // 获取所有类别
+    getAllCategories: function() {
+      return ApiService.get('/categories');
+    },
+    
+    // 获取所有设计师
+    getAllDesigners: function() {
+      return ApiService.get('/designers');
+    },
+    
+    // 获取所有订单，支持过滤参数
+    getAllOrders: function(filters = {}) {
+      // 默认参数
+      const params = {
+        all: 1,
+        ...filters
+      };
+      
+      return ApiService.get('/orders', params);
+    },
+    
+    // 获取网站统计数据
+    getSiteStatistics: function() {
+      return ApiService.get('/admin/dashboard');
+    },
+    
+    // 获取报表数据
+    getReportData: function(type, period) {
+      return ApiService.get('/admin/reports', { type, period });
+    }
+  };
+  
+  // 初始化报表数据
+  async function initReports() {
+    try {
+      showLoadingState();
+      
+      console.log('📊 开始获取报表数据...');
+      
+      // 获取日期过滤参数
+      const dateFilterParams = getDateFilterParams();
+      
+      // 并行获取所有必要的数据
+      const [ordersResponse, productsResponse, usersResponse, categoriesResponse] = await Promise.all([
+        AdminApiService.getAllOrders(dateFilterParams).catch(err => {
+          console.error('获取订单数据出错:', err);
+          return { success: true, data: { orders: [] } };
+        }),
+        AdminApiService.getAllProducts().catch(err => {
+          console.error('获取产品数据出错:', err);
+          return { success: true, data: [] };
+        }),
+        AdminApiService.getAllUsers().catch(err => {
+          console.error('获取用户数据出错:', err);
+          return { success: true, data: [] };
+        }),
+        AdminApiService.getAllCategories().catch(err => {
+          console.error('获取类别数据出错:', err);
+          return { success: true, data: [] };
+        })
+      ]);
+      
+      console.log('✅ 数据获取完成!');
+      
+      // 处理订单数据
+      if (ordersResponse && ordersResponse.success) {
+        let orders = [];
+        if (ordersResponse.data) {
+          if (Array.isArray(ordersResponse.data)) {
+            orders = ordersResponse.data;
+          } else if (ordersResponse.data.orders && Array.isArray(ordersResponse.data.orders)) {
+            orders = ordersResponse.data.orders;
+          }
+        }
+        apiData.orders = orders;
+        console.log(`📦 获取到${orders.length}个订单`);
+      }
+      
+      // 处理产品数据
+      if (productsResponse && productsResponse.success) {
+        let products = [];
+        if (productsResponse.data) {
+          if (Array.isArray(productsResponse.data)) {
+            products = productsResponse.data;
+          } else if (productsResponse.data.products && Array.isArray(productsResponse.data.products)) {
+            products = productsResponse.data.products;
+          }
+        }
+        apiData.products = products;
+        console.log(`📦 获取到${products.length}个产品`);
+      }
+      
+      // 处理用户数据
+      if (usersResponse && usersResponse.success) {
+        let users = [];
+        if (usersResponse.data) {
+          if (Array.isArray(usersResponse.data)) {
+            users = usersResponse.data;
+          } else if (usersResponse.data.users && Array.isArray(usersResponse.data.users)) {
+            users = usersResponse.data.users;
+          }
+        }
+        apiData.users = users;
+        console.log(`👤 获取到${users.length}个用户`);
+      }
+      
+      // 处理类别数据
+      if (categoriesResponse && categoriesResponse.success) {
+        let categories = [];
+        if (categoriesResponse.data) {
+          if (Array.isArray(categoriesResponse.data)) {
+            categories = categoriesResponse.data;
+          } else if (categoriesResponse.data.categories && Array.isArray(categoriesResponse.data.categories)) {
+            categories = categoriesResponse.data.categories;
+          }
+        }
+        apiData.categories = categories;
+        console.log(`🏷️ 获取到${categories.length}个类别`);
+      }
+      
+      // 使用获取的数据更新报表
+      loadData();
+      
+      // 尝试获取更多报表数据
+      try {
+        console.log('📊 获取销售报表数据...');
+        const salesReportResponse = await AdminApiService.getReportData('sales', dateRange);
+        if (salesReportResponse && salesReportResponse.success && salesReportResponse.data) {
+          console.log('✅ 获取到销售报表数据');
+          // 在这里可以使用更多特定的报表数据
+        }
+      } catch (error) {
+        console.warn('获取销售报表失败，使用默认数据:', error);
+      }
+      
+      hideLoadingState();
+    } catch (error) {
+      console.error('初始化报表出错:', error);
+      hideLoadingState();
+      showErrorMessage('加载报表数据时出错，请稍后重试');
+    }
+  }
+  
+  // 根据日期范围获取过滤参数
+  function getDateFilterParams() {
+    if (dateRange === 'all') {
+      return {};
+    }
+    
+    const daysToSubtract = parseInt(dateRange) || 30;
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+    
+    // 格式化日期为 YYYY-MM-DD
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    return {
+      start_date: formatDate(startDate),
+      end_date: formatDate(endDate)
+    };
+  }
   
   function initializeCharts() {
     // Sales Chart
@@ -594,20 +930,28 @@
   }
   
   function loadData() {
-    // Get data from localStorage
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+    // 使用从API获取的数据而非localStorage
+    const orders = apiData.orders;
+    const products = apiData.products;
+    const users = apiData.users;
+    const categories = apiData.categories;
     
-    console.log('Loaded data from localStorage:');
+    console.log('使用API数据更新报表:');
     console.log('Orders:', orders.length);
     console.log('Products:', products.length);
     console.log('Users:', users.length);
     console.log('Categories:', categories.length);
     console.log('Current filter - Date range:', dateRange);
     
-    // Filter orders by date range
+    // 显示过滤方式
+    const dateFilterParams = getDateFilterParams();
+    if (Object.keys(dateFilterParams).length > 0) {
+      console.log('使用的日期过滤参数:', dateFilterParams);
+    }
+    
+    // 在API已经过滤的情况下，不需要再次进行前端日期过滤
+    // 但为了确保数据一致性，仍然进行本地过滤
+    console.log('注意: 日期过滤已在API请求中应用，此处的前端过滤可能是冗余的');
     let filteredOrders = filterOrdersByDate(orders);
     
     console.log('Filtered orders after date filter:', filteredOrders.length);
@@ -1042,7 +1386,8 @@
       }, 2000);
     }
     
-    loadData();
+    // 重新加载数据，使用API过滤
+    initReports();
   }
   
   function updateProductChart(orders, products) {
@@ -1116,6 +1461,110 @@
     productChart.update();
     
     console.log('Product chart updated with', sortedProducts.length, 'products');
+  }
+  
+  // 显示错误消息
+  function showErrorMessage(message) {
+    // 检查是否存在错误消息容器
+    let errorContainer = document.getElementById('error-message-container');
+    if (!errorContainer) {
+      // 创建错误消息容器
+      errorContainer = document.createElement('div');
+      errorContainer.id = 'error-message-container';
+      errorContainer.className = 'alert alert-danger mt-3';
+      errorContainer.role = 'alert';
+      
+      // 添加到页面
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        mainContent.prepend(errorContainer);
+      } else {
+        document.body.prepend(errorContainer);
+      }
+    }
+    
+    // 设置错误消息
+    errorContainer.innerHTML = `
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      ${message}
+      <button type="button" class="btn-close float-end" aria-label="Close" onclick="document.getElementById('error-message-container').remove()"></button>
+    `;
+    
+    // 自动消失
+    setTimeout(() => {
+      if (document.getElementById('error-message-container')) {
+        document.getElementById('error-message-container').remove();
+      }
+    }, 5000);
+  }
+  
+  // 显示Toast消息
+  function showToast(message, type = 'success') {
+    const toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) return;
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+  
+  // 显示加载状态
+  function showLoadingState() {
+    // 给主要的图表容器添加加载指示器
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+      container.classList.add('position-relative');
+      
+      // 检查是否已经有加载指示器
+      if (!container.querySelector('.loading-overlay')) {
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75';
+        loadingOverlay.style.top = '0';
+        loadingOverlay.style.left = '0';
+        loadingOverlay.style.zIndex = '10';
+        
+        loadingOverlay.innerHTML = `
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        `;
+        
+        container.appendChild(loadingOverlay);
+      }
+    });
+    
+    // 给统计卡片添加加载指示器
+    const statValues = document.querySelectorAll('.report-stat-value');
+    statValues.forEach(element => {
+      element.innerHTML = '<div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    });
+  }
+  
+  // 隐藏加载状态
+  function hideLoadingState() {
+    // 移除图表加载指示器
+    const loadingOverlays = document.querySelectorAll('.loading-overlay');
+    loadingOverlays.forEach(overlay => overlay.remove());
   }
 </script>
 </body>

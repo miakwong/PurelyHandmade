@@ -26,9 +26,58 @@ class OrderController {
     
     public function getOrders($filters = [], $page = 1, $limit = 10) {
         try {
+            // 获取用户ID和请求参数
+            $userId = $_REQUEST['userId'] ?? null;
+            $isAdmin = isset($_REQUEST['isAdmin']) ? (bool)$_REQUEST['isAdmin'] : false;
+            $getAll = isset($_GET['all']) && $_GET['all'] == '1';
+            
+            // 获取日期过滤参数
+            $startDate = $_GET['start_date'] ?? null;
+            $endDate = $_GET['end_date'] ?? null;
+            
+            // 初始化一个新的过滤器数组，避免传入的filters被直接修改
+            $queryFilters = [];
+            
+            // 管理员请求所有订单时，不添加userId过滤
+            if ($isAdmin && $getAll) {
+                // 不添加userId过滤，返回所有订单
+                $this->logger->info('管理员请求所有订单，不添加userId过滤');
+            } else {
+                // 否则只返回当前用户的订单
+                $queryFilters['userId'] = $userId;
+            }
+            
+            // 添加日期过滤条件
+            if ($startDate) {
+                $queryFilters['start_date'] = $startDate;
+                $this->logger->info('添加开始日期过滤: ' . $startDate);
+            }
+            
+            if ($endDate) {
+                $queryFilters['end_date'] = $endDate;
+                $this->logger->info('添加结束日期过滤: ' . $endDate);
+            }
+            
+            // 记录日志，帮助调试
+            $this->logger->info('获取订单', [
+                'userId' => $userId,
+                'isAdmin' => $isAdmin ? 'true' : 'false',
+                'getAll' => $getAll ? 'true' : 'false',
+                'filters' => $queryFilters,
+                'date_range' => [$startDate, $endDate]
+            ]);
+            
+            $result = $this->order->getAll($queryFilters, $page, $limit);
+            
+            $this->logger->info('查询结果', [
+                'total' => $result['total'],
+                'orders_count' => count($result['orders'])
+            ]);
+            
             return [
                 'success' => true,
-                'data' => $this->order->getAll($filters, $page, $limit)
+                'message' => 'Success',
+                'data' => $result
             ];
         } catch (\Exception $e) {
             $this->logger->error('Get orders failed', Logger::formatException($e));
