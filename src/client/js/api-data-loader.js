@@ -65,14 +65,14 @@ window.getContainerSafely = function(containerId) {
 window.loadProducts = async function(containerId, options = {}) {
   console.log(`API loadProducts() - Starting with parameters:`, { containerId, options });
   
-  if (!DataService) {
-    console.error('API loadProducts() - DataService is not defined');
-    return;
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadProducts() - containerId参数未定义，使用默认容器ID："products-container"');
+    containerId = 'products-container'; // 使用默认的容器ID
   }
   
-  // Make sure containerId is defined
-  if (!containerId) {
-    console.error('API loadProducts() - containerId parameter is undefined or empty');
+  if (!DataService) {
+    console.error('API loadProducts() - DataService is not defined');
     return;
   }
   
@@ -220,13 +220,24 @@ window.loadProducts = async function(containerId, options = {}) {
  * @param {boolean} options.featured - Whether to show only featured categories
  */
 window.loadCategories = async function(containerId, options = {}) {
+  console.log(`API loadCategories() - Starting with parameters:`, { containerId, options });
+  
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadCategories() - containerId参数未定义，使用默认容器ID："category-cards-container"');
+    containerId = 'category-cards-container'; // 使用默认的容器ID
+  }
+  
   if (!DataService) {
     console.error('loadCategories: DataService is not defined');
     return;
   }
   
-  const container = document.getElementById(containerId);
-  if (!container) return;
+  const container = window.getContainerSafely(containerId);
+  if (!container) {
+    console.error(`API loadCategories() - Unable to find container using ID or alternatives: "${containerId}"`);
+    return;
+  }
   
   try {
     // Show loading state
@@ -302,14 +313,14 @@ window.loadCategories = async function(containerId, options = {}) {
 window.loadDesigners = async function(containerId, options = {}) {
   console.log(`API loadDesigners() - Starting with parameters:`, { containerId, options });
   
-  if (!DataService) {
-    console.error('API loadDesigners() - DataService is not defined');
-    return;
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadDesigners() - containerId参数未定义，使用默认容器ID："designers-container"');
+    containerId = 'designers-container'; // 使用默认的容器ID
   }
   
-  // Make sure containerId is defined
-  if (!containerId) {
-    console.error('API loadDesigners() - containerId parameter is undefined or empty');
+  if (!DataService) {
+    console.error('API loadDesigners() - DataService is not defined');
     return;
   }
   
