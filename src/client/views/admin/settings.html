@@ -278,21 +278,21 @@
   const AdminApiService = {
     // 获取设置
     getSettings: function(group = null) {
-      // 由于后端没有单独的settings API，暂时从本地存储中获取
-      return Promise.resolve({
-        success: true,
-        settings: getLocalSettings()
-      });
+      let url = '/settings';
+      if (group) {
+        url += `?group=${encodeURIComponent(group)}`;
+      }
+      return ApiService.get(url);
     },
     
     // 更新设置
     updateSettings: function(settingsData) {
-      // 由于后端没有单独的settings API，暂时保存到本地存储
-      saveToLocalStorageOnly(settingsData);
-      return Promise.resolve({
-        success: true,
-        message: "设置已成功保存到本地"
-      });
+      return ApiService.put('/settings/update', settingsData);
+    },
+    
+    // 删除设置
+    deleteSettings: function(key, group = 'general') {
+      return ApiService.delete(`/settings?key=${encodeURIComponent(key)}&group=${encodeURIComponent(group)}`);
     }
   };
 
@@ -379,22 +379,22 @@
     // 显示加载中状态
     showToast('Loading settings...', 'info');
     
-    // 尝试从API获取设置
+    // 从API获取设置
     AdminApiService.getSettings()
       .then(response => {
-        if (response.success && response.settings) {
-          const settings = response.settings;
+        if (response.success && response.data) {
+          const settings = response.data;
           
-          // 根据设置组来填充表单
+          // 获取通用设置组
           const generalSettings = settings.general || {};
           
-          document.getElementById('site-name').value = generalSettings.site_name?.value || '';
-          document.getElementById('contact-email').value = generalSettings.contact_email?.value || '';
-          document.getElementById('phone-number').value = generalSettings.phone_number?.value || '';
-          document.getElementById('address').value = generalSettings.address?.value || '';
-          document.getElementById('facebook-link').value = generalSettings.facebook_link?.value || '';
-          document.getElementById('twitter-link').value = generalSettings.twitter_link?.value || '';
-          document.getElementById('instagram-link').value = generalSettings.instagram_link?.value || '';
+          document.getElementById('site-name').value = getSettingValue(generalSettings, 'site_name', '');
+          document.getElementById('contact-email').value = getSettingValue(generalSettings, 'contact_email', '');
+          document.getElementById('phone-number').value = getSettingValue(generalSettings, 'phone_number', '');
+          document.getElementById('address').value = getSettingValue(generalSettings, 'address', '');
+          document.getElementById('facebook-link').value = getSettingValue(generalSettings, 'facebook_link', '');
+          document.getElementById('twitter-link').value = getSettingValue(generalSettings, 'twitter_link', '');
+          document.getElementById('instagram-link').value = getSettingValue(generalSettings, 'instagram_link', '');
           
           showToast('Settings loaded successfully', 'success');
         } else {
@@ -411,6 +411,20 @@
       });
   }
   
+  // 辅助函数 - 从设置对象中获取值
+  function getSettingValue(settingsGroup, key, defaultValue = '') {
+    if (!settingsGroup || !settingsGroup[key]) {
+      return defaultValue;
+    }
+    
+    // 处理不同的API响应格式
+    if (typeof settingsGroup[key] === 'object' && settingsGroup[key].value !== undefined) {
+      return settingsGroup[key].value;
+    }
+    
+    return settingsGroup[key];
+  }
+
   function loadSettingsFromLocalStorage() {
     const settings = JSON.parse(localStorage.getItem('settings') || '{}');
     document.getElementById('site-name').value = settings.siteName || '';
@@ -423,6 +437,9 @@
   }
 
   function saveSettings() {
+    // 显示保存中状态
+    showToast('Saving settings...', 'info');
+    
     // 获取表单值
     const settingsData = {
       general: {
@@ -454,23 +471,22 @@
           };
           localStorage.setItem('settings', JSON.stringify(localSettings));
         } else {
-          showToast('Failed to save settings to API, saved locally only', 'warning');
-          // 保存到localStorage
-          saveToLocalStorageOnly(settingsData);
+          showToast('Failed to save settings: ' + (response.message || 'Unknown error'), 'error');
         }
       })
       .catch(error => {
         console.error('Error saving settings:', error);
-        showToast('Error saving settings to API, saved locally only', 'warning');
-        // 保存到localStorage
-        saveToLocalStorageOnly(settingsData);
+        showToast('Error saving settings: ' + (error.message || 'Unknown error'), 'error');
       });
   }
 
   function resetSettings() {
     if (confirm('Are you sure you want to reset all settings to their default values?')) {
-      // 同时清除API和本地存储的设置
-      AdminApiService.updateSettings({
+      // 显示重置中状态
+      showToast('Resetting settings...', 'info');
+      
+      // 准备空设置
+      const emptySettings = {
         general: {
           site_name: '',
           contact_email: '',
@@ -480,15 +496,33 @@
           twitter_link: '',
           instagram_link: ''
         }
-      }).then(() => {
-        localStorage.removeItem('settings');
-        loadSettings();
-        showToast('Settings reset to default', 'info');
-      }).catch(() => {
-        localStorage.removeItem('settings');
-        loadSettingsFromLocalStorage();
-        showToast('Settings reset locally only', 'warning');
-      });
+      };
+      
+      // 更新到API
+      AdminApiService.updateSettings(emptySettings)
+        .then(response => {
+          if (response.success) {
+            // 同时清除本地存储
+            localStorage.removeItem('settings');
+            
+            // 重新加载表单
+            document.getElementById('site-name').value = '';
+            document.getElementById('contact-email').value = '';
+            document.getElementById('phone-number').value = '';
+            document.getElementById('address').value = '';
+            document.getElementById('facebook-link').value = '';
+            document.getElementById('twitter-link').value = '';
+            document.getElementById('instagram-link').value = '';
+            
+            showToast('Settings reset to default', 'success');
+          } else {
+            showToast('Failed to reset settings: ' + (response.message || 'Unknown error'), 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error resetting settings:', error);
+          showToast('Error resetting settings: ' + (error.message || 'Unknown error'), 'error');
+        });
     }
   }
   

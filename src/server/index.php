@@ -63,6 +63,10 @@ $routes = [
     '/orders/create' => 'api/orders/create.php',
     '/orders/update' => 'api/orders/update.php',
     
+    // Settings routes
+    '/settings' => 'api/settings/index.php',
+    '/settings/update' => 'api/settings/update.php',
+    
     // Admin routes
     '/admin/users' => 'api/admin/users.php',
     '/admin/dashboard' => 'api/admin/dashboard.php',
