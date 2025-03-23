@@ -18,6 +18,38 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', serif;
 }
 
+/* Error and Alert Styles */
+.alert {
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid transparent;
+}
+
+.alert-warning {
+  background-color: #fff8dc;
+  border-color: #fcf3cf;
+  color: #8a6d3b;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
 /* Toast Notification Styles */
 .modern-toast-container {
   position: fixed;
@@ -214,6 +246,28 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-muted);
   background-color: #f8f9fa;
   border-color: var(--border-color);
+}
+
+/* Loading indicator styles */
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: text-bottom;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
 }
 
 /* Responsive adjustments */

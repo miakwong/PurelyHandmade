@@ -220,7 +220,7 @@ window.loadProducts = async function(containerId, options = {}) {
  * @param {boolean} options.featured - Whether to show only featured categories
  */
 window.loadCategories = async function(containerId, options = {}) {
-  console.log(`API loadCategories() - Starting with parameters:`, { containerId, options });
+  console.log(`API loadCategories() - 开始加载，参数:`, { containerId, options });
   
   // 自动修复：如果containerId为undefined，尝试使用默认值
   if (!containerId) {
@@ -228,80 +228,145 @@ window.loadCategories = async function(containerId, options = {}) {
     containerId = 'category-cards-container'; // 使用默认的容器ID
   }
   
-  if (!DataService) {
-    console.error('loadCategories: DataService is not defined');
+  // 检查DataService可用性
+  if (typeof DataService === 'undefined') {
+    console.error('API loadCategories() - DataService未定义');
+    showErrorInContainer(containerId, 'DataService未定义，无法加载数据');
     return;
   }
   
   const container = window.getContainerSafely(containerId);
   if (!container) {
-    console.error(`API loadCategories() - Unable to find container using ID or alternatives: "${containerId}"`);
+    console.error(`API loadCategories() - 找不到容器: "${containerId}"`);
     return;
   }
   
   try {
-    // Show loading state
+    // 显示加载状态
     container.innerHTML = `
       <div class="col-12 text-center py-4">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading categories...</span>
         </div>
-        <p class="mt-2">Loading categories...</p>
+        <p class="mt-2">加载分类中...</p>
       </div>
     `;
     
-    // Fetch categories from API
-    const categoriesData = await DataService.getAllCategories();
+    // 获取分类数据
+    console.log(`API loadCategories() - 从API获取分类数据...`);
+    let categoryResponse;
     
-    let categories = categoriesData || [];
+    try {
+      categoryResponse = await DataService.getAllCategories();
+      console.log(`API loadCategories() - API响应:`, categoryResponse);
+    } catch (apiError) {
+      console.error(`API loadCategories() - API调用错误:`, apiError);
+      showErrorInContainer(containerId, `加载分类失败: ${apiError.message || '未知错误'}`);
+      return;
+    }
     
+    // 验证并处理API响应
+    let categories = [];
+    
+    if (!categoryResponse || !categoryResponse.success) {
+      const errorMessage = categoryResponse?.message || '未知错误';
+      console.error(`API loadCategories() - API请求失败: ${errorMessage}`);
+      showErrorInContainer(containerId, `加载分类失败: ${errorMessage}`);
+      return;
+    }
+    
+    // 提取分类数据
+    if (categoryResponse.data && Array.isArray(categoryResponse.data.categories)) {
+      categories = categoryResponse.data.categories;
+    } else if (categoryResponse.data && typeof categoryResponse.data === 'object') {
+      categories = Object.values(categoryResponse.data);
+    } else if (Array.isArray(categoryResponse.categories)) {
+      categories = categoryResponse.categories;
+    } else {
+      console.warn(`API loadCategories() - API响应格式异常，无法提取分类数据`);
+      categories = [];
+    }
+    
+    console.log(`API loadCategories() - 筛选前的分类数量:`, categories.length);
+    
+    // 应用筛选
+    let filteredCategories = [...categories];
+    
+    // 特色分类筛选
     if (options.featured) {
-      categories = categories.filter(cat => cat.featured);
+      console.log(`API loadCategories() - 筛选特色分类`);
+      filteredCategories = filteredCategories.filter(category => category.featured);
+      console.log(`API loadCategories() - 特色分类数量:`, filteredCategories.length);
     }
     
-    if (options.limit && categories.length > options.limit) {
-      categories = categories.slice(0, options.limit);
+    // 数量限制
+    if (options.limit && filteredCategories.length > options.limit) {
+      console.log(`API loadCategories() - 限制显示数量: ${options.limit}`);
+      filteredCategories = filteredCategories.slice(0, options.limit);
     }
     
-    if (categories.length === 0) {
+    // 检查结果是否为空
+    if (filteredCategories.length === 0) {
+      console.log(`API loadCategories() - 筛选后无分类数据`);
       container.innerHTML = `
         <div class="col-12 text-center py-4">
-          <p class="text-muted">No categories available at the moment</p>
+          <p class="text-muted">当前没有可用分类</p>
         </div>
       `;
       return;
     }
     
-    // Render categories
+    // 渲染分类
+    console.log(`API loadCategories() - 渲染${filteredCategories.length}个分类`);
     container.innerHTML = '';
     
-    categories.forEach(category => {
-      const imgSrc = category.image || '/src/client/assets/placeholder.jpg';
+    filteredCategories.forEach(category => {
+      console.log(`API loadCategories() - 渲染分类:`, category.id, category.name);
       
+      // 处理图像
+      const imgSrc = category.image || '/src/client/assets/category-placeholder.jpg';
+      
+      // 创建分类卡片
       const categoryHtml = `
-        <div class="col-lg-3 col-md-4 mb-4">
-          <a href="/src/client/views/product/products.html?category=${category.id}" class="category-card">
-            <div class="category-img-overlay"></div>
-            <img src="${imgSrc}" alt="${category.name}" class="category-img">
-            <div class="category-title">
-              <h3>${category.name}</h3>
-              <p>${category.description || ''}</p>
-            </div>
-          </a>
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="category-card">
+            <a href="/src/client/views/product/product-list.html?id=${category.id}" class="category-link">
+              <div class="category-img-wrapper">
+                <img src="${imgSrc}" class="category-img" alt="${category.name}">
+                <div class="category-overlay">
+                  <h3 class="category-title">${category.name}</h3>
+                  <p class="category-desc">${category.description || ''}</p>
+                  <span class="btn-browse">浏览产品</span>
+                </div>
+              </div>
+            </a>
+          </div>
         </div>
       `;
       
       container.innerHTML += categoryHtml;
     });
+    
+    console.log(`API loadCategories() - 分类渲染完成`);
   } catch (error) {
-    console.error('Error loading categories:', error);
+    console.error('API loadCategories() - 错误:', error);
+    showErrorInContainer(containerId, `加载分类时发生错误: ${error.message || '未知错误'}`);
+  }
+};
+
+// 辅助函数：在容器中显示错误
+function showErrorInContainer(containerId, errorMessage) {
+  const container = window.getContainerSafely(containerId);
+  if (container) {
     container.innerHTML = `
       <div class="col-12 text-center py-4">
-        <p class="text-danger">Error loading categories</p>
+        <div class="alert alert-warning" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>${errorMessage}
+        </div>
       </div>
     `;
   }
-};
+}
 
 /**
  * Load designers/artisans for homepage or designer browsing pages

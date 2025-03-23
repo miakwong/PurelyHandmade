@@ -124,15 +124,36 @@ const DataService = {
    */
   getAllCategories: async function() {
     try {
+      console.log('DataService: getAllCategories() - 调用API...');
       const result = await this.apiRequest('/categories');
+      console.log('DataService: getAllCategories() - API响应:', result);
+      
       if (result.success) {
-        return result.data.categories || [];
+        console.log('DataService: getAllCategories() - 成功获取分类');
+        
+        // 确保正确的响应格式
+        return {
+          success: true,
+          message: result.message || "Success",
+          data: {
+            categories: result.data?.categories || result.data || result.categories || []
+          }
+        };
       }
-      console.error('API request failed:', result.message);
-      return [];
+      
+      console.error('DataService: getAllCategories() - API请求失败:', result.message || '未知错误');
+      return { 
+        success: false, 
+        message: result.message || 'API请求失败', 
+        data: { categories: [] } 
+      };
     } catch (e) {
-      console.error('Error getting categories:', e);
-      return [];
+      console.error('DataService: getAllCategories() - 获取分类错误:', e.message || e);
+      return { 
+        success: false, 
+        message: e.message || '发生错误', 
+        data: { categories: [] } 
+      };
     }
   },
   
