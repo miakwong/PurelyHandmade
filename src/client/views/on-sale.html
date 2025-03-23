@@ -195,7 +195,10 @@
     if (typeof DataService !== 'undefined') {
       DataService.getAllProducts()
         .then(result => {
-          if (result.success && result.data) {
+          console.log('API response:', result); // Debug log
+          
+          // Check if the response has the expected structure
+          if (result.success && Array.isArray(result.data)) {
             const products = result.data;
             
             // Filter for products on sale
@@ -224,7 +227,52 @@
               });
             });
           } else {
-            productsContainer.innerHTML = `<div class="col-12 text-center"><p class="text-danger">Error loading products: ${result.message || 'Unknown error'}</p></div>`;
+            // Handle case where data isn't an array
+            console.error('API response data is not an array:', result);
+            
+            // Try to extract products from a different structure
+            let products = [];
+            if (result.data && typeof result.data === 'object') {
+              // Try common response formats
+              if (Array.isArray(result.data.products)) {
+                products = result.data.products;
+              } else if (Array.isArray(result.products)) {
+                products = result.products;
+              } else if (result.data && Object.values(result.data).every(item => typeof item === 'object')) {
+                // If data is an object with product objects as values
+                products = Object.values(result.data);
+              }
+            }
+            
+            if (products.length > 0) {
+              // We found products in a different format, proceed with them
+              const saleProducts = products.filter(product => product.onSale === true);
+              
+              if (saleProducts.length === 0) {
+                productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
+                return;
+              }
+              
+              // Clear container
+              productsContainer.innerHTML = '';
+              
+              // Display products
+              saleProducts.forEach(product => {
+                const productHTML = createProductCard(product);
+                productsContainer.innerHTML += productHTML;
+              });
+              
+              // Add "Add to Cart" button events
+              document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  const productId = parseInt(this.getAttribute('data-product-id'));
+                  addToCart(productId, 1);
+                });
+              });
+            } else {
+              productsContainer.innerHTML = `<div class="col-12 text-center"><p class="text-danger">Error loading products: ${result.message || 'Invalid data format'}</p></div>`;
+            }
           }
         })
         .catch(error => {
