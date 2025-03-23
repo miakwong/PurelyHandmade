@@ -128,11 +128,12 @@ class Database {
             
             if (!$success) {
                 error_log("Insert failed with error: " . print_r($stmt->errorInfo(), true));
+                return false;
             } else {
-                error_log("Insert successful, last insert ID: " . $this->conn->lastInsertId());
+                $lastId = $this->conn->lastInsertId();
+                error_log("Insert successful, last insert ID: " . $lastId);
+                return $lastId;
             }
-            
-            return $success;
         } catch (\PDOException $e) {
             error_log("PDOException in insert: " . $e->getMessage());
             return false;

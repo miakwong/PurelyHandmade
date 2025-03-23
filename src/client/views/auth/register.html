@@ -313,13 +313,6 @@
         showValidationError('username-error', 'Username must be at least 3 characters long.');
       }
       
-      // Check for duplicate username
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      if (users.some(user => user.username === username)) {
-        isValid = false;
-        showValidationError('username-error', 'This username is already taken. Please choose another one.');
-      }
-      
       // Password strength validation
       if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
         isValid = false;
@@ -346,86 +339,119 @@
         return;
       }
       
-      // Create user object
-      const newUser = {
-        id: Date.now(), // 使用时间戳作为唯一ID
-        username: username,
+      // Create user object to send to server
+      const userData = {
         firstName: firstName,
         lastName: lastName,
         email: email,
+        username: username,
         password: pass,
-        avatar: avatarBase64,
-        birthday: birthday,
-        gender: gender,
-        isAdmin: false,
-        createdAt: new Date().toISOString()
+        avatar: avatarBase64 || null, // 如果没有头像，使用null代替空字符串
+        birthday: birthday ? (new Date(birthday)).toISOString().split('T')[0] : null, // 确保日期格式正确
+        gender: gender ? gender.value : null, // 使用null而不是空字符串
+        role: 'user',
+        isAdmin: 0,
+        status: 'active'
       };
       
-      // Save user data to localStorage (simulate account creation)
-      try {
-        // 获取现有用户列表
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        // 添加新用户
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        // 设置当前用户（自动登录）
-        localStorage.setItem('currentUser', JSON.stringify({
-          id: newUser.id,
-          username: newUser.username,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          email: newUser.email,
-          birthday: newUser.birthday,
-          gender: newUser.gender,
-          avatar: newUser.avatar,
-          isAdmin: newUser.isAdmin
-        }));
-        
-        // 显示成功消息
-        showToast('Account created successfully! Redirecting to your profile...', 'success');
-        
-        // 手动触发storage事件，确保其他页面也能感知到变化
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'currentUser',
-          newValue: localStorage.getItem('currentUser'),
-          url: window.location.href
-        }));
-        
-        // 延迟后重定向到个人资料页面
-        setTimeout(() => {
-          window.location.href = 'profile.html';
-        }, 1500);
-      } catch (error) {
-        // Show error in the validation area
-        const formError = document.getElementById('form-validation-error');
-        formError.textContent = 'There was an error creating your account. Please try again.';
-        formError.classList.remove('d-none');
-        console.error('Registration error:', error);
+      // 用于调试的对象，避免控制台打印大量图像数据
+      const debugData = {
+        firstName, 
+        lastName,
+        email,
+        username,
+        passwordLength: pass.length,
+        birthday,
+        gender: gender ? gender.value : 'not selected',
+        avatarProvided: !!avatarBase64,
+        role: 'user',
+        isAdmin: 0
+      };
+      
+      console.log('Form submitted with data:', debugData);
+      
+      // 尝试减小头像大小以避免过大的数据传输
+      let optimizedUserData = {...userData};
+      if (avatarBase64 && avatarBase64.length > 200000) { // 如果头像超过200KB
+        console.log('Avatar is large, removing for this registration attempt');
+        optimizedUserData.avatar = null; // 暂时不发送头像数据
       }
-    });
-
-    // 添加用户名实时重复检测功能
-    document.getElementById('username').addEventListener('blur', function() {
-      const username = this.value.trim();
-      if (username) {
-        // 检查用户名长度
-        if (username.length < 3) {
-          showValidationError('username-error', 'Username must be at least 3 characters long.');
-          return;
-        }
+      
+      // Show loading indicator
+      const submitBtn = form.querySelector('.submit-btn');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
+      submitBtn.disabled = true;
+      
+      // Send registration data to server API
+      fetch('/src/server/api/auth/register.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(optimizedUserData)
+      })
+      .then(response => {
+        console.log('Server response status:', response.status);
+        return response.text().then(text => {
+          console.log('Raw server response:', text);
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            console.error('Error parsing JSON response:', e);
+            return { success: false, message: 'Invalid server response format' };
+          }
+        });
+      })
+      .then(data => {
+        // 记录服务器响应
+        console.log('Parsed server response data:', data);
         
-        // 检查是否已被注册
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (users.some(user => user.username === username)) {
-          showValidationError('username-error', 'This username is already taken. Please choose another one.');
+        // Reset button
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        
+        if (data.success) {
+          // Show success message
+          showToast('Account created successfully! Redirecting to login page...', 'success');
+          
+          // Redirect to login page after delay
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
         } else {
-          // 清除错误消息
-          document.getElementById('username-error').textContent = '';
-          document.getElementById('username-error').classList.remove('show');
+          // Show error message
+          const formError = document.getElementById('form-validation-error');
+          formError.textContent = data.message || 'Registration failed. Please try again.';
+          formError.classList.remove('d-none');
+          
+          // 检查错误的详细信息
+          console.error('Registration failed with message:', data.message);
+          if (data.errors) {
+            console.error('Validation errors:', data.errors);
+            if (data.errors.email) {
+              showValidationError('email-error', data.errors.email[0]);
+            }
+            if (data.errors.username) {
+              showValidationError('username-error', data.errors.username[0]);
+            }
+            if (data.errors.password) {
+              showValidationError('password-error', data.errors.password[0]);
+            }
+          }
         }
-      }
+      })
+      .catch(error => {
+        // Reset button
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        
+        // Show error message
+        const formError = document.getElementById('form-validation-error');
+        formError.textContent = 'An error occurred while connecting to the server. Please try again later.';
+        formError.classList.remove('d-none');
+        console.error('Registration fetch error:', error);
+      });
     });
 
     //0322邮箱验证
@@ -468,6 +494,36 @@
     }
 });
   
+    // 删除用户名实时重复检测本地存储部分
+    document.getElementById('username').addEventListener('blur', async function() {
+      const username = this.value.trim();
+      if (!username) return;
+      
+      // 检查用户名长度
+      if (username.length < 3) {
+        showValidationError('username-error', 'Username must be at least 3 characters long.');
+        return;
+      }
+      
+      try {
+        // 从服务器检查用户名是否已被使用
+        const response = await fetch('/src/server/api/auth/check_username.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        
+        const data = await response.json();
+        if (data.exists) {
+          showValidationError('username-error', 'This username is already taken. Please choose another one.');
+        } else {
+          document.getElementById('username-error').textContent = '';
+          document.getElementById('username-error').classList.remove('show');
+        }
+      } catch (error) {
+        console.error('Error checking username:', error);
+      }
+    });
 
     // Toast notification function
     function showToast(message, type = 'info') {

@@ -12,6 +12,14 @@ class User {
     }
     
     public function findById($id) {
+        if (!is_numeric($id)) {
+            error_log("Invalid user ID provided: " . var_export($id, true));
+            return false;
+        }
+        
+        // 确保ID是整数
+        $id = intval($id);
+        
         $sql = "SELECT * FROM $this->table WHERE id = :id";
         return $this->db->fetch($sql, ['id' => $id]);
     }
