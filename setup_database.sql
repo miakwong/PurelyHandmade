@@ -129,6 +129,17 @@ CREATE TABLE IF NOT EXISTS `OrderItem` (
   CONSTRAINT `OrderItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product` (`id`) ON DELETE RESTRICT
 );
 
+-- Settings Table
+CREATE TABLE IF NOT EXISTS `Settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) NOT NULL,
+  `value` text,
+  `group` varchar(191) NOT NULL DEFAULT 'general',
+  `updatedAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `group_key` (`group`, `key`)
+);
+
 -- Insert sample data for testing
 INSERT INTO `Category` (`name`, `slug`, `description`, `featured`, `updatedAt`) VALUES 
 ('Home Decor', 'home-decor', 'Beautiful handmade items for your home', 1, NOW()),

@@ -70,28 +70,63 @@ class Settings {
      * @return bool 是否成功
      */
     public function set($key, $value, $group = 'general') {
-        // 检查设置是否已存在
-        $sql = "SELECT id FROM {$this->table} WHERE `key` = :key AND `group` = :group";
-        $setting = $this->db->fetch($sql, ['key' => $key, 'group' => $group]);
-        
-        $now = date('Y-m-d H:i:s');
-        
-        if ($setting) {
-            // 更新现有设置
-            return $this->db->update(
-                $this->table,
-                ['value' => $value, 'updatedAt' => $now],
-                '`id` = :id',
-                ['id' => $setting['id']]
-            );
-        } else {
-            // 创建新设置
-            return $this->db->insert($this->table, [
-                'key' => $key,
-                'value' => $value,
-                'group' => $group,
-                'updatedAt' => $now
-            ]);
+        try {
+            error_log("Setting::set called for $group/$key");
+            
+            // 检查key和group是否合法
+            if (empty($key) || !is_string($key)) {
+                error_log("Invalid key: " . print_r($key, true));
+                return false;
+            }
+            
+            if (empty($group) || !is_string($group)) {
+                error_log("Invalid group: " . print_r($group, true));
+                return false;
+            }
+            
+            // Ensure value is something that can be stored in a text field
+            if (is_array($value) || is_object($value)) {
+                $value = json_encode($value);
+            } elseif (!is_scalar($value) && !is_null($value)) {
+                $value = "";
+            }
+            
+            // 检查设置是否已存在
+            $sql = "SELECT id FROM {$this->table} WHERE `key` = :key AND `group` = :group";
+            error_log("Executing SQL: $sql with key=$key, group=$group");
+            
+            $setting = $this->db->fetch($sql, ['key' => $key, 'group' => $group]);
+            error_log("Fetch result: " . ($setting ? "Found existing setting with ID " . $setting['id'] : "No existing setting found"));
+            
+            $now = date('Y-m-d H:i:s');
+            
+            if ($setting) {
+                // 更新现有设置
+                error_log("Updating existing setting id=" . $setting['id']);
+                $result = $this->db->update(
+                    $this->table,
+                    ['value' => $value, 'updatedAt' => $now],
+                    '`id` = :id',
+                    ['id' => $setting['id']]
+                );
+                error_log("Update result: " . ($result ? "success" : "failed"));
+                return $result;
+            } else {
+                // 创建新设置
+                error_log("Creating new setting");
+                $result = $this->db->insert($this->table, [
+                    'key' => $key,
+                    'value' => $value,
+                    'group' => $group,
+                    'updatedAt' => $now
+                ]);
+                error_log("Insert result: " . ($result ? "success" : "failed"));
+                return $result;
+            }
+        } catch (\Exception $e) {
+            error_log("Exception in Setting::set: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return false;
         }
     }
     
@@ -103,26 +138,54 @@ class Settings {
     public function batchSet($settings) {
         $success = true;
         
+        error_log("Settings model batchSet called with settings: " . print_r($settings, true));
+        
         // 开始事务
+        error_log("Starting transaction");
         $this->db->query('START TRANSACTION');
         
         try {
             foreach ($settings as $group => $groupSettings) {
+                error_log("Processing group: $group with " . count($groupSettings) . " settings");
+                
                 foreach ($groupSettings as $key => $value) {
+                    error_log("Saving setting $group/$key with value: " . substr(print_r($value, true), 0, 100) . (strlen(print_r($value, true)) > 100 ? "..." : ""));
+                    
+                    // Handle different value types
+                    if (is_array($value)) {
+                        error_log("Value is an array, converting to JSON");
+                        $value = json_encode($value);
+                    } elseif (is_object($value)) {
+                        error_log("Value is an object, converting to JSON");
+                        $value = json_encode($value);
+                    } elseif (!is_scalar($value) && !is_null($value)) {
+                        error_log("Value is not scalar or null: " . gettype($value));
+                        // Use a default value if something strange comes in
+                        $value = "";
+                    }
+                    
                     $result = $this->set($key, $value, $group);
+                    error_log("Set result for $group/$key: " . ($result ? "success" : "failed"));
+                    
                     if (!$result) {
                         $success = false;
+                        error_log("Setting $group/$key failed, will rollback transaction");
                     }
                 }
             }
             
             if ($success) {
+                error_log("All settings saved successfully, committing transaction");
                 $this->db->query('COMMIT');
             } else {
+                error_log("Some settings failed to save, rolling back transaction");
                 $this->db->query('ROLLBACK');
             }
         } catch (\Exception $e) {
+            error_log("Exception in batchSet: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             $this->db->query('ROLLBACK');
+            error_log("Transaction rolled back due to exception");
             $success = false;
         }
         

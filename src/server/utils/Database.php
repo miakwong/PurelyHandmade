@@ -100,48 +100,92 @@ class Database {
         }
     }
     
+    /**
+     * 插入记录
+     * @param string $table 表名
+     * @param array $data 数据
+     * @return bool 是否成功
+     */
     public function insert($table, $data) {
         try {
-            // Remove backticks from table name for column construction
-            $cleanTable = trim($table, '`');
-            
             $columns = array_keys($data);
-            $columnSql = implode(', ', $columns);
-            $bindingSql = implode(', ', array_map(fn($col) => ":$col", $columns));
+            $placeholders = array_map(function($col) {
+                return ":$col";
+            }, $columns);
             
-            $sql = "INSERT INTO $table ($columnSql) VALUES ($bindingSql)";
+            $columnStr = implode(', ', array_map(function($col) {
+                return "`$col`";
+            }, $columns));
             
-            // Debug log
-            error_log("Insert SQL: " . $sql);
-            error_log("Insert data: " . json_encode($data));
+            $placeholderStr = implode(', ', $placeholders);
+            
+            $sql = "INSERT INTO $table ($columnStr) VALUES ($placeholderStr)";
+            error_log("Insert SQL: $sql");
+            error_log("Insert data: " . print_r($data, true));
             
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute($data);
+            $success = $stmt->execute($data);
             
-            return $this->conn->lastInsertId();
-        } catch(PDOException $e) {
-            error_log("Insert error: " . $e->getMessage());
-            throw new Exception("Insert error: " . $e->getMessage());
+            if (!$success) {
+                error_log("Insert failed with error: " . print_r($stmt->errorInfo(), true));
+            } else {
+                error_log("Insert successful, last insert ID: " . $this->conn->lastInsertId());
+            }
+            
+            return $success;
+        } catch (\PDOException $e) {
+            error_log("PDOException in insert: " . $e->getMessage());
+            return false;
         }
     }
     
-    public function update($table, $data, $where, $whereParams = []) {
+    /**
+     * 更新记录
+     * @param string $table 表名
+     * @param array $data 数据
+     * @param string $where WHERE子句
+     * @param array $params WHERE参数
+     * @return bool 是否成功
+     */
+    public function update($table, $data, $where, $params = []) {
         try {
-            $setSql = implode(', ', array_map(fn($col) => "$col = :$col", array_keys($data)));
+            $setClauses = array_map(function($col) {
+                return "`$col` = :set_$col";
+            }, array_keys($data));
             
-            $sql = "UPDATE $table SET $setSql WHERE $where";
+            $setClauseStr = implode(', ', $setClauses);
             
-            // Debug log
-            error_log("Update SQL: " . $sql);
-            error_log("Update data: " . json_encode(array_merge($data, $whereParams)));
+            $sql = "UPDATE $table SET $setClauseStr WHERE $where";
+            error_log("Update SQL: $sql");
+            
+            // 准备参数
+            $execParams = [];
+            
+            // 添加SET子句参数
+            foreach ($data as $key => $value) {
+                $execParams["set_$key"] = $value;
+            }
+            
+            // 添加WHERE子句参数
+            foreach ($params as $key => $value) {
+                $execParams[$key] = $value;
+            }
+            
+            error_log("Update parameters: " . print_r($execParams, true));
             
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute(array_merge($data, $whereParams));
+            $success = $stmt->execute($execParams);
             
-            return $stmt->rowCount();
-        } catch(PDOException $e) {
-            error_log("Update error: " . $e->getMessage());
-            throw new Exception("Update error: " . $e->getMessage());
+            if (!$success) {
+                error_log("Update failed with error: " . print_r($stmt->errorInfo(), true));
+            } else {
+                error_log("Update successful, rows affected: " . $stmt->rowCount());
+            }
+            
+            return $success;
+        } catch (\PDOException $e) {
+            error_log("PDOException in update: " . $e->getMessage());
+            return false;
         }
     }
     

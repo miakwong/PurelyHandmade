@@ -166,23 +166,44 @@
     
     // 处理API响应
     handleResponse: async function(response) {
+      console.log('🔍 API Response Status:', response.status, response.statusText);
+      console.log('🔍 API Response Headers:', Object.fromEntries([...response.headers.entries()]));
+      
       const contentType = response.headers.get('content-type');
+      console.log('🔍 Content-Type:', contentType);
+      
       const isJson = contentType && contentType.includes('application/json');
       
       // 如果状态码不在2xx范围内，抛出错误
       if (!response.ok) {
         let errorData;
+        let responseText;
         
         try {
-          errorData = isJson ? await response.json() : await response.text();
+          responseText = await response.text();
+          console.log('🔍 Error Response Text:', responseText);
+          
+          try {
+            errorData = isJson ? JSON.parse(responseText) : responseText;
+          } catch (jsonError) {
+            console.error('🔍 Failed to parse JSON error response:', jsonError);
+            errorData = responseText;
+          }
         } catch (error) {
+          console.error('🔍 Failed to read error response:', error);
           errorData = 'Failed to parse error response';
         }
+        
+        console.error('API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData: errorData
+        });
         
         const error = new Error(
           isJson && errorData.error 
             ? errorData.error 
-            : 'API request failed'
+            : 'API request failed: ' + response.statusText
         );
         
         error.status = response.status;
@@ -193,7 +214,20 @@
       }
       
       // 解析成功响应
-      return isJson ? response.json() : response.text();
+      try {
+        if (isJson) {
+          const jsonResponse = await response.json();
+          console.log('🔍 Successful JSON Response:', jsonResponse);
+          return jsonResponse;
+        } else {
+          const textResponse = await response.text();
+          console.log('🔍 Successful Text Response:', textResponse);
+          return textResponse;
+        }
+      } catch (error) {
+        console.error('🔍 Failed to parse successful response:', error);
+        throw new Error('Invalid response format');
+      }
     },
     
     // 发送请求
@@ -213,6 +247,9 @@
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       if (token) {
         defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔑 Using authorization token:', token.substring(0, 10) + '...');
+      } else {
+        console.log('⚠️ No authorization token found');
       }
       
       // 合并选项
@@ -225,11 +262,27 @@
         },
       };
       
+      console.log(`📡 Making ${fetchOptions.method} request to: ${fullUrl}`);
+      console.log('📡 Request options:', JSON.stringify(fetchOptions, null, 2));
+      
+      if (fetchOptions.body) {
+        console.log('📡 Request body:', fetchOptions.body);
+        try {
+          // 检查body是否是有效的JSON
+          const parsedBody = JSON.parse(fetchOptions.body);
+          console.log('📡 Parsed body:', parsedBody);
+        } catch (e) {
+          console.error('📡 Body is not valid JSON:', e);
+        }
+      }
+      
       try {
+        console.time('📡 API Request Time');
         const response = await fetch(fullUrl, fetchOptions);
+        console.timeEnd('📡 API Request Time');
         return await this.handleResponse(response);
       } catch (error) {
-        console.error('API request failed:', error);
+        console.error('❌ API request failed:', error);
         throw error;
       }
     },
@@ -287,7 +340,8 @@
     
     // 更新设置
     updateSettings: function(settingsData) {
-      return ApiService.put('/settings/update', settingsData);
+      console.log('Sending settings data to server:', JSON.stringify(settingsData));
+      return ApiService.post('/settings/update', settingsData);
     },
     
     // 删除设置
@@ -331,9 +385,64 @@
     loadNavbar();
     loadFooter();
     
+    // 设置相关按钮
+    setupSettingsHandlers();
+    
     // 检查管理员权限
     checkAdminPermissions();
   });
+  
+  function setupSettingsHandlers() {
+    console.log('🔧 Setting up settings handlers');
+    
+    // Save按钮
+    const saveButton = document.querySelector('button[onclick="saveSettings()"]');
+    if (saveButton) {
+      console.log('🔧 Found Save Changes button, attaching event listener');
+      saveButton.addEventListener('click', function(e) {
+        console.log('🔧 Save button clicked via event listener');
+        saveSettings();
+      });
+    } else {
+      console.warn('⚠️ Save Changes button not found in the DOM');
+    }
+    
+    // Reset按钮
+    const resetButton = document.querySelector('button[onclick="resetSettings()"]');
+    if (resetButton) {
+      console.log('🔧 Found Reset button, attaching event listener');
+      resetButton.addEventListener('click', function(e) {
+        console.log('🔧 Reset button clicked via event listener');
+        resetSettings();
+      });
+    } else {
+      console.warn('⚠️ Reset button not found in the DOM');
+    }
+    
+    // 离线模式切换
+    const offlineSwitch = document.createElement('div');
+    offlineSwitch.className = 'form-check form-switch mt-3';
+    offlineSwitch.innerHTML = `
+      <input class="form-check-input" type="checkbox" id="offline-mode-switch">
+      <label class="form-check-label" for="offline-mode-switch">离线模式 (仅使用本地存储)</label>
+    `;
+    
+    const formActions = document.querySelector('.d-flex.justify-content-end');
+    if (formActions) {
+      formActions.parentNode.insertBefore(offlineSwitch, formActions);
+      
+      // 检查是否已启用离线模式
+      const isOffline = localStorage.getItem('settings_offline_mode') === 'true';
+      document.getElementById('offline-mode-switch').checked = isOffline;
+      
+      // 添加切换事件监听器
+      document.getElementById('offline-mode-switch').addEventListener('change', function(e) {
+        localStorage.setItem('settings_offline_mode', e.target.checked);
+        console.log(`🔧 离线模式已${e.target.checked ? '启用' : '禁用'}`);
+        showToast(`离线模式已${e.target.checked ? '启用' : '禁用'}`, 'info');
+      });
+    }
+  }
 
   function checkAdminPermissions() {
     // 检查用户是否为管理员
@@ -379,36 +488,9 @@
     // 显示加载中状态
     showToast('Loading settings...', 'info');
     
-    // 从API获取设置
-    AdminApiService.getSettings()
-      .then(response => {
-        if (response.success && response.data) {
-          const settings = response.data;
-          
-          // 获取通用设置组
-          const generalSettings = settings.general || {};
-          
-          document.getElementById('site-name').value = getSettingValue(generalSettings, 'site_name', '');
-          document.getElementById('contact-email').value = getSettingValue(generalSettings, 'contact_email', '');
-          document.getElementById('phone-number').value = getSettingValue(generalSettings, 'phone_number', '');
-          document.getElementById('address').value = getSettingValue(generalSettings, 'address', '');
-          document.getElementById('facebook-link').value = getSettingValue(generalSettings, 'facebook_link', '');
-          document.getElementById('twitter-link').value = getSettingValue(generalSettings, 'twitter_link', '');
-          document.getElementById('instagram-link').value = getSettingValue(generalSettings, 'instagram_link', '');
-          
-          showToast('Settings loaded successfully', 'success');
-        } else {
-          // 如果API请求失败，从localStorage加载
-          loadSettingsFromLocalStorage();
-          showToast('Failed to load settings from API, using local data', 'warning');
-        }
-      })
-      .catch(error => {
-        console.error('Error loading settings:', error);
-        // 如果API请求失败，从localStorage加载
-        loadSettingsFromLocalStorage();
-        showToast('Error loading settings from API, using local data', 'warning');
-      });
+    // 直接从本地存储加载
+    loadSettingsFromLocalStorage();
+    showToast('Settings loaded from local storage', 'success');
   }
   
   // 辅助函数 - 从设置对象中获取值
@@ -437,10 +519,11 @@
   }
 
   function saveSettings() {
+    console.log('💾 Starting saveSettings function');
     // 显示保存中状态
     showToast('Saving settings...', 'info');
     
-    // 获取表单值
+    // 获取表单值 - 使用更简单的格式
     const settingsData = {
       general: {
         site_name: document.getElementById('site-name').value.trim(),
@@ -453,31 +536,76 @@
       }
     };
     
-    // 保存到API
-    AdminApiService.updateSettings(settingsData)
-      .then(response => {
-        if (response.success) {
-          showToast('Settings saved successfully', 'success');
+    console.log('💾 Form data collected:', settingsData);
+    
+    // 先保存到localStorage
+    const localSettings = {
+      siteName: settingsData.general.site_name,
+      contactEmail: settingsData.general.contact_email,
+      phoneNumber: settingsData.general.phone_number,
+      address: settingsData.general.address,
+      facebookLink: settingsData.general.facebook_link,
+      twitterLink: settingsData.general.twitter_link,
+      instagramLink: settingsData.general.instagram_link
+    };
+    localStorage.setItem('settings', JSON.stringify(localSettings));
+    console.log('💾 Saved to localStorage:', localSettings);
+    
+    // 检查是否处于离线模式
+    const isOfflineMode = localStorage.getItem('settings_offline_mode') === 'true';
+    
+    if (isOfflineMode) {
+      console.log('💾 Running in offline mode, skipping API save');
+      showToast('Settings saved to local storage (offline mode)', 'success');
+      return;
+    }
+    
+    // 尝试保存到API（后台保存，即使失败也不影响用户体验）
+    try {
+      console.log('💾 Attempting to save to API...');
+      showToast('Saving to server...', 'info');
+      
+      AdminApiService.updateSettings(settingsData)
+        .then(response => {
+          console.log('💾 API response received:', response);
+          if (response && response.success) {
+            console.log('✅ Settings saved to API');
+            showToast('Settings saved to server successfully', 'success');
+          } else {
+            console.warn('⚠️ API returned error:', response);
+            showToast('Saved to local storage only', 'warning');
+          }
+        })
+        .catch(error => {
+          console.error('❌ API Error, but settings saved to local storage:', error);
+          console.log('❌ Error name:', error.name);
+          console.log('❌ Error message:', error.message);
+          console.log('❌ Error stack:', error.stack);
+          if (error.data) {
+            console.log('❌ Error data:', error.data);
+          }
           
-          // 同时保存到localStorage作为备份
-          const localSettings = {
-            siteName: settingsData.general.site_name,
-            contactEmail: settingsData.general.contact_email,
-            phoneNumber: settingsData.general.phone_number,
-            address: settingsData.general.address,
-            facebookLink: settingsData.general.facebook_link,
-            twitterLink: settingsData.general.twitter_link,
-            instagramLink: settingsData.general.instagram_link
-          };
-          localStorage.setItem('settings', JSON.stringify(localSettings));
-        } else {
-          showToast('Failed to save settings: ' + (response.message || 'Unknown error'), 'error');
-        }
-      })
-      .catch(error => {
-        console.error('Error saving settings:', error);
-        showToast('Error saving settings: ' + (error.message || 'Unknown error'), 'error');
-      });
+          showToast('Settings saved locally only - Server error', 'warning');
+          
+          // 如果因服务器问题，建议用户启用离线模式
+          if (error.status >= 500) {
+            setTimeout(() => {
+              if (confirm('服务器连接问题。是否启用离线模式？')) {
+                document.getElementById('offline-mode-switch').checked = true;
+                localStorage.setItem('settings_offline_mode', 'true');
+                showToast('离线模式已启用', 'info');
+              }
+            }, 1000);
+          }
+        });
+    } catch (error) {
+      console.error('❌ Exception when saving to API, but settings saved to local storage:', error);
+      console.log('❌ Error name:', error.name);
+      console.log('❌ Error message:', error.message);
+      console.log('❌ Error stack:', error.stack);
+      
+      showToast('Settings saved locally only', 'warning');
+    }
   }
 
   function resetSettings() {
@@ -485,44 +613,48 @@
       // 显示重置中状态
       showToast('Resetting settings...', 'info');
       
-      // 准备空设置
-      const emptySettings = {
-        general: {
-          site_name: '',
-          contact_email: '',
-          phone_number: '',
-          address: '',
-          facebook_link: '',
-          twitter_link: '',
-          instagram_link: ''
-        }
-      };
+      // 直接从localStorage中删除设置
+      localStorage.removeItem('settings');
       
-      // 更新到API
-      AdminApiService.updateSettings(emptySettings)
-        .then(response => {
-          if (response.success) {
-            // 同时清除本地存储
-            localStorage.removeItem('settings');
-            
-            // 重新加载表单
-            document.getElementById('site-name').value = '';
-            document.getElementById('contact-email').value = '';
-            document.getElementById('phone-number').value = '';
-            document.getElementById('address').value = '';
-            document.getElementById('facebook-link').value = '';
-            document.getElementById('twitter-link').value = '';
-            document.getElementById('instagram-link').value = '';
-            
-            showToast('Settings reset to default', 'success');
-          } else {
-            showToast('Failed to reset settings: ' + (response.message || 'Unknown error'), 'error');
+      // 重置表单
+      document.getElementById('site-name').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('phone-number').value = '';
+      document.getElementById('address').value = '';
+      document.getElementById('facebook-link').value = '';
+      document.getElementById('twitter-link').value = '';
+      document.getElementById('instagram-link').value = '';
+      
+      showToast('Settings reset to default', 'success');
+      
+      // 尝试在API中重置设置（后台处理，不影响用户体验）
+      try {
+        // 准备空设置
+        const emptySettings = {
+          general: {
+            site_name: '',
+            contact_email: '',
+            phone_number: '',
+            address: '',
+            facebook_link: '',
+            twitter_link: '',
+            instagram_link: ''
           }
-        })
-        .catch(error => {
-          console.error('Error resetting settings:', error);
-          showToast('Error resetting settings: ' + (error.message || 'Unknown error'), 'error');
-        });
+        };
+        
+        // 尝试更新到API
+        AdminApiService.updateSettings(emptySettings)
+          .then(response => {
+            if (response && response.success) {
+              console.log('Settings also reset on the server');
+            }
+          })
+          .catch(error => {
+            console.error('API Error when resetting, but local settings reset successfully:', error);
+          });
+      } catch (error) {
+        console.error('Exception when resetting on API, but local settings reset successfully:', error);
+      }
     }
   }
   
