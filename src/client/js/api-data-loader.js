@@ -8,6 +8,48 @@
 // Log when this script is loaded
 console.log('api-data-loader.js loaded at', new Date().toISOString());
 
+// Universal fix to handle port issues - change API base URL if needed
+if (typeof DataService !== 'undefined' && DataService.apiBaseUrl) {
+  // If we're on port 8001, update the API base URL
+  if (window.location.port === '8001') {
+    DataService.apiBaseUrl = '/api';
+    console.log('Updated API base URL for port 8001:', DataService.apiBaseUrl);
+  }
+}
+
+// Universal container ID helper function
+window.getContainerSafely = function(containerId) {
+  // If container ID is undefined, log an error and return null
+  if (!containerId) {
+    console.error(`getContainerSafely: Container ID is undefined`);
+    return null;
+  }
+  
+  // Get container by ID
+  const container = document.getElementById(containerId);
+  if (container) {
+    return container;
+  }
+  
+  // Try alternative approaches if container not found
+  console.error(`getContainerSafely: Container with ID "${containerId}" not found, trying alternatives`);
+  
+  // Check if containerId is actually a DOM element
+  if (containerId instanceof HTMLElement) {
+    console.log('getContainerSafely: Container ID is actually a DOM element, using it directly');
+    return containerId;
+  }
+  
+  // Last resort - search by class instead of ID
+  const containersByClass = document.getElementsByClassName(containerId);
+  if (containersByClass.length > 0) {
+    console.log(`getContainerSafely: Found container by class "${containerId}"`);
+    return containersByClass[0];
+  }
+  
+  return null;
+};
+
 // Define API functions globally so they're available immediately
  
 /**
@@ -23,21 +65,21 @@ console.log('api-data-loader.js loaded at', new Date().toISOString());
 window.loadProducts = async function(containerId, options = {}) {
   console.log(`API loadProducts() - Starting with parameters:`, { containerId, options });
   
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadProducts() - containerId参数未定义，使用默认容器ID："products-container"');
+    containerId = 'products-container'; // 使用默认的容器ID
+  }
+  
   if (!DataService) {
     console.error('API loadProducts() - DataService is not defined');
     return;
   }
   
-  // Make sure containerId is defined
-  if (!containerId) {
-    console.error('API loadProducts() - containerId parameter is undefined or empty');
-    return;
-  }
-  
-  // Get the container element
-  const container = document.getElementById(containerId);
+  // Get the container element using the safe helper
+  const container = window.getContainerSafely(containerId);
   if (!container) {
-    console.error(`API loadProducts() - Container with ID "${containerId}" not found`);
+    console.error(`API loadProducts() - Unable to find container using ID or alternatives: "${containerId}"`);
     return;
   }
   
@@ -178,13 +220,24 @@ window.loadProducts = async function(containerId, options = {}) {
  * @param {boolean} options.featured - Whether to show only featured categories
  */
 window.loadCategories = async function(containerId, options = {}) {
+  console.log(`API loadCategories() - Starting with parameters:`, { containerId, options });
+  
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadCategories() - containerId参数未定义，使用默认容器ID："category-cards-container"');
+    containerId = 'category-cards-container'; // 使用默认的容器ID
+  }
+  
   if (!DataService) {
     console.error('loadCategories: DataService is not defined');
     return;
   }
   
-  const container = document.getElementById(containerId);
-  if (!container) return;
+  const container = window.getContainerSafely(containerId);
+  if (!container) {
+    console.error(`API loadCategories() - Unable to find container using ID or alternatives: "${containerId}"`);
+    return;
+  }
   
   try {
     // Show loading state
@@ -260,21 +313,21 @@ window.loadCategories = async function(containerId, options = {}) {
 window.loadDesigners = async function(containerId, options = {}) {
   console.log(`API loadDesigners() - Starting with parameters:`, { containerId, options });
   
+  // 自动修复：如果containerId为undefined，尝试使用默认值
+  if (!containerId) {
+    console.warn('API loadDesigners() - containerId参数未定义，使用默认容器ID："designers-container"');
+    containerId = 'designers-container'; // 使用默认的容器ID
+  }
+  
   if (!DataService) {
     console.error('API loadDesigners() - DataService is not defined');
     return;
   }
   
-  // TEMPORARY FIX: Hardcode the container ID to ensure we get the right element
-  // This bypasses any issues with parameter passing
-  const container = document.getElementById('designers-container');
-  console.log('API loadDesigners() - Using hardcoded container ID: designers-container');
-
+  // Get the container element using the safe helper
+  const container = window.getContainerSafely(containerId);
   if (!container) {
-    console.error(`API loadDesigners() - Container with ID "designers-container" not found`);
-    // Try another common approach - query by class 
-    const containers = document.querySelectorAll('.row');
-    console.log(`API loadDesigners() - Found ${containers.length} .row elements`);
+    console.error(`API loadDesigners() - Unable to find container using ID or alternatives: "${containerId}"`);
     return;
   }
   
@@ -462,4 +515,50 @@ document.addEventListener('DOMContentLoaded', function() {
       return false;
     }
   };
-}); 
+});
+
+// Helper function to ensure all API-related scripts are loaded on any page
+window.ensureApiScriptsLoaded = function() {
+  const requiredScripts = [
+    '/src/client/js/data-service.js',
+    '/src/client/js/api-data-loader.js'
+  ];
+  
+  // Check if scripts are already loaded
+  const loadedScripts = Array.from(document.querySelectorAll('script')).map(script => script.src);
+  
+  // Add any missing scripts
+  requiredScripts.forEach(scriptSrc => {
+    const fullSrc = new URL(scriptSrc, window.location.origin).href;
+    if (!loadedScripts.some(src => src === fullSrc)) {
+      console.log(`Adding missing script: ${scriptSrc}`);
+      const script = document.createElement('script');
+      script.src = scriptSrc;
+      document.head.appendChild(script);
+    }
+  });
+  
+  // Check if DataService is available
+  if (typeof DataService === 'undefined') {
+    console.warn('DataService is not defined yet, waiting for scripts to load...');
+    // Try again after a short delay
+    setTimeout(() => {
+      if (typeof DataService !== 'undefined') {
+        console.log('DataService is now available');
+      } else {
+        console.error('DataService still not available after waiting');
+      }
+    }, 500);
+  } else {
+    console.log('DataService is available');
+  }
+  
+  return typeof DataService !== 'undefined';
+};
+
+// Auto-initialize when loaded
+if (typeof document !== 'undefined' && document.readyState === 'complete') {
+  window.ensureApiScriptsLoaded();
+} else {
+  window.addEventListener('load', window.ensureApiScriptsLoaded);
+} 
