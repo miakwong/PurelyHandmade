@@ -12,8 +12,9 @@ use Middleware\CorsMiddleware;
 $corsMiddleware = new CorsMiddleware();
 $corsMiddleware->handle();
 
-// Only accept PUT requests
-if (getRequestMethod() !== 'PUT') {
+// Accept both PUT and POST requests
+$method = getRequestMethod();
+if ($method !== 'PUT' && $method !== 'POST') {
     $response = new Response();
     $response->error('Method not allowed', 405);
     exit;
@@ -31,15 +32,30 @@ try {
     // Get order data
     $data = $request->all();
     
-    // Check if ID and status are provided
+    // Check if ID is provided
     $id = $data['id'] ?? null;
-    $status = $data['status'] ?? null;
-    $notes = $data['notes'] ?? null;
     
     if (!$id) {
         $response->error('Order ID is required');
         exit;
     }
+    
+    // Check if this is a delete action
+    if (isset($data['action']) && $data['action'] === 'delete') {
+        // Delete the order
+        $result = $orderController->deleteOrder($id);
+        
+        if ($result['success']) {
+            $response->success(null, $result['message']);
+        } else {
+            $response->error($result['message']);
+        }
+        exit;
+    }
+    
+    // If not delete, then it's a status update
+    $status = $data['status'] ?? null;
+    $notes = $data['notes'] ?? null;
     
     if (!$status) {
         $response->error('Status is required');

@@ -354,4 +354,46 @@ class OrderController {
             ];
         }
     }
+    
+    /**
+     * 删除订单
+     * 
+     * @param int $id 订单ID
+     * @return array 删除结果
+     */
+    public function deleteOrder($id) {
+        try {
+            // 检查订单是否存在
+            $existingOrder = $this->order->findById($id);
+            if (!$existingOrder) {
+                return [
+                    'success' => false,
+                    'message' => 'Order not found'
+                ];
+            }
+            
+            // 删除订单关联的订单项
+            $orderItems = $this->orderItem->getOrderItems($id);
+            foreach ($orderItems as $item) {
+                $this->orderItem->delete($item['id']);
+            }
+            
+            // 删除订单本身
+            $this->order->delete($id);
+            
+            $this->logger->info('Order deleted', ['id' => $id]);
+            
+            return [
+                'success' => true,
+                'message' => 'Order deleted successfully'
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Delete order failed', Logger::formatException($e));
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to delete order: ' . $e->getMessage()
+            ];
+        }
+    }
 } 
