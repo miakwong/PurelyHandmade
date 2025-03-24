@@ -588,8 +588,17 @@ const AdminApiService = {
   function renderOrdersTable(orders, tableBody, userMap) {
     if (!orders || !orders.length) return;
     
-    // 按时间降序排序订单（最新的在前面）
-    orders.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    // 按订单ID升序排序（而不是按日期降序）
+    orders.sort((a, b) => {
+      // 提取订单ID中的数字部分（如果ID格式为"ORD12345"，则提取12345部分）
+      const getOrderNumber = (id) => {
+        if (!id) return 0;
+        const numericPart = id.toString().replace(/\D/g, '');
+        return numericPart ? parseInt(numericPart) : 0;
+      };
+      
+      return getOrderNumber(a.id) - getOrderNumber(b.id);
+    });
     
     // 创建一个已渲染订单ID的集合，避免重复渲染
     const renderedOrderIds = new Set();
