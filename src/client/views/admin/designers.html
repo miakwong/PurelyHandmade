@@ -398,8 +398,8 @@ const ApiService = {
  */
 const AdminApiService = {
   // 获取所有设计师
-  getAllDesigners: function() {
-    return ApiService.get('/designers');
+  getAllDesigners: function(filters = {}) {
+    return ApiService.get('/designers', filters);
   },
   
   // 获取设计师详情
@@ -627,17 +627,20 @@ const AdminApiService = {
   }
   
   // 加载设计师数据
-  async function loadDesigners() {
+  async function loadDesigners(filters = {}) {
     try {
+      // 显示加载状态
+      showLoadingState();
+      
       // 从API获取设计师数据
-      const response = await AdminApiService.getAllDesigners()
+      const response = await AdminApiService.getAllDesigners(filters)
         .catch(error => {
           console.error('API错误:', error);
           throw new Error('获取设计师数据失败');
         });
       
       if (!response || !response.success) {
-        throw new Error(response && response.data ? response.data : '获取设计师数据失败');
+        throw new Error(response && response.message ? response.message : '获取设计师数据失败');
       }
       
       // 正确处理API返回结构
@@ -726,13 +729,73 @@ const AdminApiService = {
     });
   }
   
-  // 筛选设计师
-  function filterDesigners(query) {
+  // 应用筛选条件
+  async function applyFilters() {
+    const nameFilter = document.getElementById('filter-name').value.trim().toLowerCase();
+    const specialtyFilter = document.getElementById('filter-specialty').value.trim().toLowerCase();
+    
+    try {
+      // 显示加载状态
+      showLoadingState();
+      
+      // 准备API过滤参数 - 只使用name，因为backend不支持specialty
+      const filters = {};
+      if (nameFilter) {
+        filters.name = nameFilter;
+      }
+      
+      // 使用API获取过滤后的设计师数据
+      const response = await AdminApiService.getAllDesigners(filters)
+        .catch(error => {
+          console.error('API错误:', error);
+          throw new Error('获取设计师数据失败');
+        });
+      
+      if (!response || !response.success) {
+        throw new Error(response && response.message ? response.message : '获取设计师数据失败');
+      }
+      
+      // 处理API返回结构
+      let designers = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          designers = response.data;
+        } else if (response.data.designers && Array.isArray(response.data.designers)) {
+          designers = response.data.designers;
+        } else {
+          console.error('API返回的designers格式不正确:', response.data);
+          throw new Error('设计师数据格式无效');
+        }
+      }
+      
+      // 渲染设计师数据
+      renderDesigners(designers);
+      
+      // 如果specialty有值，进行客户端过滤
+      if (specialtyFilter) {
+        clientSideSpecialtyFiltering(specialtyFilter);
+      }
+      
+    } catch (error) {
+      console.error('过滤设计师出错:', error);
+      showToast('过滤设计师失败: ' + error.message, 'danger');
+      
+      // 如果API过滤失败，尝试客户端过滤
+      clientSideFiltering(nameFilter, specialtyFilter);
+    } finally {
+      // 隐藏加载状态
+      hideLoadingState();
+    }
+  }
+  
+  // 客户端专业过滤（因为后端没有specialty字段）
+  function clientSideSpecialtyFiltering(specialtyFilter) {
     const designerRows = document.querySelectorAll('#designerTableBody tr');
     
     designerRows.forEach(row => {
-      const designerName = row.getAttribute('data-designer-name');
-      if (designerName && (query === '' || designerName.toLowerCase().includes(query.toLowerCase()))) {
+      const designerBio = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+      
+      if (!specialtyFilter || designerBio.includes(specialtyFilter)) {
         row.style.display = '';
       } else {
         row.style.display = 'none';
@@ -740,11 +803,8 @@ const AdminApiService = {
     });
   }
   
-  // 应用筛选条件
-  function applyFilters() {
-    const nameFilter = document.getElementById('filter-name').value.trim().toLowerCase();
-    const specialtyFilter = document.getElementById('filter-specialty').value.trim().toLowerCase();
-    
+  // 客户端过滤（作为后备方案）
+  function clientSideFiltering(nameFilter, specialtyFilter) {
     const designerRows = document.querySelectorAll('#designerTableBody tr');
     
     designerRows.forEach(row => {
@@ -763,14 +823,12 @@ const AdminApiService = {
   }
   
   // 重置筛选条件
-  function resetFilters() {
+  async function resetFilters() {
     document.getElementById('filter-name').value = '';
     document.getElementById('filter-specialty').value = '';
     
-    const designerRows = document.querySelectorAll('#designerTableBody tr');
-    designerRows.forEach(row => {
-      row.style.display = '';
-    });
+    // 重新加载所有设计师
+    await loadDesigners();
   }
   
   // 重置设计师表单
@@ -809,14 +867,7 @@ const AdminApiService = {
       // 正确处理API返回结构
       let designer = null;
       if (response.data) {
-        if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-          designer = response.data;
-        } else if (response.data.designer && typeof response.data.designer === 'object') {
-          designer = response.data.designer;
-        } else {
-          console.error('API返回的designer格式不正确:', response.data);
-          throw new Error('设计师数据格式无效');
-        }
+        designer = response.data;
       }
       
       if (!designer) {
@@ -857,7 +908,7 @@ const AdminApiService = {
       console.error('编辑设计师出错:', error);
       
       // 显示错误消息
-      showError('无法加载设计师数据，请确保API服务正常运行并刷新页面重试。');
+      showToast('无法加载设计师数据，请确保API服务正常运行并刷新页面重试。', 'danger');
     }
   }
   
@@ -906,18 +957,7 @@ const AdminApiService = {
         designerData.image = images[0].src;
       }
       
-      // 保存到API
-      await saveDesignerToAPI(designerId, designerData);
-      
-    } catch (error) {
-      console.error('保存设计师出错:', error);
-      showToast('保存设计师失败', 'danger');
-    }
-  }
-  
-  // 保存设计师到API
-  async function saveDesignerToAPI(designerId, designerData) {
-    try {
+      // 调用API保存设计师数据
       let response;
       
       if (designerId) {
@@ -929,7 +969,7 @@ const AdminApiService = {
       }
       
       if (!response.success) {
-        throw new Error(response.data || '保存设计师失败');
+        throw new Error(response.message || '保存设计师失败');
       }
       
       // 关闭模态窗口
@@ -944,10 +984,8 @@ const AdminApiService = {
       
       showToast(designerId ? '设计师更新成功' : '设计师创建成功', 'success');
     } catch (error) {
-      console.error('保存设计师到API出错:', error);
-      
-      // 显示错误消息
-      showError('无法保存设计师数据，请确保API服务正常运行并刷新页面重试。');
+      console.error('保存设计师出错:', error);
+      showToast('保存设计师失败: ' + error.message, 'danger');
     }
   }
   
@@ -964,7 +1002,7 @@ const AdminApiService = {
       const response = await AdminApiService.deleteDesigner(designerId);
       
       if (!response.success) {
-        throw new Error(response.data || '删除设计师失败');
+        throw new Error(response.message || '删除设计师失败');
       }
       
       // 重新加载设计师数据
@@ -973,55 +1011,31 @@ const AdminApiService = {
       showToast('设计师删除成功', 'success');
     } catch (error) {
       console.error('删除设计师出错:', error);
-      
-      // 显示错误消息
-      showError('无法删除设计师，请确保API服务正常运行并刷新页面重试。');
+      showToast('删除设计师失败: ' + error.message, 'danger');
     }
   }
   
   // 切换设计师的Featured状态
   async function toggleDesignerFeatured(designerId, featured) {
     try {
-      // 从后端API获取设计师数据
-      const response = await AdminApiService.getDesignerById(designerId);
-      
-      if (!response.success) {
-        throw new Error(response.data || '获取设计师数据失败');
-      }
-      
-      // 正确处理API返回结构
-      let designer = null;
-      if (response.data) {
-        if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-          designer = response.data;
-        } else if (response.data.designer && typeof response.data.designer === 'object') {
-          designer = response.data.designer;
-        } else {
-          console.error('API返回的designer格式不正确:', response.data);
-          throw new Error('设计师数据格式无效');
-        }
-      }
-      
-      if (!designer) {
-        throw new Error('设计师不存在');
-      }
+      showToast('更新设计师状态...', 'info');
       
       // 更新设计师
       const updateResponse = await AdminApiService.updateDesigner(designerId, {
-        ...designer,
         featured: featured
       });
       
       if (!updateResponse.success) {
-        throw new Error(updateResponse.data || '更新设计师失败');
+        throw new Error(updateResponse.message || '更新设计师失败');
       }
       
       showToast(featured ? '设计师已设为推荐' : '设计师已取消推荐', 'success');
+      
+      // 重新加载设计师列表以更新UI
+      await loadDesigners();
     } catch (error) {
       console.error('切换设计师Featured状态出错:', error);
-      
-      // 显示错误消息
-      showError('无法更新设计师状态，请确保API服务正常运行并刷新页面重试。');
+      showToast('无法更新设计师状态: ' + error.message, 'danger');
     }
   }
   
@@ -1065,6 +1079,9 @@ const AdminApiService = {
       return;
     }
     
+    // 清空容器
+    designerContainer.innerHTML = '';
+    
     if (!Array.isArray(designers) || designers.length === 0) {
       designerContainer.innerHTML = `
         <tr>
@@ -1075,9 +1092,6 @@ const AdminApiService = {
       `;
       return;
     }
-    
-    // 清空容器
-    designerContainer.innerHTML = '';
     
     // 加载设计师数据到表格
     designers.forEach(designer => {

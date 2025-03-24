@@ -57,13 +57,23 @@ class Designer {
             $whereConditions[] = 'featured = 1';
         }
         
+        if (isset($filters['name']) && !empty($filters['name'])) {
+            $whereConditions[] = 'name LIKE :name';
+            $params['name'] = '%' . $filters['name'] . '%';
+        }
+        
         $whereClause = !empty($whereConditions) 
             ? 'WHERE ' . implode(' AND ', $whereConditions)
             : '';
         
         $sql = "SELECT * FROM $this->table $whereClause ORDER BY name ASC";
         
+        error_log("Executing Designer getAll with SQL: " . $sql);
+        error_log("Parameters: " . json_encode($params));
+        
         $designers = $this->db->fetchAll($sql, $params);
+        
+        error_log("Found " . count($designers) . " designers matching criteria");
         
         return [
             'designers' => $designers,
