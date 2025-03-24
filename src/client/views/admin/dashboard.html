@@ -675,9 +675,18 @@ const AdminApiService = {
     
     console.log(`📊 Dashboard: 获取到${orders.length}个订单`);
     
-    // Get 5 most recent orders
+    // 按订单ID升序排序（而不是按日期降序）
     const recentOrders = orders
-      .sort((a, b) => new Date(b.orderDate || b.createdAt) - new Date(a.orderDate || a.createdAt))
+      .sort((a, b) => {
+        // 提取订单ID中的数字部分（如果ID格式为"ORD12345"，则提取12345部分）
+        const getOrderNumber = (id) => {
+          if (!id) return 0;
+          const numericPart = id.toString().replace(/\D/g, '');
+          return numericPart ? parseInt(numericPart) : 0;
+        };
+        
+        return getOrderNumber(a.id) - getOrderNumber(b.id);
+      })
       .slice(0, 5);
     
     // 直接渲染订单表格，不再重复请求用户数据
