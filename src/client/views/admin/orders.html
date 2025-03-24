@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/style.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  <style>
+    /* Custom styles for order management */
+    .order-id-column {
+      min-width: 250px;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .order-id-text {
+      cursor: pointer;
+    }
+    
+    .order-id-text:hover {
+      text-decoration: underline;
+    }
+    
+    /* Management UI styles */
+    .admin-card {
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+      border: none;
+    }
+    
+    .admin-card .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #eaecef;
+      padding: 15px 20px;
+    }
+    
+    .admin-card .card-body {
+      padding: 20px;
+    }
+    
+    .filter-section {
+      background-color: #f8f9fa;
+      border: 1px solid #eaecef !important;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 20px !important;
+    }
+    
+    .filter-toggle {
+      cursor: pointer;
+      color: #6c757d;
+    }
+    
+    .filter-toggle:hover {
+      color: #495057;
+    }
+    
+    .admin-table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .admin-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      border-top: none;
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px 15px;
+    }
+    
+    .admin-table td {
+      padding: 12px 15px;
+      vertical-align: middle;
+    }
+    
+    .admin-table tbody tr:hover {
+      background-color: #f1f3f5;
+    }
+    
+    .action-buttons {
+      white-space: nowrap;
+    }
+    
+    .action-button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      margin-right: 0.25rem;
+    }
+    
+    .badge-status {
+      padding: 0.5em 0.75em;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    
+    @media (max-width: 768px) {
+      .filter-section .row > div {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-receipt me-2 text-primary"></i>Order Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
+
+      <div class="card admin-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Orders List</h5>
+          <span class="filter-toggle" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+            <i class="bi bi-funnel me-1"></i>Filters <i class="bi bi-chevron-up"></i>
+          </span>
+        </div>
+        <div class="card-body">
+          <!-- Add filter section -->
+          <div class="collapse show" id="filterCollapse">
+            <div class="filter-section mb-4">
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label for="filter-order-id" class="form-label">Order ID</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
+                    <input type="text" class="form-control" id="filter-order-id" placeholder="Filter by Order ID">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label for="filter-user" class="form-label">Customer</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                    <input type="text" class="form-control" id="filter-user" placeholder="Filter by customer name">
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-status" class="form-label">Status</label>
+                  <select class="form-select" id="filter-status">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-date-from" class="form-label">Date From</label>
+                  <input type="date" class="form-control" id="filter-date-from">
+                </div>
+                <div class="col-md-2">
+                  <label for="filter-date-to" class="form-label">Date To</label>
+                  <input type="date" class="form-control" id="filter-date-to">
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12 d-flex justify-content-end">
+                  <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                  </button>
+                  <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="bi bi-search me-1"></i>Search
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table admin-table table-hover">
+              <thead>
+                <tr>
+                  <th class="order-id-column">Order ID</th>
+                  <th>User</th>
+                  <th>Status</th>
+                  <th>Total Amount</th>
+                  <th>Order Date</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="order-table-body">
+                <!-- Orders data will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+          <div id="no-orders-message" class="text-center py-5 d-none">
+            <div class="py-5">
+              <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3">No orders found</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 直接在页面中内联定义关键服务，避免加载问题 -->
+<script>
+/**
+ * API Service for Purely Handmade
+ * 提供统一的API访问层，处理所有与服务器的通信
+ */
+const ApiService = {
+  // 基础API URL
+  baseUrl: '/api',
+  
+  // 处理API响应
+  handleResponse: async function(response) {
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    
+    // 如果状态码不在2xx范围内，抛出错误
+    if (!response.ok) {
+      let errorData;
+      let errorMessage = 'API request failed';
+      
+      try {
+        if (isJson) {
+          errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'API request failed';
+        } else {
+          errorData = await response.text();
+        }
+      } catch (parseError) {
+        console.error('Failed to parse error response:', parseError);
+        errorData = 'Failed to parse error response';
+      }
+      
+      // 根据状态码提供更具体的错误信息
+      switch (response.status) {
+        case 400:
+          errorMessage = `请求错误 (400): ${errorMessage}`;
+          console.error('请求参数错误:', errorData);
+          break;
+        case 401:
+          errorMessage = '未授权: 请重新登录 (401)';
+          break;
+        case 403:
+          errorMessage = '禁止访问 (403): 您没有权限执行此操作';
+          break;
+        case 404:
+          errorMessage = '资源不存在 (404): 请求的资源未找到';
+          break;
+        case 500:
+          errorMessage = '服务器错误 (500): 请联系管理员';
+          break;
+        default:
+          errorMessage = `请求失败 (${response.status}): ${errorMessage}`;
+      }
+      
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      error.data = errorData;
+      
+      // 显示错误提示
+      showToast(errorMessage, 'error');
+      
+      throw error;
+    }
+    
+    // 解析成功响应
+    return isJson ? response.json() : response.text();
+  },
+  
+  // 发送请求
+  request: async function(url, options = {}) {
+    const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+    
+    // 默认选项
+    const defaultOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      credentials: 'same-origin',
+    };
+    
+    // 添加授权令牌
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (!token) {
+      console.error('授权令牌不存在，请先登录');
+      // 如果没有token，显示错误并引导用户登录
+      showToast('您需要重新登录以继续操作', 'error');
+      setTimeout(() => {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      }, 2000);
+      throw new Error('Authorization token is missing');
+    }
+    
+    defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+    
+    // 合并选项
+    const fetchOptions = {
+      ...defaultOptions,
+      ...options,
+      headers: {
+        ...defaultOptions.headers,
+        ...options.headers,
+      },
+    };
+    
+    try {
+      console.log(`📡 发送${options.method || 'GET'}请求到: ${fullUrl}`);
+      console.log('📡 请求头:', fetchOptions.headers);
+      if (fetchOptions.body) {
+        console.log('📡 请求体:', fetchOptions.body);
+      }
+      
+      const response = await fetch(fullUrl, fetchOptions);
+      
+      // 检查授权问题
+      if (response.status === 401) {
+        console.error('授权失败: 令牌可能已过期');
+        showToast('您的登录已过期，请重新登录', 'error');
+        
+        // 清除无效token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        
+        // 延迟重定向，让用户看到错误消息
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        throw new Error('Authorization token expired');
+      }
+      
+      return await this.handleResponse(response);
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  },
+  
+  // GET请求
+  get: function(url, params = {}) {
+    // 构建查询字符串
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        queryParams.append(key, params[key]);
+      }
+    });
+    
+    const queryString = queryParams.toString();
+    const fullUrl = queryString ? `${url}?${queryString}` : url;
+    
+    return this.request(fullUrl, { method: 'GET' });
+  },
+  
+  // POST请求
+  post: function(url, data = {}) {
+    return this.request(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // PUT请求
+  put: function(url, data = {}) {
+    return this.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // DELETE请求
+  delete: function(url) {
+    return this.request(url, { method: 'DELETE' });
+  }
+};
+
+/**
+ * Admin API Service for Purely Handmade
+ * 提供管理员API访问层，处理与服务器的管理功能通信
+ */
+const AdminApiService = {
+  // 获取所有用户
+  getAllUsers: function() {
+    return ApiService.get('/auth/profile?all=1');
+  },
+  
+  // 获取所有产品
+  getAllProducts: function() {
+    return ApiService.get('/products');
+  },
+  
+  // 获取所有类别
+  getAllCategories: function() {
+    return ApiService.get('/categories');
+  },
+  
+  // 获取所有设计师
+  getAllDesigners: function() {
+    return ApiService.get('/designers');
+  },
+  
+  // 获取所有订单
+  getAllOrders: function(filters = {}) {
+    // 构建查询参数
+    const queryParams = {
+      all: 1
+    };
+    
+    // 添加过滤参数
+    if (filters.status) {
+      queryParams.status = filters.status;
+    }
+    
+    if (filters.startDate) {
+      queryParams.start_date = filters.startDate;
+    }
+    
+    if (filters.endDate) {
+      queryParams.end_date = filters.endDate;
+    }
+    
+    // 调用API请求
+    console.log('发送带过滤条件的API请求:', queryParams);
+    return ApiService.get('/orders', queryParams);
+  },
+  
+  // 更新订单状态
+  updateOrderStatus: function(orderId, status) {
+    return ApiService.put('/orders/update', { id: orderId, status: status });
+  },
+  
+  // 获取订单详情
+  getOrderById: async function(orderId) {
+    console.log(`尝试获取订单详情 ID: ${orderId}`);
+    
+    // 使用订单列表API，但获取所有订单（对管理员有效）
+    return ApiService.get('/orders', { all: 1 }).then(response => {
+      if (response.success && response.data && response.data.orders) {
+        // 从订单列表中找到指定ID的订单
+        const foundOrder = response.data.orders.find(order => order.id == orderId);
+        
+        if (foundOrder) {
+          // 如果找到了，包装为成功响应格式
+          console.log(`✅ 在订单列表中找到了订单 #${orderId}`);
+          return {
+            success: true,
+            data: foundOrder
+          };
+        } else {
+          console.warn(`⚠️ 在API响应中找不到指定订单 #${orderId}`);
+        }
+      }
+      
+      // 如果没有找到订单或API请求失败，返回错误响应
+      return {
+        success: false,
+        message: '未找到指定的订单'
+      };
+    });
+  },
+  
+  // 处理订单
+  handleOrder: function(orderId, action) {
+    console.log(`📡 处理订单 - ID: ${orderId}, 动作: ${action}`);
+    
+    // 将action转换为状态
+    let status = '';
+    switch(action) {
+      case 'process': status = 'processing'; break;
+      case 'ship': status = 'shipped'; break;
+      case 'deliver': status = 'delivered'; break;
+      case 'complete': status = 'completed'; break;
+      case 'cancel': status = 'cancelled'; break;
+      default: status = action;
+    }
+    
+    // 使用标准RESTful格式发送状态更新
+    return ApiService.put('/orders/update', {
+      id: orderId,
+      status: status
+    });
+  },
+  
+  // 删除订单
+  deleteOrder: function(orderId) {
+    return ApiService.delete(`/orders?id=${orderId}`);
+  }
+};
+
+/**
+ * 模拟数据服务
+ * 在API调用失败时提供备用数据
+ */
+const MockDataService = {
+  // 创建模拟订单数据
+  createMockOrder: function(orderId) {
+    console.log('🔧 创建模拟订单数据:', orderId);
+    return {
+      id: orderId,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      totalAmount: 99.99,
+      shippingFee: 5.99,
+      items: [
+        {
+          productId: 'mock-product-1',
+          name: 'Mock Product 1',
+          price: 49.99,
+          quantity: 1,
+          subtotal: 49.99
+        },
+        {
+          productId: 'mock-product-2',
+          name: 'Mock Product 2',
+          price: 50.00,
+          quantity: 1,
+          subtotal: 50.00
+        }
+      ],
+      userId: 'mock-user-1',
+      shippingInfo: {
+        name: 'Mock User',
+        address: '123 Mock Street',
+        city: 'Mockville',
+        state: 'Mockland',
+        zip: '12345',
+        country: 'Mockistan',
+        phone: '555-MOCK'
+      },
+      paymentMethod: 'creditCard'
+    };
+  }
+};
+</script>
+
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/ui-helpers.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    loadNavbar();
+    loadFooter();
+    checkAdminPermissions();
+    
+    // Setup for filter collapse toggle icon
+    document.querySelector('.filter-toggle').addEventListener('click', function() {
+      const icon = this.querySelector('.bi-chevron-up, .bi-chevron-down');
+      if (icon.classList.contains('bi-chevron-up')) {
+        icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+      } else {
+        icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+      }
+    });
+  });
+
+  async function loadOrders() {
+    const tableBody = document.getElementById('order-table-body');
+    const noOrdersMessage = document.getElementById('no-orders-message');
+    
+    // 显示加载状态
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading orders...</p>
+        </td>
+      </tr>
+    `;
+    
+    try {
+      // 预先获取所有用户数据，避免每个订单都要单独请求
+      console.log('📡 发送API请求: 获取所有用户 - GET /auth/profile?all=1');
+      const usersResponse = await AdminApiService.getAllUsers();
+      console.log('✅ 获取用户列表响应:', usersResponse);
+      
+      // 创建用户ID映射表
+      const userMap = {};
+      if (usersResponse && usersResponse.success && usersResponse.data) {
+        const users = Array.isArray(usersResponse.data) ? usersResponse.data : (usersResponse.data.users || []);
+        users.forEach(user => {
+          if (user && user.id) {
+            userMap[String(user.id)] = user;
+          }
+        });
+      }
+      console.log(`📊 创建了包含${Object.keys(userMap).length}个用户的映射表`);
+      
+      // 准备API过滤参数
+      const apiFilters = {};
+      
+      // 添加日期过滤条件
+      if (currentFilters.startDate) {
+        apiFilters.startDate = currentFilters.startDate;
+      }
+      
+      if (currentFilters.endDate) {
+        apiFilters.endDate = currentFilters.endDate;
+      }
+      
+      // 添加状态过滤条件
+      if (currentFilters.status) {
+        apiFilters.status = currentFilters.status;
+      }
+      
+      console.log('📡 发送API请求: 获取订单(带过滤条件) - GET /orders');
+      const response = await AdminApiService.getAllOrders(apiFilters);
+      console.log('✅ 获取订单响应:', response);
+      
+      if (!response || !response.success) {
+        throw new Error(response?.message || '无法加载订单');
+      }
+      
+      // 正确处理API返回结构
+      let orders = [];
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          orders = response.data;
+        } else if (response.data.orders && Array.isArray(response.data.orders)) {
+          orders = response.data.orders;
+        } else {
+          console.error('API返回的orders格式不正确:', response.data);
+          // 尝试其他可能的数据格式
+          const dataKeys = Object.keys(response.data);
+          if (dataKeys.length > 0 && Array.isArray(response.data[dataKeys[0]])) {
+            orders = response.data[dataKeys[0]];
+            console.log('尝试使用替代数据格式:', dataKeys[0]);
+          } else {
+            throw new Error('订单数据格式无效');
+          }
+        }
+      }
+      
+      console.log(`📊 获取到${orders.length}个订单`);
+      
+      // 仅对ID和用户名进行客户端过滤（因为服务器API不支持这些过滤）
+      if (currentFilters.id || currentFilters.user) {
+        console.log('🔍 应用客户端订单筛选条件:', {id: currentFilters.id, user: currentFilters.user});
+        orders = orders.filter(order => {
+          // 用户名过滤
+          if (currentFilters.user) {
+            const user = userMap[order.userId] || {};
+            const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '';
+            if (!userName.toLowerCase().includes(currentFilters.user.toLowerCase())) {
+              return false;
+            }
+          }
+          
+          // 订单ID过滤
+          if (currentFilters.id && !String(order.id).toLowerCase().includes(currentFilters.id.toLowerCase())) {
+            return false;
+          }
+          
+          return true;
+        });
+        console.log(`📊 客户端筛选后剩余${orders.length}个订单`);
+      }
+      
+      // 清空表格
+      tableBody.innerHTML = '';
+      
+      // 显示没有订单的消息（如果没有订单）
+      if (!orders || !orders.length) {
+        console.log('📊 没有找到订单');
+        noOrdersMessage.classList.remove('d-none');
+        return;
+      }
+      
+      // 隐藏没有订单的消息
+      noOrdersMessage.classList.add('d-none');
+      
+      // 渲染订单数据
+      console.log('🖌️ 渲染订单表格');
+      renderOrdersTable(orders, tableBody, userMap);
+      
+    } catch (error) {
+      console.error('❌ 加载订单出错:', error);
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-4">
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Error loading orders: ${error.message}
+            </div>
+            <button class="btn btn-outline-primary mt-3" onclick="loadOrders()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  // 渲染订单表格
+  function renderOrdersTable(orders, tableBody, userMap) {
+    if (!orders || !orders.length) return;
+    
+    // 按订单ID升序排序（而不是按日期降序）
+    orders.sort((a, b) => {
+      // 提取订单ID中的数字部分（如果ID格式为"ORD12345"，则提取12345部分）
+      const getOrderNumber = (id) => {
+        if (!id) return 0;
+        const numericPart = id.toString().replace(/\D/g, '');
+        return numericPart ? parseInt(numericPart) : 0;
+      };
+      
+      return getOrderNumber(a.id) - getOrderNumber(b.id);
+    });
+    
+    // 创建一个已渲染订单ID的集合，避免重复渲染
+    const renderedOrderIds = new Set();
+    
+    // 渲染每个订单行
+    orders.forEach(order => {
+      try {
+        // 检查是否已经渲染过这个订单
+        if (renderedOrderIds.has(order.id)) {
+          console.log(`⚠️ 跳过重复的订单ID: ${order.id}`);
+          return;
+        }
+        renderedOrderIds.add(order.id);
+        
+        // 获取用户名称
+        let userName = 'Unknown User';
+        if (order.user) {
+          userName = order.user.name || `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 'Unknown User';
+        } else if (order.userId && userMap[String(order.userId)]) {
+          // 从预先获取的用户映射中查找用户
+          const user = userMap[String(order.userId)];
+          userName = user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User';
+        } else if (order.userId) {
+          userName = `User #${order.userId}`;
+        }
+        
+        // 确定订单状态的样式
+        let statusBadgeClass = 'bg-secondary';
+        let statusIcon = '';
+        switch(order.status) {
+          case 'pending':
+            statusBadgeClass = 'bg-warning text-dark';
+            statusIcon = '<i class="bi bi-hourglass me-1"></i>';
+            break;
+          case 'processing':
+            statusBadgeClass = 'bg-info text-dark';
+            statusIcon = '<i class="bi bi-gear me-1"></i>';
+            break;
+          case 'shipped':
+            statusBadgeClass = 'bg-primary';
+            statusIcon = '<i class="bi bi-truck me-1"></i>';
+            break;
+          case 'delivered':
+            statusBadgeClass = 'bg-success';
+            statusIcon = '<i class="bi bi-check-circle me-1"></i>';
+            break;
+          case 'cancelled':
+            statusBadgeClass = 'bg-danger';
+            statusIcon = '<i class="bi bi-x-circle me-1"></i>';
+            break;
+        }
+        
+        // 格式化金额和日期
+        const totalAmount = typeof order.totalAmount === 'number' ? 
+          order.totalAmount.toFixed(2) : 
+          order.totalAmount || 0;
+          
+        const orderDate = order.createdAt || order.date || '';
+        const formattedDate = orderDate ? new Date(orderDate).toLocaleDateString() : 'Unknown date';
+        
+        // 创建订单行
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="order-id-column">
+            <span class="order-id-text" title="${order.id}" onclick="copyToClipboard('${order.id}')">${order.id}</span>
+          </td>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-person-circle me-2 text-secondary"></i>
+              ${userName}
+            </div>
+          </td>
+          <td><span class="badge badge-status ${statusBadgeClass}">${statusIcon}${order.status || 'unknown'}</span></td>
+          <td><strong>$${totalAmount}</strong></td>
+          <td>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-calendar-date me-2 text-secondary"></i>
+              ${formattedDate}
+            </div>
+          </td>
+          <td class="text-center action-buttons">
+            <button class="btn btn-sm btn-primary action-button" onclick="viewOrderDetails('${order.id}')">
+              <i class="bi bi-eye me-1"></i>View
+            </button>
+            <button class="btn btn-sm btn-danger action-button" onclick="deleteOrder('${order.id}')">
+              <i class="bi bi-trash me-1"></i>Delete
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      } catch (error) {
+        console.error('Error rendering order row:', error);
+      }
+    });
+  }
+
+  // 查看订单详情
+  async function viewOrderDetails(orderId) {
+    try {
+      showLoading();
+      console.log(`查看订单详情: ${orderId}`);
+      
+      // 使用改进的API调用获取订单详情
+      const response = await AdminApiService.getOrderById(orderId);
+      
+      if (!response || !response.success) {
+        hideLoading();
+        console.error(`Error viewing order details:`, response);
+        throw new Error(`Failed to load order details: ${response?.message || 'Unknown error'}`);
+      }
+      
+      const order = response.data;
+      
+      // 尝试获取用户详情
+      let userData = { username: 'Unknown User' };
+      
+      try {
+        const userResponse = await ApiService.get('/auth/profile', { id: order.userId });
+        if (userResponse.success && userResponse.data) {
+          userData = userResponse.data;
+        } else {
+          console.warn(`❌ 获取用户数据时出错:`, userResponse);
+        }
+      } catch (userError) {
+        console.error(`❌ 获取用户数据时出错:`, userError);
+      }
+      
+      // 构建模态窗口HTML
+      const modalHtml = `
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <h6>Order Information</h6>
+                    <p><strong>Order ID:</strong> ${order.id}</p>
+                    <p><strong>Date:</strong> ${new Date(order.createdAt || order.date).toLocaleString()}</p>
+                    <p><strong>Status:</strong> <span class="badge bg-${getStatusColor(order.status)}">${order.status}</span></p>
+                    <p><strong>Payment Method:</strong> ${formatPaymentMethod(order.paymentInfo?.method || order.paymentMethod)}</p>
+                    <p><strong>Payment Status:</strong> ${order.isPaid ? '<span class="text-success">Paid</span>' : '<span class="text-danger">Not Paid</span>'}</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Customer Information</h6>
+                    <p><strong>Name:</strong> ${userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Unknown'}</p>
+                    <p><strong>Email:</strong> ${userData.email || 'Not available'}</p>
+                    <h6 class="mt-3">Shipping Address</h6>
+                    ${formatShippingAddress(order.shippingInfo || order.shippingAddress)}
+                  </div>
+                </div>
+                
+                <h6>Order Items</h6>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${formatOrderItems(order.orderItems || order.items)}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                        <td>$${order.totalAmount?.toFixed(2) || '0.00'}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="3" class="text-end"><strong>Shipping Fee:</strong></td>
+                        <td>$${order.shippingFee?.toFixed(2) || '0.00'}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td><strong>$${order.grandTotal?.toFixed(2) || order.totalAmount?.toFixed(2) || '0.00'}</strong></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                
+                <div class="mt-4">
+                  <h6>Update Order Status</h6>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button class="btn ${order.status === 'pending' ? 'btn-warning' : 'btn-outline-warning'}" 
+                            onclick="handleOrder('${order.id}', 'process')">
+                      <i class="bi bi-hourglass me-1"></i>Set as Processing
+                    </button>
+                    <button class="btn ${order.status === 'processing' ? 'btn-info' : 'btn-outline-info'}" 
+                            onclick="handleOrder('${order.id}', 'ship')">
+                      <i class="bi bi-gear me-1"></i>Set as Shipped
+                    </button>
+                    <button class="btn ${order.status === 'shipped' ? 'btn-primary' : 'btn-outline-primary'}" 
+                            onclick="handleOrder('${order.id}', 'deliver')">
+                      <i class="bi bi-truck me-1"></i>Set as Delivered
+                    </button>
+                    <button class="btn ${order.status === 'completed' ? 'btn-success' : 'btn-outline-success'}" 
+                            onclick="handleOrder('${order.id}', 'complete')">
+                      <i class="bi bi-check-circle me-1"></i>Set as Completed
+                    </button>
+                    <button class="btn ${order.status === 'cancelled' ? 'btn-danger' : 'btn-outline-danger'}" 
+                            onclick="handleOrder('${order.id}', 'cancel')">
+                      <i class="bi bi-x-circle me-1"></i>Set as Cancelled
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // 创建并显示模态窗口
+      const modalContainer = document.createElement('div');
+      modalContainer.innerHTML = modalHtml;
+      document.body.appendChild(modalContainer);
+      
+      const modalElement = document.getElementById('orderDetailsModal');
+      const modal = new bootstrap.Modal(modalElement);
+      
+      // 模态窗口关闭时移除DOM元素
+      modalElement.addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modalContainer);
+      });
+      
+      // 在显示模态窗口前隐藏加载指示器
+      hideLoading();
+      modal.show();
+      
+    } catch (error) {
+      hideLoading();
+      console.error('Error viewing order details:', error);
+      Swal.fire({
+        title: '错误',
+        text: `查看订单详情时出错: ${error.message}`,
+        icon: 'error'
+      });
+    }
+  }
+  
+  // 更新订单状态
+  async function updateOrderStatus(orderId, newStatus) {
+    let loadingToast = null;
+    try {
+      // 显示加载提示
+      loadingToast = showToast('正在更新订单状态...', 'info', false);
+      
+      // 检查token
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        if (loadingToast) loadingToast.hide();
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
+      }
+      
+      // 通过API更新订单状态
+      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, status: ${newStatus})`);
+      const response = await AdminApiService.updateOrderStatus(orderId, newStatus);
+      console.log('✅ 更新订单状态响应:', response);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      if (!response || !response.success) {
+        throw new Error(response?.message || '无法更新订单状态');
+      }
+      
+      // 关闭模态窗口
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      // 重新加载订单列表
+      await loadOrders();
+      
+      // 显示成功消息
+      showToast('订单状态已成功更新', 'success');
+      
+    } catch (error) {
+      console.error('❌ 更新订单状态时出错:', error);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      // 处理不同类型的错误
+      let errorMessage = '更新订单状态时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      } else {
+        errorMessage = `更新失败: ${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
+    }
+  }
+
+  // 删除订单
+  async function deleteOrder(orderId) {
+    if (!confirm('确定要删除此订单吗? 此操作无法撤销。')) {
+      return;
+    }
+    
+    let loadingToast = null;
+    try {
+      // 显示加载提示
+      loadingToast = showToast('正在删除订单...', 'info', false);
+      
+      // 检查token
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        if (loadingToast) loadingToast.hide();
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
+      }
+      
+      // 通过API删除订单
+      console.log(`📡 发送API请求: 删除订单 - DELETE /orders?id=${orderId}`);
+      const response = await AdminApiService.deleteOrder(orderId);
+      console.log('✅ 删除订单响应:', response);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      if (!response || !response.success) {
+        throw new Error(response?.message || '无法删除订单');
+      }
+      
+      // 重新加载订单列表
+      await loadOrders();
+      
+      // 显示成功消息
+      showToast('订单已成功删除', 'success');
+      
+    } catch (error) {
+      console.error('❌ 删除订单时出错:', error);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      // 处理不同类型的错误
+      let errorMessage = '删除订单时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      } else {
+        errorMessage = `删除失败: ${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
+    }
+  }
+
+  function checkAdminPermissions() {
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+    
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      return;
+    }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
+        } else {
+          // 加载订单数据
+          console.log('✅ 用户是管理员，加载订单数据');
+          loadOrders();
+        }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
+  }
+  
+  // Current filter values
+  let currentFilters = {
+    id: '',
+    user: '',
+    status: '',
+    startDate: '',
+    endDate: ''
+  };
+  
+  // Apply filters to orders
+  function filterOrders(orders, users) {
+    if (!orders || !orders.length) return [];
+    
+    return orders.filter(order => {
+      // Get user info for filtering
+      const user = users.find(u => u.id === order.userId) || {};
+      const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '';
+      
+      // Filter by Order ID
+      if (currentFilters.id && !String(order.id).toLowerCase().includes(currentFilters.id.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by User
+      if (currentFilters.user && !userName.toLowerCase().includes(currentFilters.user.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by Status
+      if (currentFilters.status && order.status !== currentFilters.status) {
+        return false;
+      }
+      
+      // Filter by Date Range
+      const orderDate = new Date(order.createdAt || order.date);
+      
+      // Check date from
+      if (currentFilters.startDate) {
+        const fromDate = new Date(currentFilters.startDate);
+        fromDate.setHours(0, 0, 0, 0);
+        if (orderDate < fromDate) {
+          return false;
+        }
+      }
+      
+      // Check date to
+      if (currentFilters.endDate) {
+        const toDate = new Date(currentFilters.endDate);
+        toDate.setHours(23, 59, 59, 999);
+        if (orderDate > toDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }
+  
+  // Apply filters when button is clicked
+  function applyFilters() {
+    currentFilters = {
+      id: document.getElementById('filter-order-id').value.trim(),
+      user: document.getElementById('filter-user').value.trim(),
+      status: document.getElementById('filter-status').value,
+      startDate: document.getElementById('filter-date-from').value,
+      endDate: document.getElementById('filter-date-to').value
+    };
+    
+    console.log('🔍 应用新筛选条件:', currentFilters);
+    
+    // 重新加载订单列表，使用API过滤
+    loadOrders();
+  }
+  
+  // Reset all filters
+  function resetFilters() {
+    document.getElementById('filter-order-id').value = '';
+    document.getElementById('filter-user').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-date-from').value = '';
+    document.getElementById('filter-date-to').value = '';
+    
+    currentFilters = {
+      id: '',
+      user: '',
+      status: '',
+      startDate: '',
+      endDate: ''
+    };
+    
+    loadOrders();
+    showToast('Filters cleared', 'info');
+  }
+  
+  function showToast(message, type = 'success', autohide = true) {
+    const toastContainer = document.querySelector('.toast-container');
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+  
+  // 显示加载状态
+  function showLoading() {
+    // 创建一个覆盖层
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '9999';
+    
+    // 创建加载指示器
+    overlay.innerHTML = `
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    `;
+    
+    // 添加到body
+    document.body.appendChild(overlay);
+  }
+  
+  // 隐藏加载状态
+  function hideLoading() {
+    // 移除覆盖层
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+  
+  // Function to copy order ID to clipboard
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        showToast('Order ID copied to clipboard', 'info');
+      })
+      .catch(err => {
+        console.error('Could not copy text: ', err);
+      });
+  }
+
+  // 获取订单状态的颜色
+  function getStatusColor(status) {
+    switch(status) {
+      case 'pending': return 'warning';
+      case 'processing': return 'info';
+      case 'shipped': return 'primary';
+      case 'delivered': return 'success';
+      case 'completed': return 'success';
+      case 'cancelled': return 'danger';
+      default: return 'secondary';
+    }
+  }
+  
+  // 格式化支付方式
+  function formatPaymentMethod(method) {
+    if (!method) return 'Unknown';
+    
+    const methods = {
+      'creditCard': 'Credit Card',
+      'alipay': 'Alipay',
+      'wechatPay': 'WeChat Pay',
+      'bankTransfer': 'Bank Transfer'
+    };
+    
+    return methods[method] || method;
+  }
+  
+  // 格式化收货地址
+  function formatShippingAddress(address) {
+    if (!address) return '<p>No address information available</p>';
+    
+    // 处理不同的地址格式
+    if (typeof address === 'string') {
+      try {
+        address = JSON.parse(address);
+      } catch (e) {
+        return `<p>${address}</p>`;
+      }
+    }
+    
+    return `
+      <p>${address.fullName || address.name || ''}</p>
+      <p>${address.streetAddress || address.street || ''} ${address.aptSuite || address.apt || ''}</p>
+      <p>${address.city || ''}, ${address.state || address.province || ''} ${address.zipCode || address.zip || ''}</p>
+      <p>${address.country || ''}</p>
+      <p>Phone: ${address.phone || 'Not available'}</p>
+    `;
+  }
+  
+  // 格式化订单项目
+  function formatOrderItems(items) {
+    if (!items || !items.length) return '<tr><td colspan="4" class="text-center">No items</td></tr>';
+    
+    return items.map(item => {
+      const product = item.product || {};
+      const productName = product.name || item.productName || 'Unknown Product';
+      const image = product.image || item.image;
+      const price = item.price || product.price || 0;
+      const quantity = item.quantity || 0;
+      const subtotal = item.subtotal || (price * quantity) || 0;
+      
+      return `
+        <tr>
+          <td>
+            ${image ? `<img src="${image}" alt="${productName}" width="50" class="me-2">` : ''}
+            ${productName}
+          </td>
+          <td>$${parseFloat(price).toFixed(2)}</td>
+          <td>${quantity}</td>
+          <td>$${parseFloat(subtotal).toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // 处理订单状态更新
+  async function handleOrder(orderId, action) {
+    let loadingToast = null;
+    try {
+      // 显示加载提示
+      loadingToast = showToast('正在处理订单...', 'info', false);
+      
+      // 详细日志记录
+      console.log(`📡 处理订单: ID=${orderId}, 动作=${action}`);
+      
+      // 确保token有效
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
+      }
+      
+      console.log(`📡 获取当前所有订单列表，以确认订单存在`);
+      
+      // 首先验证订单是否存在
+      const checkResponse = await ApiService.get('/orders', { all: 1 });
+      console.log('📡 检查订单列表响应:', checkResponse);
+      
+      if (!checkResponse || !checkResponse.success) {
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        throw new Error('无法验证订单存在性: ' + (checkResponse?.message || 'API请求失败'));
+      }
+      
+      // 查找订单
+      const orders = checkResponse.data?.orders || [];
+      const orderExists = orders.some(order => order.id == orderId);
+      
+      if (!orderExists) {
+        console.error(`❌ 找不到ID为${orderId}的订单`);
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        throw new Error(`订单ID ${orderId} 不存在`);
+      }
+      
+      console.log(`✅ 已确认订单存在，ID=${orderId}`);
+      
+      // 将action转换为状态
+      let status = '';
+      switch(action) {
+        case 'process': status = 'processing'; break;
+        case 'ship': status = 'shipped'; break;
+        case 'deliver': status = 'delivered'; break;
+        case 'complete': status = 'completed'; break;
+        case 'cancel': status = 'cancelled'; break;
+        default: status = action;
+      }
+      
+      // 通过API更新订单状态
+      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, status: ${status})`);
+      console.log(`📡 请求体: ${JSON.stringify({id: orderId, status: status})}`);
+      
+      // 使用更精确的错误处理进行API请求
+      let response;
+      try {
+        response = await ApiService.put('/orders/update', {
+          id: orderId,
+          status: status
+        });
+      } catch (apiError) {
+        console.error('API请求异常:', apiError);
+        // 隐藏加载提示
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        // 显示详细错误
+        showToast(`API请求失败: ${apiError.message}`, 'danger');
+        return;
+      }
+      
+      console.log('✅ 处理订单响应:', response);
+      
+      // 隐藏加载提示
+      if (loadingToast) {
+        loadingToast.hide();
+      }
+      
+      if (!response || !response.success) {
+        throw new Error(response?.message || '处理订单失败');
+      }
+      
+      // 关闭模态窗口
+      const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      // 重新加载订单列表
+      await loadOrders();
+      
+      // 显示成功消息
+      showToast(`订单状态已更新为 ${status}`, 'success');
+      
+    } catch (error) {
+      console.error('❌ 处理订单时出错:', error);
+      
+      // 隐藏加载提示
+      if (loadingToast) {
+        loadingToast.hide();
+      }
+      
+      // 显示友好的错误消息
+      let errorMessage = '处理订单时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        // 清除无效的token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        
+        // 稍后跳转到登录页面
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 3000);
+      } else if (error.status === 400) {
+        errorMessage = `请求错误: ${error.message}`;
+      } else if (error.status === 404) {
+        errorMessage = `找不到订单: ${error.message}`;
+      } else {
+        errorMessage = `${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
+    }
+  }
+</script>
+
+<!-- 加载导航栏和底部栏 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 加载导航栏
+  fetch('/src/client/assets/layout/navbar.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('navbar-placeholder').innerHTML = data;
+      // 初始化导航栏的任何脚本
+      if (typeof initNavbar === 'function') {
+        initNavbar();
+      }
+      
+      // 更新认证按钮状态
+      setTimeout(() => {
+        const currentUser = localStorage.getItem('currentUser');
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const profileButton = document.getElementById('profile-button');
+        const logoutButton = document.getElementById('logout-button');
+        const adminButton = document.getElementById('admin-button');
+        
+        if (loginButton && registerButton) {
+          if (currentUser) {
+            // 用户已登录
+            loginButton.style.display = 'none';
+            registerButton.style.display = 'none';
+            if (profileButton) profileButton.style.display = 'block';
+            if (logoutButton) logoutButton.style.display = 'block';
+            
+            // 检查是否为管理员
+            try {
+              const userData = JSON.parse(currentUser);
+              if (userData.isAdmin && adminButton) {
+                adminButton.style.display = 'block';
+              }
+            } catch (e) {
+              console.error('解析用户数据出错', e);
+            }
+          } else {
+            // 用户未登录
+            loginButton.style.display = 'block';
+            registerButton.style.display = 'block';
+            if (profileButton) profileButton.style.display = 'none';
+            if (logoutButton) logoutButton.style.display = 'none';
+            if (adminButton) adminButton.style.display = 'none';
+          }
+        }
+      }, 300);
+    })
+    .catch(error => {
+      console.error('Error loading navbar:', error);
+    });
+  
+  // 加载底部栏
+  fetch('/src/client/assets/layout/footer.html')
+    .then(response => response.text())
+    .then(data => {
+      if (document.getElementById('footer-placeholder')) {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      } else {
+        // 如果底部栏占位符不存在，则创建一个
+        const footerPlaceholder = document.createElement('div');
+        footerPlaceholder.id = 'footer-placeholder';
+        document.body.appendChild(footerPlaceholder);
+        footerPlaceholder.innerHTML = data;
+      }
+    })
+    .catch(error => {
+      console.error('Error loading footer:', error);
+    });
+});
+</script>
+</body>
+</html> 

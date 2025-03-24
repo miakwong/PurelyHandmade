@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comment Management - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/admin.css" rel="stylesheet">
+  
+  <style>
+    .review-card {
+      border-radius: 10px;
+      border: 1px solid #eaeaea;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    
+    .review-header {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    .review-body {
+      padding: 20px;
+    }
+    
+    .review-footer {
+      background-color: #f8f9fa;
+      padding: 10px 15px;
+      border-top: 1px solid #eaeaea;
+    }
+    
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #eaeaea;
+    }
+    
+    .rating-stars {
+      color: #ffc107;
+      font-size: 1.2rem;
+    }
+    
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .status-pending {
+      background-color: #f7c653;
+      color: #856404;
+    }
+    
+    .status-approved {
+      background-color: #8fc2a0;
+      color: #155724;
+    }
+    
+    .status-rejected {
+      background-color: #f8aaaa;
+      color: #721c24;
+    }
+    
+    .filter-section {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .review-product-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 5px;
+      border: 1px solid #eaeaea;
+    }
+    
+    .review-stats-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .review-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .review-stat-icon {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #5a8c70;
+    }
+    
+    .review-stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .review-stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .reply-box {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="products.html">
+              <i class="bi bi-box me-2"></i>
+              Products
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="categories.html">
+              <i class="bi bi-tags me-2"></i>
+              Categories
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="designers.html">
+              <i class="bi bi-palette me-2"></i>
+              Designers
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="bi bi-cart-check me-2"></i>
+              Orders
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people me-2"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="comments.html">
+              <i class="bi bi-chat-dots me-2"></i>
+              Reviews
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="reports.html">
+              <i class="bi bi-graph-up me-2"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="settings.html">
+              <i class="bi bi-gear me-2"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-chat-square-text me-2 text-primary"></i>Comment Management</h1>
+        <div>
+          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
+            <i class="bi bi-person me-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
+
+      <!-- Review Stats -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="review-stat">
+            <div class="review-stat-icon">
+              <i class="bi bi-chat-left-text"></i>
+            </div>
+            <div class="review-stat-value" id="total-reviews">0</div>
+            <div class="review-stat-label">Total Reviews</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="review-stat">
+            <div class="review-stat-icon">
+              <i class="bi bi-clock"></i>
+            </div>
+            <div class="review-stat-value" id="pending-reviews">0</div>
+            <div class="review-stat-label">Pending</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="review-stat">
+            <div class="review-stat-icon">
+              <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="review-stat-value" id="approved-reviews">0</div>
+            <div class="review-stat-label">Approved</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="review-stat">
+            <div class="review-stat-icon">
+              <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="review-stat-value" id="avg-rating">0.0</div>
+            <div class="review-stat-label">Avg. Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="filter-section mb-4">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label for="filter-status" class="form-label">Status</label>
+            <select class="form-select" id="filter-status">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-rating" class="form-label">Min Rating</label>
+            <select class="form-select" id="filter-rating">
+              <option value="">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4+ Stars</option>
+              <option value="3">3+ Stars</option>
+              <option value="2">2+ Stars</option>
+              <option value="1">1+ Stars</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-product" class="form-label">Product</label>
+            <select class="form-select" id="filter-product">
+              <option value="">All Products</option>
+              <!-- Products will be loaded dynamically -->
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filter-search" class="form-label">Search</label>
+            <input type="text" class="form-control" id="filter-search" placeholder="Search in reviews...">
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-secondary me-2" onclick="resetFilters()">
+              <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </button>
+            <button class="btn btn-primary" onclick="applyFilters()">
+              <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="reviews-container" class="mb-4">
+        <!-- Reviews will be loaded dynamically -->
+      </div>
+      
+      <div id="no-reviews-message" class="text-center py-5 d-none">
+        <div class="empty-state-icon mx-auto mb-3">
+          <i class="bi bi-chat-left-text" style="font-size: 3rem; color: #ccc;"></i>
+        </div>
+        <p class="text-muted mb-3">No reviews found</p>
+      </div>
+      
+      <!-- Reply Modal -->
+      <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="replyModalLabel">Reply to Review</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="reply-review-id">
+              <div class="form-group mb-3">
+                <label for="reply-text" class="form-label">Your Reply</label>
+                <textarea class="form-control" id="reply-text" rows="4" placeholder="Write your reply here..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="submitReply()">Submit Reply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 直接在页面中内联定义关键服务，避免加载问题 -->
+<script>
+/**
+ * API Service for Purely Handmade
+ * 提供统一的API访问层，处理所有与服务器的通信
+ */
+const ApiService = {
+  // 基础API URL
+  baseUrl: '/api',
+  
+  // 获取授权令牌
+  getAuthToken: function() {
+    return localStorage.getItem('authToken');
+  },
+  
+  // 获取带有授权信息的请求头
+  getAuthHeaders: function() {
+    const token = this.getAuthToken();
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    } : {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+  },
+  
+  // 处理API响应
+  handleResponse: async function(response) {
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    
+    // 如果状态码不在2xx范围内，抛出错误
+    if (!response.ok) {
+      let errorData;
+      
+      try {
+        errorData = isJson ? await response.json() : await response.text();
+      } catch (error) {
+        errorData = 'Failed to parse error response';
+      }
+      
+      const error = new Error(
+        isJson && errorData.error 
+          ? errorData.error 
+          : 'API request failed'
+      );
+      
+      error.status = response.status;
+      error.statusText = response.statusText;
+      error.data = errorData;
+      
+      throw error;
+    }
+    
+    // 解析成功响应
+    return isJson ? response.json() : response.text();
+  },
+  
+  // 发送请求
+  request: async function(url, options = {}) {
+    const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+    
+    // 默认选项
+    const defaultOptions = {
+      headers: this.getAuthHeaders(),
+      credentials: 'same-origin',
+    };
+    
+    // 合并选项
+    const fetchOptions = {
+      ...defaultOptions,
+      ...options,
+      headers: {
+        ...defaultOptions.headers,
+        ...options.headers,
+      },
+    };
+    
+    // 调试日志
+    console.log(`🚀 发送API请求: ${options.method || 'GET'} ${fullUrl}`);
+    console.log('🔑 请求头:', JSON.stringify(fetchOptions.headers));
+    
+    try {
+      const response = await fetch(fullUrl, fetchOptions);
+      console.log(`📥 收到响应: ${response.status} ${response.statusText}`);
+      return await this.handleResponse(response);
+    } catch (error) {
+      console.error('❌ API请求失败:', error);
+      throw error;
+    }
+  },
+  
+  // GET请求
+  get: function(url, params = {}) {
+    // 构建查询字符串
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined && params[key] !== null) {
+        queryParams.append(key, params[key]);
+      }
+    });
+    
+    const queryString = queryParams.toString();
+    const fullUrl = queryString ? `${url}?${queryString}` : url;
+    
+    return this.request(fullUrl, { method: 'GET' });
+  },
+  
+  // POST请求
+  post: function(url, data = {}) {
+    return this.request(url, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // PUT请求
+  put: function(url, data = {}) {
+    return this.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  
+  // DELETE请求
+  delete: function(url) {
+    return this.request(url, { method: 'DELETE' });
+  }
+};
+
+/**
+ * Admin API Service for Purely Handmade
+ * 提供管理员API访问层，处理与服务器的管理功能通信
+ */
+const AdminApiService = {
+  // 获取所有评论/评价
+  getAllReviews: function() {
+    return ApiService.get('/reviews');
+  },
+  
+  // 更新评论状态
+  updateReviewStatus: function(reviewId, status) {
+    return ApiService.put('/reviews/update', {
+      id: reviewId,
+      status: status
+    });
+  },
+  
+  // 删除评论
+  deleteReview: function(reviewId) {
+    return ApiService.delete(`/reviews?id=${reviewId}`);
+  },
+  
+  // 获取所有产品
+  getAllProducts: function() {
+    return ApiService.get('/products');
+  },
+  
+  // 获取所有用户
+  getAllUsers: function() {
+    return ApiService.get('/auth/profile?all=1');
+  }
+};
+</script>
+
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/ui-helpers.js"></script>
+<script src="/src/client/js/common.js"></script>
+<script>
+  // 统一存储评论数据的键名
+  const REVIEWS_STORAGE_KEY = 'reviews';
+  
+  // 当前过滤器状态
+  let currentFilters = {
+    status: '',
+    rating: '',
+    productId: '',
+    search: ''
+  };
+  
+  // 页面加载完成后执行
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('评论管理页面加载中...');
+    
+    // 初始化授权
+    initApiAuth();
+    
+    // 加载导航栏和页脚
+    loadNavbar();
+    loadFooter();
+    
+    // 检查管理员权限
+    checkAdminPermissions();
+    
+    // 设置搜索框回车事件
+    document.getElementById('filter-search').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        applyFilters();
+      }
+    });
+  });
+  
+  // 初始化API授权
+  function initApiAuth() {
+    console.log('初始化API授权');
+    
+    // 检查是否有授权令牌
+    const token = localStorage.getItem('authToken');
+    console.log('当前授权令牌:', token);
+    
+    // 如果没有令牌，创建一个
+    if (!token) {
+      console.log('设置默认授权令牌');
+      localStorage.setItem('authToken', 'valid-admin-token');
+      
+      // 设置当前用户信息
+      const currentUser = {
+        id: 1,
+        username: 'admin',
+        isAdmin: true
+      };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      console.log('已设置默认管理员用户:', currentUser);
+    }
+  }
+  
+  /**
+   * 初始化评论系统
+   */
+  function initReviewSystem() {
+    console.log('初始化评论系统...');
+    
+    // 1. 首先合并和修复评论数据
+    unifyReviewData();
+    
+    // 2. 加载产品下拉列表
+    loadProductsForFilter();
+    
+    // 3. 加载评论数据
+    loadReviews();
+    
+    // 4. 更新统计信息
+    updateReviewStats();
+    
+    console.log('评论系统初始化完成');
+  }
+  
+  /**
+   * 统一评论数据，确保数据一致性
+   */
+  function unifyReviewData() {
+    console.log('正在统一评论数据...');
+    
+    // 从可能的存储位置获取评论数据
+    const reviewsData = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+    const commentsData = JSON.parse(localStorage.getItem('comments') || '[]');
+    const productReviewsData = JSON.parse(localStorage.getItem('productReviews') || '[]');
+    
+    console.log(`找到评论数据: reviews=${reviewsData.length}, comments=${commentsData.length}, productReviews=${productReviewsData.length}`);
+    
+    // 合并所有评论数据（去重）
+    const allReviews = [...reviewsData];
+    const reviewIds = new Set(reviewsData.map(r => r.id));
+    
+    // 添加comments数据中不重复的评论
+    commentsData.forEach(comment => {
+      if (!reviewIds.has(comment.id)) {
+        allReviews.push(comment);
+        reviewIds.add(comment.id);
+      }
+    });
+    
+    // 添加productReviews数据中不重复的评论
+    productReviewsData.forEach(review => {
+      if (!reviewIds.has(review.id)) {
+        allReviews.push(review);
+        reviewIds.add(review.id);
+      }
+    });
+    
+    // 确保所有评论都有必要的字段
+    const normalizedReviews = allReviews.map(normalizeReviewObject);
+    
+    // 保存统一的评论数据到主键
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(normalizedReviews));
+    
+    // 同步到其他键以确保兼容性
+    localStorage.setItem('comments', JSON.stringify(normalizedReviews));
+    
+    console.log(`统一后的评论数据: ${normalizedReviews.length}条`);
+    
+    // 如果没有评论数据，自动创建测试数据
+    if (normalizedReviews.length === 0) {
+      createTestReviews();
+    }
+  }
+  
+  /**
+   * 标准化评论对象，确保所有必要字段都存在
+   */
+  function normalizeReviewObject(review) {
+    // 创建一个新对象，避免修改原始对象
+    const normalized = { ...review };
+    
+    // 确保ID是字符串类型
+    normalized.id = String(normalized.id || Date.now());
+    
+    // 确保productId是字符串类型
+    normalized.productId = String(normalized.productId || '');
+    
+    // 确保userId是字符串类型
+    normalized.userId = String(normalized.userId || '');
+    
+    // 确保评分是数字
+    normalized.rating = parseInt(normalized.rating || 0);
+    
+    // 标准化内容字段 (有些可能用content，有些用comment)
+    normalized.content = normalized.content || normalized.comment || '';
+    
+    // 删除可能存在的comment字段，统一使用content
+    delete normalized.comment;
+    
+    // 确保标题字段存在
+    normalized.title = normalized.title || '评论';
+    
+    // 确保状态字段存在且有效
+    normalized.status = ['approved', 'rejected', 'pending'].includes(normalized.status) 
+      ? normalized.status 
+      : 'pending';
+    
+    // 确保日期字段存在
+    const now = new Date().toISOString();
+    normalized.createdAt = normalized.createdAt || normalized.date || now;
+    normalized.updatedAt = normalized.updatedAt || now;
+    
+    // 删除可能存在的date字段，统一使用createdAt
+    delete normalized.date;
+    
+    return normalized;
+  }
+  
+  /**
+   * 加载产品下拉列表
+   */
+  function loadProductsForFilter() {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const productSelect = document.getElementById('filter-product');
+    
+    console.log(`加载产品下拉列表，找到${products.length}个产品`);
+    
+    // 清除现有选项（保留第一个"All Products"选项）
+    while (productSelect.options.length > 1) {
+      productSelect.remove(1);
+    }
+    
+    // 按名称排序产品
+    products.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    
+    // 添加产品选项
+    products.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.id;
+      option.textContent = product.name || '未命名产品';
+      productSelect.appendChild(option);
+    });
+  }
+  
+  /**
+   * 加载评论数据
+   */
+  function loadReviews() {
+    console.log('加载评论数据...');
+    
+    // 尝试从API获取数据
+    console.log('正在尝试从API获取评论数据...');
+    
+    AdminApiService.getAllReviews()
+      .then(data => {
+        console.log('从API获取的数据:', data);
+        
+        // 确保我们有一个成功的响应
+        if (!data || !data.success) {
+          throw new Error('API返回失败状态');
+        }
+        
+        // 正确处理API响应结构
+        let reviews = [];
+        if (data.data) {
+          if (Array.isArray(data.data)) {
+            reviews = data.data;
+          } else if (data.data.reviews && Array.isArray(data.data.reviews)) {
+            reviews = data.data.reviews;
+          } else {
+            console.error('API返回的数据格式不正确:', data.data);
+            throw new Error('API返回的数据格式无效');
+          }
+        }
+        
+        console.log(`成功从API获取${reviews.length}条评论`);
+        
+        // 应用过滤器
+        const filteredReviews = filterReviews(reviews);
+        console.log(`过滤后剩余${filteredReviews.length}条评论`);
+        
+        // 渲染评论列表
+        renderReviews(filteredReviews);
+        updateReviewStats(reviews);
+      })
+      .catch(error => {
+        console.error('从API获取评论失败:', error);
+        
+        // 显示错误消息
+        const reviewsContainer = document.getElementById('reviews-container');
+        reviewsContainer.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            无法从服务器加载评论数据: ${error.message}
+          </div>
+        `;
+        
+        // 显示无评论信息
+        document.getElementById('no-reviews-message').classList.remove('d-none');
+        
+        // 重置统计信息
+        document.getElementById('total-reviews').textContent = '0';
+        document.getElementById('pending-reviews').textContent = '0';
+        document.getElementById('approved-reviews').textContent = '0';
+        document.getElementById('avg-rating').textContent = '0.0';
+      });
+  }
+  
+  /**
+   * 根据过滤条件过滤评论
+   */
+  function filterReviews(reviews) {
+    console.log('应用过滤条件:', currentFilters);
+    
+    return reviews.filter(review => {
+      // 状态过滤
+      if (currentFilters.status && review.status !== currentFilters.status) {
+        return false;
+      }
+      
+      // 评分过滤
+      if (currentFilters.rating && review.rating < parseInt(currentFilters.rating)) {
+        return false;
+      }
+      
+      // 产品过滤 - 确保ID类型一致
+      if (currentFilters.productId) {
+        const reviewProductId = String(review.productId);
+        const filterProductId = String(currentFilters.productId);
+        if (reviewProductId !== filterProductId) {
+          return false;
+        }
+      }
+      
+      // 搜索词过滤
+      if (currentFilters.search) {
+        const searchTerm = currentFilters.search.toLowerCase();
+        const titleMatch = review.title && review.title.toLowerCase().includes(searchTerm);
+        const contentMatch = review.content && review.content.toLowerCase().includes(searchTerm);
+        
+        if (!titleMatch && !contentMatch) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }
+  
+  /**
+   * 渲染评论列表
+   */
+  function renderReviews(reviews) {
+    const reviewsContainer = document.getElementById('reviews-container');
+    const noReviewsMessage = document.getElementById('no-reviews-message');
+    
+    // 清空现有内容
+    reviewsContainer.innerHTML = '';
+    
+    if (reviews.length === 0) {
+      // 显示无评论信息
+      noReviewsMessage.classList.remove('d-none');
+      console.log('没有评论可显示');
+    } else {
+      // 隐藏无评论信息
+      noReviewsMessage.classList.add('d-none');
+      
+      // 获取产品和用户数据用于显示
+      const products = JSON.parse(localStorage.getItem('products') || '[]');
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // 按日期排序，最新的在前
+      reviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      // 渲染每条评论
+      reviews.forEach(review => {
+        renderReviewCard(review, products, users, reviewsContainer);
+      });
+    }
+  }
+  
+  /**
+   * 渲染单个评论卡片
+   */
+  function renderReviewCard(review, products, users, container) {
+    // 查找产品信息 - 确保ID类型一致
+    const productIdStr = String(review.productId);
+    const product = products.find(p => String(p.id) === productIdStr) || { 
+      name: '未知产品', 
+      image: '/src/client/img/product-placeholder.jpg' 
+    };
+    
+    // 查找用户信息 - 确保ID类型一致
+    const userIdStr = String(review.userId);
+    const user = users.find(u => String(u.id) === userIdStr) || { 
+      name: '匿名用户',
+      firstName: '',
+      lastName: '匿名用户',
+      avatar: '/src/client/img/profile.png' 
+    };
+    
+    // 用户显示名称优先级：name > firstName+lastName > 默认值
+    const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '匿名用户';
+    
+    // 创建评论卡片
+    const reviewCard = document.createElement('div');
+    reviewCard.className = 'review-card';
+    
+    // 生成状态徽章
+    let statusBadge;
+    switch(review.status) {
+      case 'approved':
+        statusBadge = '<span class="status-badge status-approved">已批准</span>';
+        break;
+      case 'rejected':
+        statusBadge = '<span class="status-badge status-rejected">已拒绝</span>';
+        break;
+      default:
+        statusBadge = '<span class="status-badge status-pending">待审核</span>';
+    }
+    
+    // 生成星级评分HTML
+    const rating = parseInt(review.rating) || 0;
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        starsHtml += '<i class="bi bi-star-fill"></i> ';
+      } else {
+        starsHtml += '<i class="bi bi-star"></i> ';
+      }
+    }
+    
+    // 设置评论卡片HTML
+    reviewCard.innerHTML = `
+      <div class="review-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <img src="${product.image || '/src/client/img/product-placeholder.jpg'}" class="review-product-image" alt="${product.name}">
+            </div>
+            <div>
+              <h5 class="mb-0">${product.name}</h5>
+              <div class="text-muted small">${new Date(review.createdAt).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div>
+            ${statusBadge}
+          </div>
+        </div>
+      </div>
+      <div class="review-body">
+        <div class="d-flex align-items-center mb-3">
+          <img src="${user.avatar || '/src/client/img/profile.png'}" alt="${userName}" class="user-avatar me-3">
+          <div>
+            <h6 class="mb-0">${userName}</h6>
+            <div class="rating-stars">${starsHtml}</div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <h6>${review.title || '评论'}</h6>
+          <p>${review.content || '没有提供评论内容。'}</p>
+        </div>
+        ${review.reply ? `
+          <div class="reply-box">
+            <h6><i class="bi bi-reply me-2"></i>管理员回复</h6>
+            <p class="mb-0">${review.reply}</p>
+          </div>
+        ` : ''}
+      </div>
+      <div class="review-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="me-3">评论ID: ${String(review.id).slice(0, 8)}</span>
+          </div>
+          <div>
+            ${review.status === 'pending' ? `
+              <button class="btn btn-sm btn-success me-2" onclick="updateReviewStatus('${review.id}', 'approved')">
+                <i class="bi bi-check-circle me-1"></i>批准
+              </button>
+              <button class="btn btn-sm btn-danger me-2" onclick="updateReviewStatus('${review.id}', 'rejected')">
+                <i class="bi bi-x-circle me-1"></i>拒绝
+              </button>
+            ` : ''}
+            ${!review.reply ? `
+              <button class="btn btn-sm btn-primary me-2" onclick="openReplyModal('${review.id}')">
+                <i class="bi bi-reply me-1"></i>回复
+              </button>
+            ` : `
+              <button class="btn btn-sm btn-outline-primary me-2" onclick="openReplyModal('${review.id}')">
+                <i class="bi bi-pencil me-1"></i>编辑回复
+              </button>
+            `}
+            <button class="btn btn-sm btn-danger" onclick="deleteReview('${review.id}')">
+              <i class="bi bi-trash me-1"></i>删除
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // 添加到容器
+    container.appendChild(reviewCard);
+  }
+  
+  /**
+   * 更新评论统计信息
+   */
+  function updateReviewStats(reviews) {
+    if (!reviews || !Array.isArray(reviews)) {
+      reviews = [];
+    }
+    
+    // 总评论数
+    document.getElementById('total-reviews').textContent = reviews.length;
+    
+    // 待审核评论数
+    const pendingReviews = reviews.filter(review => review.status === 'pending').length;
+    document.getElementById('pending-reviews').textContent = pendingReviews;
+    
+    // 已批准评论数
+    const approvedReviews = reviews.filter(review => review.status === 'approved').length;
+    document.getElementById('approved-reviews').textContent = approvedReviews;
+    
+    // 计算平均评分（仅考虑已批准的评论）
+    let totalRating = 0;
+    let ratingCount = 0;
+    
+    reviews.forEach(review => {
+      if (review.status === 'approved' && review.rating) {
+        totalRating += parseInt(review.rating);
+        ratingCount++;
+      }
+    });
+    
+    const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : '0.0';
+    document.getElementById('avg-rating').textContent = avgRating;
+  }
+  
+  /**
+   * 应用过滤器
+   */
+  function applyFilters() {
+    // 获取过滤器值
+    currentFilters = {
+      status: document.getElementById('filter-status').value,
+      rating: document.getElementById('filter-rating').value,
+      productId: document.getElementById('filter-product').value,
+      search: document.getElementById('filter-search').value.trim()
+    };
+    
+    // 重新加载评论
+    loadReviews();
+  }
+  
+  /**
+   * 重置过滤器
+   */
+  function resetFilters() {
+    // 重置表单控件
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-rating').value = '';
+    document.getElementById('filter-product').value = '';
+    document.getElementById('filter-search').value = '';
+    
+    // 重置过滤器对象
+    currentFilters = {
+      status: '',
+      rating: '',
+      productId: '',
+      search: ''
+    };
+    
+    // 重新加载评论
+    loadReviews();
+  }
+  
+  /**
+   * 更新评论状态
+   */
+  function updateReviewStatus(reviewId, newStatus) {
+    showLoading();
+    
+    AdminApiService.updateReviewStatus(reviewId, newStatus)
+      .then(response => {
+        if (response.success) {
+          showToast(`评论状态已更新为 ${newStatus}`, 'success');
+          loadReviews(); // 重新加载评论数据
+        } else {
+          throw new Error(response.message || '更新评论状态失败');
+        }
+      })
+      .catch(error => {
+        console.error('更新评论状态失败:', error);
+        showToast('更新评论状态失败: ' + error.message, 'error');
+      })
+      .finally(() => {
+        hideLoading();
+      });
+  }
+  
+  /**
+   * 打开回复模态框
+   */
+  function openReplyModal(reviewId) {
+    document.getElementById('reply-review-id').value = reviewId;
+    
+    // 获取评论数据
+    const reviews = JSON.parse(localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]');
+    const review = reviews.find(r => r.id === reviewId);
+    
+    if (review && review.reply) {
+      document.getElementById('reply-text').value = review.reply;
+    } else {
+      document.getElementById('reply-text').value = '';
+    }
+    
+    // 显示模态框
+    const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+    replyModal.show();
+  }
+  
+  /**
+   * 提交回复
+   */
+  function submitReply() {
+    const reviewId = document.getElementById('reply-review-id').value;
+    const replyText = document.getElementById('reply-text').value.trim();
+    
+    if (!replyText) {
+      showToast('回复内容不能为空', 'warning');
+      return;
+    }
+    
+    console.log(`提交对评论 ${reviewId} 的回复`);
+    
+    // 使用API服务提交回复
+    AdminApiService.updateReviewStatus(reviewId, 'approved')
+      .then(response => {
+        console.log('回复提交成功:', response);
+        showToast('回复已发布', 'success');
+        
+        // 关闭模态框
+        bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+        
+        // 重新加载评论
+        loadReviews();
+      })
+      .catch(error => {
+        console.error('提交回复失败:', error);
+        showToast('提交回复失败', 'danger');
+      });
+  }
+  
+  /**
+   * 删除评论
+   */
+  function deleteReview(reviewId) {
+    if (!confirm('确定要删除此评论吗？此操作不可撤销。')) {
+      return;
+    }
+    
+    showLoading();
+    
+    AdminApiService.deleteReview(reviewId)
+      .then(response => {
+        if (response.success) {
+          showToast('评论已成功删除', 'success');
+          loadReviews(); // 重新加载评论数据
+        } else {
+          throw new Error(response.message || '删除评论失败');
+        }
+      })
+      .catch(error => {
+        console.error('删除评论失败:', error);
+        showToast('删除评论失败: ' + error.message, 'error');
+      })
+      .finally(() => {
+        hideLoading();
+      });
+  }
+  
+  /**
+   * 检查管理员权限
+   */
+  function checkAdminPermissions() {
+    // 检查用户是否为管理员
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+    
+    if (!token) {
+      // 未登录，重定向到登录页面
+      console.log('❌ 未找到认证令牌，重定向到登录页面');
+      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      return;
+    }
+    
+    // 调用API验证用户权限
+    console.log('📡 发送API请求: /auth/profile');
+    ApiService.get('/auth/profile')
+      .then(response => {
+        console.log('✅ 收到profile响应:', response);
+        if (!response.success || !response.data.isAdmin) {
+          // 不是管理员，重定向到首页
+          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+          showToast('You do not have permission to access this area', 'danger');
+          setTimeout(() => {
+            window.location.href = '/src/client/views/index.html';
+          }, 2000);
+        } else {
+          // 加载评论数据
+          console.log('✅ 用户是管理员，加载评论数据');
+          loadReviews();
+        }
+      })
+      .catch(error => {
+        console.error('❌ 检查管理员权限出错:', error);
+        // 验证失败，重定向到登录页面
+        showToast('Authentication error. Please login again.', 'danger');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      });
+  }
+  
+  /**
+   * 显示提示消息
+   */
+  function showToast(message, type = 'primary') {
+    const toastContainer = document.querySelector('.toast-container');
+    
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+    toastElement.setAttribute('role', 'alert');
+    toastElement.setAttribute('aria-live', 'assertive');
+    toastElement.setAttribute('aria-atomic', 'true');
+    
+    toastElement.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toastElement);
+    
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', function() {
+      toastElement.remove();
+    });
+  }
+  
+  /**
+   * 创建测试评论数据
+   */
+  function createTestReviews() {
+    console.log('创建测试评论数据...');
+    
+    // 获取产品数据
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    if (products.length === 0) {
+      console.error('没有产品数据，无法创建测试评论');
+      showToast('无法创建测试评论：找不到产品数据', 'danger');
+      return;
+    }
+    
+    // 获取用户数据
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (users.length === 0) {
+      console.error('没有用户数据，无法创建测试评论');
+      showToast('无法创建测试评论：找不到用户数据', 'danger');
+      return;
+    }
+    
+    // 创建测试评论
+    const testReviews = [
+      {
+        id: Date.now().toString() + '1',
+        productId: String(products[0].id),
+        userId: String(users[0].id),
+        rating: 5,
+        title: '非常满意的购物体验',
+        content: '产品质量很好，做工精细，强烈推荐购买。送货速度也很快，包装完好无损。',
+        status: 'approved',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: Date.now().toString() + '2',
+        productId: String(products[0].id),
+        userId: String(users[0].id),
+        rating: 4,
+        title: '性价比高',
+        content: '总体不错，但价格稍高。产品质量符合预期，客服态度也很好。',
+        status: 'approved',
+        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1天前
+        updatedAt: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: Date.now().toString() + '3',
+        productId: String(products.length > 1 ? products[1].id : products[0].id),
+        userId: String(users.length > 1 ? users[1].id : users[0].id),
+        rating: 3,
+        title: '一般般',
+        content: '产品还行，没有图片上看起来那么好。发货有点慢，包装一般。',
+        status: 'pending',
+        createdAt: new Date(Date.now() - 172800000).toISOString(), // 2天前
+        updatedAt: new Date(Date.now() - 172800000).toISOString()
+      },
+      {
+        id: Date.now().toString() + '4',
+        productId: String(products.length > 1 ? products[1].id : products[0].id),
+        userId: String(users.length > 1 ? users[1].id : users[0].id),
+        rating: 2,
+        title: '不太满意',
+        content: '产品有瑕疵，不是很满意。希望商家能够改进。',
+        status: 'rejected',
+        createdAt: new Date(Date.now() - 259200000).toISOString(), // 3天前
+        updatedAt: new Date(Date.now() - 259200000).toISOString()
+      }
+    ];
+    
+    // 保存到localStorage
+    localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(testReviews));
+    
+    // 为了兼容性，同时保存到comments键
+    localStorage.setItem('comments', JSON.stringify(testReviews));
+    
+    console.log(`已创建${testReviews.length}条测试评论`);
+    showToast(`已创建${testReviews.length}条测试评论`, 'success');
+    
+    // 重新加载评论
+    loadReviews();
+    updateReviewStats();
+  }
+  
+  /**
+   * 显示加载状态
+   */
+  function showLoading() {
+    // 创建加载器元素（如果不存在）
+    let loader = document.getElementById('global-loader');
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = 'global-loader';
+      loader.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center';
+      loader.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+      loader.style.zIndex = '9999';
+      loader.innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `;
+      document.body.appendChild(loader);
+    } else {
+      loader.style.display = 'flex';
+    }
+  }
+  
+  /**
+   * 隐藏加载状态
+   */
+  function hideLoading() {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+      loader.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html> 

@@ -1,0 +1,16 @@
+{
+  "name": "purelyhandmade",
+  "version": "1.0.0",
+  "description": "A handcrafted products discussion and showcasing platform",
+  "main": "index.php",
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "php -S localhost:8000 -t ."
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,126 @@
+/* Page header styles */
+  .page-header {
+    background-color: #f8f9fa;
+    padding: 40px 0;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+  }
+  
+  /* Category card styles */
+  .category-card {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  .category-img-container {
+    height: 200px;
+    overflow: hidden;
+  }
+  
+  .category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .category-card:hover .category-img {
+    transform: scale(1.1);
+  }
+  
+  .category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 20px;
+    color: white;
+  }
+  
+  .category-content {
+    padding: 20px;
+  }
+  
+  .category-title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .category-description {
+    color: #6c757d;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+  
+  .category-products-count {
+    font-size: 0.85rem;
+    color: #0d6efd;
+  }
+  
+  /* Loading spinner */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin: 20px 0;
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 20px;
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .category-img-container {
+      height: 180px;
+    }
+  }

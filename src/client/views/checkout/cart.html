@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Cart - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/src/client/css/global.css" rel="stylesheet">
+  <link href="/src/client/css/navbar.css" rel="stylesheet">
+  <link href="/src/client/css/cart.css" rel="stylesheet">
+  <!-- Add API data loader scripts -->
+  <script src="/src/client/js/data-service.js"></script>
+  <script src="/src/client/js/api-data-loader.js"></script>
+</head>
+<body>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+
+  <div class="container my-5">
+    <h2 class="mb-4 text-center">Shopping Cart</h2>
+    
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="cart-container">
+          <div id="cart-items-container">
+            <!-- Cart items will be loaded here -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <div class="cart-summary">
+          <h4 class="mb-3">Order Summary</h4>
+          
+          <div class="summary-item">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0.00</span>
+          </div>
+          <div class="summary-item">
+            <span>Estimated Shipping:</span>
+            <span id="shipping-cost">$5.99</span>
+          </div>
+          <div class="summary-item summary-total">
+            <span>Total:</span>
+            <span id="total-cost">$0.00</span>
+          </div>
+          
+          <div class="d-grid gap-2 mt-3">
+            <button id="checkout-btn" class="btn btn-success btn-lg">Proceed to Checkout</button>
+            <a href="/src/client/views/product/product-list.html" id="continue-shopping" class="btn btn-outline-secondary text-decoration-none d-flex justify-content-center align-items-center" style="height: 48px;">Continue Shopping</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder" class="mt-5"></div>
+  <script src="/src/client/js/navbar-handler.js"></script>
+
+  <script>
+    // Global cart variable to store cart items from API
+    let cart = [];
+    
+    // Fetch cart items from API
+    async function fetchCartItems() {
+      try {
+        showLoading('Loading cart...');
+        
+        // Get current user
+        const currentUser = DataService.getCurrentUser();
+        
+        // Check if user is logged in
+        if (!currentUser) {
+          hideLoading();
+          // If no user is logged in, return empty cart
+          console.log('No user logged in, returning empty cart');
+          return [];
+        }
+        
+        // Use API endpoint to get cart items with userId
+        const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          }
+        });
+        
+        const result = await response.json();
+        console.log('API Response:', result);
+        
+        hideLoading();
+        
+        if (result.success) {
+          // 确保数据是数组
+          if (Array.isArray(result.data)) {
+            return result.data;
+          } else {
+            // 兼容处理，防止API返回数据格式不一致
+            console.log('Data is not an array, attempting to parse:', result.data);
+            
+            // 尝试将字符串数据解析为对象
+            if (typeof result.data === 'string') {
+              try {
+                // If the string starts with "Cart" or any text that would cause JSON parse error
+                // clean up the string before parsing
+                let cleanedString = result.data;
+                if (cleanedString.includes("Cart")) {
+                  // Remove non-JSON content before attempting to parse
+                  cleanedString = cleanedString.substring(cleanedString.indexOf('{'));
+                }
+                
+                const parsedData = JSON.parse(cleanedString);
+                if (Array.isArray(parsedData)) {
+                  return parsedData;
+                } else if (parsedData && typeof parsedData === 'object') {
+                  // Check if parsed data has items array
+                  if (parsedData.items && Array.isArray(parsedData.items)) {
+                    return parsedData.items;
+                  }
+                  // Convert single object to array
+                  return [parsedData];
+                }
+              } catch (e) {
+                console.error('Failed to parse data string:', e);
+              }
+            }
+            
+            // Direct response handling - check for items structure in result
+            if (result.items && Array.isArray(result.items)) {
+              return result.items;
+            }
+            
+            // 如果data本身是一个对象，可能包含了一个items或products数组
+            if (typeof result.data === 'object') {
+              if (result.data.items && Array.isArray(result.data.items)) {
+                return result.data.items;
+              }
+              if (result.data.products && Array.isArray(result.data.products)) {
+                return result.data.products;
+              }
+              if (result.data.cart && Array.isArray(result.data.cart)) {
+                return result.data.cart;
+              }
+              
+              // 如果data是一个非数组对象，可能我们可以试着将它转换为数组
+              return [result.data];
+            }
+            
+            console.error('Unable to extract cart data from response');
+            return [];
+          }
+        } else {
+          console.error('Failed to fetch cart items:', result.message);
+          return [];
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error fetching cart items:', error);
+        return [];
+      }
+    }
+    
+    // Add item to cart via API
+    async function addToCart(productId, quantity) {
+      try {
+        showLoading('Adding to cart...');
+        
+        // Get current user
+        const currentUser = DataService.getCurrentUser();
+        
+        // Check if user is logged in
+        if (!currentUser) {
+          hideLoading();
+          alert('Please login to add items to cart');
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+          return false;
+        }
+        
+        const response = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId,
+            quantity
+          })
+        });
+        
+        const result = await response.json();
+        
+        hideLoading();
+        
+        if (result.success) {
+          // Refresh cart data
+          await loadCart();
+          return true;
+        } else {
+          console.error('Failed to add item to cart:', result.message);
+          return false;
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error adding item to cart:', error);
+        return false;
+      }
+    }
+    
+    // Remove item from cart via API
+    async function removeFromCart(productId) {
+      try {
+        showLoading('Removing from cart...');
+        
+        // Get current user
+        const currentUser = DataService.getCurrentUser();
+        
+        // Check if user is logged in
+        if (!currentUser) {
+          hideLoading();
+          console.error('Cannot remove item: No user logged in');
+          return false;
+        }
+        
+        const response = await fetch('/api/cart/remove', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId
+          })
+        });
+        
+        const result = await response.json();
+        
+        hideLoading();
+        
+        if (result.success) {
+          // Refresh cart data
+          await loadCart();
+          return true;
+        } else {
+          console.error('Failed to remove item from cart:', result.message);
+          return false;
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error removing item from cart:', error);
+        return false;
+      }
+    }
+    
+    // Update item quantity in cart via API
+    async function updateCartItemQuantity(productId, quantity) {
+      try {
+        showLoading('Updating cart...');
+        
+        // Get current user
+        const currentUser = DataService.getCurrentUser();
+        
+        // Check if user is logged in
+        if (!currentUser) {
+          hideLoading();
+          console.error('Cannot update item: No user logged in');
+          return false;
+        }
+        
+        const response = await fetch('/api/cart/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId,
+            quantity
+          })
+        });
+        
+        const result = await response.json();
+        
+        hideLoading();
+        
+        if (result.success) {
+          // Refresh cart data
+          await loadCart();
+          return true;
+        } else {
+          console.error('Failed to update item quantity:', result.message);
+          return false;
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error updating item quantity:', error);
+        return false;
+      }
+    }
+    
+    // Load cart data from API
+    async function loadCart() {
+      cart = await fetchCartItems();
+      console.log('Received cart data:', cart);
+      
+      // Ensure cart is an array
+      if (!Array.isArray(cart)) {
+        console.error('Cart data is not an array:', cart);
+        cart = [];
+      }
+      
+      renderCart();
+    }
+    
+    const cartContainer = document.getElementById('cart-items-container');
+    const subtotalEl = document.getElementById('subtotal');
+    const shippingCostEl = document.getElementById('shipping-cost');
+    const totalCostEl = document.getElementById('total-cost');
+    
+    // Build Cart
+    function renderCart() {
+      try {
+        // Safety check - ensure cart is an array
+        if (!Array.isArray(cart)) {
+          console.error('Cart is not an array in renderCart', cart);
+          cart = [];
+        }
+        
+        if (!cart || cart.length === 0) {
+          cartContainer.innerHTML = `
+            <div class="empty-cart-message">
+              <h5>Your cart is empty</h5>
+              <p class="text-muted">Add items to your cart to continue shopping.</p>
+            </div>
+          `;
+          updateTotals(0);
+          return;
+        }
+        
+        // Build Cart Details
+        let cartHTML = `
+          <div class="select-all-container">
+            <div class="form-check">
+              <input class="form-check-input cart-item-checkbox" type="checkbox" id="select-all" checked>
+              <label class="form-check-label" for="select-all">
+                <strong>Select All Items</strong>
+              </label>
+            </div>
+          </div>
+        `;
+        
+        cart.forEach((item, index) => {
+          // 添加默认值防止null或undefined导致的错误
+          const price = item.price || 0;
+          const quantity = item.quantity || 1;
+          const name = item.name || 'Unnamed Product';
+          const subtotal = (price * quantity).toFixed(2);
+          
+          // 处理分类和描述
+          const description = item.description || item.details || 'No description available';
+          const imageUrl = item.image || (Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : 'https://via.placeholder.com/80');
+          
+          cartHTML += `
+            <div class="cart-item">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <input type="checkbox" class="cart-item-checkbox" data-index="${index}" data-price="${subtotal}" checked>
+                </div>
+                <div class="col-auto">
+                  <img src="${imageUrl}" alt="${name}" class="product-image">
+                </div>
+                <div class="col">
+                  <h5>${name}</h5>
+                  <div class="text-muted small">${description}</div>
+                  <div class="mt-2 d-flex align-items-center">
+                    <span class="price me-3">$${price.toFixed(2)}</span>
+                    <div class="d-flex align-items-center">
+                      <button class="btn btn-sm btn-outline-secondary btn-quantity decrease-qty" data-index="${index}">-</button>
+                      <input type="number" min="1" value="${quantity}" class="quantity-input mx-2" data-index="${index}" readonly>
+                      <button class="btn btn-sm btn-outline-secondary btn-quantity increase-qty" data-index="${index}">+</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-auto text-end">
+                  <div class="fw-bold mb-2">$${subtotal}</div>
+                  <button class="btn btn-sm btn-danger remove-item" data-index="${index}">Remove</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        cartContainer.innerHTML = cartHTML;
+        
+        // Calculate and update price
+        calculateTotals();
+        
+        // Add listener
+        addEventListeners();
+      } catch (error) {
+        console.error('Error rendering cart:', error);
+        // Provide fallback UI in case of error
+        cartContainer.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            There was an error displaying your cart. Please try refreshing the page.
+          </div>
+        `;
+        updateTotals(0);
+      }
+    }
+    
+    // Add Event listener
+    function addEventListeners() {
+      // select all or undo
+      const selectAllCheckbox = document.getElementById('select-all');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          const isChecked = this.checked;
+          document.querySelectorAll('.cart-item-checkbox:not(#select-all)').forEach(checkbox => {
+            checkbox.checked = isChecked;
+            const cartItem = checkbox.closest('.cart-item');
+            if (isChecked) {
+              cartItem.classList.remove('cart-item-unchecked');
+            } else {
+              cartItem.classList.add('cart-item-unchecked');
+            }
+          });
+          calculateTotals();
+        });
+      }
+      
+      // Select items
+      document.querySelectorAll('.cart-item-checkbox:not(#select-all)').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const cartItem = this.closest('.cart-item');
+          if (this.checked) {
+            cartItem.classList.remove('cart-item-unchecked');
+          } else {
+            cartItem.classList.add('cart-item-unchecked');
+          }
+          
+          // Update select all
+          const allChecked = Array.from(document.querySelectorAll('.cart-item-checkbox:not(#select-all)')).every(cb => cb.checked);
+          const selectAllCb = document.getElementById('select-all');
+          if (selectAllCb) {
+            selectAllCb.checked = allChecked;
+          }
+          
+          calculateTotals();
+        });
+      });
+      
+      // Add quantity
+      document.querySelectorAll('.increase-qty').forEach(button => {
+        button.addEventListener('click', async function() {
+          const index = parseInt(this.dataset.index);
+          if (index >= 0 && index < cart.length) {
+            const productId = cart[index].id;
+            const newQuantity = (parseInt(cart[index].quantity) || 0) + 1;
+            await updateCartItemQuantity(productId, newQuantity);
+          }
+        });
+      });
+      
+      // Decline quantity
+      document.querySelectorAll('.decrease-qty').forEach(button => {
+        button.addEventListener('click', async function() {
+          const index = parseInt(this.dataset.index);
+          if (index >= 0 && index < cart.length) {
+            const productId = cart[index].id;
+            const currentQty = parseInt(cart[index].quantity) || 1;
+            if (currentQty > 1) {
+              await updateCartItemQuantity(productId, currentQty - 1);
+            }
+          }
+        });
+      });
+      
+      // 移除商品
+      document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', async function() {
+          const index = parseInt(this.dataset.index);
+          if (index >= 0 && index < cart.length) {
+            const productId = cart[index].id;
+            await removeFromCart(productId);
+          }
+        });
+      });
+      
+      // 结账按钮
+      document.getElementById('checkout-btn').addEventListener('click', async function() {
+        const selectedItems = [];
+
+        // 获取选中的商品
+        document.querySelectorAll('.cart-item-checkbox:not(#select-all):checked').forEach(checkbox => {
+          const index = parseInt(checkbox.dataset.index);
+          if (index >= 0 && index < cart.length) {
+            selectedItems.push(cart[index]);
+          }
+        });
+        
+        if (selectedItems.length === 0) {
+          alert('Please select at least one item to checkout');
+          return;
+        }
+        
+        // 获取当前用户信息
+        const currentUser = DataService.getCurrentUser();
+        
+        if (!currentUser) {
+          // 如果用户未登录，重定向到登录页面
+          alert('Please login to checkout');
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+          return;
+        }
+        
+        try {
+          // 更新购物车中的选中状态（通过API）
+          showLoading('Preparing checkout...');
+          
+          // 标记未选中的商品为不活跃
+          const uncheckedItems = [];
+          document.querySelectorAll('.cart-item-checkbox:not(#select-all):not(:checked)').forEach(checkbox => {
+            const index = parseInt(checkbox.dataset.index);
+            if (index >= 0 && index < cart.length) {
+              uncheckedItems.push(cart[index].id);
+            }
+          });
+          
+          if (uncheckedItems.length > 0) {
+            // 调用API标记为非活跃（如果API支持这个功能）
+            try {
+              await DataService.apiRequest('/cart/update-status', {
+                method: 'POST',
+                body: JSON.stringify({
+                  userId: currentUser.id,
+                  itemIds: uncheckedItems,
+                  active: false
+                })
+              });
+            } catch (err) {
+              console.warn('Failed to update item status, proceeding anyway:', err);
+            }
+          }
+          
+          hideLoading();
+          
+          // 导航到结账页面
+          window.location.href = '/src/client/views/checkout/checkout.html';
+        } catch (error) {
+          hideLoading();
+          console.error('Error preparing for checkout:', error);
+          
+          // 发生错误时仍然允许用户继续结账
+          window.location.href = '/src/client/views/checkout/checkout.html';
+        }
+      });
+    }
+    
+    // 计算总价
+    function calculateTotals() {
+      try {
+        // Safety check - ensure cart is an array
+        if (!Array.isArray(cart)) {
+          console.error('Cart is not an array in calculateTotals', cart);
+          updateTotals(0);
+          return;
+        }
+        
+        const checkedItems = document.querySelectorAll('.cart-item-checkbox:not(#select-all):checked');
+        let subtotal = 0;
+        let shippingCost = 0;
+        
+        // 计算选中商品的小计
+        checkedItems.forEach(checkbox => {
+          const index = parseInt(checkbox.dataset.index);
+          if (index >= 0 && index < cart.length) {
+            subtotal += cart[index].price * cart[index].quantity;
+          }
+        });
+        
+        // 设置运费
+        shippingCost = subtotal > 0 ? 5.99 : 0;
+        
+        // 更新总价
+        updateTotals(subtotal, shippingCost);
+      } catch (error) {
+        console.error('Error calculating totals:', error);
+        updateTotals(0);
+      }
+    }
+    
+    // 更新价格显示
+    function updateTotals(subtotal = 0, shippingCost = 0) {
+      const total = subtotal + shippingCost;
+      
+      subtotalEl.textContent = '$' + subtotal.toFixed(2);
+      shippingCostEl.textContent = shippingCost > 0 ? '$' + shippingCost.toFixed(2) : 'Free';
+      totalCostEl.textContent = '$' + total.toFixed(2);
+    }
+    
+    // 显示和隐藏加载提示
+    function showLoading(message = 'Loading...') {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'loading-overlay';
+      loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <div class="loading-message">${message}</div>
+      `;
+      document.body.appendChild(loadingEl);
+    }
+    
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-overlay');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
+    }
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', async function() {
+      // 加载导航栏和页脚
+      fetch('/src/client/assets/layout/navbar.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('navbar-placeholder').innerHTML = html;
+          
+          // 在导航栏加载完成后执行
+          if (typeof window.initNavbar === 'function') {
+            window.initNavbar();
+          }
+          
+          // 更新购物车图标数量
+          if (typeof window.updateCartCount === 'function') {
+            window.updateCartCount();
+          }
+        });
+      
+      fetch('/src/client/assets/layout/footer.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('footer-placeholder').innerHTML = html;
+        });
+      
+      // Check if user is logged in
+      const currentUser = DataService.getCurrentUser();
+      
+      if (!currentUser) {
+        // Display message for non-logged in users
+        cartContainer.innerHTML = `
+          <div class="empty-cart-message">
+            <h5>Please log in to view your cart</h5>
+            <p class="text-muted">You need to be logged in to manage your shopping cart.</p>
+            <a href="/src/client/views/auth/login.html?returnUrl=${encodeURIComponent(window.location.href)}" class="btn btn-primary mt-3">Log In</a>
+          </div>
+        `;
+        updateTotals(0);
+      } else {
+        // 加载购物车数据
+        await loadCart();
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Navbar Handler -->
+  <script src="/src/client/js/navbar-handler.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test</title>
+</head>
+<body>
+  <h1>API Test</h1>
+  <div id="designers-container">Loading designers...</div>
+  
+  <script>
+    // Simple test to fetch data from the test API
+    async function testAPI() {
+      const designersContainer = document.getElementById('designers-container');
+      
+      try {
+        console.log('Testing API connection...');
+        const response = await fetch('/test_api.php');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        if (data.success && data.data && data.data.designers) {
+          designersContainer.innerHTML = `<h2>Found ${data.data.designers.length} designers</h2>`;
+          
+          // Display designers
+          const designersList = document.createElement('ul');
+          data.data.designers.forEach(designer => {
+            const listItem = document.createElement('li');
+            listItem.textContent = designer.name;
+            designersList.appendChild(listItem);
+          });
+          
+          designersContainer.appendChild(designersList);
+        } else {
+          designersContainer.innerHTML = '<p>No designers found in API response</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        designersContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+    
+    // Run the test when the page loads
+    document.addEventListener('DOMContentLoaded', testAPI);
+  </script>
+</body>
+</html> 
