@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Arrivals - Purely Homemade</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/new-arrivals.css">
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- API Helper -->
+  <script src="/src/client/js/api-loader-helper.js"></script>
+
+</head>
+<body>
+
+<!-- Navbar Placeholder -->
+<div id="navbar-placeholder"></div>
+
+<!-- Hero Section -->
+<div class="container-fluid bg-light py-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h1 class="display-4 fw-bold">New Arrivals</h1>
+        <p class="lead">Discover our latest handcrafted treasures, fresh from our artisans' studios.</p>
+        <p>Each piece is unique, made with care and passion by our talented makers.</p>
+      </div>
+      <div class="col-md-6 text-center">
+        <img src="../img/logo.jpg" class="img-fluid rounded" alt="New Arrivals" style="max-height: 250px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Products Section -->
+<div class="container mt-5">
+  <h2 class="section-title">Just Added</h2>
+  
+  <div class="row" id="new-products-container">
+    <!-- Products will be loaded dynamically -->
+    <div class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading new arrivals...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Newsletter Section -->
+<div class="container-fluid bg-light py-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <h3>Stay Updated with New Arrivals</h3>
+        <p class="mb-4">Subscribe to our newsletter to be the first to know about our newest handcrafted products.</p>
+        <div class="input-group mb-3">
+          <input type="email" class="form-control" placeholder="Your email address">
+          <button class="btn btn-primary" type="button">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Placeholder -->
+<div id="footer-placeholder"></div>
+
+<!-- Toast通知容器 -->
+<div class="modern-toast-container" id="toast-container"></div>
+
+<!-- Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Data Service scripts - Must load before init-data.js -->
+<script src="/src/client/js/data-service.js"></script>
+<script src="/src/client/js/api-data-loader.js"></script>
+
+<!-- 初始化数据脚本 -->
+<script src="/src/client/js/init-data.js"></script>
+
+<!-- Navbar Handler -->
+<script src="/src/client/js/navbar-handler.js"></script>
+
+<script>
+  console.log('Script block starting...');
+  
+  // DOM content loaded event for page-specific initialization
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired');
+    
+    // Ensure data is initialized
+    if (typeof window.initializeData === 'function') {
+      console.log('Calling initializeData function');
+      window.initializeData();
+    } else {
+      console.warn('initializeData function not found');
+    }
+    
+    // Load new arrivals
+    console.log('Calling loadNewArrivals function');
+    loadNewArrivals();
+  });
+  
+  // 加载新上架产品
+  function loadNewArrivals() {
+    console.log('loadNewArrivals function called');
+    const productsContainer = document.getElementById('new-products-container');
+    
+    if (!productsContainer) {
+      console.error('Products container not found!');
+      return;
+    }
+    
+    // Show loading state
+    productsContainer.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading products...</span>
+        </div>
+        <p class="mt-2">Loading new arrivals...</p>
+      </div>
+    `;
+    
+    // Check if the API method is available
+    if (typeof window.loadProducts === 'function') {
+      console.log('Using API loadProducts function');
+      
+      window.loadProducts('new-products-container', {
+        newArrivals: true,
+        limit: 20
+      });
+    } else {
+      console.error('API loadProducts function not available. Ensure api-data-loader.js is loaded');
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Cannot load products: API unavailable</p></div>';
+      
+      // Try to load the API scripts and retry
+      if (typeof window.ensureApiScriptsLoaded === 'function') {
+        window.ensureApiScriptsLoaded().then(() => {
+          if (typeof window.loadProducts === 'function') {
+            console.log('API loaded successfully, retrying loadNewArrivals');
+            window.loadProducts('new-products-container', {
+              newArrivals: true,
+              limit: 20
+            });
+          }
+        });
+      }
+    }
+  }
+  
+  // 创建产品卡片HTML
+  function createProductCard(product) {
+    console.log('Creating product card for:', product.id, product.name);
+    
+    try {
+      // 生成星级评分HTML
+      const fullStars = Math.floor(product.rating || 0);
+      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+      
+      console.log(`Product ${product.name} - Rating: ${product.rating}`);
+      console.log(`Star breakdown - Full stars: ${fullStars}, Half star: ${hasHalfStar}, Empty stars: ${5 - fullStars - (hasHalfStar ? 1 : 0)}`);
+      
+      let starsHtml = '<div class="product-rating">';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="bi bi-star-fill"></i>';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i>';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="bi bi-star"></i>';
+      }
+      // Add text rating for clarity
+      starsHtml += `<span class="rating-text">(${product.rating ? product.rating.toFixed(1) : '0.0'})</span>`;
+      starsHtml += '</div>';
+      
+      // 价格显示
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
+          <div class="product-price-wrapper">
+            <span class="product-price">$${product.salePrice.toFixed(2)}</span>
+            <span class="product-price-discount">$${product.price.toFixed(2)}</span>
+          </div>
+        `;
+      } else if (product.price) {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
+      } else {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
+      }
+      
+      // 计算上架天数
+      const listingDate = new Date(product.listingDate);
+      const today = new Date();
+      const daysListed = Math.floor((today - listingDate) / (1000 * 60 * 60 * 24));
+      
+      console.log(`Product ${product.id} image:`, product.images[0]);
+      
+      const cardHTML = `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="product-card">
+            <div class="product-img-wrapper">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+                <img src="${product.images[0]}" class="product-img" alt="${product.name}">
+                ${daysListed <= 7 ? '<div class="product-badge">NEW</div>' : ''}
+                ${product.onSale ? `<div class="product-badge" style="left: ${daysListed <= 7 ? '80px' : '15px'}">Sale</div>` : ''}
+                ${product.stock && product.stock <= 5 ? '<div class="product-badge stock-badge">Low Stock</div>' : ''}
+              </a>
+            </div>
+            <div class="product-card-body">
+              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+                <h2 class="product-title">${product.name}</h2>
+              </a>
+              ${priceHtml}
+              ${starsHtml}
+              <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
+              <button class="add-to-cart-btn" data-id="${product.id}">
+                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return cardHTML;
+    } catch (error) {
+      console.error(`Error creating product card for product ${product.id}:`, error);
+      return `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="alert alert-danger">
+            Error displaying product: ${product.name || 'Unknown product'}
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  // 添加到购物车
+  async function addToCart(productId, quantity) {
+    try {
+      // 获取当前用户信息
+      const currentUser = DataService.getCurrentUser();
+      
+      if (!currentUser) {
+        // 如果用户未登录，提示登录
+        showToast('Please login to add items to cart', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        }, 1500);
+        return false;
+      }
+      
+      // 显示加载中提示
+      showLoading('Adding to cart...');
+      
+      // 调用API添加商品到购物车
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DataService.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
+        })
+      });
+      
+      const result = await response.json();
+      hideLoading();
+      
+      if (result.success) {
+        // 获取产品信息用于显示成功消息
+        const product = products.find(p => p.id == productId);
+        const productName = product ? product.name : 'Product';
+        
+        // 显示成功消息
+        showToast(`${productName} added to your cart!`, 'success');
+        
+        // 更新购物车计数
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
+        }
+        
+        return true;
+      } else {
+        showToast(result.message || 'Failed to add item to cart', 'error');
+        return false;
+      }
+    } catch (error) {
+      hideLoading();
+      console.error('Error adding product to cart:', error);
+      showToast('Error adding product to cart', 'error');
+      return false;
+    }
+  }
+  
+  // 显示加载提示
+  function showLoading(message = 'Loading...') {
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'loading-overlay';
+    loadingEl.style.position = 'fixed';
+    loadingEl.style.top = '0';
+    loadingEl.style.left = '0';
+    loadingEl.style.width = '100%';
+    loadingEl.style.height = '100%';
+    loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    loadingEl.style.display = 'flex';
+    loadingEl.style.flexDirection = 'column';
+    loadingEl.style.justifyContent = 'center';
+    loadingEl.style.alignItems = 'center';
+    loadingEl.style.zIndex = '9999';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'loading-spinner';
+    spinner.style.width = '40px';
+    spinner.style.height = '40px';
+    spinner.style.border = '4px solid #f3f3f3';
+    spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+    spinner.style.borderRadius = '50%';
+    spinner.style.animation = 'spin 1s linear infinite';
+    spinner.style.marginBottom = '15px';
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'loading-message';
+    messageEl.textContent = message;
+    messageEl.style.fontSize = '16px';
+    
+    loadingEl.appendChild(spinner);
+    loadingEl.appendChild(messageEl);
+    document.body.appendChild(loadingEl);
+    
+    // 添加动画样式
+    if (!document.getElementById('loading-spinner-style')) {
+      const style = document.createElement('style');
+      style.id = 'loading-spinner-style';
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  // 隐藏加载提示
+  function hideLoading() {
+    const loadingEl = document.getElementById('loading-overlay');
+    if (loadingEl) {
+      loadingEl.remove();
+    }
+  }
+  
+  // 显示Toast通知
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    
+    if (!toastContainer) return;
+    
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `modern-toast ${type}`;
+    
+    // 添加内容
+    toast.innerHTML = `
+      <div style="flex: 1; padding-right: 10px;">
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+            ${message}
+      </div>
+      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+    `;
+    
+    // 添加到容器
+    toastContainer.appendChild(toast);
+    
+    // 添加关闭按钮事件
+    const closeBtn = toast.querySelector('div:last-child');
+    closeBtn.addEventListener('click', function() {
+      toast.remove();
+    });
+    
+    // 自动3秒后移除
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // 更新购物车计数函数
+  function updateCartCount() {
+    const cartData = localStorage.getItem('cart');
+    const cartCount = document.getElementById('cart-count');
+    
+    if (!cartCount) return;
+    
+    if (cartData) {
+      const cart = JSON.parse(cartData);
+      const count = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCount.textContent = count;
+      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+    } else {
+      cartCount.style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html> 

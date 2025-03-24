@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - Purely Homemade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="../../css/global.css" rel="stylesheet">
+  <link href="../../css/navbar.css" rel="stylesheet">
+  <link href="../../css/checkout.css" rel="stylesheet">
+  <!-- 引入API数据加载服务 -->
+  <script src="../../js/data-service.js"></script>
+  <script src="../../js/api-data-loader.js"></script>
+  <style>
+    /* Loading overlay styles */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+    
+    .loading-message {
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+  
+  <!-- Main Content -->
+  <div id="main-content" class="container my-5">
+    <h1 class="text-center mb-4">Checkout</h1>
+    
+    <div class="row">
+      <!-- Shipping & Payment Column -->
+      <div class="col-lg-8">
+        <!-- Shipping Information -->
+        <div class="card shadow-sm section-card">
+          <div class="card-body">
+            <h3 class="section-title">Shipping Information</h3>
+            
+            <form id="shipping-form" novalidate>
+              <div class="mb-3">
+                <select id="shipCountry" class="form-select" required>
+                  <option value="" selected disabled>Select Country</option>
+                  <!-- 国家选项将通过API动态加载 -->
+                </select>
+              </div>
+              <input type="text" id="shipName" class="form-control mb-3" placeholder="Full Name" required>
+              <input type="text" id="shipAddress" class="form-control mb-3" placeholder="Address Line 1" required>
+              <input type="text" id="shipAddress2" class="form-control mb-3" placeholder="Address Line 2 (Optional)">
+              <div class="row mb-3" id="domestic-fields">
+                <div class="col-md-6">
+                  <input type="text" id="shipCity" class="form-control" placeholder="City" required>
+                </div>
+                <div class="col-md-3">
+                  <select id="shipState" class="form-select" required>
+                    <option value="" selected disabled>State</option>
+                    <!-- 州/省份选项将通过API动态加载 -->
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <input type="text" id="shipZip" class="form-control" placeholder="ZIP" required>
+                </div>
+              </div>
+              <div class="row mb-3" id="international-fields" style="display: none;">
+                <div class="col-md-5">
+                  <input type="text" id="shipCityInt" class="form-control" placeholder="City" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" id="shipStateInt" class="form-control" placeholder="State/Province/Region">
+                  <select id="shipProvince" class="form-select" style="display:none;" required>
+                    <option value="" selected disabled>Province/Region</option>
+                    <!-- 省份选项将通过API动态加载 -->
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <input type="text" id="shipZipInt" class="form-control" placeholder="Postal Code">
+                </div>
+              </div>
+              <input type="tel" id="shipPhone" class="form-control mb-3" placeholder="Phone Number" required>
+              <div class="mb-3">
+                <label class="form-label">Shipping Method</label>
+                <div class="form-check">
+                  <input class="form-check-input shipping-method" type="radio" name="shippingMethod" id="methodStandard" value="standard" checked data-price="5.99">
+                  <label class="form-check-label" for="methodStandard">Standard Shipping ($5.99)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input shipping-method" type="radio" name="shippingMethod" id="methodExpress" value="express" data-price="12.99">
+                  <label class="form-check-label" for="methodExpress">Express Shipping ($12.99)</label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="card shadow-sm section-card">
+          <div class="card-body">
+            <h3 class="section-title">Payment Method</h3>
+            
+            <div class="mb-4">
+              <div id="credit-card-option" class="payment-option selected">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="methodCard" value="card" checked>
+                  <label class="form-check-label" for="methodCard">
+                    <strong>Credit / Debit Card</strong>
+                  </label>
+                </div>
+              </div>
+              
+              <div id="paypal-option" class="payment-option">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="methodPaypal" value="paypal">
+                  <label class="form-check-label" for="methodPaypal">
+                    <strong>PayPal</strong>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div id="card-payment-form">
+              <form id="payment-form" novalidate>
+                <div class="mb-3">
+                  <label for="cardNumber" class="form-label">Card Number</label>
+                  <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" required>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="cardExpiry" class="form-label">Expiry Date</label>
+                    <input type="text" id="cardExpiry" class="form-control" placeholder="MM/YY" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="cardCVV" class="form-label">CVV</label>
+                    <input type="text" id="cardCVV" class="form-control" placeholder="123" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="cardName" class="form-label">Name on Card</label>
+                  <input type="text" id="cardName" class="form-control" placeholder="John Doe" required>
+                </div>
+              </form>
+            </div>
+            
+            <div id="paypal-payment-form" style="display: none;">
+              <div class="alert alert-info">
+                You will be redirected to PayPal to complete your payment after placing your order.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Place Order Button -->
+        <div class="d-grid mb-4">
+          <button type="button" id="place-order" class="btn btn-success btn-lg">Place Order</button>
+        </div>
+      </div>
+      
+      <!-- Order Summary Column -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px; z-index: 100;">
+          <div class="card-body">
+            <h3 class="section-title">Order Summary</h3>
+            
+            <div id="cart-items-summary" class="order-summary">
+              <!-- 添加提示文字 -->
+              <div class="cart-summary-header">
+                Select items to include in your order:
+              </div>
+              <!-- Cart items will be displayed here -->
+              <div class="text-center py-2">
+                <div class="spinner-border text-secondary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="summary-item">
+              <span>Subtotal:</span>
+              <span id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-item">
+              <span>Shipping:</span>
+              <span id="shipping-cost">$5.99</span>
+            </div>
+            <div class="summary-item" id="regional-fee-container" style="display: none;">
+              <span>Regional Fee:</span>
+              <span id="regional-fee">$0.00</span>
+            </div>
+            <div class="summary-item summary-total">
+              <span>Total:</span>
+              <span id="total-cost">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <script src="/src/client/js/navbar-handler.js"></script>
+  
+  <script>
+    // 区域附加费率
+    const regionalFees = {
+      // 美国地区费用
+      "US": {
+        "CA": 2.99,  // 加州
+        "NY": 2.49,  // 纽约
+        "FL": 1.99,  // 佛罗里达
+        "TX": 1.49,  // 德克萨斯
+      },
+      // 加拿大地区费用
+      "CA": {
+        "ON": 3.99,  // 安大略省
+        "QC": 3.49,  // 魁北克省
+        "BC": 4.99,  // 不列颠哥伦比亚省
+      },
+      // 英国地区费用
+      "UK": {
+        "London": 2.99,
+        "Manchester": 1.99,
+      }
+      // 可以添加更多国家和地区
+    };
+    
+    // 国际运费基础价格
+    const internationalShippingRates = {
+      "US": {standard: 5.99, express: 12.99},
+      "CA": {standard: 8.99, express: 16.99},
+      "UK": {standard: 12.99, express: 24.99},
+      "AU": {standard: 15.99, express: 29.99},
+      "FR": {standard: 14.99, express: 27.99},
+      "DE": {standard: 14.99, express: 27.99},
+      "JP": {standard: 18.99, express: 32.99},
+      "CN": {standard: 18.99, express: 32.99},
+      "IN": {standard: 16.99, express: 30.99},
+      "BR": {standard: 17.99, express: 31.99},
+      "MX": {standard: 10.99, express: 19.99}
+    };
+    
+    // 从API获取国家列表
+    async function fetchCountries() {
+      try {
+        showLoading('Loading countries...');
+        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2');
+        const countries = await response.json();
+        hideLoading();
+        
+        // 对国家按名称排序
+        return countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+      } catch (error) {
+        hideLoading();
+        console.error('Error fetching countries:', error);
+        // 返回默认国家列表作为备选
+        return [
+          { name: { common: 'United States' }, cca2: 'US' },
+          { name: { common: 'Canada' }, cca2: 'CA' },
+          { name: { common: 'United Kingdom' }, cca2: 'GB' },
+          { name: { common: 'Australia' }, cca2: 'AU' },
+          { name: { common: 'France' }, cca2: 'FR' },
+          { name: { common: 'Germany' }, cca2: 'DE' },
+          { name: { common: 'Japan' }, cca2: 'JP' },
+          { name: { common: 'China' }, cca2: 'CN' },
+          { name: { common: 'India' }, cca2: 'IN' },
+          { name: { common: 'Brazil' }, cca2: 'BR' },
+          { name: { common: 'Mexico' }, cca2: 'MX' }
+        ];
+      }
+    }
+    
+    // 从API获取指定国家的地区/省份
+    async function fetchRegions(countryCode) {
+      try {
+        // 首先尝试使用全球地区API获取数据
+        showLoading(`Loading regions for ${countryCode}...`);
+        
+        // 使用GeoDB Cities API获取国家的行政区划
+        // 注意：此API需要注册获取API密钥，这里使用的是示例URL
+        // 在生产环境中，应该使用环境变量或配置文件中的API密钥
+        const geoDbResponse = await fetch(`https://countriesnow.space/api/v0.1/countries/states/q?country=${encodeURIComponent(getCountryNameByCode(countryCode))}`);
+        const geoDbData = await geoDbResponse.json();
+        
+        // 检查API响应
+        if (geoDbData && geoDbData.data && Array.isArray(geoDbData.data.states) && geoDbData.data.states.length > 0) {
+          hideLoading();
+          // 将API响应格式化为我们的标准格式
+          return geoDbData.data.states.map(state => ({
+            code: state.state_code || state.name.substring(0, 2).toUpperCase(),
+            name: state.name
+          }));
+        }
+        
+        // 如果通用API失败，使用特定国家的数据源作为备选
+        console.warn(`Could not get regions for ${countryCode} from primary API, using fallback sources`);
+        
+        // 特定国家的备选数据源
+        if (countryCode === 'US') {
+          // 美国各州
+          const response = await fetch('https://gist.githubusercontent.com/mshafrir/2646763/raw/8b0dbb93521f5d6889502305335104218454c2bf/states_hash.json');
+          const statesObj = await response.json();
+          hideLoading();
+          return Object.entries(statesObj).map(([code, name]) => ({ code, name }));
+        } else if (countryCode === 'CA') {
+          // 加拿大省份
+          const response = await fetch('https://gist.githubusercontent.com/pburtchaell/33cea9626e0241b970c0/raw/efa27ce264dd4c4e1957c8c012a0d37d89a717cc/gistfile1.json');
+          const provinces = await response.json();
+          hideLoading();
+          return provinces.map(province => ({ 
+            code: province.short, 
+            name: province.name 
+          }));
+        } else if (countryCode === 'GB') {
+          // 英国地区
+          hideLoading();
+          return [
+            { code: 'ENG', name: 'England' },
+            { code: 'SCT', name: 'Scotland' },
+            { code: 'WLS', name: 'Wales' },
+            { code: 'NIR', name: 'Northern Ireland' },
+            { code: 'LDN', name: 'London' },
+            { code: 'MAN', name: 'Manchester' },
+            { code: 'BIR', name: 'Birmingham' },
+            { code: 'LIV', name: 'Liverpool' },
+            { code: 'EDI', name: 'Edinburgh' },
+            { code: 'GLA', name: 'Glasgow' }
+          ];
+        } else if (countryCode === 'AU') {
+          // 澳大利亚州/领地
+          hideLoading();
+          return [
+            { code: 'NSW', name: 'New South Wales' },
+            { code: 'QLD', name: 'Queensland' },
+            { code: 'SA', name: 'South Australia' },
+            { code: 'TAS', name: 'Tasmania' },
+            { code: 'VIC', name: 'Victoria' },
+            { code: 'WA', name: 'Western Australia' },
+            { code: 'ACT', name: 'Australian Capital Territory' },
+            { code: 'NT', name: 'Northern Territory' }
+          ];
+        } else if (countryCode === 'CN') {
+          // 中国省份
+          hideLoading();
+          return [
+            { code: 'BJ', name: 'Beijing' },
+            { code: 'SH', name: 'Shanghai' },
+            { code: 'GD', name: 'Guangdong' },
+            { code: 'JS', name: 'Jiangsu' },
+            { code: 'ZJ', name: 'Zhejiang' },
+            { code: 'SD', name: 'Shandong' },
+            { code: 'SC', name: 'Sichuan' },
+            { code: 'HB', name: 'Hubei' },
+            { code: 'FJ', name: 'Fujian' },
+            { code: 'HN', name: 'Hunan' },
+            { code: 'AH', name: 'Anhui' },
+            { code: 'GX', name: 'Guangxi' },
+            { code: 'HE', name: 'Hebei' },
+            { code: 'HL', name: 'Heilongjiang' },
+            { code: 'HN', name: 'Hunan' },
+            { code: 'JL', name: 'Jilin' },
+            { code: 'LN', name: 'Liaoning' },
+            { code: 'NX', name: 'Ningxia' },
+            { code: 'QH', name: 'Qinghai' },
+            { code: 'SN', name: 'Shaanxi' },
+            { code: 'SX', name: 'Shanxi' },
+            { code: 'TJ', name: 'Tianjin' },
+            { code: 'XJ', name: 'Xinjiang' },
+            { code: 'YN', name: 'Yunnan' },
+            { code: 'ZJ', name: 'Zhejiang' }
+          ];
+        } else if (countryCode === 'IN') {
+          // 印度邦/直辖区
+          hideLoading();
+          return [
+            { code: 'AP', name: 'Andhra Pradesh' },
+            { code: 'AR', name: 'Arunachal Pradesh' },
+            { code: 'AS', name: 'Assam' },
+            { code: 'BR', name: 'Bihar' },
+            { code: 'CT', name: 'Chhattisgarh' },
+            { code: 'GA', name: 'Goa' },
+            { code: 'GJ', name: 'Gujarat' },
+            { code: 'HR', name: 'Haryana' },
+            { code: 'HP', name: 'Himachal Pradesh' },
+            { code: 'JH', name: 'Jharkhand' },
+            { code: 'KA', name: 'Karnataka' },
+            { code: 'KL', name: 'Kerala' },
+            { code: 'MP', name: 'Madhya Pradesh' },
+            { code: 'MH', name: 'Maharashtra' },
+            { code: 'MN', name: 'Manipur' },
+            { code: 'ML', name: 'Meghalaya' },
+            { code: 'MZ', name: 'Mizoram' },
+            { code: 'NL', name: 'Nagaland' },
+            { code: 'OR', name: 'Odisha' },
+            { code: 'PB', name: 'Punjab' },
+            { code: 'RJ', name: 'Rajasthan' },
+            { code: 'SK', name: 'Sikkim' },
+            { code: 'TN', name: 'Tamil Nadu' },
+            { code: 'TG', name: 'Telangana' },
+            { code: 'TR', name: 'Tripura' },
+            { code: 'UT', name: 'Uttarakhand' },
+            { code: 'UP', name: 'Uttar Pradesh' },
+            { code: 'WB', name: 'West Bengal' },
+            { code: 'AN', name: 'Andaman and Nicobar Islands' },
+            { code: 'CH', name: 'Chandigarh' },
+            { code: 'DN', name: 'Dadra and Nagar Haveli and Daman and Diu' },
+            { code: 'DL', name: 'Delhi' },
+            { code: 'JK', name: 'Jammu and Kashmir' },
+            { code: 'LA', name: 'Ladakh' },
+            { code: 'LD', name: 'Lakshadweep' },
+            { code: 'PY', name: 'Puducherry' }
+          ];
+        } else if (countryCode === 'DE') {
+          // 德国联邦州
+          hideLoading();
+          return [
+            { code: 'BW', name: 'Baden-Württemberg' },
+            { code: 'BY', name: 'Bavaria' },
+            { code: 'BE', name: 'Berlin' },
+            { code: 'BB', name: 'Brandenburg' },
+            { code: 'HB', name: 'Bremen' },
+            { code: 'HH', name: 'Hamburg' },
+            { code: 'HE', name: 'Hesse' },
+            { code: 'NI', name: 'Lower Saxony' },
+            { code: 'MV', name: 'Mecklenburg-Vorpommern' },
+            { code: 'NW', name: 'North Rhine-Westphalia' },
+            { code: 'RP', name: 'Rhineland-Palatinate' },
+            { code: 'SL', name: 'Saarland' },
+            { code: 'SN', name: 'Saxony' },
+            { code: 'ST', name: 'Saxony-Anhalt' },
+            { code: 'SH', name: 'Schleswig-Holstein' },
+            { code: 'TH', name: 'Thuringia' }
+          ];
+        } else if (countryCode === 'JP') {
+          // 日本都道府县
+          hideLoading();
+          return [
+            { code: '01', name: 'Hokkaido' },
+            { code: '02', name: 'Aomori' },
+            { code: '03', name: 'Iwate' },
+            { code: '04', name: 'Miyagi' },
+            { code: '05', name: 'Akita' },
+            { code: '06', name: 'Yamagata' },
+            { code: '07', name: 'Fukushima' },
+            { code: '08', name: 'Ibaraki' },
+            { code: '09', name: 'Tochigi' },
+            { code: '10', name: 'Gunma' },
+            { code: '11', name: 'Saitama' },
+            { code: '12', name: 'Chiba' },
+            { code: '13', name: 'Tokyo' },
+            { code: '14', name: 'Kanagawa' },
+            { code: '15', name: 'Niigata' },
+            { code: '16', name: 'Toyama' },
+            { code: '17', name: 'Ishikawa' },
+            { code: '18', name: 'Fukui' },
+            { code: '19', name: 'Yamanashi' },
+            { code: '20', name: 'Nagano' },
+            { code: '21', name: 'Gifu' },
+            { code: '22', name: 'Shizuoka' },
+            { code: '23', name: 'Aichi' },
+            { code: '24', name: 'Mie' },
+            { code: '25', name: 'Shiga' },
+            { code: '26', name: 'Kyoto' },
+            { code: '27', name: 'Osaka' },
+            { code: '28', name: 'Hyogo' },
+            { code: '29', name: 'Nara' },
+            { code: '30', name: 'Wakayama' },
+            { code: '31', name: 'Tottori' },
+            { code: '32', name: 'Shimane' },
+            { code: '33', name: 'Okayama' },
+            { code: '34', name: 'Hiroshima' },
+            { code: '35', name: 'Yamaguchi' },
+            { code: '36', name: 'Tokushima' },
+            { code: '37', name: 'Kagawa' },
+            { code: '38', name: 'Ehime' },
+            { code: '39', name: 'Kochi' },
+            { code: '40', name: 'Fukuoka' },
+            { code: '41', name: 'Saga' },
+            { code: '42', name: 'Nagasaki' },
+            { code: '43', name: 'Kumamoto' },
+            { code: '44', name: 'Oita' },
+            { code: '45', name: 'Miyazaki' },
+            { code: '46', name: 'Kagoshima' },
+            { code: '47', name: 'Okinawa' }
+          ];
+        } else if (countryCode === 'BR') {
+          // 巴西联邦州
+          hideLoading();
+          return [
+            { code: 'AC', name: 'Acre' },
+            { code: 'AL', name: 'Alagoas' },
+            { code: 'AP', name: 'Amapá' },
+            { code: 'AM', name: 'Amazonas' },
+            { code: 'BA', name: 'Bahia' },
+            { code: 'CE', name: 'Ceará' },
+            { code: 'DF', name: 'Distrito Federal' },
+            { code: 'ES', name: 'Espírito Santo' },
+            { code: 'GO', name: 'Goiás' },
+            { code: 'MA', name: 'Maranhão' },
+            { code: 'MT', name: 'Mato Grosso' },
+            { code: 'MS', name: 'Mato Grosso do Sul' },
+            { code: 'MG', name: 'Minas Gerais' },
+            { code: 'PA', name: 'Pará' },
+            { code: 'PB', name: 'Paraíba' },
+            { code: 'PR', name: 'Paraná' },
+            { code: 'PE', name: 'Pernambuco' },
+            { code: 'PI', name: 'Piauí' },
+            { code: 'RJ', name: 'Rio de Janeiro' },
+            { code: 'RN', name: 'Rio Grande do Norte' },
+            { code: 'RS', name: 'Rio Grande do Sul' },
+            { code: 'RO', name: 'Rondônia' },
+            { code: 'RR', name: 'Roraima' },
+            { code: 'SC', name: 'Santa Catarina' },
+            { code: 'SP', name: 'São Paulo' },
+            { code: 'SE', name: 'Sergipe' },
+            { code: 'TO', name: 'Tocantins' }
+          ];
+        }
+        
+        // 对于没有特定处理的国家，返回一个空数组
+        hideLoading();
+        return [];
+      } catch (error) {
+        hideLoading();
+        console.error(`Error fetching regions for ${countryCode}:`, error);
+        return [];
+      }
+    }
+    
+    // 根据国家代码获取国家名称
+    function getCountryNameByCode(countryCode) {
+      // 国家代码到名称的映射
+      const countryMap = {
+        'US': 'United States',
+        'CA': 'Canada',
+        'GB': 'United Kingdom',
+        'AU': 'Australia',
+        'FR': 'France',
+        'DE': 'Germany',
+        'JP': 'Japan',
+        'CN': 'China',
+        'IN': 'India',
+        'BR': 'Brazil',
+        'MX': 'Mexico',
+        'ES': 'Spain',
+        'IT': 'Italy',
+        'NL': 'Netherlands',
+        'RU': 'Russia',
+        'KR': 'South Korea',
+        'ZA': 'South Africa',
+        'AR': 'Argentina',
+        'SG': 'Singapore',
+        'AE': 'United Arab Emirates'
+      };
+      
+      return countryMap[countryCode] || countryCode;
+    }
+    
+    // 显示和隐藏加载提示
+    function showLoading(message = 'Loading...') {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'loading-overlay';
+      loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <div class="loading-message">${message}</div>
+      `;
+      document.body.appendChild(loadingEl);
+    }
+    
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-overlay');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
+    }
+    
+    // 支付方式切换
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'card') {
+          document.getElementById('card-payment-form').style.display = 'block';
+          document.getElementById('paypal-payment-form').style.display = 'none';
+          document.getElementById('credit-card-option').classList.add('selected');
+          document.getElementById('paypal-option').classList.remove('selected');
+          document.getElementById('place-order').textContent = 'Place Order';
+        } else {
+          document.getElementById('card-payment-form').style.display = 'none';
+          document.getElementById('paypal-payment-form').style.display = 'block';
+          document.getElementById('credit-card-option').classList.remove('selected');
+          document.getElementById('paypal-option').classList.add('selected');
+          document.getElementById('place-order').textContent = 'Proceed to PayPal';
+        }
+      });
+    });
+    
+    // 支付选项UI交互
+    document.getElementById('credit-card-option').addEventListener('click', function() {
+      document.getElementById('methodCard').checked = true;
+      document.getElementById('credit-card-option').classList.add('selected');
+      document.getElementById('paypal-option').classList.remove('selected');
+      document.getElementById('card-payment-form').style.display = 'block';
+      document.getElementById('paypal-payment-form').style.display = 'none';
+      document.getElementById('place-order').textContent = 'Place Order';
+    });
+    
+    document.getElementById('paypal-option').addEventListener('click', function() {
+      document.getElementById('methodPaypal').checked = true;
+      document.getElementById('credit-card-option').classList.remove('selected');
+      document.getElementById('paypal-option').classList.add('selected');
+      document.getElementById('card-payment-form').style.display = 'none';
+      document.getElementById('paypal-payment-form').style.display = 'block';
+      document.getElementById('place-order').textContent = 'Proceed to PayPal';
+    });
+    
+    // 加载购物车数据并显示订单摘要
+    document.addEventListener('DOMContentLoaded', async function() {
+      // 加载导航栏和页脚
+      fetch('/src/client/assets/layout/navbar.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('navbar-placeholder').innerHTML = html;
+          
+          // 在导航栏加载完成后执行
+          if (typeof window.initNavbar === 'function') {
+            window.initNavbar();
+          }
+        });
+      
+      fetch('/src/client/assets/layout/footer.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('footer-placeholder').innerHTML = html;
+        });
+        
+      // 检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        alert('Please login to checkout');
+        window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        return;
+      }
+      
+      // 加载国家数据
+      try {
+        const countries = await fetchCountries();
+        const shipCountrySelect = document.getElementById('shipCountry');
+        
+        // 清空除了第一个选项外的所有选项
+        while (shipCountrySelect.options.length > 1) {
+          shipCountrySelect.remove(1);
+        }
+        
+        // 添加国家选项
+        countries.forEach(country => {
+          const option = document.createElement('option');
+          option.value = country.cca2;
+          option.textContent = country.name.common;
+          shipCountrySelect.appendChild(option);
+        });
+        
+        // 初始化默认选择美国
+        shipCountrySelect.value = 'US';
+        // 手动触发change事件，以加载美国各州
+        const event = new Event('change');
+        shipCountrySelect.dispatchEvent(event);
+      } catch (error) {
+        console.error('Error loading countries:', error);
+      }
+      
+      // 显示加载提示
+      showLoading('Loading cart items...');
+      
+      try {
+        // 使用DataService从API获取购物车数据
+        console.log('Fetching cart from API via DataService...');
+        const result = await DataService.apiRequest(`/cart?userId=${currentUser.id}`);
+        hideLoading();
+        
+        console.log('API cart response:', result);
+        let cartItems = [];
+        
+        // 处理不同的响应结构
+        if (result.success) {
+          if (Array.isArray(result.data)) {
+            cartItems = result.data;
+          } else if (result.data && Array.isArray(result.data.items)) {
+            cartItems = result.data.items;
+          } else if (Array.isArray(result.items)) {
+            cartItems = result.items;
+          }
+        }
+        
+        // 验证购物车不为空
+        if (cartItems.length === 0) {
+          alert('No items in your cart. Returning to cart page.');
+          window.location.href = '/src/client/views/checkout/cart.html';
+          return;
+        }
+        
+        // 显示购物车商品
+        let cartHTML = '';
+        let subtotal = 0;
+        
+        cartItems.forEach((item, index) => {
+          const price = parseFloat(item.price) || 0;
+          const quantity = parseInt(item.quantity) || 1;
+          const itemTotal = price * quantity;
+          subtotal += itemTotal;
+          
+          cartHTML += `
+            <div class="cart-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <input type="checkbox" class="cart-item-checkbox me-2" data-index="${index}" data-price="${itemTotal.toFixed(2)}" data-id="${item.id}" checked>
+                  <span><strong>${item.name}</strong> × ${quantity}</span>
+                </div>
+                <span>$${itemTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        document.getElementById('cart-items-summary').innerHTML = cartHTML;
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+        
+        // 初始化总计
+        updateTotals(subtotal);
+        
+        // 为购物车中的复选框添加事件监听
+        document.querySelectorAll('.cart-item-checkbox').forEach(checkbox => {
+          checkbox.addEventListener('change', function() {
+            const cartItem = this.closest('.cart-item');
+            if (this.checked) {
+              cartItem.classList.remove('cart-item-unchecked');
+            } else {
+              cartItem.classList.add('cart-item-unchecked');
+            }
+            updateTotals();
+          });
+        });
+      } catch (error) {
+        hideLoading();
+        console.error('Error loading cart items:', error);
+        alert('An error occurred while loading cart items. Please try again later.');
+      }
+    });
+    
+    // 监听国家选择变化
+    document.getElementById('shipCountry').addEventListener('change', async function() {
+      const country = this.value;
+      const domesticFields = document.getElementById('domestic-fields');
+      const internationalFields = document.getElementById('international-fields');
+      const stateSelect = document.getElementById('shipState');
+      const methodStandard = document.getElementById('methodStandard');
+      const methodExpress = document.getElementById('methodExpress');
+      const provinceSelect = document.getElementById('shipProvince');
+      const stateIntInput = document.getElementById('shipStateInt');
+      const zipIntInput = document.getElementById('shipZipInt');
+      
+      // 根据选择的国家显示相应的地址字段
+      if (country === 'US') {
+        domesticFields.style.display = 'flex';
+        internationalFields.style.display = 'none';
+        
+        // 加载美国各州
+        try {
+          const states = await fetchRegions('US');
+          // 清空除了第一个选项外的所有选项
+          while (stateSelect.options.length > 1) {
+            stateSelect.remove(1);
+          }
+          
+          // 添加州选项
+          states.forEach(state => {
+            const option = document.createElement('option');
+            option.value = state.code;
+            option.textContent = state.name;
+            stateSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Error loading US states:', error);
+        }
+        
+        // 更新运费显示
+        const rates = internationalShippingRates[country];
+        methodStandard.dataset.price = rates.standard;
+        methodExpress.dataset.price = rates.express;
+        document.querySelector('label[for="methodStandard"]').textContent = 
+          `Standard Shipping ($${rates.standard.toFixed(2)})`;
+        document.querySelector('label[for="methodExpress"]').textContent = 
+          `Express Shipping ($${rates.express.toFixed(2)})`;
+          
+        // 更新运费和总计
+        const selectedMethod = document.querySelector('input[name="shippingMethod"]:checked');
+        document.getElementById('shipping-cost').textContent = 
+          `$${parseFloat(selectedMethod.dataset.price).toFixed(2)}`;
+        updateTotals();
+      } else {
+        domesticFields.style.display = 'none';
+        internationalFields.style.display = 'flex';
+        
+        // 处理加拿大省份下拉菜单和邮政编码格式
+        if (country === 'CA') {
+          // 加载加拿大省份
+          try {
+            const provinces = await fetchRegions('CA');
+            // 清空除了第一个选项外的所有选项
+            while (provinceSelect.options.length > 1) {
+              provinceSelect.remove(1);
+            }
+            
+            // 添加省份选项
+            provinces.forEach(province => {
+              const option = document.createElement('option');
+              option.value = province.short;
+              option.textContent = province.name;
+              provinceSelect.appendChild(option);
+            });
+          } catch (error) {
+            console.error('Error loading Canadian provinces:', error);
+          }
+          
+          provinceSelect.style.display = 'block';
+          stateIntInput.style.display = 'none';
+          zipIntInput.placeholder = "Postal Code";
+        } else if (country === 'GB') {
+          // 英国改为UK代码匹配
+          // 加载英国地区
+          try {
+            const regions = await fetchRegions('GB');
+            // 显示文本框
+            provinceSelect.style.display = 'none';
+            stateIntInput.style.display = 'block';
+            zipIntInput.placeholder = "Postal Code";
+            
+            // 如果希望加载下拉菜单，可以取消以下注释：
+            /*
+            // 清空除了第一个选项外的所有选项
+            while (provinceSelect.options.length > 1) {
+              provinceSelect.remove(1);
+            }
+            
+            // 添加地区选项
+            regions.forEach(region => {
+              const option = document.createElement('option');
+              option.value = region.code;
+              option.textContent = region.name;
+              provinceSelect.appendChild(option);
+            });
+            
+            provinceSelect.style.display = 'block';
+            stateIntInput.style.display = 'none';
+            */
+          } catch (error) {
+            console.error('Error loading UK regions:', error);
+          }
+        } else {
+          // 其他国家
+          provinceSelect.style.display = 'none';
+          stateIntInput.style.display = 'block';
+          zipIntInput.placeholder = "Postal Code";
+          
+          // 可选：尝试加载该国家的地区
+          try {
+            const regions = await fetchRegions(country);
+            if (regions && regions.length > 0) {
+              // 如果有地区数据，显示下拉菜单
+              // 清空除了第一个选项外的所有选项
+              while (provinceSelect.options.length > 1) {
+                provinceSelect.remove(1);
+              }
+              
+              // 添加地区选项
+              regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.code;
+                option.textContent = region.name;
+                provinceSelect.appendChild(option);
+              });
+              
+              provinceSelect.style.display = 'block';
+              stateIntInput.style.display = 'none';
+            }
+          } catch (error) {
+            console.error(`Error loading regions for ${country}:`, error);
+          }
+        }
+        
+        // 如果国家在预设运费中，则更新运费
+        if (internationalShippingRates[country]) {
+          const rates = internationalShippingRates[country];
+          methodStandard.dataset.price = rates.standard;
+          methodExpress.dataset.price = rates.express;
+          document.querySelector('label[for="methodStandard"]').textContent = 
+            `Standard Shipping ($${rates.standard.toFixed(2)})`;
+          document.querySelector('label[for="methodExpress"]').textContent = 
+            `Express Shipping ($${rates.express.toFixed(2)})`;
+            
+          // 更新运费和总计
+          const selectedMethod = document.querySelector('input[name="shippingMethod"]:checked');
+          document.getElementById('shipping-cost').textContent = 
+            `$${parseFloat(selectedMethod.dataset.price).toFixed(2)}`;
+          updateTotals();
+        }
+      }
+      
+      // 清除任何区域费用
+      document.getElementById('regional-fee-container').style.display = 'none';
+    });
+    
+    // 修改省份选择变化事件
+    document.getElementById('shipProvince').addEventListener('change', function() {
+      const country = document.getElementById('shipCountry').value;
+      const province = this.value;
+      const regionalFeeContainerEl = document.getElementById('regional-fee-container');
+      const regionalFeeEl = document.getElementById('regional-fee');
+      
+      // 检查该国家的省份是否有区域费用
+      if (regionalFees[country] && regionalFees[country][province]) {
+        const fee = regionalFees[country][province];
+        regionalFeeEl.textContent = `$${fee.toFixed(2)}`;
+        regionalFeeContainerEl.style.display = 'flex';
+      } else {
+        regionalFeeContainerEl.style.display = 'none';
+      }
+      
+      // 更新总计
+      updateTotals();
+    });
+    
+    // 监听配送方式变化，更新配送费用
+    document.querySelectorAll('.shipping-method').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const shippingCost = parseFloat(this.dataset.price);
+        document.getElementById('shipping-cost').textContent = `$${shippingCost.toFixed(2)}`;
+        
+        // 更新总计
+        updateTotals();
+      });
+    });
+    
+    // 更新总计金额
+    function updateTotals(cartSubtotal = null) {
+      // 如果提供了明确的小计值，使用它；否则从选中的商品计算小计
+      let subtotal = cartSubtotal;
+      
+      // 如果没有提供小计，计算所有选中商品的小计
+      if (subtotal === null) {
+        subtotal = 0;
+        document.querySelectorAll('.cart-item-checkbox:checked').forEach(checkbox => {
+          subtotal += parseFloat(checkbox.dataset.price);
+        });
+        // 更新小计显示
+        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+      }
+      
+      // 获取运费
+      const shippingCost = parseFloat(document.getElementById('shipping-cost').textContent.replace('$', ''));
+      
+      // 获取区域费用（如果有）
+      let regionalFee = 0;
+      const regionalFeeContainer = document.getElementById('regional-fee-container');
+      if (regionalFeeContainer.style.display !== 'none') {
+        regionalFee = parseFloat(document.getElementById('regional-fee').textContent.replace('$', ''));
+      }
+      
+      // 计算总计
+      const total = subtotal + shippingCost + regionalFee;
+      document.getElementById('total-cost').textContent = `$${total.toFixed(2)}`;
+    }
+    
+    // 处理下单
+    document.getElementById('place-order').addEventListener('click', async function() {
+      // 首先检查用户是否有权限下单
+      const currentUser = DataService.getCurrentUser();
+      
+      // 如果用户未登录，请他们登录
+      if (!currentUser || !currentUser.id) {
+        alert('Please login to place an order.');
+        window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.href);
+        return;
+      }
+      
+      // 检查用户是否有下单权限
+      if (currentUser.canOrder === false) {
+        alert('Your account is currently restricted from placing orders. Please contact customer support for assistance.');
+        return;
+      }
+      
+      // 如果用户账户被锁定（inactive），也不允许下单
+      if (currentUser.status === 'inactive') {
+        alert('Your account is currently inactive. Please contact customer support to reactivate your account.');
+        return;
+      }
+      
+      // 验证配送表单
+      const shippingForm = document.getElementById('shipping-form');
+      if (!shippingForm.checkValidity()) {
+        shippingForm.reportValidity();
+        return;
+      }
+      
+      const country = document.getElementById('shipCountry').value;
+      if (!country) {
+        alert('Please select a country.');
+        return;
+      }
+      
+      // 附加验证
+      const phone = document.getElementById('shipPhone').value.trim();
+      if (!/^\d{10,15}$/.test(phone)) {
+        alert('Please enter a valid phone number (10-15 digits).');
+        return;
+      }
+      
+      // 根据国家验证邮政编码
+      let zip;
+      if (country === 'US') {
+        zip = document.getElementById('shipZip').value.trim();
+        if (!/^\d{5}$/.test(zip)) {
+          alert('Please enter a valid 5-digit ZIP code.');
+          return;
+        }
+      } else if (country === 'CA') {
+        zip = document.getElementById('shipZipInt').value.trim();
+        // 加拿大邮政编码格式: A1A 1A1 或 A1A1A1
+        if (!/^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/.test(zip)) {
+          alert('Please enter a valid Canadian postal code (format: A1A 1A1).');
+          return;
+        }
+      } else {
+        zip = document.getElementById('shipZipInt').value.trim();
+        if (!zip) {
+          alert('Please enter a postal code.');
+          return;
+        }
+      }
+      
+      // 验证支付方式
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      if (paymentMethod === 'card') {
+        const paymentForm = document.getElementById('payment-form');
+        if (!paymentForm.checkValidity()) {
+          paymentForm.reportValidity();
+          return;
+        }
+        
+        // 检查卡号是否已输入（不包括预填充的带星号卡号）
+        const cardNumber = document.getElementById('cardNumber').value.trim();
+        if (!cardNumber.startsWith('*') && !/^\d{16}$/.test(cardNumber.replace(/\D/g, ''))) {
+          alert('Please enter a valid 16-digit card number.');
+          return;
+        }
+        
+        // 验证有效期
+        const cardExpiry = document.getElementById('cardExpiry').value.trim();
+        if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(cardExpiry)) {
+          alert('Please enter a valid expiry date in MM/YY format.');
+          return;
+        }
+        
+        // 验证CVV
+        const cardCVV = document.getElementById('cardCVV').value.trim();
+        if (!/^\d{3}$/.test(cardCVV)) {
+          alert('Please enter a valid 3-digit CVV.');
+          return;
+        }
+      }
+      
+      try {
+        // 获取购物车数据
+        console.log('Getting cart data from API...');
+        const cartResult = await DataService.apiRequest(`/cart?userId=${currentUser.id}`);
+        console.log('Cart API response:', cartResult);
+        
+        let cartItems = [];
+        
+        if (cartResult.success) {
+          if (Array.isArray(cartResult.data)) {
+            cartItems = cartResult.data;
+          } else if (cartResult.data && Array.isArray(cartResult.data.items)) {
+            cartItems = cartResult.data.items;
+          } else if (Array.isArray(cartResult.items)) {
+            cartItems = cartResult.items;
+          }
+        }
+        
+        // 获取选中的商品
+        const selectedItems = [];
+        document.querySelectorAll('.cart-item-checkbox:checked').forEach(checkbox => {
+          const productId = checkbox.dataset.id;
+          const matchingItem = cartItems.find(item => item.id == productId);
+          if (matchingItem) {
+            selectedItems.push(matchingItem);
+          }
+        });
+
+        // 验证购物车不为空
+        if (selectedItems.length === 0) {
+          alert('Please select at least one item to place an order.');
+          return;
+        }
+        
+        // 保存配送信息
+        const selectedMethod = document.querySelector('input[name="shippingMethod"]:checked');
+        const shippingCost = parseFloat(selectedMethod.dataset.price);
+        
+        // 根据国家获取适当的地址信息
+        let state, city;
+        if (country === 'US') {
+          state = document.getElementById('shipState').value;
+          city = document.getElementById('shipCity').value.trim();
+        } else if (country === 'CA') {
+          state = document.getElementById('shipProvince').value;
+          city = document.getElementById('shipCityInt').value.trim();
+        } else {
+          state = document.getElementById('shipStateInt').value.trim();
+          city = document.getElementById('shipCityInt').value.trim();
+        }
+        
+        // 计算区域费用
+        let regionalFee = 0;
+        const regionalFeeContainer = document.getElementById('regional-fee-container');
+        if (regionalFeeContainer.style.display !== 'none') {
+          regionalFee = parseFloat(document.getElementById('regional-fee').textContent.replace('$', ''));
+        }
+        
+        const totalCost = parseFloat(document.getElementById('total-cost').textContent.replace('$', ''));
+        
+        const shippingInfo = {
+          country: country,
+          name: document.getElementById('shipName').value.trim(),
+          address: document.getElementById('shipAddress').value.trim(),
+          address2: document.getElementById('shipAddress2').value.trim(),
+          city: city,
+          state: state,
+          zip: zip,
+          phone: document.getElementById('shipPhone').value.trim(),
+          method: selectedMethod.value,
+          shippingCost: shippingCost,
+          regionalFee: regionalFee,
+          totalCost: totalCost
+        };
+        
+        // 保存支付信息
+        let paymentInfo = {
+          method: paymentMethod
+        };
+        
+        if (paymentMethod === 'card') {
+          const cardNumber = document.getElementById('cardNumber').value.trim();
+          let lastFour;
+          if (cardNumber.startsWith('*')) {
+            // 如果卡号已经被掩码，使用保存的lastFour
+            const savedPaymentInfo = JSON.parse(localStorage.getItem('paymentInfo') || '{}');
+            lastFour = savedPaymentInfo.cardInfo?.lastFour || '0000';
+          } else {
+            // 否则，从新输入的卡号中提取
+            lastFour = cardNumber.replace(/\D/g, '').slice(-4);
+          }
+          
+          paymentInfo.cardInfo = {
+            lastFour: lastFour,
+            expiry: document.getElementById('cardExpiry').value.trim(),
+            name: document.getElementById('cardName').value.trim()
+          };
+        }
+        
+        // 生成订单ID
+        const orderId = 'ORD' + Date.now();
+        
+        // 计算预计送达日期
+        const estDate = new Date();
+        estDate.setDate(estDate.getDate() + (selectedMethod.value === 'express' ? 2 : 5));
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const estimatedDelivery = estDate.toLocaleDateString(undefined, options);
+        
+        // 创建订单对象
+        const order = {
+          id: orderId,
+          userId: currentUser.id,
+          items: selectedItems,
+          shipping: shippingInfo,
+          payment: paymentInfo,
+          subtotal: parseFloat(document.getElementById('subtotal').textContent.replace('$', '')),
+          shippingCost: shippingCost,
+          regionalFee: regionalFee,
+          total: totalCost,
+          orderDate: new Date().toISOString(),
+          estimatedDelivery: estimatedDelivery,
+          status: 'pending'
+        };
+        
+        console.log('Creating order via API:', order);
+        // 使用API创建订单
+        const createOrderResult = await DataService.apiRequest('/orders/create', {
+          method: 'POST',
+          body: JSON.stringify(order)
+        });
+        
+        console.log('Create order API response:', createOrderResult);
+        
+        if (createOrderResult.success) {
+          // 保存最后一个订单用于确认页面
+          localStorage.setItem('lastOrder', JSON.stringify(createOrderResult.data || order));
+          
+          // 清空购物车（通过API）
+          await DataService.apiRequest('/cart/clear', {
+            method: 'POST',
+            body: JSON.stringify({ userId: currentUser.id })
+          });
+          
+          // 重定向到订单确认页面
+          window.location.href = 'order_confirm.html';
+        } else {
+          alert(`Order placement failed: ${createOrderResult.message || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error('Error during order placement:', error);
+        alert('An error occurred while placing your order. Please try again later.');
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Navbar Handler -->
+  <script src="../../js/navbar-handler.js"></script>
+</body>
+</html> 

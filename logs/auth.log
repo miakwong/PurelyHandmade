@@ -1,0 +1,18 @@
+[2025-03-23 13:28:35] [INFO] User registered {"id":"10","email":"test123@example.com"}
+[2025-03-23 13:28:40] [INFO] User logged in {"id":10,"email":"test123@example.com"}
+[2025-03-23 13:29:53] [INFO] User registered {"id":"12","email":"admin2@example.com"}
+[2025-03-23 13:30:09] [INFO] User logged in {"id":12,"email":"admin2@example.com"}
+[2025-03-23 13:38:24] [INFO] User registered {"id":"13","email":"test@example.com"}
+[2025-03-23 13:38:27] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 13:38:30] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 13:40:44] [INFO] User registered {"id":"14","email":"admin3@example.com"}
+[2025-03-23 13:40:51] [INFO] User logged in {"id":14,"email":"admin3@example.com"}
+[2025-03-23 13:40:55] [INFO] User logged in {"id":14,"email":"admin3@example.com"}
+[2025-03-23 14:09:14] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:09:33] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:09:40] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:09:45] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:10:33] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:10:41] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:11:23] [INFO] User logged in {"id":13,"email":"test@example.com"}
+[2025-03-23 14:15:31] [INFO] User registered {"id":"15","email":"new@example.com"}
