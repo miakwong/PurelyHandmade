@@ -5,6 +5,7 @@ use Controllers\DesignerController;
 use Utils\Request;
 use Utils\Response;
 use Middleware\CorsMiddleware;
+use Utils\Logger;
 
 // Apply CORS middleware
 $corsMiddleware = new CorsMiddleware();
@@ -21,6 +22,7 @@ try {
     $request = new Request();
     $response = new Response();
     $designerController = new DesignerController();
+    $logger = new Logger('designer-api.log');
     
     // Get query parameters
     $filters = [];
@@ -29,6 +31,14 @@ try {
     if ($request->has('featured')) {
         $filters['featured'] = $request->getParam('featured');
     }
+    
+    // 添加对name参数的支持
+    if ($request->has('name')) {
+        $filters['name'] = $request->getParam('name');
+    }
+    
+    // 记录接收到的过滤参数
+    $logger->info('Received filter parameters', $filters);
     
     // Get designers
     $result = $designerController->getDesigners($filters);
@@ -43,6 +53,6 @@ try {
     $response->serverError('An error occurred while processing your request: ' . $e->getMessage());
     
     // Log the error
-    $logger = new Utils\Logger();
-    $logger->error('Designer listing error', Utils\Logger::formatException($e));
+    $logger = new Logger();
+    $logger->error('Designer listing error', Logger::formatException($e));
 }
