@@ -86,6 +86,7 @@
       const data = await response.json();
 
       console.log('Category API Response:', data); 
+
       // 隐藏加载指示器
       if (loadingIndicator) {
         loadingIndicator.style.display = 'none';
@@ -93,6 +94,7 @@
 
       // 修改数据获取路径以匹配API返回的实际结构
       const categories = data?.data?.data?.categories?.categories || [];
+      console.log('Full API Response:', data);
       
       // 检查分类是否存在
       if (!Array.isArray(categories) || categories.length === 0) {
@@ -109,13 +111,16 @@
       }
       
       // 渲染分类卡片
-      let categoriesHtml = '';
+      let productCountsCache = JSON.parse(localStorage.getItem('productCounts')) || {};
+
+        let categoriesHtml = '';
       
       categories.forEach(category => {
         const categoryImage = category.image 
           ? category.image // 直接使用 API 返回的完整路径
           : '/src/client/img/category/placeholder.jpg';
     
+        const productCount = productCountsCache[category.id] || 0;
         
         categoriesHtml += `
           <div class="col-md-4 col-sm-6 mb-4 fade-in">

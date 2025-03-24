@@ -43,6 +43,10 @@ try {
         foreach ($categoriesData as &$category) {
             if (isset($category['id'])) {
                 $category['productCount'] = $categoryController->getProductCount($category['id']);
+                $totalProductCount += $category['productCount'];
+
+                error_log("📌 Category: " . $category['name'] . " (ID: " . $category['id'] . ")");
+                error_log("📊 Product Count: " . $category['productCount']);
             }
         }
 
@@ -64,6 +68,7 @@ try {
 
     } else {
         $response->error($result['message']);
+        
     }
 } catch (Exception $e) {
     // 记录错误日志

@@ -35,16 +35,6 @@ window.initializeData = function() {
   const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   
-  // Categories
-  const categories = [
-    { id: 1, name: 'Ceramics', slug: 'ceramics', description: 'Handcrafted ceramic items', image: '/src/client/img/ceramics-bg.JPG' },
-    { id: 2, name: 'Wood Crafts', slug: 'wood-crafts', description: 'Handmade wooden items and carvings', image: '/src/client/img/wood-bg.JPG' },
-    { id: 3, name: 'Textiles', slug: 'textiles', description: 'Handwoven and textile-based products', image: '/src/client/img/textiles-bg.JPG' }
-  ];
-  
-  // Store categories
-  localStorage.setItem('categories', JSON.stringify(categories));
-  */
 };
 
 // Test if API endpoints are accessible

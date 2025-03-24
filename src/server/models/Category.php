@@ -2,7 +2,7 @@
 namespace Models;
 
 use Utils\Database;
-
+use Utils\Logger;
 class Category {
     private $db;
     private $table = 'Category';
@@ -72,8 +72,21 @@ class Category {
     }
     
     public function getProductCount($categoryId) {
-        $sql = "SELECT COUNT(*) as count FROM Product WHERE categoryId = :categoryId AND active = 1";
-        $result = $this->db->fetch($sql, ['categoryId' => $categoryId]);
-        return $result['count'] ?? 0;
+        try {
+            $sql = "SELECT COUNT(*) as count FROM Product WHERE categoryId = :categoryId AND active = 1";
+            
+            // 记录日志，检查是否正确执行
+            error_log("🛠️ SQL Query: " . $sql . " with categoryId: " . $categoryId);
+    
+            $result = $this->db->fetch($sql, ['categoryId' => $categoryId]);
+    
+            // 记录查询结果
+            error_log("🎯 Query Result: " . json_encode($result));
+    
+            return $result['count'] ?? 0;
+        } catch (\Exception $e) {
+            $this->logger->error('Get product count failed', Logger::formatException($e));
+            return 0;
+        }
     }
 } 
