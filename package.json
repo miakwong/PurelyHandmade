@@ -9,7 +9,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "php -S localhost:8000 -t ."
+    "start": "php -S localhost:8000 -t .",
+    "dev": "./start.sh",
+    "dev:alt": "./start.sh 8001"
   },
   "author": "",
   "license": "ISC"

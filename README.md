@@ -2,6 +2,54 @@
 
 A handcrafted products discussion and showcasing platform built with PHP, MySQL, HTML5, CSS3, and JavaScript.
 
+## 快速启动项目
+
+我们提供了多种方式来启动项目：
+
+### 使用启动脚本（推荐）
+
+项目根目录下有一个`start.sh`脚本，它可以帮助您更轻松地启动项目：
+
+```bash
+# 使用默认端口(8000)启动
+./start.sh
+
+# 使用指定端口启动
+./start.sh 8080
+```
+
+启动脚本会：
+- 检查指定端口是否被占用
+- 尝试自动关闭占用端口的PHP进程
+- 检查MySQL服务是否运行
+- 启动PHP开发服务器
+
+### 使用npm脚本
+
+```bash
+# 使用默认配置启动（端口8000）
+npm start
+
+# 使用启动脚本（自动检测端口等）
+npm run dev
+
+# 使用备用端口（端口8001）启动
+npm run dev:alt
+```
+
+### 手动启动
+
+```bash
+php -S localhost:8000 -t .
+```
+
+## 访问项目
+
+启动成功后，可以通过以下地址访问项目：
+
+- 主页：http://localhost:8000/
+- 管理员页面：http://localhost:8000/src/client/views/admin/designers.html
+
 ## Project Objectives
 
 ### Website User Objectives:
