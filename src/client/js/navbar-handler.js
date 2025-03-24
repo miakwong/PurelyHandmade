@@ -16,7 +16,13 @@ function loadNavbar() {
       console.log('Navbar loaded successfully');
       
       // Update cart count after navbar is loaded
-      if (typeof updateCartCount === 'function') {
+      if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.updateCartCount === 'function') {
+        // 使用UIHelpers中的updateCartCount方法
+        UIHelpers.updateCartCount().catch(err => {
+          console.error('Error updating cart count:', err);
+        });
+      } else if (typeof updateCartCount === 'function') {
+        // 兼容性处理：如果UIHelpers不存在但有全局updateCartCount函数
         updateCartCount().catch(err => {
           console.error('Error updating cart count:', err);
         });
@@ -108,43 +114,6 @@ function loadFooter() {
       document.getElementById('footer-placeholder').innerHTML =
         '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
     });
-}
-
-// Handle cart count updates
-async function updateCartCount() {
-  const cartCount = document.getElementById('cart-count');
-  
-  if (!cartCount) return;
-
-  // Check if user is logged in
-  const currentUser = window.DataService ? DataService.getCurrentUser() : null;
-  if (!currentUser) {
-    cartCount.style.display = 'none';
-    return;
-  }
-  
-  try {
-    // 使用DataService的getCart方法获取购物车数据
-    const cart = await DataService.getCart();
-    
-    // 确保cart是数组
-    if (!Array.isArray(cart)) {
-      console.warn('Cart is not an array:', cart);
-      cartCount.textContent = '0';
-      cartCount.style.display = 'none';
-      return;
-    }
-    
-    const itemCount = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
-    
-    // Update the cart count display
-    cartCount.textContent = itemCount;
-    cartCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
-  } catch (error) {
-    console.error('Error updating cart count:', error);
-    cartCount.textContent = '0';
-    cartCount.style.display = 'none';
-  }
 }
 
 // Main initialization function
