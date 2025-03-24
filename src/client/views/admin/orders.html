@@ -439,20 +439,54 @@ const AdminApiService = {
   },
   
   // 获取订单详情
-  getOrderById: function(orderId) {
-    // 由于测试表明/orders端点加参数工作正常，而直接路径方式不工作
-    // 因此直接使用已知能工作的方法
-    console.log(`使用验证可行的API端点获取订单 ID: ${orderId}`);
-    return ApiService.get('/orders', { id: orderId });
+  getOrderById: async function(orderId) {
+    console.log(`尝试获取订单详情 ID: ${orderId}`);
+    
+    // 使用订单列表API，但获取所有订单（对管理员有效）
+    return ApiService.get('/orders', { all: 1 }).then(response => {
+      if (response.success && response.data && response.data.orders) {
+        // 从订单列表中找到指定ID的订单
+        const foundOrder = response.data.orders.find(order => order.id == orderId);
+        
+        if (foundOrder) {
+          // 如果找到了，包装为成功响应格式
+          console.log(`✅ 在订单列表中找到了订单 #${orderId}`);
+          return {
+            success: true,
+            data: foundOrder
+          };
+        } else {
+          console.warn(`⚠️ 在API响应中找不到指定订单 #${orderId}`);
+        }
+      }
+      
+      // 如果没有找到订单或API请求失败，返回错误响应
+      return {
+        success: false,
+        message: '未找到指定的订单'
+      };
+    });
   },
   
   // 处理订单
   handleOrder: function(orderId, action) {
     console.log(`📡 处理订单 - ID: ${orderId}, 动作: ${action}`);
-    // 直接使用已知能工作的API格式
-    return ApiService.post('/orders/process', {
+    
+    // 将action转换为状态
+    let status = '';
+    switch(action) {
+      case 'process': status = 'processing'; break;
+      case 'ship': status = 'shipped'; break;
+      case 'deliver': status = 'delivered'; break;
+      case 'complete': status = 'completed'; break;
+      case 'cancel': status = 'cancelled'; break;
+      default: status = action;
+    }
+    
+    // 使用标准RESTful格式发送状态更新
+    return ApiService.put('/orders/update', {
       id: orderId,
-      action: action
+      status: status
     });
   },
   
@@ -748,69 +782,32 @@ const MockDataService = {
   // 查看订单详情
   async function viewOrderDetails(orderId) {
     try {
-      // 显示加载提示
-      showToast('Loading order details...', 'info');
+      showLoading();
+      console.log(`查看订单详情: ${orderId}`);
       
-      // 从API获取订单详情
-      console.log(`📡 发送API请求: 获取订单详情 - 订单ID: ${orderId}`);
-      
-      // 使用已验证工作的API端点
+      // 使用改进的API调用获取订单详情
       const response = await AdminApiService.getOrderById(orderId);
-      console.log('✅ 获取订单详情响应:', response);
       
       if (!response || !response.success) {
-        throw new Error(response?.message || 'Failed to load order details');
+        hideLoading();
+        console.error(`Error viewing order details:`, response);
+        throw new Error(`Failed to load order details: ${response?.message || 'Unknown error'}`);
       }
       
-      // 在响应中查找特定订单
-      let order = null;
+      const order = response.data;
       
-      // 处理API返回结构
-      if (response.data) {
-        if (response.data.orders && Array.isArray(response.data.orders)) {
-          // API返回orders数组，找到匹配ID的订单
-          const matchingOrder = response.data.orders.find(o => o.id === orderId);
-          if (matchingOrder) {
-            order = matchingOrder;
-          }
-        } else if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-          // 直接使用对象
-          order = response.data;
-        } else if (response.data.order && typeof response.data.order === 'object') {
-          // 使用嵌套的order对象
-          order = response.data.order;
+      // 尝试获取用户详情
+      let userData = { username: 'Unknown User' };
+      
+      try {
+        const userResponse = await ApiService.get('/auth/profile', { id: order.userId });
+        if (userResponse.success && userResponse.data) {
+          userData = userResponse.data;
+        } else {
+          console.warn(`❌ 获取用户数据时出错:`, userResponse);
         }
-      }
-      
-      // 如果找不到订单，使用模拟数据
-      if (!order) {
-        console.warn('⚠️ 在API响应中找不到指定订单，使用模拟数据');
-        order = MockDataService.createMockOrder(orderId);
-        showToast('Using mock data (Order not found in API response)', 'warning');
-      }
-      
-      // 获取用户信息
-      let user = { name: 'Unknown User' };
-      if (order.user) {
-        user = order.user;
-      } else if (order.userId) {
-        try {
-          console.log(`📡 获取订单用户信息 - userId: ${order.userId}`);
-          const userResponse = await ApiService.get(`/auth/users/detail?id=${order.userId}`);
-          console.log('✅ 获取用户信息响应:', userResponse);
-          if (userResponse && userResponse.success) {
-            // 正确处理用户API返回
-            if (userResponse.data) {
-              if (typeof userResponse.data === 'object' && !Array.isArray(userResponse.data)) {
-                user = userResponse.data;
-              } else if (userResponse.data.user && typeof userResponse.data.user === 'object') {
-                user = userResponse.data.user;
-              }
-            }
-          }
-        } catch (error) {
-          console.error('❌ 获取用户数据时出错:', error);
-        }
+      } catch (userError) {
+        console.error(`❌ 获取用户数据时出错:`, userError);
       }
       
       // 构建模态窗口HTML
@@ -834,8 +831,8 @@ const MockDataService = {
                   </div>
                   <div class="col-md-6">
                     <h6>Customer Information</h6>
-                    <p><strong>Name:</strong> ${user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown'}</p>
-                    <p><strong>Email:</strong> ${user.email || 'Not available'}</p>
+                    <p><strong>Name:</strong> ${userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Unknown'}</p>
+                    <p><strong>Email:</strong> ${userData.email || 'Not available'}</p>
                     <h6 class="mt-3">Shipping Address</h6>
                     ${formatShippingAddress(order.shippingInfo || order.shippingAddress)}
                   </div>
@@ -877,23 +874,23 @@ const MockDataService = {
                   <div class="d-flex flex-wrap gap-2">
                     <button class="btn ${order.status === 'pending' ? 'btn-warning' : 'btn-outline-warning'}" 
                             onclick="handleOrder('${order.id}', 'process')">
-                      <i class="bi bi-hourglass me-1"></i>Process
+                      <i class="bi bi-hourglass me-1"></i>Set as Processing
                     </button>
                     <button class="btn ${order.status === 'processing' ? 'btn-info' : 'btn-outline-info'}" 
                             onclick="handleOrder('${order.id}', 'ship')">
-                      <i class="bi bi-gear me-1"></i>Ship
+                      <i class="bi bi-gear me-1"></i>Set as Shipped
                     </button>
                     <button class="btn ${order.status === 'shipped' ? 'btn-primary' : 'btn-outline-primary'}" 
                             onclick="handleOrder('${order.id}', 'deliver')">
-                      <i class="bi bi-truck me-1"></i>Deliver
+                      <i class="bi bi-truck me-1"></i>Set as Delivered
                     </button>
                     <button class="btn ${order.status === 'delivered' ? 'btn-success' : 'btn-outline-success'}" 
                             onclick="handleOrder('${order.id}', 'complete')">
-                      <i class="bi bi-check-circle me-1"></i>Complete
+                      <i class="bi bi-check-circle me-1"></i>Set as Completed
                     </button>
                     <button class="btn ${order.status === 'cancelled' ? 'btn-danger' : 'btn-outline-danger'}" 
                             onclick="handleOrder('${order.id}', 'cancel')">
-                      <i class="bi bi-x-circle me-1"></i>Cancel
+                      <i class="bi bi-x-circle me-1"></i>Set as Cancelled
                     </button>
                   </div>
                 </div>
@@ -921,8 +918,13 @@ const MockDataService = {
       });
       
     } catch (error) {
+      hideLoading();
       console.error('Error viewing order details:', error);
-      showToast(`Error loading order details: ${error.message}`, 'danger');
+      Swal.fire({
+        title: '错误',
+        text: `查看订单详情时出错: ${error.message}`,
+        icon: 'error'
+      });
     }
   }
   
@@ -1249,12 +1251,12 @@ const MockDataService = {
       showToast('Processing order...', 'info');
       
       // 通过API更新订单状态
-      console.log(`📡 发送API请求: 处理订单 - POST /orders/process (id: ${orderId}, action: ${action})`);
+      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, action: ${action})`);
       const response = await AdminApiService.handleOrder(orderId, action);
       console.log('✅ 处理订单响应:', response);
       
       if (!response || !response.success) {
-        throw new Error(response?.data || 'Failed to process order');
+        throw new Error(response?.message || 'Failed to process order');
       }
       
       // 关闭模态窗口
@@ -1267,7 +1269,7 @@ const MockDataService = {
       await loadOrders();
       
       // 显示成功消息
-      showToast(`Order ${action}ed successfully`, 'success');
+      showToast(`Order status updated to ${action}`, 'success');
       
     } catch (error) {
       console.error('❌ 处理订单时出错:', error);
