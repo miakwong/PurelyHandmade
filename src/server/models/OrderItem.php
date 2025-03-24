@@ -61,4 +61,18 @@ class OrderItem {
         
         return $this->db->fetch($sql, ['productId' => $productId]);
     }
+    
+    /**
+     * 删除订单项
+     *
+     * @param int $id 订单项ID
+     * @return bool 删除结果
+     */
+    public function delete($id) {
+        return $this->db->delete(
+            $this->table, 
+            'id = :id', 
+            ['id' => $id]
+        );
+    }
 } 
