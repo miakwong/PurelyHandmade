@@ -384,7 +384,7 @@ const DataService = {
       // 检查用户是否登录
       const currentUser = this.getCurrentUser();
       if (!currentUser) {
-        console.error('User not logged in');
+        console.log('User not logged in');
         return [];
       }
       

@@ -3,31 +3,6 @@
  * Uses a different path (../../) to access assets
  */
 
-// 简单的购物车计数更新实现，确保即使UIHelpers不可用也能正常工作
-function updateCartCount() {
-  const cartCount = document.getElementById('cart-count');
-  if (!cartCount) return;
-  
-  if (typeof DataService === 'undefined' || !DataService.getAuthToken()) {
-    cartCount.style.display = 'none';
-    return;
-  }
-  
-  try {
-    // 尝试从localStorage获取一个简单的计数
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const count = Array.isArray(cart) ? cart.reduce((total, item) => total + (item.quantity || 1), 0) : 0;
-    
-    cartCount.textContent = count.toString();
-    cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-    return Promise.resolve(); // 返回一个resolved promise
-  } catch (e) {
-    console.error('Error in simple updateCartCount:', e);
-    cartCount.style.display = 'none';
-    return Promise.resolve(); // 错误时也返回resolved promise
-  }
-}
-
 // Load the navbar and handle authentication
 function loadNavbar() {
   fetch('/src/client/assets/layout/navbar.html')
@@ -43,12 +18,24 @@ function loadNavbar() {
       
       // Update cart count after navbar is loaded
       try {
-        // 优先使用UIHelpers中的方法
         if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.updateCartCount === 'function') {
-          UIHelpers.updateCartCount();
+          // 使用UIHelpers中的updateCartCount方法
+          const result = UIHelpers.updateCartCount();
+          if (result && typeof result.catch === 'function') {
+            result.catch(err => {
+              console.error('Error updating cart count:', err);
+            });
+          }
+        } else if (typeof updateCartCount === 'function') {
+          // 兼容性处理：如果UIHelpers不存在但有全局updateCartCount函数
+          const result = updateCartCount();
+          if (result && typeof result.catch === 'function') {
+            result.catch(err => {
+              console.error('Error updating cart count:', err);
+            });
+          }
         } else {
-          // 使用内置简单实现
-          updateCartCount();
+          console.log('No updateCartCount function available');
         }
       } catch (err) {
         console.error('Error while updating cart count:', err);

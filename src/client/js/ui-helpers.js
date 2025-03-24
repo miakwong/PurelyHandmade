@@ -228,6 +228,14 @@ const UIHelpers = {
     if (!cartCount) return;
     
     try {
+      // 首先检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        // 用户未登录，直接隐藏购物车图标，不需要获取购物车数据
+        cartCount.style.display = 'none';
+        return;
+      }
+      
       // DataService.getCart 是异步函数，需要 await
       const cart = await DataService.getCart();
       
