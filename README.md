@@ -309,37 +309,37 @@ The project includes test scripts for login functionality and user profile pages
 
 [MIT License](LICENSE)
 
-# PurelyHandmade Website Website Navigation Guide
+# PurelyHandmade 网站导航指南
 
-## 
+## 网站页面访问链接
 
-This website is served via a local PHP server, and the main page access links are as follows:
+本网站通过PHP本地服务器提供服务，主要页面的访问链接如下：
 
-### Product-Related Pages
+### 产品相关页面
 
-- **Product List Page**：
+- **产品列表页面**：
   http://localhost:8000/src/client/views/product/product-list.html
 
-- **Product Details Page**：
+- **产品详情页面**：
   http://localhost:8000/src/client/views/product/product_detail.html?id=17
   (可将ID替换为其他产品ID)
 
-- **Category List Page**：
+- **分类列表页面**：
   http://localhost:8000/src/client/views/product/category-list.html
 
-- **Category Products Page**：
+- **分类产品页面**：
   http://localhost:8000/src/client/views/product/category-page.html?id=10
   (可将ID替换为其他分类ID)
 
-### Other Pages
+### 其他页面
 
-- **On-Sale Page**：
+- **特卖页面**：
   http://localhost:8000/src/client/views/on-sale.html
 
-- **About Us**：
+- **关于我们**：
   http://localhost:8000/src/client/views/about.html
 
-## API Access
+## API访问
 
 API基础URL为：`http://localhost:8000/api`
 
@@ -350,10 +350,6 @@ API基础URL为：`http://localhost:8000/api`
 - `/designers` - 获取所有设计师
 - `/designers/featured` - 获取精选设计师
 
-## Development Notes
+## 开发说明
 
-The website has successfully migrated from localStorage-based data storage to backend API data fetching. All pages now correctly retrieve and display data from the backend database.
-
-
-
-
+本网站现已完成从localStorage本地存储到后端API数据获取的迁移，所有页面都能够正确地从后端数据库获取数据并显示。 
