@@ -492,7 +492,12 @@ const AdminApiService = {
   
   // 删除订单
   deleteOrder: function(orderId) {
-    return ApiService.delete(`/orders?id=${orderId}`);
+    // 改用POST方法而不是DELETE，并添加action参数
+    return ApiService.post('/orders/update', {
+      id: orderId,
+      action: 'delete',
+      status: 'deleted'  // 如果API需要状态参数
+    });
   }
 };
 
@@ -910,12 +915,15 @@ const MockDataService = {
       
       const modalElement = document.getElementById('orderDetailsModal');
       const modal = new bootstrap.Modal(modalElement);
-      modal.show();
       
       // 模态窗口关闭时移除DOM元素
       modalElement.addEventListener('hidden.bs.modal', function() {
         document.body.removeChild(modalContainer);
       });
+      
+      // 在显示模态窗口前隐藏加载指示器
+      hideLoading();
+      modal.show();
       
     } catch (error) {
       hideLoading();
@@ -1157,6 +1165,42 @@ const MockDataService = {
     toastElement.addEventListener('hidden.bs.toast', function() {
       toastElement.remove();
     });
+  }
+  
+  // 显示加载状态
+  function showLoading() {
+    // 创建一个覆盖层
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '9999';
+    
+    // 创建加载指示器
+    overlay.innerHTML = `
+      <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    `;
+    
+    // 添加到body
+    document.body.appendChild(overlay);
+  }
+  
+  // 隐藏加载状态
+  function hideLoading() {
+    // 移除覆盖层
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
   }
   
   // Function to copy order ID to clipboard
