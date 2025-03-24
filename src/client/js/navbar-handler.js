@@ -109,19 +109,66 @@ function loadFooter() {
 }
 
 // Handle cart count updates
-function updateCartCount() {
-  const cartData = localStorage.getItem('cart');
+async function updateCartCount() {
   const cartCount = document.getElementById('cart-count');
   
   if (!cartCount) return;
-  
-  if (cartData) {
-    const cart = JSON.parse(cartData);
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = count;
-    cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-  } else {
+
+  // Check if user is logged in
+  const currentUser = window.DataService ? DataService.getCurrentUser() : null;
+  if (!currentUser) {
     cartCount.style.display = 'none';
+    return;
+  }
+  
+  try {
+    // Call the cart API to get current cart items
+    const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
+      headers: {
+        'Authorization': `Bearer ${DataService.getAuthToken()}`
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      let cartItems = [];
+      
+      // Handle different response structures
+      if (Array.isArray(result.data)) {
+        cartItems = result.data;
+      } else if (result.data && Array.isArray(result.data.items)) {
+        cartItems = result.data.items;
+      } else if (Array.isArray(result.items)) {
+        cartItems = result.items;
+      }
+      
+      if (cartItems.length > 0) {
+        const count = cartItems.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+        cartCount.textContent = count;
+        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+      } else {
+        cartCount.style.display = 'none';
+      }
+    } else {
+      cartCount.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Error fetching cart count:', error);
+    cartCount.style.display = 'none';
+    
+    // Fallback to localStorage if API fails
+    const cartData = localStorage.getItem('cart');
+    if (cartData) {
+      try {
+        const cart = JSON.parse(cartData);
+        const count = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+        cartCount.textContent = count;
+        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+      } catch (e) {
+        console.error('Error parsing cart data from localStorage:', e);
+      }
+    }
   }
 }
 

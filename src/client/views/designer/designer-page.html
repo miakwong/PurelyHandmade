@@ -112,12 +112,14 @@
     }
 
     // 添加到购物车
-    function addToCart(productId, quantity) {
+    async function addToCart(productId, quantity) {
       console.log('addToCart called with productId:', productId, 'type:', typeof productId);
       
+      // 查找产品信息
       const productsData = localStorage.getItem('products');
       if (!productsData) {
         console.error('No products data found in localStorage');
+        showToast('Product data not available', 'error');
         return;
       }
       
@@ -148,82 +150,114 @@
       
       console.log('Found product to add to cart:', product);
       
-      // 获取现有购物车
-      let cart = [];
-      const cartData = localStorage.getItem('cart');
-      if (cartData) {
-        try {
-          cart = JSON.parse(cartData);
-          console.log('Existing cart:', cart);
-        } catch (e) {
-          console.error('Error parsing cart data:', e);
-          showToast('Error loading cart data', 'error');
-        }
+      // 检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        // 用户未登录，提示登录
+        showToast('Please login to add items to cart', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        }, 1500);
+        return;
       }
       
-      // 计算最终价格，确保不会出现NaN
-      const price = parseFloat(product.price) || 0;
-      const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
-      console.log('Calculated price:', finalPrice);
+      // 显示加载提示
+      showLoading('Adding to cart...');
       
-      // 处理图片URL
-      let imageUrl = 'https://via.placeholder.com/80';
-      if (product.image) {
-        imageUrl = product.image;
-      } else if (Array.isArray(product.images) && product.images.length > 0) {
-        imageUrl = product.images[0];
-      }
-      
-      // 检查产品是否已在购物车中
-      const existingItem = cart.find(item => {
-        const itemMatch = (item.id === product.id) || 
-                         (parseInt(item.id) === parseInt(product.id)) || 
-                         (String(item.id) === String(product.id));
-        console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
-        return itemMatch;
-      });
-      
-      if (existingItem) {
-        console.log('Product already in cart, updating quantity');
-        existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
-      } else {
-        console.log('Adding new product to cart');
-        // 安全处理产品描述
-        let description = 'No description available';
-        if (product.description) {
-          description = product.description.substring(0, 100);
-          if (product.description.length > 100) {
-            description += '...';
-          }
-        } else if (product.details) {
-          description = product.details.substring(0, 100);
-          if (product.details.length > 100) {
-            description += '...';
-          }
-        }
-        
-        cart.push({
-          id: product.id || 0,
-          name: product.name || 'Unnamed Product',
-          price: finalPrice,
-          image: imageUrl,
-          quantity: quantity || 1,
-          description: description,
-          categoryId: product.categoryId || null
+      try {
+        // 调用API添加商品到购物车
+        const response = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId: productId,
+            quantity: quantity || 1
+          })
         });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+          // 显示成功信息
+          showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+          
+          // 更新购物车数量
+          if (typeof window.updateCartCount === 'function') {
+            window.updateCartCount();
+          }
+        } else {
+          // 显示错误信息
+          showToast(result.message || 'Failed to add product to cart', 'error');
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error adding product to cart:', error);
+        showToast('Error adding product to cart', 'error');
       }
-      
-      // 保存到localStorage
-      console.log('Saving updated cart to localStorage:', cart);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      // 显示成功消息
-      showToast(`${product.name || 'Product'} added to your cart!`, 'success');
-      
-      // 更新导航栏购物车计数
-      updateCartCount();
     }
     
+    // 显示加载提示
+    function showLoading(message = 'Loading...') {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'loading-overlay';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '0';
+      loadingEl.style.left = '0';
+      loadingEl.style.width = '100%';
+      loadingEl.style.height = '100%';
+      loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      loadingEl.style.display = 'flex';
+      loadingEl.style.flexDirection = 'column';
+      loadingEl.style.justifyContent = 'center';
+      loadingEl.style.alignItems = 'center';
+      loadingEl.style.zIndex = '9999';
+      
+      const spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+      spinner.style.width = '40px';
+      spinner.style.height = '40px';
+      spinner.style.border = '4px solid #f3f3f3';
+      spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+      spinner.style.borderRadius = '50%';
+      spinner.style.animation = 'spin 1s linear infinite';
+      spinner.style.marginBottom = '15px';
+      
+      const messageEl = document.createElement('div');
+      messageEl.className = 'loading-message';
+      messageEl.textContent = message;
+      messageEl.style.fontSize = '16px';
+      
+      loadingEl.appendChild(spinner);
+      loadingEl.appendChild(messageEl);
+      document.body.appendChild(loadingEl);
+      
+      // 添加动画样式
+      if (!document.getElementById('loading-spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'loading-spinner-style';
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+    
+    // 隐藏加载提示
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-overlay');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
+    }
+
     // 更新购物车计数
     function updateCartCount() {
       const cartData = localStorage.getItem('cart');

@@ -524,60 +524,58 @@ document.addEventListener('DOMContentLoaded', function() {
    */
   window.addToCart = async function(productId, quantity = 1) {
     try {
-      const product = await DataService.getProductById(productId);
+      // 获取当前用户信息
+      const currentUser = DataService.getCurrentUser();
       
-      if (!product) {
-        console.error('Product not found with ID:', productId);
-        showToast('Product not found', 'error');
+      if (!currentUser) {
+        // 如果用户未登录，提示登录
+        showToast('Please login to add items to cart', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        }, 1500);
         return false;
       }
       
-      // Get existing cart
-      let cart = [];
-      const cartData = localStorage.getItem('cart');
-      if (cartData) {
-        try {
-          cart = JSON.parse(cartData);
-        } catch (e) {
-          console.error('Error parsing cart data:', e);
-          showToast('Error loading cart data', 'error');
-          return false;
+      // 显示加载中
+      showLoadingOverlay('Adding to cart...');
+      
+      // 调用API添加商品到购物车
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DataService.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
+        })
+      });
+      
+      const result = await response.json();
+      hideLoadingOverlay();
+      
+      if (result.success) {
+        // 获取产品信息用于显示消息
+        const product = await DataService.getProductById(productId);
+        const productName = product ? product.name : 'Product';
+        
+        // 显示成功消息
+        showToast(`${productName} added to your cart!`, 'success');
+        
+        // 更新购物车数量显示
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
         }
-      }
-      
-      // Check if product is already in cart
-      const existingItem = cart.find(item => String(item.id) === String(productId));
-      
-      if (existingItem) {
-        existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+        
+        return true;
       } else {
-        // Create cart item from product data
-        cart.push({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image || '/src/client/assets/placeholder.jpg',
-          quantity: quantity,
-          description: product.description ? 
-            (product.description.length > 100 ? product.description.substring(0, 100) + '...' : product.description) : 
-            'No description available',
-          categoryId: product.categoryId
-        });
+        showToast(result.message || 'Failed to add item to cart', 'error');
+        return false;
       }
-      
-      // Save to localStorage
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      // Show success message
-      showToast(`${product.name} added to your cart!`, 'success');
-      
-      // Update cart count in UI
-      if (typeof updateCartCount === 'function') {
-        updateCartCount();
-      }
-      
-      return true;
     } catch (error) {
+      hideLoadingOverlay();
       console.error('Error adding product to cart:', error);
       showToast('Error adding product to cart', 'error');
       return false;
@@ -598,31 +596,93 @@ window.ensureApiScriptsLoaded = function() {
   // Add any missing scripts
   requiredScripts.forEach(scriptSrc => {
     const fullSrc = new URL(scriptSrc, window.location.origin).href;
-    if (!loadedScripts.some(src => src === fullSrc)) {
-      console.log(`Adding missing script: ${scriptSrc}`);
+    if (!loadedScripts.some(loadedSrc => loadedSrc.includes(scriptSrc))) {
       const script = document.createElement('script');
       script.src = scriptSrc;
       document.head.appendChild(script);
+      console.log('Loaded missing script:', scriptSrc);
     }
   });
-  
-  // Check if DataService is available
-  if (typeof DataService === 'undefined') {
-    console.warn('DataService is not defined yet, waiting for scripts to load...');
-    // Try again after a short delay
-    setTimeout(() => {
-      if (typeof DataService !== 'undefined') {
-        console.log('DataService is now available');
-      } else {
-        console.error('DataService still not available after waiting');
-      }
-    }, 500);
-  } else {
-    console.log('DataService is available');
+};
+
+/**
+ * Show a loading overlay
+ * @param {string} message - Message to display
+ */
+function showLoadingOverlay(message = 'Loading...') {
+  // Check if overlay already exists
+  let overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    // Update message if overlay already exists
+    const messageEl = overlay.querySelector('.loading-message');
+    if (messageEl) {
+      messageEl.textContent = message;
+    }
+    return;
   }
   
-  return typeof DataService !== 'undefined';
-};
+  // Create overlay
+  overlay = document.createElement('div');
+  overlay.id = 'loading-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.zIndex = '9999';
+  
+  // Create spinner
+  const spinner = document.createElement('div');
+  spinner.className = 'loading-spinner';
+  spinner.style.width = '40px';
+  spinner.style.height = '40px';
+  spinner.style.border = '4px solid #f3f3f3';
+  spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+  spinner.style.borderRadius = '50%';
+  spinner.style.animation = 'spin 1s linear infinite';
+  spinner.style.marginBottom = '15px';
+  
+  // Create message
+  const messageEl = document.createElement('div');
+  messageEl.className = 'loading-message';
+  messageEl.textContent = message;
+  messageEl.style.fontSize = '16px';
+  
+  // Add elements to overlay
+  overlay.appendChild(spinner);
+  overlay.appendChild(messageEl);
+  
+  // Add overlay to body
+  document.body.appendChild(overlay);
+  
+  // Add keyframe animation
+  if (!document.getElementById('loading-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'loading-spinner-style';
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+/**
+ * Hide the loading overlay
+ */
+function hideLoadingOverlay() {
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.remove();
+  }
+}
 
 // Auto-initialize when loaded
 if (typeof document !== 'undefined' && document.readyState === 'complete') {
