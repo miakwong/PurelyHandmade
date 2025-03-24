@@ -129,7 +129,7 @@ class AuthController {
             }
             
             // Verify password
-            if (!$this->user->verifyPassword($password, $user['password_hash'])) {
+            if (!$this->user->verifyPassword($password, $user['password'])) {
                 error_log("❌ login() 密码错误");
                 return [
                     'success' => false,
@@ -146,7 +146,7 @@ class AuthController {
             error_log("✅ login() 更新最后登录时间: " . $user['id']);
             
             // Remove sensitive data
-            unset($user['password_hash']);
+            unset($user['password']);
             
             $this->logger->info('User logged in', ['id' => $user['id'], 'email' => $identifier]);
             
