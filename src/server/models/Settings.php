@@ -12,9 +12,9 @@ class Settings {
     }
     
     /**
-     * 获取所有设置
-     * @param string|null $group 设置组，可以为null表示获取所有组
-     * @return array 设置数据
+     * Get all settings
+     * @param string|null $group setting group, can be null for all groups
+     * @return array settings data
      */
     public function getAll($group = null) {
         $whereClause = '';
@@ -28,7 +28,7 @@ class Settings {
         $sql = "SELECT * FROM {$this->table} $whereClause ORDER BY `group`, `key`";
         $settings = $this->db->fetchAll($sql, $params);
         
-        // 将结果转换为按组分类的关联数组
+        // Convert results to an associative array grouped by group
         $result = [];
         foreach ($settings as $setting) {
             $groupName = $setting['group'];
@@ -49,11 +49,11 @@ class Settings {
     }
     
     /**
-     * 获取指定键的设置值
-     * @param string $key 设置键
-     * @param string $group 设置组
-     * @param mixed $default 默认值
-     * @return mixed 设置值或默认值
+     * Get the value of a specific setting key
+     * @param string $key setting key
+     * @param string $group setting group
+     * @param mixed $default default value
+     * @return mixed setting value or default value
      */
     public function get($key, $group = 'general', $default = null) {
         $sql = "SELECT * FROM {$this->table} WHERE `key` = :key AND `group` = :group";
@@ -63,17 +63,17 @@ class Settings {
     }
     
     /**
-     * 保存设置值
-     * @param string $key 设置键
-     * @param mixed $value 设置值
-     * @param string $group 设置组
-     * @return bool 是否成功
+     * Save setting value
+     * @param string $key setting key
+     * @param mixed $value setting value
+     * @param string $group setting group
+     * @return bool whether successful
      */
     public function set($key, $value, $group = 'general') {
         try {
             error_log("Setting::set called for $group/$key");
             
-            // 检查key和group是否合法
+            // Check if key and group are valid
             if (empty($key) || !is_string($key)) {
                 error_log("Invalid key: " . print_r($key, true));
                 return false;
@@ -91,7 +91,7 @@ class Settings {
                 $value = "";
             }
             
-            // 检查设置是否已存在
+            // Check if setting exists
             $sql = "SELECT id FROM {$this->table} WHERE `key` = :key AND `group` = :group";
             error_log("Executing SQL: $sql with key=$key, group=$group");
             
@@ -101,7 +101,7 @@ class Settings {
             $now = date('Y-m-d H:i:s');
             
             if ($setting) {
-                // 更新现有设置
+                // Update existing setting
                 error_log("Updating existing setting id=" . $setting['id']);
                 $result = $this->db->update(
                     $this->table,
@@ -112,7 +112,7 @@ class Settings {
                 error_log("Update result: " . ($result ? "success" : "failed"));
                 return $result;
             } else {
-                // 创建新设置
+                // Create new setting
                 error_log("Creating new setting");
                 $result = $this->db->insert($this->table, [
                     'key' => $key,
@@ -131,16 +131,16 @@ class Settings {
     }
     
     /**
-     * 批量保存设置
-     * @param array $settings 设置数组 ['group' => ['key' => 'value']]
-     * @return bool 是否成功
+     * Batch save settings
+     * @param array $settings settings array ['group' => ['key' => 'value']]
+     * @return bool whether successful
      */
     public function batchSet($settings) {
         $success = true;
         
         error_log("Settings model batchSet called with settings: " . print_r($settings, true));
         
-        // 开始事务
+        // Start transaction
         error_log("Starting transaction");
         $this->db->query('START TRANSACTION');
         
@@ -193,10 +193,10 @@ class Settings {
     }
     
     /**
-     * 删除设置
-     * @param string $key 设置键
-     * @param string $group 设置组
-     * @return bool 是否成功
+     * Delete setting
+     * @param string $key setting key
+     * @param string $group setting group
+     * @return bool whether successful
      */
     public function delete($key, $group = 'general') {
         return $this->db->delete(
@@ -207,9 +207,9 @@ class Settings {
     }
     
     /**
-     * 删除一组设置
-     * @param string $group 设置组
-     * @return bool 是否成功
+     * Delete a group of settings
+     * @param string $group setting group
+     * @return bool whether successful
      */
     public function deleteGroup($group) {
         return $this->db->delete(

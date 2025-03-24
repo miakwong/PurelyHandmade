@@ -228,7 +228,7 @@
     </ol>
   </nav>
   
-  <!-- 加载指示器 -->
+  <!-- Loading indicator -->
   <div id="loading-indicator" class="text-center my-5 d-none">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -393,7 +393,7 @@
 <!-- Footer Placeholder -->
 <div id="footer-placeholder"></div>
 
-<!-- Toast通知容器 -->
+<!-- Toast notification container -->
 <div class="toast-container" id="toast-container"></div>
 
 <!-- Bootstrap JS and jQuery -->
@@ -414,24 +414,24 @@
       document.getElementById('navbar-placeholder').innerHTML = html;
       console.log('Navbar loaded successfully');
       
-      // 导航栏加载完成后，确保更新登录状态
+      // After navbar loads, ensure update login status
       setTimeout(() => {
         console.log('Checking for updateAuthButton availability');
         
-        // 尝试使用全局函数
+        // Try using global function
         if (typeof window.updateAuthButton === 'function') {
           console.log('Updating auth button state using window.updateAuthButton');
           window.updateAuthButton();
         }
-        // 尝试使用局部函数
+        // Try using local function
         else if (typeof updateAuthButton === 'function') {
           console.log('Updating auth button state using updateAuthButton');
           updateAuthButton();
         }
-        // 使用备用实现
+        // Use fallback implementation
         else {
           console.log('updateAuthButton function not available, using fallback');
-          // 定义一个备用的updateAuthButton函数
+          // Define a fallback updateAuthButton function
           window.updateAuthButton = function() {
             const currentUser = localStorage.getItem('currentUser');
             const loginButton = document.getElementById('login-button');
@@ -442,7 +442,7 @@
             console.log('Update Auth Button fallback called, currentUser:', currentUser ? 'exists' : 'not found');
             
             if (currentUser) {
-              // 用户已登录
+              // User is logged in
               if (loginButton) loginButton.style.display = 'none';
               if (registerButton) registerButton.style.display = 'none';
               if (profileButton) profileButton.style.display = 'block';
@@ -455,7 +455,7 @@
                 });
               }
             } else {
-              // 用户未登录
+              // User is not logged in
               if (loginButton) loginButton.style.display = 'block';
               if (registerButton) registerButton.style.display = 'block';
               if (profileButton) profileButton.style.display = 'none';
@@ -463,12 +463,12 @@
             }
           };
           
-          // 调用备用函数
+          // Call fallback function
           window.updateAuthButton();
         }
       }, 300);
       
-      // 更新购物车数量
+      // Update cart count
       if (typeof updateCartCount === 'function') {
         updateCartCount();
       }
@@ -495,11 +495,11 @@
               '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
     });
   
-  // 在文档完全加载后再次尝试调用更新身份验证状态和购物车
+    //After document fully loaded, try to update auth and cart state
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded: Document fully loaded, checking auth and cart state');
     
-    // 添加额外的延迟来确保导航栏已完全加载并且身份验证状态得到正确更新
+      //Add extra delay to ensure navbar is fully loaded and auth state is updated correctly
     setTimeout(() => {
       console.log('Document fully loaded, updating auth state again');
       if (typeof window.updateAuthButton === 'function') {
@@ -510,16 +510,16 @@
         window.updateCartCount();
       }
       
-      // 模拟从URL获取订单ID并加载订单数据
+      // Simulate getting order ID from URL and loading order data
       loadOrderDetails();
     }, 500);
   });
   
-  // API服务
+  // API service
   const ApiService = {
     baseUrl: '/api',
     
-    // 处理API响应
+    // Handle API response
     handleResponse: async function(response) {
       if (!response.ok) {
         const error = new Error('API request failed');
@@ -543,7 +543,7 @@
       return response.text();
     },
     
-    // GET请求
+    // GET request
     get: function(url, params = {}) {
       const queryParams = new URLSearchParams();
       Object.keys(params).forEach(key => {
@@ -565,10 +565,10 @@
     }
   };
   
-  // 加载订单详情的函数
+  // Load order details function
   async function loadOrderDetails() {
     try {
-      // 从URL获取订单ID
+      // Get order ID from URL
       const orderId = new URLSearchParams(window.location.search).get('id');
       
       if (!orderId) {
@@ -576,7 +576,7 @@
         return;
       }
       
-      // 检查用户登录状态
+      // Check user login status
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       if (!token) {
         showToast('Please login to view order details', 'error');
@@ -586,13 +586,13 @@
         return;
       }
       
-      // 显示加载提示
+      // Show loading indicator
       document.getElementById('loading-indicator').classList.remove('d-none');
       
-      // 从API获取订单详情
+      // Get order details from API
       const response = await ApiService.get(`/orders/${orderId}`);
       
-      // 隐藏加载提示
+      // Hide loading indicator
       document.getElementById('loading-indicator').classList.add('d-none');
       
       if (!response || !response.success) {
@@ -603,19 +603,19 @@
       
       console.log("Order data:", order);
       
-      // 确保订单项目是数组
+      // Ensure order items is an array
       if (!order.items || !Array.isArray(order.items)) {
         console.warn("Order items not found or not an array, using empty array");
         order.items = [];
       }
       
-      // 更新页面上的订单信息
+      // Update order information on the page
       document.getElementById('order-id').textContent = `Order #${order.id}`;
       document.getElementById('order-date').textContent = new Date(order.createdAt).toLocaleDateString();
       document.getElementById('order-status').textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
       document.getElementById('order-status').className = `order-status status-${order.status}`;
       
-      // 更新订单项目
+      // Update order items
       const orderItemsContainer = document.getElementById('order-items');
       orderItemsContainer.innerHTML = '';
       
@@ -635,11 +635,11 @@
         orderItemsContainer.innerHTML += itemHTML;
       });
       
-      // 更新订单总计
+      // Update order total
       document.getElementById('order-total-items').textContent = totalItems;
       document.getElementById('order-subtotal').textContent = `$${order.totalAmount.toFixed(2)}`;
       
-      // 如果有配送信息，则更新
+      // If there is shipping information, update
       if (order.shippingInfo) {
         try {
           const shippingInfo = typeof order.shippingInfo === 'string' 
@@ -667,13 +667,13 @@
     }
   }
   
-  // 显示Toast通知
+  // Show Toast notification
   function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toast-container');
     
     if (!toastContainer) return;
     
-    // 创建toast元素
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.style.backgroundColor = '#fff';
@@ -693,22 +693,22 @@
       toast.style.borderLeft = '4px solid #dc3545';
     }
     
-    // 添加内容
+    // Add content
     toast.innerHTML = `
       <div style="flex: 1; padding-right: 10px;">${message}</div>
       <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
     `;
     
-    // 添加到容器
+    // Add to container
     toastContainer.appendChild(toast);
     
-    // 添加关闭按钮事件
+    // Add close button event
     const closeBtn = toast.querySelector('div:last-child');
     closeBtn.addEventListener('click', function() {
       toast.remove();
     });
     
-    // 自动3秒后移除
+    // Automatically remove after 3 seconds
     setTimeout(() => {
       toast.remove();
     }, 3000);

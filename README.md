@@ -2,53 +2,53 @@
 
 A handcrafted products discussion and showcasing platform built with PHP, MySQL, HTML5, CSS3, and JavaScript.
 
-## 快速启动项目
+## Quick Start
 
-我们提供了多种方式来启动项目：
+We provide several ways to start the project:
 
-### 使用启动脚本（推荐）
+### Using the Startup Script (Recommended)
 
-项目根目录下有一个`start.sh`脚本，它可以帮助您更轻松地启动项目：
+There is a `start.sh` script in the root directory of the project that can help you start the project more easily:
 
 ```bash
-# 使用默认端口(8000)启动
+# Start with the default port (8000)
 ./start.sh
 
-# 使用指定端口启动
+# Start with a specified port
 ./start.sh 8080
 ```
 
-启动脚本会：
-- 检查指定端口是否被占用
-- 尝试自动关闭占用端口的PHP进程
-- 检查MySQL服务是否运行
-- 启动PHP开发服务器
+The startup script will:
+- Check if the specified port is occupied
+- Attempt to automatically close the PHP process occupying the port
+- Check if the MySQL service is running
+- Start the PHP development server
 
-### 使用npm脚本
+### Using npm Scripts
 
 ```bash
-# 使用默认配置启动（端口8000）
+# Start with the default configuration (port 8000)
 npm start
 
-# 使用启动脚本（自动检测端口等）
+# Start with the startup script (auto-detect port, etc.)
 npm run dev
 
-# 使用备用端口（端口8001）启动
+# Start with an alternative port (port 8001)
 npm run dev:alt
 ```
 
-### 手动启动
+### Manual Start
 
 ```bash
 php -S localhost:8000 -t .
 ```
 
-## 访问项目
+## Accessing the Project
 
-启动成功后，可以通过以下地址访问项目：
+After successfully starting the project, you can access it via the following addresses:
 
-- 主页：http://localhost:8000/
-- 管理员页面：http://localhost:8000/src/client/views/admin/designers.html
+- Homepage: http://localhost:8000/
+- Admin Page: http://localhost:8000/src/client/views/admin/designers.html
 
 ## Project Objectives
 
@@ -309,47 +309,51 @@ The project includes test scripts for login functionality and user profile pages
 
 [MIT License](LICENSE)
 
-# PurelyHandmade 网站导航指南
+# PurelyHandmade Website Website Navigation Guide
 
-## 网站页面访问链接
+## 
 
-本网站通过PHP本地服务器提供服务，主要页面的访问链接如下：
+This website is served via a local PHP server, and the main page access links are as follows:
 
-### 产品相关页面
+### Product-Related Pages
 
-- **产品列表页面**：
+- **Product List Page**：
   http://localhost:8000/src/client/views/product/product-list.html
 
-- **产品详情页面**：
-  http://localhost:8000/src/client/views/product/product_detail.html?id=17
-  (可将ID替换为其他产品ID)
+- **Product Details Page**：
+  http://localhost:8000/src/client/views/product/product-detail.html?id=17
+  (Replace ID with another product ID)
 
-- **分类列表页面**：
+- **Category List Page**：
   http://localhost:8000/src/client/views/product/category-list.html
 
-- **分类产品页面**：
+- **Category Products Page**：
   http://localhost:8000/src/client/views/product/category-page.html?id=10
-  (可将ID替换为其他分类ID)
+  (Replace ID with another category ID)
 
-### 其他页面
+### Other Pages
 
-- **特卖页面**：
+- **On-Sale Page**：
   http://localhost:8000/src/client/views/on-sale.html
 
-- **关于我们**：
+- **About Us**：
   http://localhost:8000/src/client/views/about.html
 
-## API访问
+## API Access
 
-API基础URL为：`http://localhost:8000/api`
+The base URL for the API is: `http://localhost:8000/api`
 
-可用的API端点：
-- `/products` - 获取所有产品
-- `/products/detail?id=17` - 获取特定产品详情
-- `/categories` - 获取所有分类
-- `/designers` - 获取所有设计师
-- `/designers/featured` - 获取精选设计师
+Available API endpoints:
+- `/products` - Retrieve all products
+- `/products/detail?id=17` - Retrieve details of a specific product
+- `/categories` - Retrieve all categories
+- `/designers` - Retrieve all designers
+- `/designers/featured` - Retrieve featured designers
 
-## 开发说明
+## Development Notes
 
-本网站现已完成从localStorage本地存储到后端API数据获取的迁移，所有页面都能够正确地从后端数据库获取数据并显示。 
+The website has successfully migrated from localStorage-based data storage to backend API data fetching. All pages now correctly retrieve and display data from the backend database.
+
+
+
+

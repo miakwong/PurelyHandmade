@@ -70,7 +70,7 @@ class AuthController {
                 ];
             }
             
-            // 确保转换为整数
+            //  Ensure the user ID is valid
             $userId = intval($userId);
             
             // Get the created user
@@ -106,7 +106,7 @@ class AuthController {
     
     public function login($identifier, $password) {
         try {
-             // 先检查是否是邮箱
+            // Check if the identifier is an email  
             if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
                 $user = $this->user->findByEmail($identifier);
             } else {
@@ -130,7 +130,7 @@ class AuthController {
             
             // Verify password
             if (!$this->user->verifyPassword($password, $user['password'])) {
-                error_log("❌ login() 密码错误");
+                error_log("❌ login() password error");
                 return [
                     'success' => false,
                     'message' => 'Invalid email or password'
