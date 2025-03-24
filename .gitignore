@@ -38,3 +38,5 @@ logs/
 *.log
 .env
 logs/order.log
+logs/designer.log
+logs/order.log
