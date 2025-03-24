@@ -237,7 +237,7 @@ window.loadCategories = async function(containerId, options = {}) {
   
   const container = window.getContainerSafely(containerId);
   if (!container) {
-    console.error(`API loadCategories() - 找不到容器: "${containerId}"`);
+    console.error(`API loadCategories() - container not found: "${containerId}"`);
     return;
   }
   
@@ -248,80 +248,75 @@ window.loadCategories = async function(containerId, options = {}) {
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading categories...</span>
         </div>
-        <p class="mt-2">加载分类中...</p>
+        <p class="mt-2">Loading categories...</p>
       </div>
-    `;
+    `;  
     
     // 获取分类数据
-    console.log(`API loadCategories() - 从API获取分类数据...`);
+    console.log(`📡 API loadCategories() - Fetching categories from API...`);
     let categoryResponse;
-    
+
     try {
-      categoryResponse = await DataService.getAllCategories();
-      console.log(`API loadCategories() - API响应:`, categoryResponse);
+        categoryResponse = await DataService.getAllCategories();
+        console.log(`📡 API loadCategories() - API response:`, categoryResponse);
     } catch (apiError) {
-      console.error(`API loadCategories() - API调用错误:`, apiError);
-      showErrorInContainer(containerId, `加载分类失败: ${apiError.message || '未知错误'}`);
-      return;
+        console.error(`❌ API loadCategories() - API call error:`, apiError);
+        showErrorInContainer(containerId, `Failed to load categories: ${apiError.message || 'Unknown error'}`);
+        return;
     }
-    
-    // 验证并处理API响应
-    let categories = [];
-    
-    if (!categoryResponse || !categoryResponse.success) {
-      const errorMessage = categoryResponse?.message || '未知错误';
-      console.error(`API loadCategories() - API请求失败: ${errorMessage}`);
-      showErrorInContainer(containerId, `加载分类失败: ${errorMessage}`);
-      return;
-    }
-    
+
     // 提取分类数据
-    if (categoryResponse.data && Array.isArray(categoryResponse.data.categories)) {
-      categories = categoryResponse.data.categories;
-    } else if (categoryResponse.data && typeof categoryResponse.data === 'object') {
-      categories = Object.values(categoryResponse.data);
-    } else if (Array.isArray(categoryResponse.categories)) {
-      categories = categoryResponse.categories;
-    } else {
-      console.warn(`API loadCategories() - API响应格式异常，无法提取分类数据`);
-      categories = [];
-    }
     
-    console.log(`API loadCategories() - 筛选前的分类数量:`, categories.length);
+    const categories = categoryResponse?.data?.data?.categories?.categories || [];
+
+
+    if (!Array.isArray(categories)) {
+      console.log(`❌ API response does not contain a valid categories array!`, categoryResponse);
+      return;
+    }
+    console.log('Extracted categories:', categories);
+    categories.forEach(category => {
+      console.log(`Category: ID=${category.id}, Name=${category.name}`);
+    });
+    
+
+    console.log(`📊 Number of categories before filtering:`, categories.length);
+
     
     // 应用筛选
     let filteredCategories = [...categories];
     
     // 特色分类筛选
     if (options.featured) {
-      console.log(`API loadCategories() - 筛选特色分类`);
+      console.log('Filtering featured categories');
       filteredCategories = filteredCategories.filter(category => category.featured);
-      console.log(`API loadCategories() - 特色分类数量:`, filteredCategories.length);
+      console.log('Number of featured categories:', filteredCategories.length);
     }
     
     // 数量限制
-    if (options.limit && filteredCategories.length > options.limit) {
-      console.log(`API loadCategories() - 限制显示数量: ${options.limit}`);
+    if (options.limit) {
+      console.log('Limiting to', options.limit, 'categories');
       filteredCategories = filteredCategories.slice(0, options.limit);
+      console.log('Categories after limiting:', filteredCategories.length);
     }
     
     // 检查结果是否为空
     if (filteredCategories.length === 0) {
-      console.log(`API loadCategories() - 筛选后无分类数据`);
+      console.log(`API loadCategories() - No categories available after filtering`);
       container.innerHTML = `
         <div class="col-12 text-center py-4">
-          <p class="text-muted">当前没有可用分类</p>
+          <p class="text-muted">No categories available at the moment</p>
         </div>
       `;
       return;
     }
     
     // 渲染分类
-    console.log(`API loadCategories() - 渲染${filteredCategories.length}个分类`);
+    console.log(`API loadCategories() - Rendering ${filteredCategories.length} categories`);
     container.innerHTML = '';
     
     filteredCategories.forEach(category => {
-      console.log(`API loadCategories() - 渲染分类:`, category.id, category.name);
+      console.log(`API loadCategories() - Rendering category:`, category.id, category.name);
       
       // 处理图像
       const imgSrc = category.image || '/src/client/img/category-placeholder.jpg';
@@ -336,7 +331,7 @@ window.loadCategories = async function(containerId, options = {}) {
                 <div class="category-overlay">
                   <h3 class="category-title">${category.name}</h3>
                   <p class="category-desc">${category.description || ''}</p>
-                  <span class="btn-browse">浏览产品</span>
+                  <span class="btn-browse">Browse products</span>
                 </div>
               </div>
             </a>
@@ -347,14 +342,14 @@ window.loadCategories = async function(containerId, options = {}) {
       container.innerHTML += categoryHtml;
     });
     
-    console.log(`API loadCategories() - 分类渲染完成`);
+    console.log(`API loadCategories() - Categories rendered`);
   } catch (error) {
-    console.error('API loadCategories() - 错误:', error);
-    showErrorInContainer(containerId, `加载分类时发生错误: ${error.message || '未知错误'}`);
+    console.error('API loadCategories() - Error:', error);
+    showErrorInContainer(containerId, `Error loading categories: ${error.message || 'Unknown error'}`);
   }
 };
 
-// 辅助函数：在容器中显示错误
+// Helper function: Display error in container
 function showErrorInContainer(containerId, errorMessage) {
   const container = window.getContainerSafely(containerId);
   if (container) {
@@ -380,7 +375,7 @@ window.loadDesigners = async function(containerId, options = {}) {
   
   // 自动修复：如果containerId为undefined，尝试使用默认值
   if (!containerId) {
-    console.warn('API loadDesigners() - containerId参数未定义，使用默认容器ID："designers-container"');
+    console.warn('API loadDesigners() - containerId parameter is undefined, using default container ID: "designers-container"');
     containerId = 'designers-container'; // 使用默认的容器ID
   }
   

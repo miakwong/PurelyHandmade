@@ -223,4 +223,13 @@ class CategoryController {
             ];
         }
     }
+    
+    public function getProductCount($categoryId) {
+        try {
+            return $this->category->getProductCount($categoryId);
+        } catch (\Exception $e) {
+            $this->logger->error('Get product count failed', Logger::formatException($e));
+            return 0;
+        }
+    }
 } 
