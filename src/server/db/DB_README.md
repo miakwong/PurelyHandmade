@@ -7,6 +7,7 @@
 - `database_content.md` - 数据库内容文档，包含所有表结构和数据
 - `init_database.php` - 核心数据库初始化脚本
 - `init_db.php` - 用户友好的命令行界面
+- `init_database.sql` - 完整的 SQL 脚本，可直接在数据库中执行
 
 ## 使用方法
 
@@ -25,7 +26,7 @@
 
 ### 初始化数据库
 
-有两种方式运行初始化:
+有三种方式运行初始化:
 
 1. **交互模式** - 会提示确认后再执行:
    ```bash
@@ -39,6 +40,11 @@
    php init_db.php --force
    ```
 
+3. **SQL 脚本方式** - 直接在数据库中执行 SQL 文件:
+   ```bash
+   mysql -u 用户名 -p < src/server/db/init_database.sql
+   ```
+
 ### 执行过程
 
 1. 脚本会连接到数据库
@@ -46,6 +52,21 @@
 3. 删除所有已存在的表(如果有)
 4. 创建所有必要的表结构
 5. 填充初始数据
+
+### 表结构
+
+系统包含以下表:
+
+- `User` - 用户信息
+- `Category` - 产品类别
+- `Designer` - 设计师信息
+- `Product` - 产品信息
+- `Order` - 订单信息
+- `OrderItem` - 订单项目
+- `Review` - 产品评论
+- `Settings` - 系统设置
+- `Cart` - 购物车主表
+- `CartItem` - 购物车项目
 
 ### 初始数据
 

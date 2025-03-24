@@ -97,7 +97,8 @@ function createTables($pdo) {
     
     $tables = [
         'OrderItem', 'Review', 'Order', 'Product', 'Designer', 
-        'Category', 'User', 'Settings', '_prisma_migrations'
+        'Category', 'User', 'Settings', 
+        'CartItem', 'Cart'
     ];
     
     foreach ($tables as $table) {
@@ -256,19 +257,30 @@ function createTables($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     echo "Created table: Settings\n";
     
-    // _prisma_migrations Table (just for reference)
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `_prisma_migrations` (
-        `id` varchar(36) NOT NULL,
-        `checksum` varchar(64) NOT NULL,
-        `finished_at` datetime(3) DEFAULT NULL,
-        `migration_name` varchar(255) NOT NULL,
-        `logs` text,
-        `rolled_back_at` datetime(3) DEFAULT NULL,
-        `started_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-        `applied_steps_count` int unsigned NOT NULL DEFAULT '0',
-        PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    echo "Created table: _prisma_migrations\n";
+    // Create Cart table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS Cart (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
+    )");
+    echo "Created table: Cart\n";
+    
+    // Create CartItem table
+    $pdo->exec("CREATE TABLE IF NOT EXISTS CartItem (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        cartId INT NOT NULL,
+        userId INT NOT NULL,
+        productId INT NOT NULL,
+        quantity INT NOT NULL DEFAULT 1,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (cartId) REFERENCES Cart(id) ON DELETE CASCADE,
+        FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE,
+        FOREIGN KEY (productId) REFERENCES Product(id) ON DELETE CASCADE
+    )");
+    echo "Created table: CartItem\n";
 }
 
 /**
