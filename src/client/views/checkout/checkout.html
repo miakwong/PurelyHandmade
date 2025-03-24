@@ -298,22 +298,48 @@
     
     // 从API获取指定国家的地区/省份
     async function fetchRegions(countryCode) {
-      // 为主要国家使用更详细的地区API
-      // 注意: 由于某些API限制，这里使用了不同的服务来获取不同国家的地区数据
-      
       try {
+        // 首先尝试使用全球地区API获取数据
+        showLoading(`Loading regions for ${countryCode}...`);
+        
+        // 使用GeoDB Cities API获取国家的行政区划
+        // 注意：此API需要注册获取API密钥，这里使用的是示例URL
+        // 在生产环境中，应该使用环境变量或配置文件中的API密钥
+        const geoDbResponse = await fetch(`https://countriesnow.space/api/v0.1/countries/states/q?country=${encodeURIComponent(getCountryNameByCode(countryCode))}`);
+        const geoDbData = await geoDbResponse.json();
+        
+        // 检查API响应
+        if (geoDbData && geoDbData.data && Array.isArray(geoDbData.data.states) && geoDbData.data.states.length > 0) {
+          hideLoading();
+          // 将API响应格式化为我们的标准格式
+          return geoDbData.data.states.map(state => ({
+            code: state.state_code || state.name.substring(0, 2).toUpperCase(),
+            name: state.name
+          }));
+        }
+        
+        // 如果通用API失败，使用特定国家的数据源作为备选
+        console.warn(`Could not get regions for ${countryCode} from primary API, using fallback sources`);
+        
+        // 特定国家的备选数据源
         if (countryCode === 'US') {
           // 美国各州
           const response = await fetch('https://gist.githubusercontent.com/mshafrir/2646763/raw/8b0dbb93521f5d6889502305335104218454c2bf/states_hash.json');
           const statesObj = await response.json();
+          hideLoading();
           return Object.entries(statesObj).map(([code, name]) => ({ code, name }));
         } else if (countryCode === 'CA') {
           // 加拿大省份
           const response = await fetch('https://gist.githubusercontent.com/pburtchaell/33cea9626e0241b970c0/raw/efa27ce264dd4c4e1957c8c012a0d37d89a717cc/gistfile1.json');
           const provinces = await response.json();
-          return provinces;
+          hideLoading();
+          return provinces.map(province => ({ 
+            code: province.short, 
+            name: province.name 
+          }));
         } else if (countryCode === 'GB') {
           // 英国地区
+          hideLoading();
           return [
             { code: 'ENG', name: 'England' },
             { code: 'SCT', name: 'Scotland' },
@@ -328,6 +354,7 @@
           ];
         } else if (countryCode === 'AU') {
           // 澳大利亚州/领地
+          hideLoading();
           return [
             { code: 'NSW', name: 'New South Wales' },
             { code: 'QLD', name: 'Queensland' },
@@ -340,6 +367,7 @@
           ];
         } else if (countryCode === 'CN') {
           // 中国省份
+          hideLoading();
           return [
             { code: 'BJ', name: 'Beijing' },
             { code: 'SH', name: 'Shanghai' },
@@ -350,16 +378,208 @@
             { code: 'SC', name: 'Sichuan' },
             { code: 'HB', name: 'Hubei' },
             { code: 'FJ', name: 'Fujian' },
-            { code: 'HN', name: 'Hunan' }
+            { code: 'HN', name: 'Hunan' },
+            { code: 'AH', name: 'Anhui' },
+            { code: 'GX', name: 'Guangxi' },
+            { code: 'HE', name: 'Hebei' },
+            { code: 'HL', name: 'Heilongjiang' },
+            { code: 'HN', name: 'Hunan' },
+            { code: 'JL', name: 'Jilin' },
+            { code: 'LN', name: 'Liaoning' },
+            { code: 'NX', name: 'Ningxia' },
+            { code: 'QH', name: 'Qinghai' },
+            { code: 'SN', name: 'Shaanxi' },
+            { code: 'SX', name: 'Shanxi' },
+            { code: 'TJ', name: 'Tianjin' },
+            { code: 'XJ', name: 'Xinjiang' },
+            { code: 'YN', name: 'Yunnan' },
+            { code: 'ZJ', name: 'Zhejiang' }
+          ];
+        } else if (countryCode === 'IN') {
+          // 印度邦/直辖区
+          hideLoading();
+          return [
+            { code: 'AP', name: 'Andhra Pradesh' },
+            { code: 'AR', name: 'Arunachal Pradesh' },
+            { code: 'AS', name: 'Assam' },
+            { code: 'BR', name: 'Bihar' },
+            { code: 'CT', name: 'Chhattisgarh' },
+            { code: 'GA', name: 'Goa' },
+            { code: 'GJ', name: 'Gujarat' },
+            { code: 'HR', name: 'Haryana' },
+            { code: 'HP', name: 'Himachal Pradesh' },
+            { code: 'JH', name: 'Jharkhand' },
+            { code: 'KA', name: 'Karnataka' },
+            { code: 'KL', name: 'Kerala' },
+            { code: 'MP', name: 'Madhya Pradesh' },
+            { code: 'MH', name: 'Maharashtra' },
+            { code: 'MN', name: 'Manipur' },
+            { code: 'ML', name: 'Meghalaya' },
+            { code: 'MZ', name: 'Mizoram' },
+            { code: 'NL', name: 'Nagaland' },
+            { code: 'OR', name: 'Odisha' },
+            { code: 'PB', name: 'Punjab' },
+            { code: 'RJ', name: 'Rajasthan' },
+            { code: 'SK', name: 'Sikkim' },
+            { code: 'TN', name: 'Tamil Nadu' },
+            { code: 'TG', name: 'Telangana' },
+            { code: 'TR', name: 'Tripura' },
+            { code: 'UT', name: 'Uttarakhand' },
+            { code: 'UP', name: 'Uttar Pradesh' },
+            { code: 'WB', name: 'West Bengal' },
+            { code: 'AN', name: 'Andaman and Nicobar Islands' },
+            { code: 'CH', name: 'Chandigarh' },
+            { code: 'DN', name: 'Dadra and Nagar Haveli and Daman and Diu' },
+            { code: 'DL', name: 'Delhi' },
+            { code: 'JK', name: 'Jammu and Kashmir' },
+            { code: 'LA', name: 'Ladakh' },
+            { code: 'LD', name: 'Lakshadweep' },
+            { code: 'PY', name: 'Puducherry' }
+          ];
+        } else if (countryCode === 'DE') {
+          // 德国联邦州
+          hideLoading();
+          return [
+            { code: 'BW', name: 'Baden-Württemberg' },
+            { code: 'BY', name: 'Bavaria' },
+            { code: 'BE', name: 'Berlin' },
+            { code: 'BB', name: 'Brandenburg' },
+            { code: 'HB', name: 'Bremen' },
+            { code: 'HH', name: 'Hamburg' },
+            { code: 'HE', name: 'Hesse' },
+            { code: 'NI', name: 'Lower Saxony' },
+            { code: 'MV', name: 'Mecklenburg-Vorpommern' },
+            { code: 'NW', name: 'North Rhine-Westphalia' },
+            { code: 'RP', name: 'Rhineland-Palatinate' },
+            { code: 'SL', name: 'Saarland' },
+            { code: 'SN', name: 'Saxony' },
+            { code: 'ST', name: 'Saxony-Anhalt' },
+            { code: 'SH', name: 'Schleswig-Holstein' },
+            { code: 'TH', name: 'Thuringia' }
+          ];
+        } else if (countryCode === 'JP') {
+          // 日本都道府县
+          hideLoading();
+          return [
+            { code: '01', name: 'Hokkaido' },
+            { code: '02', name: 'Aomori' },
+            { code: '03', name: 'Iwate' },
+            { code: '04', name: 'Miyagi' },
+            { code: '05', name: 'Akita' },
+            { code: '06', name: 'Yamagata' },
+            { code: '07', name: 'Fukushima' },
+            { code: '08', name: 'Ibaraki' },
+            { code: '09', name: 'Tochigi' },
+            { code: '10', name: 'Gunma' },
+            { code: '11', name: 'Saitama' },
+            { code: '12', name: 'Chiba' },
+            { code: '13', name: 'Tokyo' },
+            { code: '14', name: 'Kanagawa' },
+            { code: '15', name: 'Niigata' },
+            { code: '16', name: 'Toyama' },
+            { code: '17', name: 'Ishikawa' },
+            { code: '18', name: 'Fukui' },
+            { code: '19', name: 'Yamanashi' },
+            { code: '20', name: 'Nagano' },
+            { code: '21', name: 'Gifu' },
+            { code: '22', name: 'Shizuoka' },
+            { code: '23', name: 'Aichi' },
+            { code: '24', name: 'Mie' },
+            { code: '25', name: 'Shiga' },
+            { code: '26', name: 'Kyoto' },
+            { code: '27', name: 'Osaka' },
+            { code: '28', name: 'Hyogo' },
+            { code: '29', name: 'Nara' },
+            { code: '30', name: 'Wakayama' },
+            { code: '31', name: 'Tottori' },
+            { code: '32', name: 'Shimane' },
+            { code: '33', name: 'Okayama' },
+            { code: '34', name: 'Hiroshima' },
+            { code: '35', name: 'Yamaguchi' },
+            { code: '36', name: 'Tokushima' },
+            { code: '37', name: 'Kagawa' },
+            { code: '38', name: 'Ehime' },
+            { code: '39', name: 'Kochi' },
+            { code: '40', name: 'Fukuoka' },
+            { code: '41', name: 'Saga' },
+            { code: '42', name: 'Nagasaki' },
+            { code: '43', name: 'Kumamoto' },
+            { code: '44', name: 'Oita' },
+            { code: '45', name: 'Miyazaki' },
+            { code: '46', name: 'Kagoshima' },
+            { code: '47', name: 'Okinawa' }
+          ];
+        } else if (countryCode === 'BR') {
+          // 巴西联邦州
+          hideLoading();
+          return [
+            { code: 'AC', name: 'Acre' },
+            { code: 'AL', name: 'Alagoas' },
+            { code: 'AP', name: 'Amapá' },
+            { code: 'AM', name: 'Amazonas' },
+            { code: 'BA', name: 'Bahia' },
+            { code: 'CE', name: 'Ceará' },
+            { code: 'DF', name: 'Distrito Federal' },
+            { code: 'ES', name: 'Espírito Santo' },
+            { code: 'GO', name: 'Goiás' },
+            { code: 'MA', name: 'Maranhão' },
+            { code: 'MT', name: 'Mato Grosso' },
+            { code: 'MS', name: 'Mato Grosso do Sul' },
+            { code: 'MG', name: 'Minas Gerais' },
+            { code: 'PA', name: 'Pará' },
+            { code: 'PB', name: 'Paraíba' },
+            { code: 'PR', name: 'Paraná' },
+            { code: 'PE', name: 'Pernambuco' },
+            { code: 'PI', name: 'Piauí' },
+            { code: 'RJ', name: 'Rio de Janeiro' },
+            { code: 'RN', name: 'Rio Grande do Norte' },
+            { code: 'RS', name: 'Rio Grande do Sul' },
+            { code: 'RO', name: 'Rondônia' },
+            { code: 'RR', name: 'Roraima' },
+            { code: 'SC', name: 'Santa Catarina' },
+            { code: 'SP', name: 'São Paulo' },
+            { code: 'SE', name: 'Sergipe' },
+            { code: 'TO', name: 'Tocantins' }
           ];
         }
         
-        // 对于其他国家，返回一个空数组
+        // 对于没有特定处理的国家，返回一个空数组
+        hideLoading();
         return [];
       } catch (error) {
+        hideLoading();
         console.error(`Error fetching regions for ${countryCode}:`, error);
         return [];
       }
+    }
+    
+    // 根据国家代码获取国家名称
+    function getCountryNameByCode(countryCode) {
+      // 国家代码到名称的映射
+      const countryMap = {
+        'US': 'United States',
+        'CA': 'Canada',
+        'GB': 'United Kingdom',
+        'AU': 'Australia',
+        'FR': 'France',
+        'DE': 'Germany',
+        'JP': 'Japan',
+        'CN': 'China',
+        'IN': 'India',
+        'BR': 'Brazil',
+        'MX': 'Mexico',
+        'ES': 'Spain',
+        'IT': 'Italy',
+        'NL': 'Netherlands',
+        'RU': 'Russia',
+        'KR': 'South Korea',
+        'ZA': 'South Africa',
+        'AR': 'Argentina',
+        'SG': 'Singapore',
+        'AE': 'United Arab Emirates'
+      };
+      
+      return countryMap[countryCode] || countryCode;
     }
     
     // 显示和隐藏加载提示
