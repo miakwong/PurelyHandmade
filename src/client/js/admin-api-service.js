@@ -20,6 +20,24 @@ const AdminApiService = {
   },
   
   /**
+   * 获取用户详情
+   * @param {number} userId 用户ID
+   * @returns {Promise} 请求结果
+   */
+  getUserById: function(userId) {
+    return ApiService.get(`/api/admin/users/detail?id=${userId}`);
+  },
+  
+  /**
+   * 删除用户
+   * @param {number} userId 用户ID
+   * @returns {Promise} 请求结果
+   */
+  deleteUser: function(userId) {
+    return ApiService.delete(`/api/admin/users?id=${userId}`);
+  },
+  
+  /**
    * 禁用/启用用户
    * @param {number} userId 用户ID
    * @param {boolean} isEnabled 是否启用
