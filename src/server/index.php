@@ -77,6 +77,7 @@ $routes = [
     
     // Admin routes
     '/admin/users' => 'api/admin/users.php',
+    '/admin/users/detail' => 'api/admin/users/detail.php',
     '/admin/dashboard' => 'api/admin/dashboard.php',
     '/admin/reports' => 'api/admin/reports.php',
     
