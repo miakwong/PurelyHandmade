@@ -310,6 +310,9 @@ function insertData($pdo) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     
     $categories = [
+        [1,'Ceramics','ceramics','Handcrafted ceramic items','/src/client/img/category/ceramics.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'],
+        [2,'Wood Crafts','wood-crafts','Handmade wooden items and carvings','/src/client/img/category/wood.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'],
+        [3,'Textiles','textiles','Handwoven and textile-based products','/src/client/img/category/textiles.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'],
         [7, 'Pottery', 'pottery', 'Handmade ceramics and pottery artworks', null, 0, '2025-03-22 11:40:56.365', '2025-03-22 11:40:56.365'],
         [8, 'Woven', 'woven', 'Handwoven products and accessories', null, 0, '2025-03-22 11:40:56.366', '2025-03-22 11:40:56.366'],
         [9, 'Woodwork', 'woodwork', 'Handmade wooden products and furniture', null, 0, '2025-03-22 11:40:56.368', '2025-03-22 11:40:56.368'],

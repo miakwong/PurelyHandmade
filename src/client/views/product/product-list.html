@@ -339,10 +339,10 @@
       // 使用API获取分类
       let categoryResponse;
       try {
-        console.log("发送API请求获取分类数据...");
+        console.log("Sending API request to get category data...");
         // 尝试使用fetch直接请求API - 用作备份机制
         if (typeof DataService === 'undefined' || !DataService.getAllCategories) {
-          console.warn("DataService未定义或不可用，尝试使用fetch直接请求API");
+          console.warn("DataService is undefined or not available, trying to use fetch directly as a backup mechanism");
           const response = await fetch('/api/categories');
           categoryResponse = await response.json();
         } else {
@@ -351,29 +351,29 @@
         
         // 确保响应格式一致性，避免undefined错误
         if (!categoryResponse) {
-          throw new Error("API返回空响应");
+          throw new Error("API returned empty response");
         }
         
         console.log('API分类数据响应:', categoryResponse);
       } catch (apiError) {
-        console.error('从API获取分类数据错误:', apiError.message || apiError);
+        console.error('Error getting category data from API:', apiError.message || apiError);
         // API错误仍需确保UI正常 - 创建一个格式正确的失败响应
         categoryResponse = { 
           success: false, 
-          message: apiError.message || '请求分类数据时出错', 
+          message: apiError.message || 'Error getting category data', 
           data: { categories: [] } 
         };
       }
       
       // 检查响应格式并规范化
       if (!categoryResponse.hasOwnProperty('success')) {
-        console.warn('API响应格式不规范，尝试规范化');
+        console.warn('API response format is not consistent, attempting to normalize');
         // 如果响应没有success字段，尝试重新格式化它
         if (categoryResponse.data || categoryResponse.categories) {
           // 如果有data.categories或直接有categories字段，认为成功
           categoryResponse = {
             success: true,
-            message: "成功获取分类",
+            message: "Successfully got categories",
             data: {
               categories: categoryResponse.data?.categories || categoryResponse.categories || []
             }
@@ -382,7 +382,7 @@
           // 无法识别的格式，创建失败响应
           categoryResponse = {
             success: false,
-            message: "响应格式不正确",
+            message: "Incorrect response format",
             data: { categories: [] }
           };
         }
@@ -403,12 +403,12 @@
         }
         
         categories = categoriesData;
-        console.log(`成功获取${categories.length}个分类:`, categories);
+        console.log(`Successfully got ${categories.length} categories:`, categories);
         
         // 清空现有内容并添加"全部"选项
         categoryFiltersContainer.innerHTML = '';
         addAllCategoriesCheckbox(categoryFiltersContainer);
-        console.log("已添加'全部'类别选项");
+        console.log("'All' category option added");
         
         // 添加分类选项
         if (categories.length > 0) {
@@ -429,8 +429,8 @@
           addCategoryEventListeners();
           console.log("已添加分类筛选事件监听器");
         } else {
-          console.warn('API返回的分类为空');
-          categoryFiltersContainer.innerHTML += '<p class="text-muted small mt-2">暂无分类数据</p>';
+          console.warn('API returned empty categories');
+          categoryFiltersContainer.innerHTML += '<p class="text-muted small mt-2">No categories available at the moment</p>';
         }
         
         // 检查URL参数中是否有categoryId
@@ -447,30 +447,30 @@
         
         // 最终验证
         const allCategoryCheckbox = document.getElementById('category-all');
-        console.log("分类加载完成后验证 - 全部分类复选框:", allCategoryCheckbox ? '存在' : '不存在');
+        console.log("Category load completed verification - 'All' category checkbox:", allCategoryCheckbox ? 'exists' : 'does not exist');
         if (allCategoryCheckbox) {
-          console.log("全部分类复选框状态: checked=", allCategoryCheckbox.checked);
+          console.log("All category checkbox status: checked=", allCategoryCheckbox.checked);
         }
         
       } else {
-        const errorMessage = categoryResponse.message || '未知错误';
-        console.error('API分类请求失败:', errorMessage);
+        const errorMessage = categoryResponse.message || 'Unknown error';
+        console.error('API category request failed:', errorMessage);
         categoryFiltersContainer.innerHTML = `
           <div class="alert alert-warning small py-2">
-            <i class="bi bi-exclamation-triangle me-2"></i>加载分类失败
-            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">重试</button>
+            <i class="bi bi-exclamation-triangle me-2"></i>Failed to load categories
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">Retry</button>
           </div>
         `;
         createDefaultCategoryFilter();
       }
     } catch (error) {
-      console.error('加载分类错误:', error.message || error);
+      console.error('Error loading categories:', error.message || error);
       const categoryFiltersContainer = document.getElementById('category-filters');
       if (categoryFiltersContainer) {
         categoryFiltersContainer.innerHTML = `
           <div class="alert alert-warning small py-2">
-            <i class="bi bi-exclamation-triangle me-2"></i>加载分类出错: ${error.message || '未知错误'}
-            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">重试</button>
+            <i class="bi bi-exclamation-triangle me-2"></i>Error loading categories: ${error.message || 'Unknown error'}
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadCategories()">Retry</button>
           </div>
         `;
       }
@@ -482,20 +482,20 @@
   
   // 创建默认的分类筛选器（确保UI可用）
   function createDefaultCategoryFilter() {
-    console.log("=== createDefaultCategoryFilter() - 创建默认分类筛选器 ===");
+    console.log("=== createDefaultCategoryFilter() - Creating default category filter ===");
     const categoryFiltersContainer = document.getElementById('category-filters');
     if (categoryFiltersContainer) {
       categoryFiltersContainer.innerHTML = '';
       addAllCategoriesCheckbox(categoryFiltersContainer);
-      console.log("已创建默认分类筛选器");
+      console.log("Default category filter created");
     } else {
-      console.error("找不到类别筛选容器，无法创建默认筛选器");
+      console.error("Category filter container not found, unable to create default filter");
     }
   }
   
   // 添加"全部"分类选项
   function addAllCategoriesCheckbox(container) {
-    console.log("=== addAllCategoriesCheckbox() - 添加'全部'分类选项 ===");
+    console.log("=== addAllCategoriesCheckbox() - Adding 'All' category option ===");
     container.innerHTML += `
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="all" id="category-all" checked>
@@ -504,13 +504,13 @@
         </label>
       </div>
     `;
-    console.log("DOM添加后验证 - '全部'分类复选框:", document.getElementById('category-all') ? '存在' : '不存在');
+    console.log("DOM after adding - 'All' category checkbox:", document.getElementById('category-all') ? 'exists' : 'does not exist');
     
     // 添加"全部"分类点击事件
     const allCategoriesCheckbox = document.getElementById('category-all');
     if (allCategoriesCheckbox) {
       allCategoriesCheckbox.addEventListener('change', function() {
-        console.log("'全部'分类复选框变更 - 新状态:", this.checked);
+        console.log("'All' category checkbox changed - new status:", this.checked);
         if (this.checked) {
           document.querySelectorAll('.category-filter').forEach(function(checkbox) {
             checkbox.checked = false;
@@ -518,9 +518,9 @@
         }
         applyFiltersAndSort();
       });
-      console.log("已添加'全部'分类复选框事件监听器");
+      console.log("'All' category checkbox event listener added");
     } else {
-      console.error("无法添加'全部'分类复选框事件监听器 - 元素不存在");
+      console.error("Unable to add 'All' category checkbox event listener - element does not exist");
     }
   }
   
