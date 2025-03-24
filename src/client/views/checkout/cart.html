@@ -48,7 +48,7 @@
           
           <div class="d-grid gap-2 mt-3">
             <button id="checkout-btn" class="btn btn-success btn-lg">Proceed to Checkout</button>
-            <a href="/" id="continue-shopping" class="btn btn-outline-secondary text-decoration-none d-flex justify-content-center align-items-center" style="height: 48px;">Continue Shopping</a>
+            <a href="/src/client/views/product/product-list.html" id="continue-shopping" class="btn btn-outline-secondary text-decoration-none d-flex justify-content-center align-items-center" style="height: 48px;">Continue Shopping</a>
           </div>
         </div>
       </div>
@@ -519,59 +519,12 @@
           return;
         }
         
-        // 准备订单数据
-        const orderData = {
-          userId: currentUser.id,
-          items: selectedItems.map(item => ({
-            productId: item.id,
-            quantity: item.quantity
-          }))
-        };
+        // Store selected items in localStorage for checkout page to use
+        localStorage.setItem('checkoutItems', JSON.stringify(selectedItems));
         
-        // 使用API创建订单
-        createOrder(orderData);
+        // Navigate to checkout page
+        window.location.href = '/src/client/views/checkout/checkout.html';
       });
-    }
-    
-    // 创建订单
-    async function createOrder(orderData) {
-      try {
-        // 显示加载中提示
-        showLoading('Processing your order...');
-        
-        // 调用API创建订单
-        const response = await fetch('/api/orders/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${DataService.getAuthToken()}`
-          },
-          body: JSON.stringify(orderData)
-        });
-        
-        const result = await response.json();
-        
-        hideLoading();
-        
-        if (result.success) {
-          // 清除已结账的商品 - API should handle this
-          // Refresh cart after checkout
-          await loadCart();
-          
-          // 显示成功消息
-          alert('Order placed successfully!');
-          
-          // 跳转到订单详情页
-          window.location.href = `/src/client/views/order/order-detail.html?id=${result.data.id}`;
-        } else {
-          // 显示错误消息
-          alert('Failed to place order: ' + result.message);
-        }
-      } catch (error) {
-        hideLoading();
-        console.error('Error creating order:', error);
-        alert('An error occurred while processing your order. Please try again.');
-      }
     }
     
     // 计算总价
