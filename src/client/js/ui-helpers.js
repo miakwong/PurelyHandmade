@@ -36,7 +36,9 @@ const UIHelpers = {
             this.updateAuthState();
             // 更新购物车数量（如果函数存在）
             if (typeof this.updateCartCount === 'function') {
-              this.updateCartCount();
+              this.updateCartCount().catch(err => {
+                console.error('Error updating cart count:', err);
+              });
             }
           }, 100);
           
@@ -221,15 +223,31 @@ const UIHelpers = {
    * 更新购物车数量
    * Update cart count in navbar
    */
-  updateCartCount: function() {
+  updateCartCount: async function() {
     const cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
     
-    const cart = DataService.getCart();
-    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-    
-    cartCount.textContent = itemCount;
-    cartCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
+    try {
+      // DataService.getCart 是异步函数，需要 await
+      const cart = await DataService.getCart();
+      
+      // 确保 cart 是数组
+      if (!Array.isArray(cart)) {
+        console.warn('Cart is not an array:', cart);
+        cartCount.textContent = '0';
+        cartCount.style.display = 'none';
+        return;
+      }
+      
+      const itemCount = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+      
+      cartCount.textContent = itemCount;
+      cartCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
+    } catch (error) {
+      console.error('Error updating cart count:', error);
+      cartCount.textContent = '0';
+      cartCount.style.display = 'none';
+    }
   },
   
   /**
@@ -288,9 +306,15 @@ const UIHelpers = {
     container.querySelectorAll('.add-to-cart').forEach(button => {
       button.addEventListener('click', () => {
         const productId = button.getAttribute('data-product-id');
-        DataService.addToCart(productId, 1);
-        this.showToast('Product added to cart!', 'success');
-        this.updateCartCount();
+        DataService.addToCart(productId, 1).then(() => {
+          this.showToast('Product added to cart!', 'success');
+          this.updateCartCount().catch(err => {
+            console.error('Error updating cart count:', err);
+          });
+        }).catch(err => {
+          console.error('Error adding to cart:', err);
+          this.showToast('Failed to add product to cart. Please try again.', 'danger');
+        });
       });
     });
   }

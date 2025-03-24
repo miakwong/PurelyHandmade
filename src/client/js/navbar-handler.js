@@ -17,7 +17,9 @@ function loadNavbar() {
       
       // Update cart count after navbar is loaded
       if (typeof updateCartCount === 'function') {
-        updateCartCount();
+        updateCartCount().catch(err => {
+          console.error('Error updating cart count:', err);
+        });
       }
       
       // Update authentication button state after navbar is loaded
@@ -122,53 +124,26 @@ async function updateCartCount() {
   }
   
   try {
-    // Call the cart API to get current cart items
-    const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
-      headers: {
-        'Authorization': `Bearer ${DataService.getAuthToken()}`
-      }
-    });
+    // 使用DataService的getCart方法获取购物车数据
+    const cart = await DataService.getCart();
     
-    const result = await response.json();
-    
-    if (result.success) {
-      let cartItems = [];
-      
-      // Handle different response structures
-      if (Array.isArray(result.data)) {
-        cartItems = result.data;
-      } else if (result.data && Array.isArray(result.data.items)) {
-        cartItems = result.data.items;
-      } else if (Array.isArray(result.items)) {
-        cartItems = result.items;
-      }
-      
-      if (cartItems.length > 0) {
-        const count = cartItems.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
-        cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-      } else {
-        cartCount.style.display = 'none';
-      }
-    } else {
+    // 确保cart是数组
+    if (!Array.isArray(cart)) {
+      console.warn('Cart is not an array:', cart);
+      cartCount.textContent = '0';
       cartCount.style.display = 'none';
+      return;
     }
-  } catch (error) {
-    console.error('Error fetching cart count:', error);
-    cartCount.style.display = 'none';
     
-    // Fallback to localStorage if API fails
-    const cartData = localStorage.getItem('cart');
-    if (cartData) {
-      try {
-        const cart = JSON.parse(cartData);
-        const count = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
-        cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-      } catch (e) {
-        console.error('Error parsing cart data from localStorage:', e);
-      }
-    }
+    const itemCount = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+    
+    // Update the cart count display
+    cartCount.textContent = itemCount;
+    cartCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
+  } catch (error) {
+    console.error('Error updating cart count:', error);
+    cartCount.textContent = '0';
+    cartCount.style.display = 'none';
   }
 }
 

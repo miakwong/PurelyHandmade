@@ -566,7 +566,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 更新购物车数量显示
         if (typeof updateCartCount === 'function') {
-          updateCartCount();
+          updateCartCount().catch(err => {
+            console.error('Error updating cart count:', err);
+          });
         }
         
         return true;
