@@ -1034,11 +1034,61 @@ const AdminApiService = {
     return statusClassMap[status] || 'bg-secondary';
   }
 
-  // 更新最近订单列表
+  // 更新仪表盘统计数据
+  async function updateDashboardStats() {
+    try {
+      // 显示加载状态
+      showLoadingState();
+      
+      // 获取统计数据
+      const statsResponse = await AdminApiService.getSiteStatistics().catch(error => {
+        console.error('获取网站统计数据失败:', error);
+        return { success: true, data: {} };
+      });
+      
+      // 获取产品数据
+      const productsResponse = await AdminApiService.getAllProducts().catch(error => {
+        console.error('获取产品失败:', error);
+        return { success: true, data: { products: [], total: 0 } };
+      });
+      
+      // 获取订单数据
+      const ordersResponse = await AdminApiService.getAllOrders().catch(error => {
+        console.error('获取订单失败:', error);
+        return { success: true, data: { orders: [], total: 0 } };
+      });
+      
+      // 获取用户数据
+      const usersResponse = await AdminApiService.getAllUsers().catch(error => {
+        console.error('获取用户失败:', error);
+        return { success: true, data: { users: [], total: 0 } };
+      });
+      
+      // 更新统计卡片
+      updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
+      
+      // 隐藏加载状态
+      hideLoadingState();
+      
+      return { productsResponse, ordersResponse, usersResponse, statsResponse };
+    } catch (error) {
+      console.error('Error updating dashboard stats:', error);
+      // 隐藏加载状态
+      hideLoadingState();
+      return null;
+    }
+  }
+  
+  // 更新最近订单
   async function updateRecentOrders() {
     try {
-      const recentOrdersContainer = document.getElementById('recent-orders');
-      const response = await ApiService.get('/orders');
+      const recentOrdersContainer = document.getElementById('recent-orders-table');
+      if (!recentOrdersContainer) {
+        console.error('Recent orders container not found');
+        return;
+      }
+      
+      const response = await ApiService.get('/orders', { all: 1 });
       
       if (response.success && response.data && response.data.orders) {
         // 按照日期降序排序，确保最近的订单排在前面
@@ -1048,59 +1098,40 @@ const AdminApiService = {
         const recentOrders = orders.slice(0, 5);
         
         if (recentOrders.length > 0) {
-          const orderRows = recentOrders.map(order => {
-            return `
-              <tr data-order-id="${order.id}" class="order-row" style="cursor: pointer;">
-                <td><a href="#" class="order-details-link">#${order.id}</a></td>
-                <td>${formatDate(order.orderDate)}</td>
-                <td><span class="badge ${getStatusBadgeClass(order.status)}">${getStatusDisplayName(order.status)}</span></td>
-                <td>${formatCurrency(order.totalAmount)}</td>
-              </tr>
-            `;
-          }).join('');
-          
-          recentOrdersContainer.innerHTML = orderRows;
-          
-          // 添加点击事件处理
-          document.querySelectorAll('.order-row').forEach(row => {
-            row.addEventListener('click', function() {
-              const orderId = this.getAttribute('data-order-id');
-              viewOrderDetails(orderId);
-            });
-          });
-          
-          document.querySelectorAll('.order-details-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              const orderId = this.closest('tr').getAttribute('data-order-id');
-              viewOrderDetails(orderId);
-            });
-          });
+          // 使用空数组作为用户数据的占位符，因为我们不需要它
+          renderOrdersTable(recentOrders, []);
         } else {
-          recentOrdersContainer.innerHTML = '<tr><td colspan="4" class="text-center">No recent orders</td></tr>';
+          recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">No recent orders</td></tr>';
         }
       } else {
-        recentOrdersContainer.innerHTML = '<tr><td colspan="4" class="text-center">Failed to load recent orders</td></tr>';
+        recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Failed to load recent orders</td></tr>';
       }
     } catch (error) {
       console.error('Error loading recent orders:', error);
-      document.getElementById('recent-orders').innerHTML = '<tr><td colspan="4" class="text-center">Error loading recent orders</td></tr>';
+      const recentOrdersContainer = document.getElementById('recent-orders-table');
+      if (recentOrdersContainer) {
+        recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Error loading recent orders</td></tr>';
+      }
     }
   }
 
   // 页面加载完成后执行
   document.addEventListener('DOMContentLoaded', async function() {
-    // 获取面板统计数据
-    await updateDashboardStats();
-    
-    // 更新最近订单
-    await updateRecentOrders();
-    
-    // 定时刷新数据（每5分钟）
-    setInterval(async function() {
+    try {
+      // 获取面板统计数据
       await updateDashboardStats();
+      
+      // 更新最近订单
       await updateRecentOrders();
-    }, 5 * 60 * 1000);
+      
+      // 定时刷新数据（每5分钟）
+      setInterval(async function() {
+        await updateDashboardStats();
+        await updateRecentOrders();
+      }, 5 * 60 * 1000);
+    } catch (error) {
+      console.error('DOMContentLoaded error:', error);
+    }
   });
 </script>
 </body>
