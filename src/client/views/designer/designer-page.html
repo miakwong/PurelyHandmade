@@ -112,12 +112,14 @@
     }
 
     // 添加到购物车
-    function addToCart(productId, quantity) {
+    async function addToCart(productId, quantity) {
       console.log('addToCart called with productId:', productId, 'type:', typeof productId);
       
+      // 查找产品信息
       const productsData = localStorage.getItem('products');
       if (!productsData) {
         console.error('No products data found in localStorage');
+        showToast('Product data not available', 'error');
         return;
       }
       
@@ -148,95 +150,161 @@
       
       console.log('Found product to add to cart:', product);
       
-      // 获取现有购物车
-      let cart = [];
-      const cartData = localStorage.getItem('cart');
-      if (cartData) {
-        try {
-          cart = JSON.parse(cartData);
-          console.log('Existing cart:', cart);
-        } catch (e) {
-          console.error('Error parsing cart data:', e);
-          showToast('Error loading cart data', 'error');
-        }
+      // 检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        // 用户未登录，提示登录
+        showToast('Please login to add items to cart', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        }, 1500);
+        return;
       }
       
-      // 计算最终价格，确保不会出现NaN
-      const price = parseFloat(product.price) || 0;
-      const finalPrice = product.onSale ? (parseFloat(product.salePrice) || price * 0.9) : price;
-      console.log('Calculated price:', finalPrice);
+      // 显示加载提示
+      showLoading('Adding to cart...');
       
-      // 处理图片URL
-      let imageUrl = 'https://via.placeholder.com/80';
-      if (product.image) {
-        imageUrl = product.image;
-      } else if (Array.isArray(product.images) && product.images.length > 0) {
-        imageUrl = product.images[0];
-      }
-      
-      // 检查产品是否已在购物车中
-      const existingItem = cart.find(item => {
-        const itemMatch = (item.id === product.id) || 
-                         (parseInt(item.id) === parseInt(product.id)) || 
-                         (String(item.id) === String(product.id));
-        console.log(`Cart item ID: ${item.id}, comparing with product ID: ${product.id}, matches: ${itemMatch}`);
-        return itemMatch;
-      });
-      
-      if (existingItem) {
-        console.log('Product already in cart, updating quantity');
-        existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
-      } else {
-        console.log('Adding new product to cart');
-        // 安全处理产品描述
-        let description = 'No description available';
-        if (product.description) {
-          description = product.description.substring(0, 100);
-          if (product.description.length > 100) {
-            description += '...';
-          }
-        } else if (product.details) {
-          description = product.details.substring(0, 100);
-          if (product.details.length > 100) {
-            description += '...';
-          }
-        }
-        
-        cart.push({
-          id: product.id || 0,
-          name: product.name || 'Unnamed Product',
-          price: finalPrice,
-          image: imageUrl,
-          quantity: quantity || 1,
-          description: description,
-          categoryId: product.categoryId || null
+      try {
+        // 调用API添加商品到购物车
+        const response = await fetch('/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId: productId,
+            quantity: quantity || 1
+          })
         });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+          // 显示成功信息
+          showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+          
+          // 更新购物车数量
+          if (typeof window.updateCartCount === 'function') {
+            window.updateCartCount();
+          }
+        } else {
+          // 显示错误信息
+          showToast(result.message || 'Failed to add product to cart', 'error');
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error adding product to cart:', error);
+        showToast('Error adding product to cart', 'error');
       }
-      
-      // 保存到localStorage
-      console.log('Saving updated cart to localStorage:', cart);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      // 显示成功消息
-      showToast(`${product.name || 'Product'} added to your cart!`, 'success');
-      
-      // 更新导航栏购物车计数
-      updateCartCount();
     }
     
+    // 显示加载提示
+    function showLoading(message = 'Loading...') {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'loading-overlay';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '0';
+      loadingEl.style.left = '0';
+      loadingEl.style.width = '100%';
+      loadingEl.style.height = '100%';
+      loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      loadingEl.style.display = 'flex';
+      loadingEl.style.flexDirection = 'column';
+      loadingEl.style.justifyContent = 'center';
+      loadingEl.style.alignItems = 'center';
+      loadingEl.style.zIndex = '9999';
+      
+      const spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+      spinner.style.width = '40px';
+      spinner.style.height = '40px';
+      spinner.style.border = '4px solid #f3f3f3';
+      spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+      spinner.style.borderRadius = '50%';
+      spinner.style.animation = 'spin 1s linear infinite';
+      spinner.style.marginBottom = '15px';
+      
+      const messageEl = document.createElement('div');
+      messageEl.className = 'loading-message';
+      messageEl.textContent = message;
+      messageEl.style.fontSize = '16px';
+      
+      loadingEl.appendChild(spinner);
+      loadingEl.appendChild(messageEl);
+      document.body.appendChild(loadingEl);
+      
+      // 添加动画样式
+      if (!document.getElementById('loading-spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'loading-spinner-style';
+        style.textContent = `
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+    
+    // 隐藏加载提示
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-overlay');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
+    }
+
     // 更新购物车计数
-    function updateCartCount() {
-      const cartData = localStorage.getItem('cart');
+    async function updateCartCount() {
       const cartCount = document.getElementById('cart-count');
       
       if (!cartCount) return;
+
+      // 检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        cartCount.style.display = 'none';
+        return;
+      }
       
-      if (cartData) {
-        const cart = JSON.parse(cartData);
-        const count = cart.reduce((total, item) => total + item.quantity, 0);
-        cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-      } else {
+      try {
+        // 调用API获取购物车数据
+        const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
+          headers: {
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          let cartItems = [];
+          
+          // 处理不同的响应结构
+          if (Array.isArray(result.data)) {
+            cartItems = result.data;
+          } else if (result.data && Array.isArray(result.data.items)) {
+            cartItems = result.data.items;
+          } else if (Array.isArray(result.items)) {
+            cartItems = result.items;
+          }
+          
+          if (cartItems.length > 0) {
+            const count = cartItems.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+            cartCount.textContent = count;
+            cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+          } else {
+            cartCount.style.display = 'none';
+          }
+        } else {
+          cartCount.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
         cartCount.style.display = 'none';
       }
     }
@@ -281,12 +349,30 @@
         priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
       }
       
+      // 处理图片URL
+      let imageUrl = '/src/client/assets/placeholder.jpg';
+      if (product.image) {
+        imageUrl = product.image;
+      } else if (product.gallery) {
+        // 处理gallery可能是数组或JSON字符串的情况
+        try {
+          const gallery = typeof product.gallery === 'string' ? JSON.parse(product.gallery) : product.gallery;
+          if (Array.isArray(gallery) && gallery.length > 0) {
+            imageUrl = gallery[0];
+          }
+        } catch (e) {
+          console.error('Error parsing gallery data:', e);
+        }
+      } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0];
+      }
+      
       return `
         <div class="col-md-4">
           <div class="product-card">
             <div class="product-img-wrapper">
               <a href="../product/product_detail.html?id=${product.id}">
-                <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
+                <img src="${imageUrl}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
               </a>
             </div>
@@ -307,7 +393,7 @@
     }
 
     // Load designer details and products
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       console.log('DOM loaded, starting to load designer products');
       const designerId = getQueryParam('id');
       console.log('Designer ID from URL:', designerId);
@@ -317,104 +403,77 @@
         return;
       }
       
-      // Retrieve designers from localStorage
-      let designers = [];
+      showLoading('Loading designer information...');
+      
       try {
-        const designersData = localStorage.getItem('designers');
-        console.log('Raw designers data:', designersData);
-        designers = JSON.parse(designersData || '[]');
-        console.log('Parsed designers:', designers);
-      } catch (e) {
-        console.error('Error parsing designers data:', e);
-        showToast('Error loading designers data: ' + e.message, 'error');
-      }
-      
-      const designer = designers.find(d => d.id === designerId);
-      console.log('Found designer:', designer);
-      
-      if (!designer) {
-        document.getElementById('designer-info').innerHTML = '<div class="alert alert-warning">Designer not found.</div>';
-        return;
-      }
-      
-      // Display designer information
-      document.getElementById('designer-info').innerHTML = `
-        <h1>${designer.name}</h1>
-        <p>${designer.bio || 'No biography available.'}</p>
-      `;
-      
-      // Update breadcrumb with designer name
-      document.getElementById('designer-name').textContent = designer.name;
-      
-      // Set header for products section
-      document.getElementById('products-header').innerText = designer.name + "'s Products";
-
-      // Get all products from localStorage
-      const productsData = localStorage.getItem('products');
-      console.log('Raw products data:', productsData);
-      
-      if (!productsData) {
-        document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available.</div>';
-        return;
-      }
-
-      // Find products by this designer
-      const products = JSON.parse(productsData);
-      console.log('All products:', products);
-      console.log('Looking for products with designerId:', designerId);
-      
-      // Check if products have designerId
-      const hasDesignerIds = products.some(p => p.designerId);
-      console.log('Products have designerId property:', hasDesignerIds);
-      
-      if (!hasDesignerIds) {
-        // If products don't have designerId, we'll assign some based on categoryId for this demo
-        console.log('Adding mock designerId to products for this demo');
+        // Fetch designer data from API
+        const designerResponse = await fetch(`/api/designers/detail?id=${designerId}`);
+        const designerResult = await designerResponse.json();
         
-        // Assign products to designers based on categories
-        products.forEach(p => {
-          if (p.categoryId === 1) p.designerId = 'd1';
-          else if (p.categoryId === 2) p.designerId = 'd2';
-          else if (p.categoryId === 3) p.designerId = 'd3';
+        console.log('Designer API response:', designerResult);
+        
+        if (!designerResult.success || !designerResult.data) {
+          hideLoading();
+          document.getElementById('designer-info').innerHTML = '<div class="alert alert-warning">Designer not found.</div>';
+          return;
+        }
+        
+        const designer = designerResult.data;
+        
+        // Display designer information
+        document.getElementById('designer-info').innerHTML = `
+          <h1>${designer.name}</h1>
+          <p>${designer.bio || 'No biography available.'}</p>
+        `;
+        
+        // Update breadcrumb with designer name
+        document.getElementById('designer-name').textContent = designer.name;
+        
+        // Set header for products section
+        document.getElementById('products-header').innerText = designer.name + "'s Products";
+        
+        // Fetch products by designer from API
+        const productsResponse = await fetch(`/api/products?designerId=${designerId}`);
+        const productsResult = await productsResponse.json();
+        
+        console.log('Products API response:', productsResult);
+        hideLoading();
+        
+        // Extract products from response
+        let designerProducts = [];
+        if (productsResult.success) {
+          if (Array.isArray(productsResult.data)) {
+            designerProducts = productsResult.data;
+          } else if (productsResult.data && Array.isArray(productsResult.data.products)) {
+            designerProducts = productsResult.data.products;
+          } else if (productsResult.products && Array.isArray(productsResult.products)) {
+            designerProducts = productsResult.products;
+          }
+        }
+        
+        console.log('Filtered designer products:', designerProducts);
+        
+        if (designerProducts.length === 0) {
+          document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available from this designer.</div>';
+          return;
+        }
+        
+        // Render product cards
+        const productsContainer = document.getElementById('products-container');
+        productsContainer.innerHTML = '';
+        
+        designerProducts.forEach(product => {
+          console.log('Creating card for product:', product);
+          productsContainer.innerHTML += createProductCard(product);
         });
         
-        // Save the updated products back to localStorage
-        localStorage.setItem('products', JSON.stringify(products));
+        // No need for separate event listeners since we're using onclick in the HTML
+        console.log('Product cards added with inline onclick handlers');
+      } catch (error) {
+        hideLoading();
+        console.error('Error loading designer data:', error);
+        document.getElementById('designer-info').innerHTML = '<div class="alert alert-danger">Error loading designer information.</div>';
       }
-      
-      // Check types for comparison - string vs number issues are common
-      console.log('Designer ID type:', typeof designerId);
-      if (products.length > 0) {
-        console.log('Sample product designerId type:', typeof products[0].designerId);
-      }
-      
-      // Try both string and number comparison to handle potential type issues
-      const designerProducts = products.filter(product => {
-        const match = (product.designerId === designerId) || 
-                      (product.designerId === parseInt(designerId)) || 
-                      (String(product.designerId) === designerId);
-        console.log(`Product ID ${product.id}, designerId: ${product.designerId}, matches: ${match}`);
-        return match;
-      });
-      
-      console.log('Filtered designer products:', designerProducts);
-      
-      if (designerProducts.length === 0) {
-        document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available from this designer.</div>';
-        return;
-      }
-      
-      // Render product cards
-      const productsContainer = document.getElementById('products-container');
-      productsContainer.innerHTML = '';
-      
-      designerProducts.forEach(product => {
-        console.log('Creating card for product:', product);
-        productsContainer.innerHTML += createProductCard(product);
-      });
-      
-      // No need for separate event listeners since we're using onclick in the HTML
-      console.log('Product cards added with inline onclick handlers');
     });
   </script>
 

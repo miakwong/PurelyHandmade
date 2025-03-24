@@ -344,41 +344,120 @@
   }
   
   // 添加到购物车
-  function addToCart(productId, quantity) {
-    if (typeof DataService !== 'undefined') {
-      // Get product details using the API
-      DataService.getProductById(productId)
-        .then(result => {
-          if (result && result.data) {
-            const product = result.data;
-            
-            // Add to cart using DataService
-            if (typeof DataService.addToCart === 'function') {
-              DataService.addToCart(product, quantity);
-              
-              // Show success message
-              showToast(`${product.name} added to cart!`, 'success');
-              
-              // Update cart count in navbar if the function exists
-              if (typeof updateCartCount === 'function') {
-                updateCartCount();
-              }
-            } else {
-              console.error('DataService.addToCart function not available');
-              showToast('Could not add to cart: service unavailable', 'error');
-            }
-          } else {
-            console.error('Could not get product details:', result);
-            showToast('Could not add to cart: product not found', 'error');
-          }
+  async function addToCart(productId, quantity) {
+    try {
+      // 获取当前用户信息
+      const currentUser = DataService.getCurrentUser();
+      
+      if (!currentUser) {
+        // 如果用户未登录，提示登录
+        showToast('Please login to add items to cart', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+        }, 1500);
+        return false;
+      }
+      
+      // 显示加载中提示
+      showLoading('Adding to cart...');
+      
+      // 调用API添加商品到购物车
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DataService.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
         })
-        .catch(error => {
-          console.error('Error getting product details:', error);
-          showToast('Could not add to cart: error retrieving product', 'error');
-        });
-    } else {
-      console.error('DataService is not defined');
-      showToast('Could not add to cart: API service not available', 'error');
+      });
+      
+      const result = await response.json();
+      hideLoading();
+      
+      if (result.success) {
+        // 获取产品信息用于显示成功消息
+        const product = onSaleProducts.find(p => p.id == productId);
+        const productName = product ? product.name : 'Product';
+        
+        // 显示成功消息
+        showToast(`${productName} added to your cart!`, 'success');
+        
+        // 更新购物车计数
+        if (typeof updateCartCount === 'function') {
+          updateCartCount();
+        }
+        
+        return true;
+      } else {
+        showToast(result.message || 'Failed to add item to cart', 'error');
+        return false;
+      }
+    } catch (error) {
+      hideLoading();
+      console.error('Error adding product to cart:', error);
+      showToast('Error adding product to cart', 'error');
+      return false;
+    }
+  }
+  
+  // 显示加载提示
+  function showLoading(message = 'Loading...') {
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'loading-overlay';
+    loadingEl.style.position = 'fixed';
+    loadingEl.style.top = '0';
+    loadingEl.style.left = '0';
+    loadingEl.style.width = '100%';
+    loadingEl.style.height = '100%';
+    loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    loadingEl.style.display = 'flex';
+    loadingEl.style.flexDirection = 'column';
+    loadingEl.style.justifyContent = 'center';
+    loadingEl.style.alignItems = 'center';
+    loadingEl.style.zIndex = '9999';
+    
+    const spinner = document.createElement('div');
+    spinner.className = 'loading-spinner';
+    spinner.style.width = '40px';
+    spinner.style.height = '40px';
+    spinner.style.border = '4px solid #f3f3f3';
+    spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+    spinner.style.borderRadius = '50%';
+    spinner.style.animation = 'spin 1s linear infinite';
+    spinner.style.marginBottom = '15px';
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'loading-message';
+    messageEl.textContent = message;
+    messageEl.style.fontSize = '16px';
+    
+    loadingEl.appendChild(spinner);
+    loadingEl.appendChild(messageEl);
+    document.body.appendChild(loadingEl);
+    
+    // 添加动画样式
+    if (!document.getElementById('loading-spinner-style')) {
+      const style = document.createElement('style');
+      style.id = 'loading-spinner-style';
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  // 隐藏加载提示
+  function hideLoading() {
+    const loadingEl = document.getElementById('loading-overlay');
+    if (loadingEl) {
+      loadingEl.remove();
     }
   }
   

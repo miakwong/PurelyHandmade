@@ -377,14 +377,29 @@ const DataService = {
   
   /**
    * 获取购物车数据
-   * @returns {Array} 购物车项目数组
+   * @returns {Promise<Array>} 购物车商品数组
    */
-  getCart: function() {
+  getCart: async function() {
     try {
-      const cartStr = localStorage.getItem('cart');
-      return cartStr ? JSON.parse(cartStr) : [];
-    } catch (e) {
-      console.error('Error parsing cart:', e);
+      // 检查用户是否登录
+      const currentUser = this.getCurrentUser();
+      if (!currentUser) {
+        console.error('User not logged in');
+        return [];
+      }
+      
+      // 调用API获取购物车数据
+      const result = await this.apiRequest(`/cart?userId=${currentUser.id}`, {
+        method: 'GET'
+      });
+      
+      if (result.success && Array.isArray(result.data)) {
+        return result.data;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error getting cart:', error);
       return [];
     }
   },
@@ -399,67 +414,98 @@ const DataService = {
   
   /**
    * 添加商品到购物车
-   * @param {Object} product 产品信息
+   * @param {string|number} productId 产品ID
    * @param {number} quantity 数量
+   * @returns {Promise<boolean>} 操作是否成功
    */
-  addToCart: function(product, quantity = 1) {
-    if (!product || !product.id) return false;
-    
-    const cart = this.getCart();
-    
-    // 检查产品是否已在购物车中
-    const existingItemIndex = cart.findIndex(item => item.id === product.id);
-    
-    if (existingItemIndex >= 0) {
-      // 更新现有商品数量
-      cart[existingItemIndex].quantity += quantity;
-    } else {
-      // 添加新商品
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: quantity
+  addToCart: async function(productId, quantity = 1) {
+    try {
+      // 检查用户是否登录
+      const currentUser = this.getCurrentUser();
+      if (!currentUser) {
+        console.error('User not logged in');
+        return false;
+      }
+      
+      // 调用API添加商品到购物车
+      const result = await this.apiRequest('/cart/add', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
+        })
       });
+      
+      return result.success === true;
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      return false;
     }
-    
-    this.saveCart(cart);
-    return true;
   },
   
   /**
    * 从购物车移除商品
-   * @param {string} productId 产品ID
+   * @param {string|number} productId 产品ID
+   * @returns {Promise<boolean>} 操作是否成功
    */
-  removeFromCart: function(productId) {
-    if (!productId) return false;
-    
-    let cart = this.getCart();
-    cart = cart.filter(item => item.id !== productId);
-    
-    this.saveCart(cart);
-    return true;
+  removeFromCart: async function(productId) {
+    try {
+      // 检查用户是否登录
+      const currentUser = this.getCurrentUser();
+      if (!currentUser) {
+        console.error('User not logged in');
+        return false;
+      }
+      
+      // 调用API从购物车删除商品
+      const result = await this.apiRequest('/cart/remove', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId
+        })
+      });
+      
+      return result.success === true;
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      return false;
+    }
   },
   
   /**
    * 更新购物车中商品数量
-   * @param {string} productId 产品ID
+   * @param {string|number} productId 产品ID
    * @param {number} quantity 新数量
+   * @returns {Promise<boolean>} 操作是否成功
    */
-  updateCartItemQuantity: function(productId, quantity) {
-    if (!productId || quantity < 1) return false;
-    
-    const cart = this.getCart();
-    const itemIndex = cart.findIndex(item => item.id === productId);
-    
-    if (itemIndex >= 0) {
-      cart[itemIndex].quantity = quantity;
-      this.saveCart(cart);
-      return true;
+  updateCartItemQuantity: async function(productId, quantity) {
+    try {
+      if (quantity < 1) return false;
+      
+      // 检查用户是否登录
+      const currentUser = this.getCurrentUser();
+      if (!currentUser) {
+        console.error('User not logged in');
+        return false;
+      }
+      
+      // 调用API更新购物车商品数量
+      const result = await this.apiRequest('/cart/update', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
+        })
+      });
+      
+      return result.success === true;
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+      return false;
     }
-    
-    return false;
   },
   
   /**

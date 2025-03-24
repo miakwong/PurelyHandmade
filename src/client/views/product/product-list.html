@@ -1007,7 +1007,7 @@
   }
   
   // 添加到购物车
-  function addToCart(productId, quantity) {
+  async function addToCart(productId, quantity) {
     const product = products.find(p => p.id == productId);
     
     if (!product) {
@@ -1015,35 +1015,111 @@
       return;
     }
     
-    // 获取购物车
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // 检查产品是否已在购物车中
-    const existingProduct = cart.find(item => item.id == productId);
-    
-    if (existingProduct) {
-      // 更新数量
-      existingProduct.quantity += quantity;
-    } else {
-      // 添加新产品
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantity,
-        image: product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg'
-      });
+    // 检查用户是否登录
+    const currentUser = DataService.getCurrentUser();
+    if (!currentUser) {
+      // 用户未登录，提示登录
+      showToast('Please login to add items to cart', 'error');
+      setTimeout(() => {
+        window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
     }
     
-    // 保存购物车
-    localStorage.setItem('cart', JSON.stringify(cart));
+    // 显示加载提示
+    showLoading('Adding to cart...');
     
-    // 显示成功提示
-    showToast('Product added to cart!', 'success');
+    try {
+      // 调用API添加商品到购物车
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DataService.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          productId: productId,
+          quantity: quantity
+        })
+      });
+      
+      const result = await response.json();
+      hideLoading();
+      
+      if (result.success) {
+        // 显示成功信息
+        showToast(`${product.name || 'Product'} added to your cart!`, 'success');
+        
+        // 更新购物车数量
+        if (typeof window.updateCartCount === 'function') {
+          window.updateCartCount();
+        }
+      } else {
+        // 显示错误信息
+        showToast(result.message || 'Failed to add product to cart', 'error');
+      }
+    } catch (error) {
+      hideLoading();
+      console.error('Error adding product to cart:', error);
+      showToast('Error adding product to cart', 'error');
+    }
+  }
+  
+  // 显示加载提示
+  function showLoading(message = 'Loading...') {
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'loading-overlay';
+    loadingEl.style.position = 'fixed';
+    loadingEl.style.top = '0';
+    loadingEl.style.left = '0';
+    loadingEl.style.width = '100%';
+    loadingEl.style.height = '100%';
+    loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+    loadingEl.style.display = 'flex';
+    loadingEl.style.flexDirection = 'column';
+    loadingEl.style.justifyContent = 'center';
+    loadingEl.style.alignItems = 'center';
+    loadingEl.style.zIndex = '9999';
     
-    // 如果有更新购物车徽章的函数，则调用它
-    if (typeof updateCartBadge === 'function') {
-      updateCartBadge();
+    const spinner = document.createElement('div');
+    spinner.className = 'loading-spinner';
+    spinner.style.width = '40px';
+    spinner.style.height = '40px';
+    spinner.style.border = '4px solid #f3f3f3';
+    spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+    spinner.style.borderRadius = '50%';
+    spinner.style.animation = 'spin 1s linear infinite';
+    spinner.style.marginBottom = '15px';
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'loading-message';
+    messageEl.textContent = message;
+    messageEl.style.fontSize = '16px';
+    
+    loadingEl.appendChild(spinner);
+    loadingEl.appendChild(messageEl);
+    document.body.appendChild(loadingEl);
+    
+    // 添加动画样式
+    if (!document.getElementById('loading-spinner-style')) {
+      const style = document.createElement('style');
+      style.id = 'loading-spinner-style';
+      style.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  // 隐藏加载提示
+  function hideLoading() {
+    const loadingEl = document.getElementById('loading-overlay');
+    if (loadingEl) {
+      loadingEl.remove();
     }
   }
   
