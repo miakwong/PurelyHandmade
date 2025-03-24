@@ -13,6 +13,7 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # 处理API请求
+RewriteRule ^api/([^/]+)\.php$ src/server/api/$1/$2.php [QSA,L]
 RewriteRule ^api/(.*)$ src/server/api.php [QSA,L]
 
 # 如果请求的是客户端文件，进行路由

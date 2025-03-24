@@ -389,7 +389,7 @@
 <!-- Include Bootstrap and other scripts only once -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/src/client/js/common.js"></script>
+<script src="../../js/common.js"></script>
 
   <script src="../../js/navbar-handler.js"></script>
 <script>
@@ -510,8 +510,8 @@
       // window.location.href = '/src/client/views/auth/login.html';
     }
   }
-  
-  function updateProfileDisplayFields() {
+
+  async function updateProfileDisplayFields() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
     if (currentUser) {
@@ -615,8 +615,11 @@
           updateProfileDisplayFields();
           
           // Close modal
-          const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-          modal.hide();
+          const modalElement = document.getElementById('editProfileModal')
+          modalElement.removeAttribute('aria-hidden'); // ✅ 先移除 aria-hidden
+          const modal = bootstrap.Modal.getInstance(modalElement);
+          modal.hide();    // ✅ 现在可以正常隐藏
+
           
           // Show success message
           alert('Profile updated successfully!');
@@ -648,31 +651,49 @@
         // Get current user
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (currentUser) {
-          // In a real app, we would validate the current password against stored hash
-          // For demo, just check if it's not empty
-          if (!currentPassword) {
-            errorElement.textContent = 'Current password is required!';
-            errorElement.classList.remove('d-none');
-      return;
-    }
-    
-          // Update password (in real app, this would be hashed)
-          currentUser.password = newPassword;
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-          
-          // Update users array if exists
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const userIndex = users.findIndex(user => user.id === currentUser.id);
-        if (userIndex !== -1) {
-          users[userIndex].password = newPassword;
-          localStorage.setItem('users', JSON.stringify(users));
-        }
-        
-        // Reset form
-          changePasswordForm.reset();
-          
-          // Show success message
-          alert('Password changed successfully!');
+            // 发送密码更新请求到后端
+            fetch('/api/auth/update.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // 更新本地存储的密码
+                    currentUser.password = newPassword;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // 更新users数组（如果存在）
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const userIndex = users.findIndex(user => user.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        users[userIndex].password = newPassword;
+                        localStorage.setItem('users', JSON.stringify(users));
+                    }
+                    
+                    // 重置表单
+                    changePasswordForm.reset();
+                    
+                    // 显示成功消息
+                    showToast('密码更新成功！', 'success');
+                } else {
+                    // 显示错误消息
+                    errorElement.textContent = result.message || '密码更新失败，请重试。';
+                    errorElement.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('更新密码时出错:', error);
+                errorElement.textContent = '更新密码时出错，请重试。';
+                errorElement.classList.remove('d-none');
+            });
         }
       });
     }
@@ -693,29 +714,62 @@
     const saveBtn = document.createElement('button');
     saveBtn.className = 'btn btn-sm btn-success ms-2';
     saveBtn.innerHTML = '<i class="bi bi-check"></i>';
-    saveBtn.onclick = function() {
-      const newUsername = input.value;
-      if (newUsername) {
-        // Update username in localStorage
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-          currentUser.username = newUsername;
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-          
-          // Update users array if exists
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const userIndex = users.findIndex(user => user.id === currentUser.id);
-    if (userIndex !== -1) {
-            users[userIndex].username = newUsername;
-            localStorage.setItem('users', JSON.stringify(users));
+    
+    saveBtn.onclick = async function () {
+      const newUsername = input.value.trim();
+      if (!newUsername) {
+          alert('Username cannot be empty!');
+          return;
+      }
+
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!currentUser) {
+          alert('User not found in localStorage!');
+          return;
+      }
+
+      // 向数据库发送更新请求
+      try {
+          const response = await fetch('src/server/api/auth/updateProfile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  userId: currentUser.id,
+                  username: newUsername
+              })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+              // 更新 `localStorage` 数据
+              currentUser.username = newUsername;
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+              // 更新 `users` 数组（如果存在）
+              const users = JSON.parse(localStorage.getItem('users') || '[]');
+              const userIndex = users.findIndex(user => user.id === currentUser.id);
+              if (userIndex !== -1) {
+                  users[userIndex].username = newUsername;
+                  localStorage.setItem('users', JSON.stringify(users));
+              }
+
+              // 更新前端页面
+              usernameDisplay.textContent = `@${newUsername}`;
+              document.getElementById('username-display-profile').textContent = `@${newUsername}`;
+              
+              // 成功提示
+              showToast('Username updated successfully!', 'success');
+          } else {
+              console.error('Failed to update username:', result.message);
+              showToast('Failed to update username!', 'danger');
           }
-        }
+      } catch (error) {
+          console.error('Error updating username:', error);
+          showToast('Error updating username!', 'danger');
+      }
         
-        // Update displayed username
-        usernameDisplay.textContent = `@${newUsername}`;
-        document.getElementById('username-display-profile').textContent = `@${newUsername}`;
-        
-        // Restore original display
+        // 恢复原始显示
         toggleUsernameEdit();
       }
     };
@@ -741,7 +795,7 @@
     
     // Focus input
     input.focus();
-  }
+  
   
   function checkAdminStatus() {
     // Check if user is admin and show admin tab if yes
@@ -1012,8 +1066,8 @@
   function saveProfileChanges() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser) {
-      showToast('No user logged in', 'danger');
-      return;
+        showToast('No user logged in', 'danger');
+        return;
     }
     
     // Get form values
@@ -1027,60 +1081,97 @@
     let gender = '';
     const genderRadios = document.getElementsByName('gender');
     for (let i = 0; i < genderRadios.length; i++) {
-      if (genderRadios[i].checked) {
-        gender = genderRadios[i].value;
-        break;
-      }
+        if (genderRadios[i].checked) {
+            gender = genderRadios[i].value;
+            break;
+        }
     }
     
     // Validate inputs
     if (!firstName || !lastName || !email || !username) {
-      document.getElementById('profile-error').textContent = 'Please fill in all required fields.';
-      document.getElementById('profile-error').classList.remove('d-none');
-      return;
+        document.getElementById('profile-error').textContent = 'Please fill in all required fields.';
+        document.getElementById('profile-error').classList.remove('d-none');
+        return;
     }
     
-    // Update user data
-    currentUser.firstName = firstName;
-    currentUser.lastName = lastName;
-    currentUser.name = `${firstName} ${lastName}`;
-    currentUser.email = email;
-    currentUser.username = username;
-    currentUser.birthday = birthday;
-    currentUser.gender = gender;
-        
-        // Save to localStorage
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // Prepare update data
+    const updateData = {
+        userId: currentUser.id,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        username: username,
+        birthday: birthday,
+        gender: gender
+    };
     
-    // Update users array if exists
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(user => user.id === currentUser.id);
-    if (userIndex !== -1) {
-      users[userIndex] = { ...users[userIndex], ...currentUser };
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    
-    // Hide modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-    if (modal) modal.hide();
-    
-    // Update displayed user information
-    document.getElementById('user-full-name').textContent = currentUser.name;
-    document.getElementById('username-display').textContent = `@${currentUser.username}`;
-    document.getElementById('username-display-profile').textContent = `@${currentUser.username}`;
-    document.getElementById('email-display').textContent = currentUser.email;
-    
-    // Update first name and last name in the personal info card
-    const firstNameDisplay = document.getElementById('first-name');
-    const lastNameDisplay = document.getElementById('last-name');
-    if (firstNameDisplay) firstNameDisplay.textContent = currentUser.firstName;
-    if (lastNameDisplay) lastNameDisplay.textContent = currentUser.lastName;
-    
-    updateProfileDisplayFields();
-    
-    // Show success message
-    showToast('Profile updated successfully', 'success');
-  }
+    // Send update request to backend
+    fetch('/src/server/api/auth/update.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Update local storage user data
+            currentUser.firstName = firstName;
+            currentUser.lastName = lastName;
+            currentUser.name = `${firstName} ${lastName}`;          
+            currentUser.email = email;
+            currentUser.username = username;
+            currentUser.birthday = birthday;
+            currentUser.gender = gender;
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Update users array if exists
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(user => user.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex] = { ...users[userIndex], ...currentUser };
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            // Close modal
+            const modalElement = document.getElementById('editProfileModal');
+            modalElement.removeAttribute('aria-hidden');  
+
+            const modal = bootstrap.Modal.getInstance(modalElement);
+
+            modal.hide();  //
+            
+            // Update displayed user information
+            document.getElementById('user-full-name').textContent = currentUser.name;
+            document.getElementById('username-display').textContent = `@${currentUser.username}`;
+            document.getElementById('username-display-profile').textContent = `@${currentUser.username}`;
+            document.getElementById('email-display').textContent = currentUser.email;
+            
+            // Update first name and last name in the personal info card
+            const firstNameDisplay = document.getElementById('first-name');
+            const lastNameDisplay = document.getElementById('last-name');
+            if (firstNameDisplay) firstNameDisplay.textContent = currentUser.firstName;
+            if (lastNameDisplay) lastNameDisplay.textContent = currentUser.lastName;
+            
+            updateProfileDisplayFields();
+            
+            // Show success message
+            showToast('Profile updated successfully', 'success');
+        } else {
+            // Show error message
+            document.getElementById('profile-error').textContent = result.message || 'Update failed, please try again.';
+            document.getElementById('profile-error').classList.remove('d-none');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating profile:', error);
+        document.getElementById('profile-error').textContent = 'Update failed, please try again.';
+        document.getElementById('profile-error').classList.remove('d-none');
+    });
+}
 
   function saveEditedAddress() {
     console.log('Saving edited address');
@@ -1249,7 +1340,7 @@
 
 
 <!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -1308,34 +1399,6 @@
   </div>
 </div>
 
-<!-- Script to create a test admin user for debugging -->
-<script>
-  // Function to create test admin user
-  function createTestAdminUser() {
-    const testUser = {
-      id: 'admin1',
-      username: 'admin',
-      email: 'admin@example.com',
-      name: 'Admin User',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
-      isAdmin: true
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(testUser));
-    
-    // Add to users array if it exists
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (!users.find(u => u.id === testUser.id)) {
-      users.push(testUser);
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    
-    alert('Test admin user created and logged in!');
-    window.location.reload();
-  }
-  
-</script>
+
 
 </html>
