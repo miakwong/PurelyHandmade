@@ -96,6 +96,19 @@
       color: #dc3545;
       margin-bottom: 1rem;
     }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
@@ -513,7 +526,37 @@ const AdminApiService = {
   // 获取网站统计数据
   getSiteStatistics: function() {
     return ApiService.get('/admin/dashboard');
-  }
+  },
+  
+  // 获取订单详情
+  getOrderById: async function(orderId) {
+    console.log(`尝试获取订单详情 ID: ${orderId}`);
+    
+    // 使用订单列表API，但获取所有订单（对管理员有效）
+    return ApiService.get('/orders', { all: 1 }).then(response => {
+      if (response.success && response.data && response.data.orders) {
+        // 从订单列表中找到指定ID的订单
+        const foundOrder = response.data.orders.find(order => order.id == orderId);
+        
+        if (foundOrder) {
+          // 如果找到了，包装为成功响应格式
+          console.log(`✅ 在订单列表中找到了订单 #${orderId}`);
+          return {
+            success: true,
+            data: foundOrder
+          };
+        } else {
+          console.warn(`⚠️ 在API响应中找不到指定订单 #${orderId}`);
+        }
+      }
+      
+      // 如果没有找到订单或API请求失败，返回错误响应
+      return {
+        success: false,
+        message: '未找到指定的订单'
+      };
+    });
+  },
 };
 </script>
 
@@ -800,6 +843,265 @@ const AdminApiService = {
       alert('Error: ' + message);
     }
   }
+
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+  
+  // 显示加载动画
+  function showLoading() {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+  
+  // 隐藏加载动画
+  function hideLoading() {
+    const overlay = document.querySelector('.loading-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  // 格式化货币
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('zh-CN', {
+      style: 'currency',
+      currency: 'CNY'
+    }).format(amount);
+  }
+  
+  // 查看订单详情
+  async function viewOrderDetails(orderId) {
+    try {
+      showLoading();
+      console.log(`查看订单详情: ${orderId}`);
+      
+      // 使用改进的API调用获取订单详情
+      const response = await AdminApiService.getOrderById(orderId);
+      
+      if (!response || !response.success) {
+        hideLoading();
+        console.error(`Error viewing order details:`, response);
+        throw new Error(`Failed to load order details: ${response?.message || 'Unknown error'}`);
+      }
+      
+      const order = response.data;
+      
+      // 尝试获取用户详情
+      let userData = { username: 'Unknown User' };
+      
+      try {
+        const userResponse = await ApiService.get('/auth/profile', { id: order.userId });
+        if (userResponse.success && userResponse.data) {
+          userData = userResponse.data;
+        } else {
+          console.warn(`❌ 获取用户数据时出错:`, userResponse);
+        }
+      } catch (userError) {
+        console.error(`❌ 获取用户数据时出错:`, userError);
+      }
+      
+      // 格式化订单项
+      let orderItemsHTML = '';
+      if (order.items && order.items.length > 0) {
+        orderItemsHTML = order.items.map(item => `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${formatCurrency(item.price)}</td>
+            <td>${formatCurrency(item.price * item.quantity)}</td>
+          </tr>
+        `).join('');
+      } else {
+        orderItemsHTML = `<tr><td colspan="4" class="text-center">No items found</td></tr>`;
+      }
+      
+      // 格式化配送地址
+      function formatShippingAddress(shipping) {
+        if (!shipping) return 'Not available';
+        
+        const parts = [];
+        if (shipping.fullName) parts.push(shipping.fullName);
+        if (shipping.streetAddress) parts.push(shipping.streetAddress);
+        if (shipping.city) parts.push(shipping.city);
+        if (shipping.state) parts.push(shipping.state);
+        if (shipping.country) parts.push(shipping.country);
+        if (shipping.zipCode) parts.push(shipping.zipCode);
+        if (shipping.phone) parts.push(`电话: ${shipping.phone}`);
+        
+        return parts.join('<br>') || 'Not available';
+      }
+      
+      hideLoading();
+      
+      // 显示订单详情对话框
+      Swal.fire({
+        title: `订单详情 #${order.id}`,
+        html: `
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>订单信息</h6>
+                <p><strong>订单号:</strong> #${order.id}</p>
+                <p><strong>日期:</strong> ${formatDate(order.orderDate)}</p>
+                <p><strong>状态:</strong> <span class="badge ${getStatusBadgeClass(order.status)}">${getStatusDisplayName(order.status)}</span></p>
+                <p><strong>总金额:</strong> ${formatCurrency(order.totalAmount)}</p>
+              </div>
+              <div class="col-md-6">
+                <h6>客户信息</h6>
+                <p><strong>姓名:</strong> ${userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Unknown'}</p>
+                <p><strong>邮箱:</strong> ${userData.email || 'Not available'}</p>
+                <h6 class="mt-3">配送地址</h6>
+                ${formatShippingAddress(order.shippingInfo)}
+              </div>
+            </div>
+            <div class="row mt-4">
+              <div class="col-12">
+                <h6>订单商品</h6>
+                <table class="table table-sm table-bordered">
+                  <thead>
+                    <tr>
+                      <th>商品</th>
+                      <th>数量</th>
+                      <th>单价</th>
+                      <th>小计</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${orderItemsHTML}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th colspan="3" class="text-end">总计</th>
+                      <th>${formatCurrency(order.totalAmount)}</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        `,
+        width: '800px',
+        showCloseButton: true,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      hideLoading();
+      console.error('Error viewing order details:', error);
+      Swal.fire({
+        title: '错误',
+        text: `查看订单详情时出错: ${error.message}`,
+        icon: 'error'
+      });
+    }
+  }
+  
+  // 获取订单状态显示名称
+  function getStatusDisplayName(status) {
+    const statusMap = {
+      'pending': '待处理',
+      'processing': '处理中',
+      'shipped': '已发货',
+      'delivered': '已送达',
+      'completed': '已完成',
+      'cancelled': '已取消'
+    };
+    return statusMap[status] || status;
+  }
+  
+  // 获取订单状态徽章样式
+  function getStatusBadgeClass(status) {
+    const statusClassMap = {
+      'pending': 'bg-warning text-dark',
+      'processing': 'bg-info text-dark',
+      'shipped': 'bg-primary',
+      'delivered': 'bg-success',
+      'completed': 'bg-success',
+      'cancelled': 'bg-danger'
+    };
+    return statusClassMap[status] || 'bg-secondary';
+  }
+
+  // 更新最近订单列表
+  async function updateRecentOrders() {
+    try {
+      const recentOrdersContainer = document.getElementById('recent-orders');
+      const response = await ApiService.get('/orders');
+      
+      if (response.success && response.data && response.data.orders) {
+        // 按照日期降序排序，确保最近的订单排在前面
+        const orders = response.data.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+        
+        // 只显示前5个订单
+        const recentOrders = orders.slice(0, 5);
+        
+        if (recentOrders.length > 0) {
+          const orderRows = recentOrders.map(order => {
+            return `
+              <tr data-order-id="${order.id}" class="order-row" style="cursor: pointer;">
+                <td><a href="#" class="order-details-link">#${order.id}</a></td>
+                <td>${formatDate(order.orderDate)}</td>
+                <td><span class="badge ${getStatusBadgeClass(order.status)}">${getStatusDisplayName(order.status)}</span></td>
+                <td>${formatCurrency(order.totalAmount)}</td>
+              </tr>
+            `;
+          }).join('');
+          
+          recentOrdersContainer.innerHTML = orderRows;
+          
+          // 添加点击事件处理
+          document.querySelectorAll('.order-row').forEach(row => {
+            row.addEventListener('click', function() {
+              const orderId = this.getAttribute('data-order-id');
+              viewOrderDetails(orderId);
+            });
+          });
+          
+          document.querySelectorAll('.order-details-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              const orderId = this.closest('tr').getAttribute('data-order-id');
+              viewOrderDetails(orderId);
+            });
+          });
+        } else {
+          recentOrdersContainer.innerHTML = '<tr><td colspan="4" class="text-center">No recent orders</td></tr>';
+        }
+      } else {
+        recentOrdersContainer.innerHTML = '<tr><td colspan="4" class="text-center">Failed to load recent orders</td></tr>';
+      }
+    } catch (error) {
+      console.error('Error loading recent orders:', error);
+      document.getElementById('recent-orders').innerHTML = '<tr><td colspan="4" class="text-center">Error loading recent orders</td></tr>';
+    }
+  }
+
+  // 页面加载完成后执行
+  document.addEventListener('DOMContentLoaded', async function() {
+    // 获取面板统计数据
+    await updateDashboardStats();
+    
+    // 更新最近订单
+    await updateRecentOrders();
+    
+    // 定时刷新数据（每5分钟）
+    setInterval(async function() {
+      await updateDashboardStats();
+      await updateRecentOrders();
+    }, 5 * 60 * 1000);
+  });
 </script>
 </body>
 </html> 
