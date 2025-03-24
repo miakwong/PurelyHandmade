@@ -129,7 +129,8 @@ class AuthController {
             }
             
             // Verify password
-            if (!$this->user->verifyPassword($password, $user['password'])) {
+            if (!$this->user->verifyPassword($password, $user['password_hash'])) {
+                error_log("❌ login() 密码错误");
                 return [
                     'success' => false,
                     'message' => 'Invalid email or password'
@@ -138,14 +139,16 @@ class AuthController {
             
             // Generate JWT token
             $token = $this->auth->generateToken($user['id']);
+            error_log("✅ login() 生成 JWT: " . $token);
             
             // Update last login time
             $this->user->updateLoginTime($user['id']);
+            error_log("✅ login() 更新最后登录时间: " . $user['id']);
             
             // Remove sensitive data
-            unset($user['password']);
+            unset($user['password_hash']);
             
-            $this->logger->info('User logged in', ['id' => $user['id'], 'identifier' => $identifier]);
+            $this->logger->info('User logged in', ['id' => $user['id'], 'email' => $identifier]);
             
             return [
                 'success' => true,
@@ -155,6 +158,7 @@ class AuthController {
             ];
         } catch (\Exception $e) {
             $this->logger->error('Login failed', Logger::formatException($e));
+            error_log("❌ login() 发生异常: " . $e->getMessage());
             
             return [
                 'success' => false,

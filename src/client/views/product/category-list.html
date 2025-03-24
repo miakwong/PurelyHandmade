@@ -12,14 +12,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/navbar.css">
   <link rel="stylesheet" href="../../css/global.css">
   <link rel="stylesheet" href="../../css/category-list.css">
-  
-  <!-- Data Services -->
-  <script src="/src/client/js/data-service.js"></script>
-  <script src="/src/client/js/api-data-loader.js"></script>
 
 </head>
 <body>
@@ -65,37 +60,42 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Load navbar and footer -->
-<script>
-  $(function() {
-    $("#navbar-placeholder").load("/src/client/assets/layout/navbar.html");
-    $("#footer-placeholder").load("/src/client/assets/layout/footer.html");
-  });
-</script>
+<!-- Initialize data script -->
+<script src="../../js/init-data.js"></script>
+<script src="../../js/navbar-handler.js"></script>
 
-<script>  
-  // Load categories when DOM is ready
+<script>
+  // 页面加载完成后执行
   document.addEventListener('DOMContentLoaded', function() {
-    // Load all categories
+    if (typeof window.initializeData === 'function') {
+      window.initializeData();
+    }
+    
+    // 加载所有分类
     loadCategories();
   });
   
-  // Function to load all categories from API
+  // 加载分类数据
   async function loadCategories() {
     const container = document.getElementById('categories-container');
     const loadingIndicator = document.getElementById('loading-indicator');
     
     try {
-      // Fetch categories from API
-      const categories = await DataService.getAllCategories();
-      
-      // Hide loading indicator
+      // 从API获取分类数据
+      const response = await fetch('/src/server/api/categories/list.php');
+      const data = await response.json();
+
+      console.log('Category API Response:', data); 
+      // 隐藏加载指示器
       if (loadingIndicator) {
         loadingIndicator.style.display = 'none';
       }
+
+      // 修改数据获取路径以匹配API返回的实际结构
+      const categories = data?.data?.data?.categories?.categories || [];
       
-      // Check if categories exist
-      if (!categories || categories.length === 0) {
+      // 检查分类是否存在
+      if (!Array.isArray(categories) || categories.length === 0) {
         container.innerHTML = `
           <div class="col-12 text-center py-5">
             <div class="empty-state">
@@ -108,31 +108,18 @@
         return;
       }
       
-      // Fetch all products to count items in each category
-      const productsResponse = await DataService.getAllProducts();
-      let products = [];
-      
-      if (productsResponse.success) {
-        if (productsResponse.data && productsResponse.data.products) {
-          products = productsResponse.data.products;
-        } else if (productsResponse.products) {
-          products = productsResponse.products;
-        }
-      }
-      
-      // Render categories
+      // 渲染分类卡片
       let categoriesHtml = '';
       
       categories.forEach(category => {
-        // Get count of products in this category
-        const productCount = products.filter(p => p.categoryId === category.id).length;
-        
-        // Default image if not provided
-        const categoryImage = category.image || '/src/client/assets/placeholder.jpg';
+        const categoryImage = category.image 
+          ? category.image // 直接使用 API 返回的完整路径
+          : '/src/client/img/category/placeholder.jpg';
+    
         
         categoriesHtml += `
           <div class="col-md-4 col-sm-6 mb-4 fade-in">
-            <a href="category-page.html?id=${category.id}" class="text-decoration-none">
+            <a href="product-list.html?id=${category.id}" class="text-decoration-none">
               <div class="category-card h-100">
                 <div class="category-img-container position-relative">
                   <img src="${categoryImage}" alt="${category.name}" class="category-img">
@@ -144,7 +131,7 @@
                   <h3 class="category-title">${category.name}</h3>
                   <p class="category-description">${category.description || 'Explore our collection of handcrafted products.'}</p>
                   <div class="category-products-count">
-                    <i class="bi bi-box-seam me-1"></i> ${productCount} product${productCount !== 1 ? 's' : ''}
+                    <i class="bi bi-box-seam me-1"></i> ${category.productCount || 0} product${category.productCount !== 1 ? 's' : ''}
                   </div>
                 </div>
               </div>
@@ -157,7 +144,7 @@
     } catch (error) {
       console.error('Error loading categories:', error);
       
-      // Show error message
+      // 显示错误信息
       container.innerHTML = `
         <div class="col-12 text-center py-5">
           <div class="empty-state">
@@ -168,54 +155,11 @@
         </div>
       `;
       
-      // Hide loading indicator
+      // 隐藏加载指示器
       if (loadingIndicator) {
         loadingIndicator.style.display = 'none';
       }
     }
-  }
-  
-  // Show toast notification
-  function showToast(message, type = 'success') {
-    // Ensure toast container exists
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.id = 'toast-container';
-      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-      document.body.appendChild(toastContainer);
-    }
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast show`;
-    toast.role = 'alert';
-    toast.ariaLive = 'assertive';
-    toast.ariaAtomic = 'true';
-    
-    // Set toast content with appropriate styling
-    let bgClass = 'bg-success';
-    if (type === 'error') bgClass = 'bg-danger';
-    if (type === 'info') bgClass = 'bg-info';
-    
-    toast.innerHTML = `
-      <div class="toast-header">
-        <div class="rounded me-2 ${bgClass}" style="width: 20px; height: 20px;"></div>
-        <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        ${message}
-      </div>
-    `;
-    
-    // Add to container
-    toastContainer.appendChild(toast);
-    
-    // Auto-remove after 3 seconds
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
   }
 </script>
 
