@@ -1,45 +1,45 @@
-# PurelyHandmade .htaccess 文件
-# 用于路由前端和API请求
+# PurelyHandmade .htaccess file
+# For routing frontend and API requests
 
-# 启用重写引擎
+# Enable rewrite engine
 RewriteEngine On
 
-# 设置基本URL（如果在子目录中）
+# Set base URL (if in a subdirectory)
 # RewriteBase /purelyhandmade/
 
-# 如果是实际存在的文件或目录，直接访问
+# If the requested file or directory exists, access directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# 处理API请求
+# Handle API requests
 RewriteRule ^api/([^/]+)\.php$ src/server/api/$1/$2.php [QSA,L]
 RewriteRule ^api/(.*)$ src/server/api.php [QSA,L]
 
-# 如果请求的是客户端文件，进行路由
+# If the requested file is a client file, route it
 RewriteRule ^client/(.*)$ src/client/$1 [QSA,L]
 
-# 其他所有请求都路由到主入口文件
+# All other requests are routed to the main entry file
 RewriteRule ^(.*)$ src/index.php [QSA,L]
 
-# PHP设置
+# PHP settings
 php_flag display_errors on
 php_value error_reporting E_ALL
 
-# 设置默认字符集
+# Set default character set
 AddDefaultCharset UTF-8
 
-# 禁止访问敏感文件
+# No access to sensitive files
 <FilesMatch "^\.">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# 禁止访问PHP错误日志
+# No access to PHP error log
 <Files error_log>
     Order allow,deny
     Deny from all
 </Files>
 
-# 定义默认文档
+# Define default document
 DirectoryIndex src/index.php 

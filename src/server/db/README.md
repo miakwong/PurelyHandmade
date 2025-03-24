@@ -1,31 +1,31 @@
-# 数据库初始化工具
+# Database Initialization Tool
 
-这个目录包含 PurelyHandmade 系统的数据库初始化工具。详细的使用说明请参考 [DB_README.md](./DB_README.md) 文件。
+This directory contains the database initialization tools for the PurelyHandmade system. For detailed instructions, please refer to the [DB_README.md](./DB_README.md) file.
 
-## 目录内容
+## Directory Contents
 
-- `init_database.php` - 数据库初始化核心脚本
-- `init_db.php` - 用户友好的命令行界面
-- `database_content.md` - 完整的数据库内容文档
-- `.env.example` - 环境变量示例文件
-- `DB_README.md` - 详细使用文档
+- `init_database.php` - Core script for database initialization
+- `init_db.php` - User-friendly command line interface
+- `database_content.md` - Complete database content documentation
+- `.env.example` - Example environment variable file
+- `DB_README.md` - Detailed usage documentation
 
-## 快速使用指南
+## Quick Start Guide
 
-1. 确保根目录有正确配置的 `.env` 文件
-2. 运行初始化脚本:
+1. Ensure there is a properly configured `.env` file in the root directory
+2. Run the initialization script:
 
 ```bash
 cd src/server/db
 php init_db.php
 ```
 
-初始化脚本会创建并填充数据库表，包括用户、产品、类别、设计师、订单和评论等必要数据。
+The initialization script will create and populate database tables, including necessary data for users, products, categories, designers, orders, and reviews.
 
-## 注意事项
+## Notes
 
-- 此工具会清空现有数据库内容，请谨慎使用
-- 在生产环境使用前先进行备份
-- 默认提供测试账户:
-  - 管理员: admin@purelyhandmade.com
-  - 普通用户: user@purelyhandmade.com 
+- This tool will clear existing database content, please use with caution
+- Backup before using in a production environment
+- Default test accounts provided:
+  - Admin: admin@purelyhandmade.com
+  - Regular user: user@purelyhandmade.com
