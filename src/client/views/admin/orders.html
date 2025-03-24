@@ -201,10 +201,10 @@
             <div class="filter-section mb-4">
               <div class="row g-3">
                 <div class="col-md-3">
-                  <label for="filter-id" class="form-label">Order ID</label>
+                  <label for="filter-order-id" class="form-label">Order ID</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
-                    <input type="text" class="form-control" id="filter-id" placeholder="Filter by Order ID">
+                    <input type="text" class="form-control" id="filter-order-id" placeholder="Filter by Order ID">
                   </div>
                 </div>
                 <div class="col-md-3">
@@ -300,22 +300,49 @@ const ApiService = {
     // 如果状态码不在2xx范围内，抛出错误
     if (!response.ok) {
       let errorData;
+      let errorMessage = 'API request failed';
       
       try {
-        errorData = isJson ? await response.json() : await response.text();
-      } catch (error) {
+        if (isJson) {
+          errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'API request failed';
+        } else {
+          errorData = await response.text();
+        }
+      } catch (parseError) {
+        console.error('Failed to parse error response:', parseError);
         errorData = 'Failed to parse error response';
       }
       
-      const error = new Error(
-        isJson && errorData.error 
-          ? errorData.error 
-          : 'API request failed'
-      );
+      // 根据状态码提供更具体的错误信息
+      switch (response.status) {
+        case 400:
+          errorMessage = `请求错误 (400): ${errorMessage}`;
+          console.error('请求参数错误:', errorData);
+          break;
+        case 401:
+          errorMessage = '未授权: 请重新登录 (401)';
+          break;
+        case 403:
+          errorMessage = '禁止访问 (403): 您没有权限执行此操作';
+          break;
+        case 404:
+          errorMessage = '资源不存在 (404): 请求的资源未找到';
+          break;
+        case 500:
+          errorMessage = '服务器错误 (500): 请联系管理员';
+          break;
+        default:
+          errorMessage = `请求失败 (${response.status}): ${errorMessage}`;
+      }
       
+      const error = new Error(errorMessage);
       error.status = response.status;
       error.statusText = response.statusText;
       error.data = errorData;
+      
+      // 显示错误提示
+      showToast(errorMessage, 'error');
       
       throw error;
     }
@@ -339,9 +366,17 @@ const ApiService = {
     
     // 添加授权令牌
     const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-    if (token) {
-      defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+    if (!token) {
+      console.error('授权令牌不存在，请先登录');
+      // 如果没有token，显示错误并引导用户登录
+      showToast('您需要重新登录以继续操作', 'error');
+      setTimeout(() => {
+        window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      }, 2000);
+      throw new Error('Authorization token is missing');
     }
+    
+    defaultOptions.headers['Authorization'] = `Bearer ${token}`;
     
     // 合并选项
     const fetchOptions = {
@@ -354,7 +389,30 @@ const ApiService = {
     };
     
     try {
+      console.log(`📡 发送${options.method || 'GET'}请求到: ${fullUrl}`);
+      console.log('📡 请求头:', fetchOptions.headers);
+      if (fetchOptions.body) {
+        console.log('📡 请求体:', fetchOptions.body);
+      }
+      
       const response = await fetch(fullUrl, fetchOptions);
+      
+      // 检查授权问题
+      if (response.status === 401) {
+        console.error('授权失败: 令牌可能已过期');
+        showToast('您的登录已过期，请重新登录', 'error');
+        
+        // 清除无效token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        
+        // 延迟重定向，让用户看到错误消息
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        throw new Error('Authorization token expired');
+      }
+      
       return await this.handleResponse(response);
     } catch (error) {
       console.error('API request failed:', error);
@@ -426,16 +484,33 @@ const AdminApiService = {
   },
   
   // 获取所有订单
-  getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
+  getAllOrders: function(filters = {}) {
+    // 构建查询参数
+    const queryParams = {
+      all: 1
+    };
+    
+    // 添加过滤参数
+    if (filters.status) {
+      queryParams.status = filters.status;
+    }
+    
+    if (filters.startDate) {
+      queryParams.start_date = filters.startDate;
+    }
+    
+    if (filters.endDate) {
+      queryParams.end_date = filters.endDate;
+    }
+    
+    // 调用API请求
+    console.log('发送带过滤条件的API请求:', queryParams);
+    return ApiService.get('/orders', queryParams);
   },
   
   // 更新订单状态
   updateOrderStatus: function(orderId, status) {
-    return ApiService.put(`/orders/update`, {
-      id: orderId,
-      status: status
-    });
+    return ApiService.put('/orders/update', { id: orderId, status: status });
   },
   
   // 获取订单详情
@@ -492,12 +567,7 @@ const AdminApiService = {
   
   // 删除订单
   deleteOrder: function(orderId) {
-    // 改用POST方法而不是DELETE，并添加action参数
-    return ApiService.post('/orders/update', {
-      id: orderId,
-      action: 'delete',
-      status: 'deleted'  // 如果API需要状态参数
-    });
+    return ApiService.delete(`/orders?id=${orderId}`);
   }
 };
 
@@ -601,12 +671,29 @@ const MockDataService = {
       }
       console.log(`📊 创建了包含${Object.keys(userMap).length}个用户的映射表`);
       
-      console.log('📡 发送API请求: 获取所有订单 - GET /orders');
-      const response = await AdminApiService.getAllOrders();
+      // 准备API过滤参数
+      const apiFilters = {};
+      
+      // 添加日期过滤条件
+      if (currentFilters.startDate) {
+        apiFilters.startDate = currentFilters.startDate;
+      }
+      
+      if (currentFilters.endDate) {
+        apiFilters.endDate = currentFilters.endDate;
+      }
+      
+      // 添加状态过滤条件
+      if (currentFilters.status) {
+        apiFilters.status = currentFilters.status;
+      }
+      
+      console.log('📡 发送API请求: 获取订单(带过滤条件) - GET /orders');
+      const response = await AdminApiService.getAllOrders(apiFilters);
       console.log('✅ 获取订单响应:', response);
       
       if (!response || !response.success) {
-        throw new Error(response?.message || 'Failed to load orders');
+        throw new Error(response?.message || '无法加载订单');
       }
       
       // 正确处理API返回结构
@@ -624,18 +711,34 @@ const MockDataService = {
             orders = response.data[dataKeys[0]];
             console.log('尝试使用替代数据格式:', dataKeys[0]);
           } else {
-            throw new Error('Invalid orders data format');
+            throw new Error('订单数据格式无效');
           }
         }
       }
       
       console.log(`📊 获取到${orders.length}个订单`);
       
-      // 应用筛选
-      if (Object.values(currentFilters).some(v => v)) {
-        console.log('🔍 应用订单筛选条件:', currentFilters);
-        orders = filterOrders(orders, Object.values(userMap));
-        console.log(`📊 筛选后剩余${orders.length}个订单`);
+      // 仅对ID和用户名进行客户端过滤（因为服务器API不支持这些过滤）
+      if (currentFilters.id || currentFilters.user) {
+        console.log('🔍 应用客户端订单筛选条件:', {id: currentFilters.id, user: currentFilters.user});
+        orders = orders.filter(order => {
+          // 用户名过滤
+          if (currentFilters.user) {
+            const user = userMap[order.userId] || {};
+            const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '';
+            if (!userName.toLowerCase().includes(currentFilters.user.toLowerCase())) {
+              return false;
+            }
+          }
+          
+          // 订单ID过滤
+          if (currentFilters.id && !String(order.id).toLowerCase().includes(currentFilters.id.toLowerCase())) {
+            return false;
+          }
+          
+          return true;
+        });
+        console.log(`📊 客户端筛选后剩余${orders.length}个订单`);
       }
       
       // 清空表格
@@ -889,7 +992,7 @@ const MockDataService = {
                             onclick="handleOrder('${order.id}', 'deliver')">
                       <i class="bi bi-truck me-1"></i>Set as Delivered
                     </button>
-                    <button class="btn ${order.status === 'delivered' ? 'btn-success' : 'btn-outline-success'}" 
+                    <button class="btn ${order.status === 'completed' ? 'btn-success' : 'btn-outline-success'}" 
                             onclick="handleOrder('${order.id}', 'complete')">
                       <i class="bi bi-check-circle me-1"></i>Set as Completed
                     </button>
@@ -938,17 +1041,32 @@ const MockDataService = {
   
   // 更新订单状态
   async function updateOrderStatus(orderId, newStatus) {
+    let loadingToast = null;
     try {
       // 显示加载提示
-      showToast('Updating order status...', 'info');
+      loadingToast = showToast('正在更新订单状态...', 'info', false);
+      
+      // 检查token
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        if (loadingToast) loadingToast.hide();
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
+      }
       
       // 通过API更新订单状态
       console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, status: ${newStatus})`);
       const response = await AdminApiService.updateOrderStatus(orderId, newStatus);
       console.log('✅ 更新订单状态响应:', response);
       
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
       if (!response || !response.success) {
-        throw new Error(response?.data || 'Failed to update order status');
+        throw new Error(response?.message || '无法更新订单状态');
       }
       
       // 关闭模态窗口
@@ -961,40 +1079,89 @@ const MockDataService = {
       await loadOrders();
       
       // 显示成功消息
-      showToast('Order status updated successfully', 'success');
+      showToast('订单状态已成功更新', 'success');
       
     } catch (error) {
       console.error('❌ 更新订单状态时出错:', error);
-      showToast(`Error updating order status: ${error.message}`, 'danger');
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      // 处理不同类型的错误
+      let errorMessage = '更新订单状态时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      } else {
+        errorMessage = `更新失败: ${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
     }
   }
 
   // 删除订单
   async function deleteOrder(orderId) {
-    if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
-      try {
-        // 显示加载提示
-        showToast('Deleting order...', 'info');
-        
-        // 通过API删除订单
-        console.log(`📡 发送API请求: 删除订单 - DELETE /orders?id=${orderId}`);
-        const response = await AdminApiService.deleteOrder(orderId);
-        console.log('✅ 删除订单响应:', response);
-        
-        if (!response || !response.success) {
-          throw new Error(response?.data || 'Failed to delete order');
-        }
-        
-        // 重新加载订单列表
-        await loadOrders();
-        
-        // 显示成功消息
-        showToast('Order deleted successfully', 'success');
-        
-      } catch (error) {
-        console.error('❌ 删除订单时出错:', error);
-        showToast(`Error deleting order: ${error.message}`, 'danger');
+    if (!confirm('确定要删除此订单吗? 此操作无法撤销。')) {
+      return;
+    }
+    
+    let loadingToast = null;
+    try {
+      // 显示加载提示
+      loadingToast = showToast('正在删除订单...', 'info', false);
+      
+      // 检查token
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        if (loadingToast) loadingToast.hide();
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
       }
+      
+      // 通过API删除订单
+      console.log(`📡 发送API请求: 删除订单 - DELETE /orders?id=${orderId}`);
+      const response = await AdminApiService.deleteOrder(orderId);
+      console.log('✅ 删除订单响应:', response);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      if (!response || !response.success) {
+        throw new Error(response?.message || '无法删除订单');
+      }
+      
+      // 重新加载订单列表
+      await loadOrders();
+      
+      // 显示成功消息
+      showToast('订单已成功删除', 'success');
+      
+    } catch (error) {
+      console.error('❌ 删除订单时出错:', error);
+      
+      // 隐藏加载提示
+      if (loadingToast) loadingToast.hide();
+      
+      // 处理不同类型的错误
+      let errorMessage = '删除订单时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+      } else {
+        errorMessage = `删除失败: ${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
     }
   }
 
@@ -1043,8 +1210,8 @@ const MockDataService = {
     id: '',
     user: '',
     status: '',
-    dateFrom: '',
-    dateTo: ''
+    startDate: '',
+    endDate: ''
   };
   
   // Apply filters to orders
@@ -1057,7 +1224,7 @@ const MockDataService = {
       const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || '';
       
       // Filter by Order ID
-      if (currentFilters.id && !order.id.toLowerCase().includes(currentFilters.id.toLowerCase())) {
+      if (currentFilters.id && !String(order.id).toLowerCase().includes(currentFilters.id.toLowerCase())) {
         return false;
       }
       
@@ -1075,8 +1242,8 @@ const MockDataService = {
       const orderDate = new Date(order.createdAt || order.date);
       
       // Check date from
-      if (currentFilters.dateFrom) {
-        const fromDate = new Date(currentFilters.dateFrom);
+      if (currentFilters.startDate) {
+        const fromDate = new Date(currentFilters.startDate);
         fromDate.setHours(0, 0, 0, 0);
         if (orderDate < fromDate) {
           return false;
@@ -1084,8 +1251,8 @@ const MockDataService = {
       }
       
       // Check date to
-      if (currentFilters.dateTo) {
-        const toDate = new Date(currentFilters.dateTo);
+      if (currentFilters.endDate) {
+        const toDate = new Date(currentFilters.endDate);
         toDate.setHours(23, 59, 59, 999);
         if (orderDate > toDate) {
           return false;
@@ -1099,29 +1266,22 @@ const MockDataService = {
   // Apply filters when button is clicked
   function applyFilters() {
     currentFilters = {
-      id: document.getElementById('filter-id').value.trim(),
+      id: document.getElementById('filter-order-id').value.trim(),
       user: document.getElementById('filter-user').value.trim(),
       status: document.getElementById('filter-status').value,
-      dateFrom: document.getElementById('filter-date-from').value,
-      dateTo: document.getElementById('filter-date-to').value
+      startDate: document.getElementById('filter-date-from').value,
+      endDate: document.getElementById('filter-date-to').value
     };
     
-    loadOrders();
+    console.log('🔍 应用新筛选条件:', currentFilters);
     
-    // Show which filters are applied
-    const appliedFilters = Object.entries(currentFilters)
-      .filter(([_, value]) => value)
-      .map(([key, _]) => key)
-      .join(', ');
-      
-    if (appliedFilters) {
-      showToast(`Filters applied: ${appliedFilters}`, 'info');
-    }
+    // 重新加载订单列表，使用API过滤
+    loadOrders();
   }
   
   // Reset all filters
   function resetFilters() {
-    document.getElementById('filter-id').value = '';
+    document.getElementById('filter-order-id').value = '';
     document.getElementById('filter-user').value = '';
     document.getElementById('filter-status').value = '';
     document.getElementById('filter-date-from').value = '';
@@ -1131,15 +1291,15 @@ const MockDataService = {
       id: '',
       user: '',
       status: '',
-      dateFrom: '',
-      dateTo: ''
+      startDate: '',
+      endDate: ''
     };
     
     loadOrders();
     showToast('Filters cleared', 'info');
   }
   
-  function showToast(message, type = 'success') {
+  function showToast(message, type = 'success', autohide = true) {
     const toastContainer = document.querySelector('.toast-container');
     
     const toastElement = document.createElement('div');
@@ -1159,7 +1319,7 @@ const MockDataService = {
     
     toastContainer.appendChild(toastElement);
     
-    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    const toast = new bootstrap.Toast(toastElement, { autohide, delay: 3000 });
     toast.show();
     
     toastElement.addEventListener('hidden.bs.toast', function() {
@@ -1221,6 +1381,7 @@ const MockDataService = {
       case 'processing': return 'info';
       case 'shipped': return 'primary';
       case 'delivered': return 'success';
+      case 'completed': return 'success';
       case 'cancelled': return 'danger';
       default: return 'secondary';
     }
@@ -1290,17 +1451,93 @@ const MockDataService = {
 
   // 处理订单状态更新
   async function handleOrder(orderId, action) {
+    let loadingToast = null;
     try {
       // 显示加载提示
-      showToast('Processing order...', 'info');
+      loadingToast = showToast('正在处理订单...', 'info', false);
+      
+      // 详细日志记录
+      console.log(`📡 处理订单: ID=${orderId}, 动作=${action}`);
+      
+      // 确保token有效
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) {
+        showToast('您需要重新登录以继续操作', 'error');
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 2000);
+        return;
+      }
+      
+      console.log(`📡 获取当前所有订单列表，以确认订单存在`);
+      
+      // 首先验证订单是否存在
+      const checkResponse = await ApiService.get('/orders', { all: 1 });
+      console.log('📡 检查订单列表响应:', checkResponse);
+      
+      if (!checkResponse || !checkResponse.success) {
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        throw new Error('无法验证订单存在性: ' + (checkResponse?.message || 'API请求失败'));
+      }
+      
+      // 查找订单
+      const orders = checkResponse.data?.orders || [];
+      const orderExists = orders.some(order => order.id == orderId);
+      
+      if (!orderExists) {
+        console.error(`❌ 找不到ID为${orderId}的订单`);
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        throw new Error(`订单ID ${orderId} 不存在`);
+      }
+      
+      console.log(`✅ 已确认订单存在，ID=${orderId}`);
+      
+      // 将action转换为状态
+      let status = '';
+      switch(action) {
+        case 'process': status = 'processing'; break;
+        case 'ship': status = 'shipped'; break;
+        case 'deliver': status = 'delivered'; break;
+        case 'complete': status = 'completed'; break;
+        case 'cancel': status = 'cancelled'; break;
+        default: status = action;
+      }
       
       // 通过API更新订单状态
-      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, action: ${action})`);
-      const response = await AdminApiService.handleOrder(orderId, action);
+      console.log(`📡 发送API请求: 更新订单状态 - PUT /orders/update (id: ${orderId}, status: ${status})`);
+      console.log(`📡 请求体: ${JSON.stringify({id: orderId, status: status})}`);
+      
+      // 使用更精确的错误处理进行API请求
+      let response;
+      try {
+        response = await ApiService.put('/orders/update', {
+          id: orderId,
+          status: status
+        });
+      } catch (apiError) {
+        console.error('API请求异常:', apiError);
+        // 隐藏加载提示
+        if (loadingToast) {
+          loadingToast.hide();
+        }
+        // 显示详细错误
+        showToast(`API请求失败: ${apiError.message}`, 'danger');
+        return;
+      }
+      
       console.log('✅ 处理订单响应:', response);
       
+      // 隐藏加载提示
+      if (loadingToast) {
+        loadingToast.hide();
+      }
+      
       if (!response || !response.success) {
-        throw new Error(response?.message || 'Failed to process order');
+        throw new Error(response?.message || '处理订单失败');
       }
       
       // 关闭模态窗口
@@ -1313,11 +1550,38 @@ const MockDataService = {
       await loadOrders();
       
       // 显示成功消息
-      showToast(`Order status updated to ${action}`, 'success');
+      showToast(`订单状态已更新为 ${status}`, 'success');
       
     } catch (error) {
       console.error('❌ 处理订单时出错:', error);
-      showToast(`Error processing order: ${error.message}`, 'danger');
+      
+      // 隐藏加载提示
+      if (loadingToast) {
+        loadingToast.hide();
+      }
+      
+      // 显示友好的错误消息
+      let errorMessage = '处理订单时出错';
+      
+      if (error.message.includes('token')) {
+        errorMessage = '登录凭证无效，请重新登录';
+        // 清除无效的token
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        
+        // 稍后跳转到登录页面
+        setTimeout(() => {
+          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+        }, 3000);
+      } else if (error.status === 400) {
+        errorMessage = `请求错误: ${error.message}`;
+      } else if (error.status === 404) {
+        errorMessage = `找不到订单: ${error.message}`;
+      } else {
+        errorMessage = `${error.message}`;
+      }
+      
+      showToast(errorMessage, 'danger');
     }
   }
 </script>

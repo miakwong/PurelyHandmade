@@ -35,6 +35,9 @@ class OrderController {
             $startDate = $_GET['start_date'] ?? null;
             $endDate = $_GET['end_date'] ?? null;
             
+            // 获取状态过滤参数
+            $status = $_GET['status'] ?? null;
+            
             // 初始化一个新的过滤器数组，避免传入的filters被直接修改
             $queryFilters = [];
             
@@ -58,13 +61,20 @@ class OrderController {
                 $this->logger->info('添加结束日期过滤: ' . $endDate);
             }
             
+            // 添加状态过滤条件
+            if ($status) {
+                $queryFilters['status'] = $status;
+                $this->logger->info('添加状态过滤: ' . $status);
+            }
+            
             // 记录日志，帮助调试
             $this->logger->info('获取订单', [
                 'userId' => $userId,
                 'isAdmin' => $isAdmin ? 'true' : 'false',
                 'getAll' => $getAll ? 'true' : 'false',
                 'filters' => $queryFilters,
-                'date_range' => [$startDate, $endDate]
+                'date_range' => [$startDate, $endDate],
+                'status' => $status
             ]);
             
             $result = $this->order->getAll($queryFilters, $page, $limit);
@@ -284,7 +294,7 @@ class OrderController {
             }
             
             // Validate status
-            $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+            $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
             if (!in_array($status, $validStatuses)) {
                 return [
                     'success' => false,
