@@ -75,12 +75,12 @@ class Category {
         try {
             $sql = "SELECT COUNT(*) as count FROM Product WHERE categoryId = :categoryId AND active = 1";
             
-            // 记录日志，检查是否正确执行
+            // Record the SQL query and categoryId
             error_log("🛠️ SQL Query: " . $sql . " with categoryId: " . $categoryId);
     
             $result = $this->db->fetch($sql, ['categoryId' => $categoryId]);
     
-            // 记录查询结果
+            // Record the query result
             error_log("🎯 Query Result: " . json_encode($result));
     
             return $result['count'] ?? 0;
