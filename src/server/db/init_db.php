@@ -1,13 +1,13 @@
 <?php
 /**
- * 数据库初始化命令行工具
+ * Database initialization command line tool
  * 
- * 用法：
- * php init_db.php          - 交互模式
- * php init_db.php --force  - 强制模式，不提示确认
+ * Usage:
+ * php init_db.php          - interactive mode
+ * php init_db.php --force  - force mode, no confirmation required
  */
 
-// 解析命令行参数
+// Parse command line arguments
 $forceMode = false;
 foreach ($argv as $arg) {
     if ($arg === '--force') {
@@ -15,48 +15,48 @@ foreach ($argv as $arg) {
     }
 }
 
-// 如果不是强制模式，显示警告并请求确认
+// If not in force mode, show warning and request confirmation
 if (!$forceMode) {
     echo "=======================================================\n";
-    echo "        PurelyHandmade 数据库初始化工具\n";
+    echo "        PurelyHandmade Database Initialization Tool\n";
     echo "=======================================================\n\n";
-    echo "警告: 此操作将重置数据库，所有现有数据将被删除!\n";
-    echo "数据库将根据 database_content.md 文件重新创建并填充初始数据。\n\n";
+    echo "Warning: This operation will reset the database, and all existing data will be deleted!\n";
+    echo "The database will be recreated and populated with initial data according to the database_content.md file.\n\n";
     
-    echo "您确定要继续吗? [y/N]: ";
+    echo "Are you sure you want to continue? [y/N]: ";
     $handle = fopen("php://stdin", "r");
     $line = trim(fgets($handle));
     fclose($handle);
     
     if (strtolower($line) !== 'y') {
-        echo "操作已取消\n";
+        echo "Operation cancelled\n";
         exit;
     }
     
-    echo "\n开始初始化数据库...\n\n";
+    echo "\nStarting database initialization...\n\n";
 }
 
-// 执行数据库初始化脚本
+// Execute database initialization script
 require_once __DIR__ . '/init_database.php';
 
 echo "\n=======================================================\n";
-echo "        数据库初始化完成!\n";
+echo "         Database initialization completed!\n";
 echo "=======================================================\n\n";
-echo "数据库摘要:\n";
-echo "- 用户: 12个 (包括管理员和普通用户)\n";
-echo "- 产品类别: 8个\n";
-echo "- 设计师: 8个\n";
-echo "- 产品: 10个\n";
-echo "- 订单: 10个\n";
-echo "- 评论: 10个\n\n";
+echo "Database summary:\n";
+echo "- Users: 12 (including admin and regular users)\n";
+echo "- Product categories: 8\n";
+echo "- Designers: 8\n";
+echo "- Products: 10\n";
+echo "- Orders: 10\n";
+echo "- Reviews: 10\n\n";
 
-echo "管理员账户:\n";
-echo "- 用户名: admin@purelyhandmade.com / 密码: 密码散列值已存储\n";
-echo "- 用户名: newadmin@example.com / 密码: 密码散列值已存储\n\n";
+echo "Admin account:\n";
+echo "- Username: admin@purelyhandmade.com / Password: password hash stored\n";
+echo "- Username: newadmin@example.com / Password: password hash stored\n\n";
 
-echo "普通用户账户:\n";
-echo "- 用户名: user@purelyhandmade.com / 密码: 密码散列值已存储\n";
-echo "- 用户名: customer1@example.com / 密码: 密码散列值已存储\n\n";
+echo "Regular user accounts:\n";
+echo "- Username: user@purelyhandmade.com / Password: password hash stored\n";
+echo "- Username: customer1@example.com / Password: password hash stored\n\n";
 
-echo "可以使用这些账户登录系统测试功能。\n";
-echo "数据库结构和关系已经根据 database_content.md 文件设置完成。\n"; 
+echo "You can use these accounts to test the system.\n";
+echo "The database structure and relationships have been set up according to the database_content.md file.\n"; 

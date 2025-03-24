@@ -1,8 +1,8 @@
-# 本地环境配置文件
+# Local environment configuration file
 .env.local
 
-# 测试文件
+# Test files
 *.test.php
 
-# 日志文件
+# Log files
 *.log 
