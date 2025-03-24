@@ -440,33 +440,20 @@ const AdminApiService = {
   
   // 获取订单详情
   getOrderById: function(orderId) {
-    // 修改请求方式，确保ID参数正确传递
-    // 有些API会期望id在URL路径中，有些则在查询参数中
-    // 这里尝试以更兼容的方式发送请求
-    try {
-      return ApiService.get(`/orders/${orderId}`);
-    } catch(error) {
-      // 如果第一种尝试失败，尝试使用查询参数
-      return ApiService.get('/orders/detail', { id: orderId });
-    }
+    // 由于测试表明/orders端点加参数工作正常，而直接路径方式不工作
+    // 因此直接使用已知能工作的方法
+    console.log(`使用验证可行的API端点获取订单 ID: ${orderId}`);
+    return ApiService.get('/orders', { id: orderId });
   },
   
   // 处理订单
   handleOrder: function(orderId, action) {
     console.log(`📡 处理订单 - ID: ${orderId}, 动作: ${action}`);
-    // 尝试以几种不同的格式发送请求，以适应不同的API实现
-    try {
-      return ApiService.post(`/orders/process`, {
-        id: orderId,
-        action: action
-      });
-    } catch (error) {
-      console.warn('尝试备用请求格式:', error);
-      // 尝试另一种常见的API格式
-      return ApiService.put(`/orders/${orderId}/status`, {
-        status: action
-      });
-    }
+    // 直接使用已知能工作的API格式
+    return ApiService.post('/orders/process', {
+      id: orderId,
+      action: action
+    });
   },
   
   // 删除订单
@@ -767,55 +754,39 @@ const MockDataService = {
       // 从API获取订单详情
       console.log(`📡 发送API请求: 获取订单详情 - 订单ID: ${orderId}`);
       
-      let response;
-      let useMockData = false;
+      // 使用已验证工作的API端点
+      const response = await AdminApiService.getOrderById(orderId);
+      console.log('✅ 获取订单详情响应:', response);
       
-      try {
-        response = await AdminApiService.getOrderById(orderId);
-        console.log('✅ 获取订单详情响应:', response);
-      } catch (apiError) {
-        console.error('❌ API调用失败:', apiError);
-        // 尝试备用方法 - 直接使用ApiService
-        try {
-          console.log('📡 尝试备用方法获取订单详情');
-          response = await ApiService.get('/orders', { id: orderId });
-          console.log('✅ 备用方法响应:', response);
-        } catch (backupError) {
-          console.error('❌ 备用方法也失败:', backupError);
-          console.warn('⚠️ 使用模拟数据作为备用');
-          useMockData = true;
-        }
+      if (!response || !response.success) {
+        throw new Error(response?.message || 'Failed to load order details');
       }
       
+      // 在响应中查找特定订单
       let order = null;
       
-      if (useMockData) {
-        // 使用模拟数据
-        order = MockDataService.createMockOrder(orderId);
-        showToast('Using mock data (API failed)', 'warning');
-      } else {
-        // 使用API数据
-        if (!response || !response.success) {
-          throw new Error(response?.message || 'Failed to load order details');
-        }
-        
-        // 正确处理API返回结构
-        if (response.data) {
-          if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-            // 直接使用对象
-            order = response.data;
-          } else if (response.data.order && typeof response.data.order === 'object') {
-            // 使用嵌套的order对象
-            order = response.data.order;
-          } else {
-            console.error('API返回的order格式不正确:', response.data);
-            throw new Error('Invalid order data format');
+      // 处理API返回结构
+      if (response.data) {
+        if (response.data.orders && Array.isArray(response.data.orders)) {
+          // API返回orders数组，找到匹配ID的订单
+          const matchingOrder = response.data.orders.find(o => o.id === orderId);
+          if (matchingOrder) {
+            order = matchingOrder;
           }
+        } else if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+          // 直接使用对象
+          order = response.data;
+        } else if (response.data.order && typeof response.data.order === 'object') {
+          // 使用嵌套的order对象
+          order = response.data.order;
         }
       }
       
+      // 如果找不到订单，使用模拟数据
       if (!order) {
-        throw new Error('Order not found');
+        console.warn('⚠️ 在API响应中找不到指定订单，使用模拟数据');
+        order = MockDataService.createMockOrder(orderId);
+        showToast('Using mock data (Order not found in API response)', 'warning');
       }
       
       // 获取用户信息
