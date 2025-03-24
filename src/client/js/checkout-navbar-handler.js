@@ -18,7 +18,9 @@ function loadNavbar() {
       
       // Update cart count after navbar is loaded
       if (typeof updateCartCount === 'function') {
-        updateCartCount();
+        updateCartCount().catch(err => {
+          console.error('Error updating cart count:', err);
+        });
       }
       
       // Update authentication button state after navbar is loaded
@@ -103,18 +105,44 @@ function loadFooter() {
 }
 
 // Handle cart count updates
-function updateCartCount() {
-  const cartData = localStorage.getItem('cart');
+async function updateCartCount() {
   const cartCount = document.getElementById('cart-count');
   
   if (!cartCount) return;
-  
-  if (cartData) {
-    const cart = JSON.parse(cartData);
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = count;
-    cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-  } else {
+
+  try {
+    // 检查用户是否登录并且DataService可用
+    if (!window.DataService) {
+      console.warn('DataService is not available');
+      cartCount.style.display = 'none';
+      return;
+    }
+    
+    const currentUser = DataService.getCurrentUser();
+    if (!currentUser) {
+      cartCount.style.display = 'none';
+      return;
+    }
+    
+    // 使用DataService的getCart方法获取购物车数据
+    const cart = await DataService.getCart();
+    
+    // 确保cart是数组
+    if (!Array.isArray(cart)) {
+      console.warn('Cart is not an array:', cart);
+      cartCount.textContent = '0';
+      cartCount.style.display = 'none';
+      return;
+    }
+    
+    const itemCount = cart.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+    
+    // 更新购物车数量显示
+    cartCount.textContent = itemCount;
+    cartCount.style.display = itemCount > 0 ? 'inline-block' : 'none';
+  } catch (error) {
+    console.error('Error updating cart count:', error);
+    cartCount.textContent = '0';
     cartCount.style.display = 'none';
   }
 }

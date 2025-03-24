@@ -21,7 +21,9 @@ function loadNavbar() {
         updateAuthState();
         // Update cart count if function exists
         if (typeof updateCartCount === 'function') {
-          updateCartCount();
+          updateCartCount().catch(err => {
+            console.error('Error updating cart count:', err);
+          });
         }
       }, 100);
     })
