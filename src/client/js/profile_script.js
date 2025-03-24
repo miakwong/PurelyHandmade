@@ -6,7 +6,7 @@ function updateProfilePhoto(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            photo.src = e.target.result;
+            photo.src = event.target.result;
         };
         reader.readAsDataURL(file);
     }
