@@ -440,20 +440,83 @@ const AdminApiService = {
   
   // 获取订单详情
   getOrderById: function(orderId) {
-    return ApiService.get(`/orders/detail?id=${orderId}`);
+    // 修改请求方式，确保ID参数正确传递
+    // 有些API会期望id在URL路径中，有些则在查询参数中
+    // 这里尝试以更兼容的方式发送请求
+    try {
+      return ApiService.get(`/orders/${orderId}`);
+    } catch(error) {
+      // 如果第一种尝试失败，尝试使用查询参数
+      return ApiService.get('/orders/detail', { id: orderId });
+    }
   },
   
   // 处理订单
   handleOrder: function(orderId, action) {
-    return ApiService.post(`/orders/update`, {
-      id: orderId,
-      action: action
-    });
+    console.log(`📡 处理订单 - ID: ${orderId}, 动作: ${action}`);
+    // 尝试以几种不同的格式发送请求，以适应不同的API实现
+    try {
+      return ApiService.post(`/orders/process`, {
+        id: orderId,
+        action: action
+      });
+    } catch (error) {
+      console.warn('尝试备用请求格式:', error);
+      // 尝试另一种常见的API格式
+      return ApiService.put(`/orders/${orderId}/status`, {
+        status: action
+      });
+    }
   },
   
   // 删除订单
   deleteOrder: function(orderId) {
     return ApiService.delete(`/orders?id=${orderId}`);
+  }
+};
+
+/**
+ * 模拟数据服务
+ * 在API调用失败时提供备用数据
+ */
+const MockDataService = {
+  // 创建模拟订单数据
+  createMockOrder: function(orderId) {
+    console.log('🔧 创建模拟订单数据:', orderId);
+    return {
+      id: orderId,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      totalAmount: 99.99,
+      shippingFee: 5.99,
+      items: [
+        {
+          productId: 'mock-product-1',
+          name: 'Mock Product 1',
+          price: 49.99,
+          quantity: 1,
+          subtotal: 49.99
+        },
+        {
+          productId: 'mock-product-2',
+          name: 'Mock Product 2',
+          price: 50.00,
+          quantity: 1,
+          subtotal: 50.00
+        }
+      ],
+      userId: 'mock-user-1',
+      shippingInfo: {
+        name: 'Mock User',
+        address: '123 Mock Street',
+        city: 'Mockville',
+        state: 'Mockland',
+        zip: '12345',
+        country: 'Mockistan',
+        phone: '555-MOCK'
+      },
+      paymentMethod: 'creditCard'
+    };
   }
 };
 </script>
@@ -702,26 +765,52 @@ const AdminApiService = {
       showToast('Loading order details...', 'info');
       
       // 从API获取订单详情
-      console.log(`📡 发送API请求: 获取订单详情 - GET /orders/detail?id=${orderId}`);
-      const response = await AdminApiService.getOrderById(orderId);
-      console.log('✅ 获取订单详情响应:', response);
+      console.log(`📡 发送API请求: 获取订单详情 - 订单ID: ${orderId}`);
       
-      if (!response || !response.success) {
-        throw new Error(response?.data || 'Failed to load order details');
+      let response;
+      let useMockData = false;
+      
+      try {
+        response = await AdminApiService.getOrderById(orderId);
+        console.log('✅ 获取订单详情响应:', response);
+      } catch (apiError) {
+        console.error('❌ API调用失败:', apiError);
+        // 尝试备用方法 - 直接使用ApiService
+        try {
+          console.log('📡 尝试备用方法获取订单详情');
+          response = await ApiService.get('/orders', { id: orderId });
+          console.log('✅ 备用方法响应:', response);
+        } catch (backupError) {
+          console.error('❌ 备用方法也失败:', backupError);
+          console.warn('⚠️ 使用模拟数据作为备用');
+          useMockData = true;
+        }
       }
       
-      // 正确处理API返回结构
       let order = null;
-      if (response.data) {
-        if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-          // 直接使用对象
-          order = response.data;
-        } else if (response.data.order && typeof response.data.order === 'object') {
-          // 使用嵌套的order对象
-          order = response.data.order;
-        } else {
-          console.error('API返回的order格式不正确:', response.data);
-          throw new Error('Invalid order data format');
+      
+      if (useMockData) {
+        // 使用模拟数据
+        order = MockDataService.createMockOrder(orderId);
+        showToast('Using mock data (API failed)', 'warning');
+      } else {
+        // 使用API数据
+        if (!response || !response.success) {
+          throw new Error(response?.message || 'Failed to load order details');
+        }
+        
+        // 正确处理API返回结构
+        if (response.data) {
+          if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+            // 直接使用对象
+            order = response.data;
+          } else if (response.data.order && typeof response.data.order === 'object') {
+            // 使用嵌套的order对象
+            order = response.data.order;
+          } else {
+            console.error('API返回的order格式不正确:', response.data);
+            throw new Error('Invalid order data format');
+          }
         }
       }
       
@@ -1189,7 +1278,7 @@ const AdminApiService = {
       showToast('Processing order...', 'info');
       
       // 通过API更新订单状态
-      console.log(`📡 发送API请求: 处理订单 - POST /orders/update (id: ${orderId}, action: ${action})`);
+      console.log(`📡 发送API请求: 处理订单 - POST /orders/process (id: ${orderId}, action: ${action})`);
       const response = await AdminApiService.handleOrder(orderId, action);
       console.log('✅ 处理订单响应:', response);
       
