@@ -12,3 +12,23 @@
 [2025-03-23 21:57:46] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"true","filters":[],"date_range":[null,null]}
 [2025-03-23 21:57:46] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` ","data_sql":"SELECT * FROM `Order`  ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"limit":10,"offset":0},"result_count":10}
 [2025-03-23 21:57:46] [INFO] 查询结果 {"total":10,"orders_count":10}
+[2025-03-23 23:12:32] [INFO] 管理员请求所有订单，不添加userId过滤
+[2025-03-23 23:12:32] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"true","filters":[],"date_range":[null,null]}
+[2025-03-23 23:12:32] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` ","data_sql":"SELECT * FROM `Order`  ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"limit":10,"offset":0},"result_count":10}
+[2025-03-23 23:12:32] [INFO] 查询结果 {"total":10,"orders_count":10}
+[2025-03-23 23:19:38] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"false","filters":{"userId":13},"date_range":[null,null]}
+[2025-03-23 23:19:38] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` WHERE userId = :userId","data_sql":"SELECT * FROM `Order` WHERE userId = :userId ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"userId":13,"limit":10,"offset":0},"result_count":0}
+[2025-03-23 23:19:38] [INFO] 查询结果 {"total":0,"orders_count":0}
+[2025-03-23 23:22:49] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"false","filters":{"userId":13},"date_range":[null,null]}
+[2025-03-23 23:22:49] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` WHERE userId = :userId","data_sql":"SELECT * FROM `Order` WHERE userId = :userId ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"userId":13,"limit":10,"offset":0},"result_count":0}
+[2025-03-23 23:22:49] [INFO] 查询结果 {"total":0,"orders_count":0}
+[2025-03-23 23:24:34] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"false","filters":{"userId":13},"date_range":[null,null]}
+[2025-03-23 23:24:34] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` WHERE userId = :userId","data_sql":"SELECT * FROM `Order` WHERE userId = :userId ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"userId":13,"limit":10,"offset":0},"result_count":0}
+[2025-03-23 23:24:34] [INFO] 查询结果 {"total":0,"orders_count":0}
+[2025-03-23 23:26:00] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"false","filters":{"userId":13},"date_range":[null,null]}
+[2025-03-23 23:26:00] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` WHERE userId = :userId","data_sql":"SELECT * FROM `Order` WHERE userId = :userId ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"userId":13,"limit":10,"offset":0},"result_count":0}
+[2025-03-23 23:26:00] [INFO] 查询结果 {"total":0,"orders_count":0}
+[2025-03-23 23:50:34] [INFO] 管理员请求所有订单，不添加userId过滤
+[2025-03-23 23:50:34] [INFO] 获取订单 {"userId":13,"isAdmin":"true","getAll":"true","filters":[],"date_range":[null,null]}
+[2025-03-23 23:50:34] [INFO] SQL查询 {"count_sql":"SELECT COUNT(*) as total FROM `Order` ","data_sql":"SELECT * FROM `Order`  ORDER BY createdAt DESC LIMIT :limit OFFSET :offset","params":{"limit":10,"offset":0},"result_count":10}
+[2025-03-23 23:50:34] [INFO] 查询结果 {"total":10,"orders_count":10}

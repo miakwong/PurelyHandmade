@@ -64,12 +64,20 @@ $routes = [
     '/orders/create' => 'api/orders/create.php',
     '/orders/update' => 'api/orders/update.php',
     
+    // Cart routes
+    '/cart' => 'api/cart/index.php',
+    '/cart/add' => 'api/cart/add.php',
+    '/cart/remove' => 'api/cart/remove.php',
+    '/cart/update' => 'api/cart/update.php',
+    '/cart/clear' => 'api/cart/clear.php',
+    
     // Settings routes
     '/settings' => 'api/settings/index.php',
     '/settings/update' => 'api/settings/update.php',
     
     // Admin routes
     '/admin/users' => 'api/admin/users.php',
+    '/admin/users/detail' => 'api/admin/users/detail.php',
     '/admin/dashboard' => 'api/admin/dashboard.php',
     '/admin/reports' => 'api/admin/reports.php',
     

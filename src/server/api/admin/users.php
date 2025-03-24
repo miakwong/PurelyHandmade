@@ -65,6 +65,23 @@ try {
         } else {
             $response->error($result['message']);
         }
+    } elseif ($method === 'DELETE') {
+        // Delete user
+        $userId = $request->getParam('id');
+        
+        if (!$userId) {
+            $response->error('User ID is required');
+            exit;
+        }
+        
+        // Delete user
+        $result = $adminController->deleteUser($userId);
+        
+        if ($result['success']) {
+            $response->success(null, $result['message']);
+        } else {
+            $response->error($result['message']);
+        }
     } else {
         $response->error('Method not allowed', 405);
     }

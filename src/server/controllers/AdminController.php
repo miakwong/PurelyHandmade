@@ -79,6 +79,95 @@ class AdminController {
         }
     }
     
+    /**
+     * 获取单个用户详情
+     * 
+     * @param int $id 用户ID
+     * @return array 结果数组
+     */
+    public function getUserById($id) {
+        try {
+            // 查找用户
+            $user = $this->user->findById($id);
+            
+            if (!$user) {
+                return [
+                    'success' => false,
+                    'message' => 'User not found'
+                ];
+            }
+            
+            // 移除敏感信息
+            unset($user['password']);
+            
+            $this->logger->info('Admin fetched user detail', ['id' => $id]);
+            
+            return [
+                'success' => true,
+                'message' => 'User detail retrieved successfully',
+                'data' => $user
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Admin get user detail failed', Logger::formatException($e));
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to retrieve user detail: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * 删除用户
+     * 
+     * @param int $id 用户ID
+     * @return array 结果数组
+     */
+    public function deleteUser($id) {
+        try {
+            // 检查用户是否存在
+            $existingUser = $this->user->findById($id);
+            if (!$existingUser) {
+                return [
+                    'success' => false,
+                    'message' => 'User not found'
+                ];
+            }
+            
+            // 检查是否为最后一个管理员
+            if ($existingUser['isAdmin'] == 1) {
+                // 获取管理员数量
+                $adminCountSql = "SELECT COUNT(*) as count FROM User WHERE isAdmin = 1";
+                $result = $this->db->fetch($adminCountSql);
+                $adminCount = $result['count'] ?? 0;
+                
+                if ($adminCount <= 1) {
+                    return [
+                        'success' => false,
+                        'message' => 'Cannot delete the last administrator'
+                    ];
+                }
+            }
+            
+            // 删除用户
+            $this->user->delete($id);
+            
+            $this->logger->info('Admin deleted user', ['id' => $id]);
+            
+            return [
+                'success' => true,
+                'message' => 'User deleted successfully'
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Admin delete user failed', Logger::formatException($e));
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to delete user: ' . $e->getMessage()
+            ];
+        }
+    }
+    
     public function getDashboardData() {
         try {
             // Get user stats

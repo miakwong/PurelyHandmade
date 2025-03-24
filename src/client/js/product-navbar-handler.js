@@ -17,8 +17,28 @@ function loadNavbar() {
       console.log('Navbar loaded successfully');
       
       // Update cart count after navbar is loaded
-      if (typeof updateCartCount === 'function') {
-        updateCartCount();
+      try {
+        if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.updateCartCount === 'function') {
+          // 使用UIHelpers中的updateCartCount方法
+          const result = UIHelpers.updateCartCount();
+          if (result && typeof result.catch === 'function') {
+            result.catch(err => {
+              console.error('Error updating cart count:', err);
+            });
+          }
+        } else if (typeof updateCartCount === 'function') {
+          // 兼容性处理：如果UIHelpers不存在但有全局updateCartCount函数
+          const result = updateCartCount();
+          if (result && typeof result.catch === 'function') {
+            result.catch(err => {
+              console.error('Error updating cart count:', err);
+            });
+          }
+        } else {
+          console.log('No updateCartCount function available');
+        }
+      } catch (err) {
+        console.error('Error while updating cart count:', err);
       }
       
       // Update authentication button state after navbar is loaded
@@ -106,23 +126,6 @@ function loadFooter() {
     });
 }
 
-// Handle cart count updates
-function updateCartCount() {
-  const cartData = localStorage.getItem('cart');
-  const cartCount = document.getElementById('cart-count');
-  
-  if (!cartCount) return;
-  
-  if (cartData) {
-    const cart = JSON.parse(cartData);
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = count;
-    cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-  } else {
-    cartCount.style.display = 'none';
-  }
-}
-
 // Main initialization function
 function initPage() {
   loadNavbar();
@@ -132,6 +135,15 @@ function initPage() {
   if (typeof window.initializeData === 'function') {
     window.initializeData();
   }
+
+  // Add event listeners to auth buttons
+  document.getElementById('login-button')?.addEventListener('click', () => {
+    window.location.href = '/src/client/views/auth/login.html';
+  });
+  
+  document.getElementById('register-button')?.addEventListener('click', () => {
+    window.location.href = '/src/client/views/auth/register.html';
+  });
 }
 
 // Run initialization when the DOM is ready
