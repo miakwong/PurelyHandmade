@@ -1,87 +1,87 @@
-# PurelyHandmade 数据库初始化工具
+# PurelyHandmade Database Initialization Tool
 
-这个工具包用于初始化 PurelyHandmade 系统的数据库，包括创建表结构和填充初始数据。
+This toolkit is used to initialize the PurelyHandmade system database, including creating table structures and populating initial data.
 
-## 文件说明
+## File Description
 
-- `database_content.md` - 数据库内容文档，包含所有表结构和数据
-- `init_database.php` - 核心数据库初始化脚本
-- `init_db.php` - 用户友好的命令行界面
-- `init_database.sql` - 完整的 SQL 脚本，可直接在数据库中执行
+- `database_content.md` - Database content document, containing all table structures and data
+- `init_database.php` - Core database initialization script
+- `init_db.php` - User-friendly command line interface
+- `init_database.sql` - Complete SQL script, can be executed directly in the database
 
-## 使用方法
+## Usage
 
-### 前提条件
+### Prerequisites
 
-1. 确保已安装 PHP (7.4+) 和 MySQL/MariaDB
-2. 确保项目根目录的 .env 文件中包含正确的数据库连接信息:
+1. Ensure PHP (7.4+) and MySQL/MariaDB are installed
+2. Ensure the .env file in the project root directory contains the correct database connection information:
    ```
    DB_HOST=localhost
    DB_PORT=3306
-   DB_USER=你的用户名
-   DB_PASSWORD=你的密码
+   DB_USER=your_username
+   DB_PASSWORD=your_password
    DB_NAME=purely_handmade
-   DB_SOCKET=/opt/homebrew/var/mysql/mysql.sock (可选，根据系统调整)
+   DB_SOCKET=/opt/homebrew/var/mysql/mysql.sock (optional, adjust according to your system)
    ```
 
-### 初始化数据库
+### Initialize the Database
 
-有三种方式运行初始化:
+There are three ways to run the initialization:
 
-1. **交互模式** - 会提示确认后再执行:
+1. **Interactive Mode** - Prompts for confirmation before execution:
    ```bash
    cd src/server/db
    php init_db.php
    ```
 
-2. **强制模式** - 不提示确认直接执行:
+2. **Force Mode** - Executes directly without confirmation:
    ```bash
    cd src/server/db
    php init_db.php --force
    ```
 
-3. **SQL 脚本方式** - 直接在数据库中执行 SQL 文件:
+3. **SQL Script Mode** - Execute the SQL file directly in the database:
    ```bash
-   mysql -u 用户名 -p < src/server/db/init_database.sql
+   mysql -u username -p < src/server/db/init_database.sql
    ```
 
-### 执行过程
+### Execution Process
 
-1. 脚本会连接到数据库
-2. 如果数据库不存在，会创建数据库
-3. 删除所有已存在的表(如果有)
-4. 创建所有必要的表结构
-5. 填充初始数据
+1. The script will connect to the database
+2. If the database does not exist, it will create the database
+3. Deletes all existing tables (if any)
+4. Creates all necessary table structures
+5. Populates initial data
 
-### 表结构
+### Table Structure
 
-系统包含以下表:
+The system includes the following tables:
 
-- `User` - 用户信息
-- `Category` - 产品类别
-- `Designer` - 设计师信息
-- `Product` - 产品信息
-- `Order` - 订单信息
-- `OrderItem` - 订单项目
-- `Review` - 产品评论
-- `Settings` - 系统设置
-- `Cart` - 购物车主表
-- `CartItem` - 购物车项目
+- `User` - User information
+- `Category` - Product categories
+- `Designer` - Designer information
+- `Product` - Product information
+- `Order` - Order information
+- `OrderItem` - Order items
+- `Review` - Product reviews
+- `Settings` - System settings
+- `Cart` - Shopping cart main table
+- `CartItem` - Shopping cart items
 
-### 初始数据
+### Initial Data
 
-脚本会创建以下初始数据:
+The script will create the following initial data:
 
-- 用户账户(包括管理员和普通用户)
-- 产品类别
-- 设计师信息
-- 产品信息
-- 示例订单
-- 产品评论
-- 系统设置
+- User accounts (including admin and regular users)
+- Product categories
+- Designer information
+- Product information
+- Sample orders
+- Product reviews
+- System settings
 
-## 注意事项
+## Notes
 
-- **警告**: 运行此脚本会清空所有现有数据！请在生产环境谨慎使用。
-- 建议在运行前备份现有数据库
-- 如遇到权限问题，请确保数据库用户有足够权限创建/修改数据库和表 
+- **Warning**: Running this script will clear all existing data! Use with caution in production environments.
+- It is recommended to back up the existing database before running
+- If you encounter permission issues, ensure the database user has sufficient permissions to create/modify databases and tables
