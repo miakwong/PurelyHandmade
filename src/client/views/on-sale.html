@@ -12,10 +12,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/navbar.css">
-  <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/on-sale.css">
+  <link rel="stylesheet" href="/src/client/css/style.css">
+  <link rel="stylesheet" href="/src/client/css/navbar.css">
+  <link rel="stylesheet" href="/src/client/css/global.css">
+  <link rel="stylesheet" href="/src/client/css/on-sale.css">
+  <link rel="stylesheet" href="/src/client/css/toast.css">
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
@@ -23,6 +24,28 @@
 
   <!-- API Helper -->
   <script src="/src/client/js/api-loader-helper.js"></script>
+
+  <style>
+    @keyframes slideUpIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+  </style>
 
 </head>
 <body>
@@ -115,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <!-- Toast通知容器 -->
-<div class="modern-toast-container" id="toast-container"></div>
+<div class="modern-toast-container" id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -181,40 +204,84 @@
   function loadSaleProducts() {
     const productsContainer = document.getElementById('sale-products-container');
     
-    // 从 localStorage 获取产品数据
-    const productsData = localStorage.getItem('products');
-    if (!productsData) {
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p>No sale products found. Please check back later.</p></div>';
-      return;
+    // Show loading state
+    productsContainer.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Loading sale products...</span>
+        </div>
+        <p class="mt-2">Loading sale products...</p>
+      </div>
+    `;
+    
+    // Use API to get products
+    if (typeof DataService !== 'undefined') {
+      DataService.getAllProducts()
+        .then(result => {
+          console.log('API response:', result); // Debug log
+          
+          let products = [];
+          
+          // Extract products array from the response based on its structure
+          if (result.success) {
+            if (result.data && result.data.products && Array.isArray(result.data.products)) {
+              // Most common case: products are in result.data.products array
+              products = result.data.products;
+              console.log('Found products in result.data.products:', products.length);
+            } else if (Array.isArray(result.data)) {
+              // Alternative case: result.data is directly the array
+              products = result.data;
+              console.log('Found products directly in result.data:', products.length);
+            } else if (result.products && Array.isArray(result.products)) {
+              // Another case: products directly in the root
+              products = result.products;
+              console.log('Found products in result.products:', products.length);
+            } else if (result.data && typeof result.data === 'object') {
+              // Last resort: data is an object, try to convert its values to an array
+              products = Object.values(result.data).filter(item => typeof item === 'object');
+              console.log('Extracted products from object values:', products.length);
+            }
+          }
+          
+          if (products.length > 0) {
+            // Filter for products on sale
+            const saleProducts = products.filter(product => product.onSale === true);
+            console.log('Sale products found:', saleProducts.length);
+            
+            if (saleProducts.length === 0) {
+              productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
+              return;
+            }
+            
+            // Clear container
+            productsContainer.innerHTML = '';
+            
+            // Display products
+            saleProducts.forEach(product => {
+              const productHTML = createProductCard(product);
+              productsContainer.innerHTML += productHTML;
+            });
+            
+            // Add "Add to Cart" button events
+            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+              button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = parseInt(this.getAttribute('data-product-id'));
+                addToCart(productId, 1);
+              });
+            });
+          } else {
+            productsContainer.innerHTML = `<div class="col-12 text-center"><p class="text-danger">Error loading products: ${result.message || 'No products found in the API response'}</p></div>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching sale products:', error);
+          productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading products. Please try again later.</p></div>';
+        });
+    } else {
+      console.error('DataService is not defined');
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error: API service not available</p></div>';
     }
-    
-    const products = JSON.parse(productsData);
-    
-    // 获取所有促销产品 - 只检查onSale标志
-    const saleProducts = products.filter(product => product.onSale === true);
-    
-    if (saleProducts.length === 0) {
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
-      return;
-    }
-    
-    // 清空产品容器
-    productsContainer.innerHTML = '';
-    
-    // 显示产品
-    saleProducts.forEach(product => {
-      const productHTML = createProductCard(product);
-      productsContainer.innerHTML += productHTML;
-    });
-    
-    // 添加"添加到购物车"按钮事件
-    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const productId = parseInt(this.getAttribute('data-product-id'));
-        addToCart(productId, 1);
-      });
-    });
   }
   
   // 创建产品卡片HTML
@@ -278,72 +345,41 @@
   
   // 添加到购物车
   function addToCart(productId, quantity) {
-    const productsData = localStorage.getItem('products');
-    if (!productsData) return;
-    
-    const products = JSON.parse(productsData);
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
-    // 获取现有购物车
-    let cart = [];
-    const cartData = localStorage.getItem('cart');
-    if (cartData) {
-      cart = JSON.parse(cartData);
-    }
-    
-    // 计算最终价格 - 考虑是否有明确的salePrice
-    const price = parseFloat(product.price) || 0;
-    const finalPrice = product.onSale 
-      ? (parseFloat(product.salePrice) || price * 0.9) 
-      : price;
-    
-    // 处理图片URL
-    let imageUrl = 'https://via.placeholder.com/80';
-    if (product.image) {
-      imageUrl = product.image;
-    } else if (Array.isArray(product.images) && product.images.length > 0) {
-      imageUrl = product.images[0];
-    }
-    
-    // 检查产品是否已在购物车中
-    const existingItem = cart.find(item => item.id === productId);
-    if (existingItem) {
-      existingItem.quantity = (parseInt(existingItem.quantity) || 0) + quantity;
+    if (typeof DataService !== 'undefined') {
+      // Get product details using the API
+      DataService.getProductById(productId)
+        .then(result => {
+          if (result && result.data) {
+            const product = result.data;
+            
+            // Add to cart using DataService
+            if (typeof DataService.addToCart === 'function') {
+              DataService.addToCart(product, quantity);
+              
+              // Show success message
+              showToast(`${product.name} added to cart!`, 'success');
+              
+              // Update cart count in navbar if the function exists
+              if (typeof updateCartCount === 'function') {
+                updateCartCount();
+              }
+            } else {
+              console.error('DataService.addToCart function not available');
+              showToast('Could not add to cart: service unavailable', 'error');
+            }
+          } else {
+            console.error('Could not get product details:', result);
+            showToast('Could not add to cart: product not found', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Error getting product details:', error);
+          showToast('Could not add to cart: error retrieving product', 'error');
+        });
     } else {
-      // 安全处理产品描述
-      let description = 'No description available';
-      if (product.description) {
-        description = product.description.substring(0, 100);
-        if (product.description.length > 100) {
-          description += '...';
-        }
-      } else if (product.details) {
-        description = product.details.substring(0, 100);
-        if (product.details.length > 100) {
-          description += '...';
-        }
-      }
-      
-      cart.push({
-        id: product.id || 0,
-        name: product.name || 'Unnamed Product',
-        price: finalPrice,
-        image: imageUrl,
-        quantity: quantity || 1,
-        description: description,
-        categoryId: product.categoryId || null
-      });
+      console.error('DataService is not defined');
+      showToast('Could not add to cart: API service not available', 'error');
     }
-    
-    // 保存到localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // 显示成功消息
-    showToast(`${product.name || 'Product'} added to your cart!`, 'success');
-    
-    // 更新导航栏购物车计数
-    updateCartCount();
   }
   
   // 显示Toast通知
@@ -355,14 +391,28 @@
     // 创建toast元素
     const toast = document.createElement('div');
     toast.className = `modern-toast ${type}`;
+    toast.style.animation = 'slideUpIn 0.3s forwards';
+    toast.style.backgroundColor = type === 'success' ? '#5cb85c' : 
+                                 type === 'error' ? '#d9534f' : 
+                                 type === 'info' ? '#5bc0de' : '#f0ad4e';
+    toast.style.color = '#fff';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '4px';
+    toast.style.marginBottom = '10px';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.justifyContent = 'space-between';
+    toast.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
     
     // 添加内容
     toast.innerHTML = `
       <div style="flex: 1; padding-right: 10px;">
-        <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : 
+                      type === 'error' ? 'bi-exclamation-circle' : 
+                      type === 'info' ? 'bi-info-circle' : 'bi-exclamation-triangle'} me-2"></i>
         ${message}
       </div>
-      <div style="cursor: pointer; font-size: 16px; color: #999;">&times;</div>
+      <div style="cursor: pointer; font-size: 16px; color: #fff;">&times;</div>
     `;
     
     // 添加到容器
@@ -371,12 +421,18 @@
     // 添加关闭按钮事件
     const closeBtn = toast.querySelector('div:last-child');
     closeBtn.addEventListener('click', function() {
-      toast.remove();
+      toast.style.animation = 'fadeOut 0.3s forwards';
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
     });
     
     // 自动3秒后移除
     setTimeout(() => {
-      toast.remove();
+      toast.style.animation = 'fadeOut 0.3s forwards';
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
     }, 3000);
   }
   

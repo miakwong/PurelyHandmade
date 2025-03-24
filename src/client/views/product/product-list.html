@@ -614,13 +614,48 @@
         </div>
       `;
       
-      // 使用API获取产品
-      console.log("发送API请求获取产品数据...");
-      const productsResponse = await DataService.getAllProducts();
+      // 检查URL中是否有搜索查询参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchQuery = urlParams.get('q');
+      
+      let productsResponse;
+      
+      if (searchQuery) {
+        console.log("检测到搜索查询参数:", searchQuery);
+        // 更新标题以显示搜索结果
+        const breadcrumbCategory = document.getElementById('breadcrumb-category');
+        if (breadcrumbCategory) {
+          breadcrumbCategory.textContent = `Search Results: "${searchQuery}"`;
+        }
+        
+        const productListTitle = document.getElementById('product-list-title');
+        if (productListTitle) {
+          productListTitle.textContent = `Search Results: "${searchQuery}"`;
+        }
+        
+        // 使用搜索API获取产品
+        console.log("发送搜索API请求获取产品数据...");
+        productsResponse = await DataService.searchProducts(searchQuery);
+      } else {
+        // 使用API获取全部产品
+        console.log("发送API请求获取全部产品数据...");
+        productsResponse = await DataService.getAllProducts();
+      }
+      
       console.log('API产品数据响应:', productsResponse);
       
       if (productsResponse.success) {
-        products = productsResponse.data.products;
+        // 处理不同的API响应格式
+        if (productsResponse.data && Array.isArray(productsResponse.data)) {
+          products = productsResponse.data;
+        } else if (productsResponse.data && productsResponse.data.products && Array.isArray(productsResponse.data.products)) {
+          products = productsResponse.data.products;
+        } else if (productsResponse.products && Array.isArray(productsResponse.products)) {
+          products = productsResponse.products;
+        } else {
+          products = [];
+        }
+        
         console.log(`成功获取${products.length}个产品`);
         
         // 应用筛选和排序 - 仅在有产品且UI已准备好的情况下执行

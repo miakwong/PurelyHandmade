@@ -470,7 +470,7 @@
           </div>
           
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="admin-form-group">
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="product-featured">
@@ -481,7 +481,18 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+              <div class="admin-form-group">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="product-onsale">
+                  <label class="form-check-label" for="product-onsale">
+                    On Sale
+                  </label>
+                  <div class="form-text">Products on sale will be displayed with discount badge</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
               <div class="admin-form-group">
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="product-active" checked>
@@ -1383,6 +1394,7 @@ const AdminApiService = {
         document.getElementById('product-designer').value = product.designerId || '';
         document.getElementById('product-description').value = product.description || '';
         document.getElementById('product-featured').checked = product.featured || false;
+        document.getElementById('product-onsale').checked = product.onSale || false;
         document.getElementById('product-active').checked = product.active !== false; // 如果未指定，则默认为true
         
         // 重置文件输入
@@ -1425,6 +1437,7 @@ const AdminApiService = {
     const designerId = document.getElementById('product-designer').value;
     const description = document.getElementById('product-description').value.trim();
     const featured = document.getElementById('product-featured').checked;
+    const onSale = document.getElementById('product-onsale').checked;
     const active = document.getElementById('product-active').checked;
     
     // 验证
@@ -1473,6 +1486,7 @@ const AdminApiService = {
       designerId: designerId || null,
       description,
       featured,
+      onSale,
       active,
       gallery: productGalleryImages
     };

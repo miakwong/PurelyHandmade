@@ -645,6 +645,40 @@ const DataService = {
       console.error('Error getting product reviews:', e);
       return [];
     }
+  },
+  
+  /**
+   * 根据关键词搜索产品
+   * Search products by keyword
+   * @param {string} keyword 搜索关键词 Search keyword
+   * @param {number} page 页码 Page number
+   * @param {number} limit 每页数量 Items per page
+   * @returns {Promise<Object>} 搜索结果 Search results
+   */
+  searchProducts: async function(keyword, page = 1, limit = 10) {
+    try {
+      console.log('DataService: searchProducts() - Calling API with keyword:', keyword);
+      // 构建带有搜索参数的URL
+      const queryParams = new URLSearchParams({
+        search: keyword,
+        page: page,
+        limit: limit
+      });
+      
+      const result = await this.apiRequest(`/products?${queryParams.toString()}`);
+      console.log('DataService: searchProducts() - API response:', result);
+      
+      if (result.success) {
+        console.log('DataService: searchProducts() - Successfully fetched search results');
+        return result;
+      }
+      
+      console.error('DataService: searchProducts() - API request failed:', result.message);
+      return { success: false, message: result.message };
+    } catch (e) {
+      console.error('DataService: searchProducts() - Error searching products:', e);
+      return { success: false, message: e.message };
+    }
   }
 };
 
