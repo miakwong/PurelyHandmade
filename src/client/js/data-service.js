@@ -68,7 +68,7 @@ const DataService = {
       return result;
     } catch (error) {
       console.error(`DataService: apiRequest() - Request failed (${endpoint}):`, error);
-      return { success: false, message: '网络错误或服务器无响应' };
+      return { success: false, message: 'Internal Server Error' };
     }
   },
   
@@ -124,12 +124,12 @@ const DataService = {
    */
   getAllCategories: async function() {
     try {
-      console.log('DataService: getAllCategories() - 调用API...');
+      console.log('DataService: getAllCategories() - Calling API...');
       const result = await this.apiRequest('/categories');
-      console.log('DataService: getAllCategories() - API响应:', result);
+      console.log('DataService: getAllCategories() - API response:', result);
       
       if (result.success) {
-        console.log('DataService: getAllCategories() - 成功获取分类');
+        console.log('DataService: getAllCategories() - Successfully fetched categories');
         
         // 确保正确的响应格式
         return {
@@ -141,17 +141,17 @@ const DataService = {
         };
       }
       
-      console.error('DataService: getAllCategories() - API请求失败:', result.message || '未知错误');
+      console.error('DataService: getAllCategories() - API request failed:', result.message || 'Unknown error');
       return { 
         success: false, 
-        message: result.message || 'API请求失败', 
+        message: result.message || 'API request failed', 
         data: { categories: [] } 
       };
     } catch (e) {
-      console.error('DataService: getAllCategories() - 获取分类错误:', e.message || e);
+        console.error('DataService: getAllCategories() - Error getting categories:', e.message || e);
       return { 
         success: false, 
-        message: e.message || '发生错误', 
+        message: e.message || 'An error occurred', 
         data: { categories: [] } 
       };
     }
