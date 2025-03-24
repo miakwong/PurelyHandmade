@@ -259,18 +259,52 @@
     }
 
     // 更新购物车计数
-    function updateCartCount() {
-      const cartData = localStorage.getItem('cart');
+    async function updateCartCount() {
       const cartCount = document.getElementById('cart-count');
       
       if (!cartCount) return;
+
+      // 检查用户是否登录
+      const currentUser = DataService.getCurrentUser();
+      if (!currentUser) {
+        cartCount.style.display = 'none';
+        return;
+      }
       
-      if (cartData) {
-        const cart = JSON.parse(cartData);
-        const count = cart.reduce((total, item) => total + item.quantity, 0);
-        cartCount.textContent = count;
-        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-      } else {
+      try {
+        // 调用API获取购物车数据
+        const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
+          headers: {
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          let cartItems = [];
+          
+          // 处理不同的响应结构
+          if (Array.isArray(result.data)) {
+            cartItems = result.data;
+          } else if (result.data && Array.isArray(result.data.items)) {
+            cartItems = result.data.items;
+          } else if (Array.isArray(result.items)) {
+            cartItems = result.items;
+          }
+          
+          if (cartItems.length > 0) {
+            const count = cartItems.reduce((total, item) => total + (parseInt(item.quantity) || 1), 0);
+            cartCount.textContent = count;
+            cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+          } else {
+            cartCount.style.display = 'none';
+          }
+        } else {
+          cartCount.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
         cartCount.style.display = 'none';
       }
     }
@@ -315,12 +349,30 @@
         priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
       }
       
+      // 处理图片URL
+      let imageUrl = '/src/client/assets/placeholder.jpg';
+      if (product.image) {
+        imageUrl = product.image;
+      } else if (product.gallery) {
+        // 处理gallery可能是数组或JSON字符串的情况
+        try {
+          const gallery = typeof product.gallery === 'string' ? JSON.parse(product.gallery) : product.gallery;
+          if (Array.isArray(gallery) && gallery.length > 0) {
+            imageUrl = gallery[0];
+          }
+        } catch (e) {
+          console.error('Error parsing gallery data:', e);
+        }
+      } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        imageUrl = product.images[0];
+      }
+      
       return `
         <div class="col-md-4">
           <div class="product-card">
             <div class="product-img-wrapper">
               <a href="../product/product_detail.html?id=${product.id}">
-                <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
+                <img src="${imageUrl}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
               </a>
             </div>
@@ -341,7 +393,7 @@
     }
 
     // Load designer details and products
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       console.log('DOM loaded, starting to load designer products');
       const designerId = getQueryParam('id');
       console.log('Designer ID from URL:', designerId);
@@ -351,104 +403,77 @@
         return;
       }
       
-      // Retrieve designers from localStorage
-      let designers = [];
+      showLoading('Loading designer information...');
+      
       try {
-        const designersData = localStorage.getItem('designers');
-        console.log('Raw designers data:', designersData);
-        designers = JSON.parse(designersData || '[]');
-        console.log('Parsed designers:', designers);
-      } catch (e) {
-        console.error('Error parsing designers data:', e);
-        showToast('Error loading designers data: ' + e.message, 'error');
-      }
-      
-      const designer = designers.find(d => d.id === designerId);
-      console.log('Found designer:', designer);
-      
-      if (!designer) {
-        document.getElementById('designer-info').innerHTML = '<div class="alert alert-warning">Designer not found.</div>';
-        return;
-      }
-      
-      // Display designer information
-      document.getElementById('designer-info').innerHTML = `
-        <h1>${designer.name}</h1>
-        <p>${designer.bio || 'No biography available.'}</p>
-      `;
-      
-      // Update breadcrumb with designer name
-      document.getElementById('designer-name').textContent = designer.name;
-      
-      // Set header for products section
-      document.getElementById('products-header').innerText = designer.name + "'s Products";
-
-      // Get all products from localStorage
-      const productsData = localStorage.getItem('products');
-      console.log('Raw products data:', productsData);
-      
-      if (!productsData) {
-        document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available.</div>';
-        return;
-      }
-
-      // Find products by this designer
-      const products = JSON.parse(productsData);
-      console.log('All products:', products);
-      console.log('Looking for products with designerId:', designerId);
-      
-      // Check if products have designerId
-      const hasDesignerIds = products.some(p => p.designerId);
-      console.log('Products have designerId property:', hasDesignerIds);
-      
-      if (!hasDesignerIds) {
-        // If products don't have designerId, we'll assign some based on categoryId for this demo
-        console.log('Adding mock designerId to products for this demo');
+        // Fetch designer data from API
+        const designerResponse = await fetch(`/api/designers/detail?id=${designerId}`);
+        const designerResult = await designerResponse.json();
         
-        // Assign products to designers based on categories
-        products.forEach(p => {
-          if (p.categoryId === 1) p.designerId = 'd1';
-          else if (p.categoryId === 2) p.designerId = 'd2';
-          else if (p.categoryId === 3) p.designerId = 'd3';
+        console.log('Designer API response:', designerResult);
+        
+        if (!designerResult.success || !designerResult.data) {
+          hideLoading();
+          document.getElementById('designer-info').innerHTML = '<div class="alert alert-warning">Designer not found.</div>';
+          return;
+        }
+        
+        const designer = designerResult.data;
+        
+        // Display designer information
+        document.getElementById('designer-info').innerHTML = `
+          <h1>${designer.name}</h1>
+          <p>${designer.bio || 'No biography available.'}</p>
+        `;
+        
+        // Update breadcrumb with designer name
+        document.getElementById('designer-name').textContent = designer.name;
+        
+        // Set header for products section
+        document.getElementById('products-header').innerText = designer.name + "'s Products";
+        
+        // Fetch products by designer from API
+        const productsResponse = await fetch(`/api/products?designerId=${designerId}`);
+        const productsResult = await productsResponse.json();
+        
+        console.log('Products API response:', productsResult);
+        hideLoading();
+        
+        // Extract products from response
+        let designerProducts = [];
+        if (productsResult.success) {
+          if (Array.isArray(productsResult.data)) {
+            designerProducts = productsResult.data;
+          } else if (productsResult.data && Array.isArray(productsResult.data.products)) {
+            designerProducts = productsResult.data.products;
+          } else if (productsResult.products && Array.isArray(productsResult.products)) {
+            designerProducts = productsResult.products;
+          }
+        }
+        
+        console.log('Filtered designer products:', designerProducts);
+        
+        if (designerProducts.length === 0) {
+          document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available from this designer.</div>';
+          return;
+        }
+        
+        // Render product cards
+        const productsContainer = document.getElementById('products-container');
+        productsContainer.innerHTML = '';
+        
+        designerProducts.forEach(product => {
+          console.log('Creating card for product:', product);
+          productsContainer.innerHTML += createProductCard(product);
         });
         
-        // Save the updated products back to localStorage
-        localStorage.setItem('products', JSON.stringify(products));
+        // No need for separate event listeners since we're using onclick in the HTML
+        console.log('Product cards added with inline onclick handlers');
+      } catch (error) {
+        hideLoading();
+        console.error('Error loading designer data:', error);
+        document.getElementById('designer-info').innerHTML = '<div class="alert alert-danger">Error loading designer information.</div>';
       }
-      
-      // Check types for comparison - string vs number issues are common
-      console.log('Designer ID type:', typeof designerId);
-      if (products.length > 0) {
-        console.log('Sample product designerId type:', typeof products[0].designerId);
-      }
-      
-      // Try both string and number comparison to handle potential type issues
-      const designerProducts = products.filter(product => {
-        const match = (product.designerId === designerId) || 
-                      (product.designerId === parseInt(designerId)) || 
-                      (String(product.designerId) === designerId);
-        console.log(`Product ID ${product.id}, designerId: ${product.designerId}, matches: ${match}`);
-        return match;
-      });
-      
-      console.log('Filtered designer products:', designerProducts);
-      
-      if (designerProducts.length === 0) {
-        document.getElementById('products-container').innerHTML = '<div class="alert alert-info">No products available from this designer.</div>';
-        return;
-      }
-      
-      // Render product cards
-      const productsContainer = document.getElementById('products-container');
-      productsContainer.innerHTML = '';
-      
-      designerProducts.forEach(product => {
-        console.log('Creating card for product:', product);
-        productsContainer.innerHTML += createProductCard(product);
-      });
-      
-      // No need for separate event listeners since we're using onclick in the HTML
-      console.log('Product cards added with inline onclick handlers');
     });
   </script>
 
