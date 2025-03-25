@@ -1,124 +1,438 @@
-# PurelyHandmade API端点文档
+# PurelyHandmade API Endpoints Documentation
 
-本文档列出了PurelyHandmade项目中所有可用的API端点。
+This document lists all available API endpoints for the PurelyHandmade project.
 
-## 基础URL
+---
 
-所有API端点都有一个基础URL前缀：`/api`
+## Base URL
 
-## 认证相关API
+All API endpoints have a base URL prefix: `/api`
 
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/auth/register` | POST | 用户注册 | `username`, `email`, `password`, `isAdmin` (可选) | 公开 |
-| `/auth/login` | POST | 用户登录 | `email`, `password` | 公开 |
-| `/auth/profile` | GET | 获取当前用户资料 | 无 | 需登录 |
-| `/auth/profile?all=1` | GET | 获取所有用户资料 | 无 | 管理员 |
+---
 
-## 产品相关API
+## Authentication APIs (`auth`)
 
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/products` | GET | 获取所有产品 | 可选：`page`, `limit`, `sort_by`, `sort_dir`, `category` | 公开 |
-| `/products/detail` | GET | 获取产品详情 | `id` (必需) | 公开 |
-| `/products/create` | POST | 创建新产品 | 产品数据 | 管理员 |
-| `/products/update` | PUT | 更新产品 | `id` (必需), 更新的产品数据 | 管理员 |
-| `/products` (带id参数) | DELETE | 删除产品 | `id` (必需) | 管理员 |
+| Endpoint             | Method | Description                  | Parameters                     | Access       |
+|----------------------|--------|-----------------------------|--------------------------------|--------------|
+| `/auth/register.php`  | POST   | User registration           | `username`, `email`, `password`, `image` (optional) | Public |
+| `/auth/login.php`     | POST   | User login                  | `email`, `password`            | Public       |
+| `/auth/profile.php`   | GET    | Get current user profile    | None                           | Requires Login (JWT) |
+| `/auth/update.php`    | POST   | Update user profile         | `username`, `email`, `password`, `image` (optional) | Requires Login (JWT) |
+| `/auth/check_email.php`   | POST   | Check if email exists      | `email`                        | Public       |
+| `/auth/check_username.php`| POST   | Check if username exists   | `username`                     | Public       |
 
-## 类别相关API
+---
 
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/categories` | GET | 获取所有类别 | 可选：`page`, `limit` | 公开 |
-| `/categories/detail` | GET | 获取类别详情 | `id` (必需) | 公开 |
-| `/categories/create` | POST | 创建新类别 | 类别数据 | 管理员 |
-| `/categories/update` | PUT | 更新类别 | `id` (必需), 更新的类别数据 | 管理员 |
-| `/categories` (带id参数) | DELETE | 删除类别 | `id` (必需) | 管理员 |
+### 📌 Check Email (`check_email.php`)
+**URL:** `/auth/check_email.php`  
+**Method:** `POST`  
+**Purpose:** Check if a user-provided email address is already registered.  
 
-## 设计师相关API
-
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/designers` | GET | 获取所有设计师 | 可选：`page`, `limit` | 公开 |
-| `/designers/detail` | GET | 获取设计师详情 | `id` (必需) | 公开 |
-| `/designers/create` | POST | 创建新设计师 | 设计师数据 | 管理员 |
-| `/designers/update` | PUT | 更新设计师 | `id` (必需), 更新的设计师数据 | 管理员 |
-| `/designers` (带id参数) | DELETE | 删除设计师 | `id` (必需) | 管理员 |
-
-## 评论相关API
-
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/reviews` | GET | 获取所有评论 | 可选：`productId`, `userId`, `status` | 公开 |
-| `/reviews/create` | POST | 创建新评论 | 评论数据，包括`productId` | 需登录 |
-| `/reviews/update` | PUT | 更新评论 | `id` (必需), 更新的评论数据 | 用户/管理员 |
-| `/reviews` (带id参数) | DELETE | 删除评论 | `id` (必需) | 用户/管理员 |
-
-## 订单相关API
-
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/orders` | GET | 获取当前用户订单或所有订单 | 无 | 需登录/管理员 |
-| `/orders/detail` | GET | 获取订单详情 | `id` (必需) | 订单所有者/管理员 |
-| `/orders/create` | POST | 创建新订单 | 订单数据 | 需登录 |
-| `/orders/update` | PUT | 更新订单状态 | `id` (必需), `status`, `action` (可选) | 订单所有者/管理员 |
-| `/orders` (带id参数) | DELETE | 删除订单 | `id` (必需) | 管理员 |
-
-## 管理员相关API
-
-| 端点 | 方法 | 描述 | 参数 | 权限 |
-|------|------|------|------|------|
-| `/admin/users` | GET | 获取所有用户 | 可选：`status`, `role`, `page`, `limit` | 管理员 |
-| `/admin/dashboard` | GET | 获取管理面板数据 | 无 | 管理员 |
-| `/admin/reports` | GET | 获取报表数据 | 可选：`type`, `period`, `start`, `end` | 管理员 |
-
-## 数据格式
-
-### 成功响应格式
-
+#### Request Parameters (Request Body)
 ```json
 {
-  "success": true,
-  "message": "操作成功消息",
+  "email": "example@example.com"
+}
+Response Format (JSON)
+Success (Email exists):
+{
+  "status": "success",
   "data": {
-    // 返回的数据
+    "exists": true,
+    "message": "This email is already registered."
   }
 }
-```
+Success (Email is available):
+{
+  "status": "success",
+  "data": {
+    "exists": false,
+    "message": "Email is available."
+  }
+}
+Error (Invalid format or missing email):
+{
+  "status": "error",
+  "message": "Invalid email format"  
+}
+ Check Username (check_username.php)
+URL: /auth/check_username.php
+Method: POST
+Purpose: Check if a username is already taken.
 
-### 错误响应格式
+Request Parameters (Request Body)
+{
+  "username": "example_user"
+}
+Response Format (JSON)
+Success (Username exists):
+{
+  "status": "success",
+  "data": {
+    "exists": true,
+    "message": "This username is already taken."
+  }
+}
+Success (Username is available):
+{
+  "status": "success",
+  "data": {
+    "exists": false,
+    "message": "Username is available."
+  }
+}
+Error (Missing username):
+{
+  "status": "error",
+  "message": "Missing username parameter"
+}
+User Login (login.php)
+URL: /auth/login.php
+Method: POST
+Purpose: Authenticate user and return a JWT token.
 
-```json
+Request Parameters (Request Body)
+{
+  "email": "example@example.com",
+  "password": "example_password"
+}
+
+Response Format (JSON)
+Success:
+{
+  "status": "success",
+  "token": "your_jwt_token_here",
+  "user": {
+    "id": 1,
+    "username": "example_user",
+    "email": "example@example.com"
+  }
+}
+Error:
+{
+  "status": "error",
+  "message": "Invalid email or password."
+}
+Get User Profile (profile.php)
+URL: /auth/profile.php
+Method: GET
+Authorization: Bearer Token (JWT)
+
+Response Format (JSON)
+Success:
+{
+  "status": "success",
+  "user": {
+    "id": 1,
+    "username": "example_user",
+    "email": "example@example.com",
+    "profile_image": "http://localhost:8000/uploads/example.jpg"
+  }
+}
+ Error (Unauthorized):
+ {
+  "status": "error",
+  "message": "Unauthorized."
+}
+ User Registration (register.php)
+URL: /auth/register.php
+Method: POST
+Purpose: Register a new user.
+
+Request Parameters (Request Body)
+{
+  "username": "example_user",
+  "email": "example@example.com",
+  "password": "example_password",
+  "image": "base64_encoded_image_string"
+}
+Response Format (JSON)
+Success:{
+  "status": "success",
+  "message": "User registered successfully."
+}
+Error (Email exists):
+{
+  "status": "error",
+  "message": "Email already exists."
+}
+Update User Profile (update.php)
+URL: /auth/update.php
+Method: POST
+Authorization: Bearer Token (JWT)
+Purpose: Update user profile information.
+
+Request Parameters (Request Body)
+{
+  "username": "new_username",
+  "email": "new_email@example.com",
+  "password": "new_password",
+  "image": "base64_encoded_image_string"
+}
+Response Format (JSON)
+Success:
+{
+  "status": "success",
+  "message": "Profile updated successfully."
+}
+ Error:
+ {
+  "status": "error",
+  "message": "Failed to update profile."
+}
+Common Response Format
+ Success Response
+
+{
+  "success": true,
+  "message": "Success message",
+  "data": { }
+}
+ Error Response
+
 {
   "success": false,
-  "message": "错误消息"
+  "message": "Error message"
 }
-```
+Authorization (JWT)
+For protected APIs, you must include the following header:
 
-### 授权头格式
+Authorization: Bearer your_jwt_token_here
 
-所有需要认证的API都需要在请求头中添加授权令牌：
+create.php contents：
+ Create Product (`create.php`)
+**URL:** `/products/create.php`  
+**Method:** `POST`  
+**Purpose:** Create a new product. (Only accessible by admin users)  
 
-```
-Authorization: Bearer <jwt_token>
-```
+Authorization
+- **Required:** Yes (Admin Only)
+- **Authorization Header:** 
 
-## 通用参数
+ Request Parameters (Request Body)
+```json
+{
+  "name": "Product Name",
+  "description": "Product Description",
+  "price": 99.99,
+  "category_id": 1,
+  "image": "base64_encoded_image_string"
+}
+Success Response (Status Code: 201)
 
-### 分页参数
+{
+  "status": "success",
+  "message": "Product created successfully.",
+  "data": {
+    "id": 1,
+    "name": "Product Name",
+    "description": "Product Description",
+    "price": 99.99,
+    "category_id": 1,
+    "image_url": "http://localhost:8000/uploads/product_image.jpg"
+  }
+}
+ Error Responses
+Validation Error:
 
-- `page`: 页码，默认为1
-- `limit`: 每页项目数，默认为20
+{
+  "status": "error",
+  "message": "Validation failed.",
+  "errors": {
+    "name": "Product name is required.",
+    "price": "Product price must be a number."
+  }
+}
+Authorization Error:
 
-### 排序参数
+{
+  "status": "error",
+  "message": "Unauthorized access."
+}
+Server Error:
 
-- `sort_by`: 排序字段，例如 `created_at`
-- `sort_dir`: 排序方向，`asc` 升序 或 `desc` 降序
+{
+  "status": "error",
+  "message": "An error occurred while processing your request."
+}
+ detail.php （products API）
+markdown
+ Get Product Detail (`detail.php`)
+**URL:** `/products/detail.php`  
+**Method:** `GET`  
+**Purpose:** Retrieve product details by ID or slug.  
 
-## 错误代码
+ Request Parameters (Query String)
+- By ID:  
+/products/detail.php?id=1
 
-- 400: 请求错误
-- 401: 未授权
-- 403: 禁止访问
-- 404: 资源不存在
-- 500: 服务器内部错误 
+diff
+- By Slug:  
+/products/detail.php?slug=handmade-vase
+
+ Success Response
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "name": "Handmade Vase",
+    "description": "Beautifully crafted vase.",
+    "price": 25.99,
+    "category": "Home Decor",
+    "image_url": "http://localhost:8000/uploads/handmade_vase.jpg"
+  }
+}
+Error Responses
+Missing Parameters:
+
+{
+  "status": "error",
+  "message": "Product ID or slug is required."
+}
+Product Not Found:
+
+{
+  "status": "error",
+  "message": "Product not found."
+}
+Server Error:
+
+{
+  "status": "error",
+  "message": "An error occurred while processing your request."
+}
+
+index.php 
+markdown
+
+ Get Product List (`index.php`)
+**URL:** `/products/index.php`  
+**Method:** `GET`  
+**Purpose:** Retrieve a list of products, optionally filtered and paginated.  
+
+---
+ Request Parameters (Query String)
+| Parameter  | Type     | Description                        | Required | Example                   |
+|------------|----------|------------------------------------|----------|---------------------------|
+| `category` | `string`  | Filter by category name or ID.    | No       | `category=2`              |
+| `designer` | `string`  | Filter by designer name or ID.    | No       | `designer=3`              |
+| `featured` | `boolean` | Filter featured products only.    | No       | `featured=true`           |
+| `active`   | `boolean` | Filter active products only.      | No       | `active=true`             |
+| `search`   | `string`  | Search term for product names.    | No       | `search=handmade`         |
+| `page`     | `integer` | Page number for pagination.       | No       | `page=1`                  |
+| `limit`    | `integer` | Number of products per page.      | No       | `limit=10`                |
+
+---
+Success Response
+
+{
+  "status": "success",
+  "data": {
+    "products": [
+      {
+        "id": 1,
+        "name": "Handmade Vase",
+        "description": "Beautifully crafted vase.",
+        "price": 25.99,
+        "category": "Home Decor",
+        "designer": "Artisan John",
+        "image_url": "http://localhost:8000/uploads/handmade_vase.jpg"
+      },
+      {
+        "id": 2,
+        "name": "Wooden Sculpture",
+        "description": "Intricately carved wooden sculpture.",
+        "price": 45.00,
+        "category": "Art",
+        "designer": "WoodMaster",
+        "image_url": "http://localhost:8000/uploads/wooden_sculpture.jpg"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 20
+    }
+  }
+}
+ Error Responses
+No Products Found:
+{
+  "status": "error",
+  "message": "No products found."
+}
+Server Error:
+
+{
+  "status": "error",
+  "message": "An error occurred while processing your request."
+}
+
+update.php 
+
+ Update Product (`update.php`)
+**URL:** `/products/update.php`  
+**Method:** `PUT`  
+**Purpose:** Update an existing product. (Only accessible by admin users)  
+
+
+Authorization
+- **Required:** Yes (Admin Only)
+- **Authorization Header:** 
+Authorization: Bearer your_jwt_token_here
+
+
+ Request Parameters (Request Body)
+
+{
+  "id": 1,
+  "name": "Updated Product Name",
+  "description": "Updated Product Description",
+  "price": 49.99,
+  "category_id": 1,
+  "image": "base64_encoded_image_string"
+}
+ Success Response
+
+{
+  "status": "success",
+  "message": "Product updated successfully.",
+  "data": {
+    "id": 1,
+    "name": "Updated Product Name",
+    "description": "Updated Product Description",
+    "price": 49.99,
+    "category_id": 1,
+    "image_url": "http://localhost:8000/uploads/updated_product_image.jpg"
+  }
+}
+Error Responses
+Missing Product ID:
+
+{
+  "status": "error",
+  "message": "Product ID is required."
+}
+Validation Error:
+
+{
+  "status": "error",
+  "message": "Validation failed.",
+  "errors": {
+    "name": "Product name cannot be empty.",
+    "price": "Product price must be a valid number."
+  }
+}
+Authorization Error:
+
+{
+  "status": "error",
+  "message": "Unauthorized access."
+}
+Server Error:
+
+{
+  "status": "error",
+  "message": "An error occurred while processing your request."
+}
