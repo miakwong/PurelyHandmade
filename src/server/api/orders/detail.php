@@ -58,14 +58,17 @@ try {
 ### Get Order Details - `GET /api/orders/detail.php`
 - **Description:** Retrieves details of a specific order by its ID for the authenticated user.
 - **Request Headers:**  
-  - `Authorization: Bearer <JWT Token>` 
- Request Parameters 
+  - `Authorization: Bearer <JWT Token>` (Required)
+
+--- Request Parameters (Query)
 | Parameter | Type    | Required | Description                       |
 |-----------|---------|----------|----------------------------------|
 | `id`      | integer  | Yes      | The ID of the order to be fetched. |
 | `userId`  | integer  | Yes      | The ID of the user making the request. |
 
+---
 
  Example Request
+```http
 GET /api/orders/detail.php?id=101&userId=1
 Authorization: Bearer <JWT Token>
