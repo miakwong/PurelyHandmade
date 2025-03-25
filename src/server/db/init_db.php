@@ -15,25 +15,38 @@ foreach ($argv as $arg) {
     }
 }
 
+// Check if running from browser
+$isWeb = php_sapi_name() !== 'cli';
+
+// Check for `force` mode (CLI: `--force`, Web: `?force=1`)
+$forceMode = isset($_GET['force']) || in_array('--force', $argv ?? []);
+
 // If not in force mode, show warning and request confirmation
 if (!$forceMode) {
-    echo "=======================================================\n";
-    echo "        PurelyHandmade Database Initialization Tool\n";
-    echo "=======================================================\n\n";
-    echo "Warning: This operation will reset the database, and all existing data will be deleted!\n";
-    echo "The database will be recreated and populated with initial data according to the database_content.md file.\n\n";
-    
-    echo "Are you sure you want to continue? [y/N]: ";
-    $handle = fopen("php://stdin", "r");
-    $line = trim(fgets($handle));
-    fclose($handle);
-    
-    if (strtolower($line) !== 'y') {
-        echo "Operation cancelled\n";
-        exit;
+    if ($isWeb) {
+        // Web mode: Use a GET parameter
+        die("⚠️ Warning: Running this script will reset the database! <br>
+            Add <code>?force=1</code> to the URL to confirm.<br>
+            Example: <a href='?force=1'>Click here to initialize</a>");
+    } else {
+        // CLI mode: Wait for user confirmation
+        echo "=======================================================\n";
+        echo "        PurelyHandmade Database Initialization Tool\n";
+        echo "=======================================================\n\n";
+        echo "Warning: This operation will reset the database, and all existing data will be deleted!\n";
+        echo "Are you sure you want to continue? [y/N]: ";
+        
+        $handle = fopen("php://stdin", "r");
+        $line = trim(fgets($handle));
+        fclose($handle);
+        
+        if (strtolower($line) !== 'y') {
+            echo "Operation cancelled.\n";
+            exit;
+        }
+        
+        echo "\nStarting database initialization...\n\n";
     }
-    
-    echo "\nStarting database initialization...\n\n";
 }
 
 // Execute database initialization script
