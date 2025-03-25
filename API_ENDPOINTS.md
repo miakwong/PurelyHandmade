@@ -23,7 +23,7 @@ All API endpoints have a base URL prefix: `/api`
 
 ---
 
-### 📌 Check Email (`check_email.php`)
+ Check Email (`check_email.php`)
 **URL:** `/auth/check_email.php`  
 **Method:** `POST`  
 **Purpose:** Check if a user-provided email address is already registered.  
@@ -456,9 +456,7 @@ Request Body (JSON Format)
 }
 
  Example Request
-http
-复制
-编辑
+
 POST /api/orders/create.php
 Authorization: Bearer <JWT Token>
 Content-Type: application/json
@@ -492,4 +490,9 @@ Content-Type: application/json
 {
   "success": false,
   "message": "Order items array is required"
+}
+Example Response
+{
+  "success": True,
+  "message": "Order ID is approved"
 }
