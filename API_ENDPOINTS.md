@@ -436,38 +436,54 @@ Server Error:
   "status": "error",
   "message": "An error occurred while processing your request."
 }
-
-## Order APIs
+Order APIs
 
 ### Create Order - `POST /api/orders/create.php`
-- **Description:** Create a new order with items, shipping, and payment information.
+- **Description:** Creates a new order for the authenticated user, with specified items, shipping, and payment information.
 - **Request Headers:**  
-  `Authorization: Bearer <JWT Token>`  
+  - `Authorization: Bearer <JWT Token>`  (Required)
 
-- **Request Body:**  
-  ```json
-  {
-    "items": [
-      { "productId": 1, "quantity": 2 },
-      { "productId": 2, "quantity": 1 }
-    ],
-    "shippingInfo": { "address": "123 Main St, City, Country" },
-    "paymentInfo": { "method": "Credit Card" }
-  }
-•	Response:
-json
-复制编辑
+---
+Request Body (JSON Format)
+```json
+{
+  "items": [
+    { "productId": 1, "quantity": 2 },
+    { "productId": 2, "quantity": 1 }
+  ],
+  "shippingAddress": "123 Main St, City, Country",
+  "paymentMethod": "Credit Card"
+}
+
+ Example Request
+http
+复制
+编辑
+POST /api/orders/create.php
+Authorization: Bearer <JWT Token>
+Content-Type: application/json
+
+{
+  "items": [
+    { "productId": 1, "quantity": 2 },
+    { "productId": 2, "quantity": 1 }
+  ],
+  "shippingAddress": "123 Main St, City, Country",
+  "paymentMethod": "Credit Card"
+}
+ Example Response (Success - 201 Created)
+
 {
   "success": true,
   "message": "Order created successfully",
   "order": {
     "id": 101,
     "userId": 1,
-    "totalAmount": 150,
+    "totalAmount": 120,
     "status": "pending",
     "items": [
-      { "productId": 1, "quantity": 2, "price": 50 },
-      { "productId": 2, "quantity": 1, "price": 50 }
+      { "productId": 1, "quantity": 2, "price": 40, "name": "Handmade Necklace" },
+      { "productId": 2, "quantity": 1, "price": 40, "name": "Wooden Sculpture" }
     ]
   }
 }
