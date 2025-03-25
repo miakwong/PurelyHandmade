@@ -436,3 +436,21 @@ Server Error:
   "status": "error",
   "message": "An error occurred while processing your request."
 }
+
+## Order APIs
+
+### Create Order - `POST /api/orders/create.php`
+- **Description:** Create a new order with items, shipping, and payment information.
+- **Request Headers:**  
+  `Authorization: Bearer <JWT Token>`  
+
+- **Request Body:**  
+  ```json
+  {
+    "items": [
+      { "productId": 1, "quantity": 2 },
+      { "productId": 2, "quantity": 1 }
+    ],
+    "shippingInfo": { "address": "123 Main St, City, Country" },
+    "paymentInfo": { "method": "Credit Card" }
+  }
