@@ -487,3 +487,9 @@ Content-Type: application/json
     ]
   }
 }
+ Example Response (Error - 400 Bad Request)
+
+{
+  "success": false,
+  "message": "Order items array is required"
+}
