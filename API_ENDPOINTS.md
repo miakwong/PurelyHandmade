@@ -516,8 +516,22 @@ Status Code	Message	Reason
 | `userId`  | integer  | Yes      | The ID of the user making the request. |
 
 ---
-
-#### 📤 Example Request
+ Example Request
 ```http
 GET /api/orders/detail.php?id=101&userId=1
 Authorization: Bearer <JWT Token>
+Example Response (Success - 200 OK)
+{
+  "success": true,
+  "order": {
+    "id": 101,
+    "userId": 1,
+    "orderDate": "2025-03-24T10:30:00",
+    "status": "pending",
+    "totalAmount": 120,
+    "items": [
+      { "productId": 1, "quantity": 2, "price": 40, "name": "Handmade Necklace" },
+      { "productId": 2, "quantity": 1, "price": 40, "name": "Wooden Sculpture" }
+    ]
+  }
+}
