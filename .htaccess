@@ -4,6 +4,7 @@
 # Enable rewrite engine
 RewriteEngine On
 
+# SSH TEST CHANGE
 # Set base URL (if in a subdirectory)
 # RewriteBase /purelyhandmade/
 
