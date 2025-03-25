@@ -454,8 +454,9 @@ Server Error:
     "shippingInfo": { "address": "123 Main St, City, Country" },
     "paymentInfo": { "method": "Credit Card" }
   }
-Response:
-
+•	Response:
+json
+复制编辑
 {
   "success": true,
   "message": "Order created successfully",
