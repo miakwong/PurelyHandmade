@@ -454,3 +454,19 @@ Server Error:
     "shippingInfo": { "address": "123 Main St, City, Country" },
     "paymentInfo": { "method": "Credit Card" }
   }
+Response:
+
+{
+  "success": true,
+  "message": "Order created successfully",
+  "order": {
+    "id": 101,
+    "userId": 1,
+    "totalAmount": 150,
+    "status": "pending",
+    "items": [
+      { "productId": 1, "quantity": 2, "price": 50 },
+      { "productId": 2, "quantity": 1, "price": 50 }
+    ]
+  }
+}
