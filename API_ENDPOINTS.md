@@ -308,5 +308,3 @@ Authorization: Bearer <JWT Token>
   "message": "Order ID is required"
 }
 ```
-
----
