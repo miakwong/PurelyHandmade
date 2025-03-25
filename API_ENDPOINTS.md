@@ -535,3 +535,16 @@ Example Response (Success - 200 OK)
     ]
   }
 }
+
+Example Response (Error - 400 Bad Request)
+json
+{
+  "success": false,
+  "message": "Order ID is required"
+}
+ Error Responses
+Status Code	Message	Reason
+400	Order ID is required	Missing or invalid id parameter.
+401	Unauthorized	JWT Token is invalid or not provided.
+404	Order not found	The order does not exist or is not accessible by the user.
+500	An error occurred	Server-side error or database failure.
