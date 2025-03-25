@@ -502,3 +502,22 @@ Status Code	Message	Reason
 401	Unauthorized	JWT Token is invalid or not provided.
 404	Order not found	The order does not exist or is not accessible by the user.
 500	An error occurred	Server-side error or database failure.
+ Get Order Details - `GET /api/orders/detail.php`
+- **Description:** Retrieves details of a specific order by its ID for the authenticated user.
+- **Request Headers:**  
+  - `Authorization: Bearer <JWT Token>` (Required)
+
+---
+
+ Request Parameters (Query)
+| Parameter | Type    | Required | Description                       |
+|-----------|---------|----------|----------------------------------|
+| `id`      | integer  | Yes      | The ID of the order to be fetched. |
+| `userId`  | integer  | Yes      | The ID of the user making the request. |
+
+---
+
+#### 📤 Example Request
+```http
+GET /api/orders/detail.php?id=101&userId=1
+Authorization: Bearer <JWT Token>
