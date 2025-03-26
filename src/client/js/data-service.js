@@ -1,34 +1,33 @@
 /**
  * Data Service for Purely Handmade
  * 
- * 提供统一的数据访问层，处理客户端数据的获取和管理
  * Provides a unified data access layer for handling client-side data retrieval and management
  */
 
-// API 基础 URL
-const API_BASE_URL = '/api';
+// API base URL
+const API_BASE_URL = CONFIG.getApiPath('');
 
-// 定义 DataService 对象
+// Define DataService object
 const DataService = {
   /**
-   * 获取授权令牌
-   * @returns {string|null} 授权令牌
+   * Get authorization token
+   * @returns {string|null} Authorization token
    */
   getAuthToken: function() {
     return localStorage.getItem('authToken');
   },
   
   /**
-   * 设置授权令牌
-   * @param {string} token 授权令牌
+   * Set authorization token
+   * @param {string} token Authorization token
    */
   setAuthToken: function(token) {
     localStorage.setItem('authToken', token);
   },
   
   /**
-   * 创建带授权的请求头
-   * @returns {Object} 请求头对象
+   * Create a request header with authorization
+   * @returns {Object} Request header object
    */
   getAuthHeaders: function() {
     const token = this.getAuthToken();
@@ -41,24 +40,24 @@ const DataService = {
   },
   
   /**
-   * API 请求基础方法
-   * @param {string} endpoint API终端路径
-   * @param {Object} options 请求选项
-   * @returns {Promise<Object>} 响应数据
+   * API request base method
+   * @param {string} endpoint API endpoint path
+   * @param {Object} options Request options
+   * @returns {Promise<Object>} Response data
    */
   async apiRequest(endpoint, options = {}) {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
       
-      // 默认选项
+      // Default options
       const defaultOptions = {
         headers: this.getAuthHeaders()
       };
       
-      // 合并选项
+      // Merge options
       const fetchOptions = {...defaultOptions, ...options};
       
-      // 执行请求
+      // Execute request
       console.log(`DataService: apiRequest() - Making request to ${url}`);
       const response = await fetch(url, fetchOptions);
       console.log(`DataService: apiRequest() - Response status: ${response.status}`);
@@ -73,9 +72,8 @@ const DataService = {
   },
   
   /**
-   * 获取所有产品
    * Get all products
-   * @returns {Promise<Array>} 产品列表 Product list
+   * @returns {Promise<Array>} Product list
    */
   getAllProducts: async function() {
     try {
@@ -85,8 +83,6 @@ const DataService = {
       
       if (result.success) {
         console.log('DataService: getAllProducts() - Successfully fetched products');
-        
-        // Return the full response to allow for consistent handling at the API data loader
         return result;
       }
       console.error('DataService: getAllProducts() - API request failed:', result.message);
@@ -98,10 +94,9 @@ const DataService = {
   },
   
   /**
-   * 按ID获取产品
    * Get product by ID
-   * @param {number|string} id 产品ID Product ID
-   * @returns {Promise<Object|null>} 产品对象或null Product object or null
+   * @param {number|string} id Product ID
+   * @returns {Promise<Object|null>} Product object or null
    */
   getProductById: async function(id) {
     try {
@@ -118,9 +113,8 @@ const DataService = {
   },
   
   /**
-   * 获取所有类别
    * Get all categories
-   * @returns {Promise<Array>} 类别列表 Category list
+   * @returns {Promise<Array>} Category list
    */
   getAllCategories: async function() {
     try {
@@ -131,7 +125,7 @@ const DataService = {
       if (result.success) {
         console.log('DataService: getAllCategories() - Successfully fetched categories');
         
-        // 确保正确的响应格式
+        // Ensure correct response format
         return {
           success: true,
           message: result.message || "Success",
@@ -158,10 +152,9 @@ const DataService = {
   },
   
   /**
-   * 按ID获取类别
    * Get category by ID
-   * @param {number|string} id 类别ID Category ID
-   * @returns {Promise<Object|null>} 类别对象或null Category object or null
+   * @param {number|string} id Category ID
+   * @returns {Promise<Object|null>} Category object or null
    */
   getCategoryById: async function(id) {
     try {
@@ -178,9 +171,8 @@ const DataService = {
   },
   
   /**
-   * 获取所有设计师
    * Get all designers
-   * @returns {Promise<Array>} 设计师列表 Designer list
+   * @returns {Promise<Array>} Designer list
    */
   getAllDesigners: async function() {
     try {
@@ -203,9 +195,8 @@ const DataService = {
   },
   
   /**
-   * 获取精选设计师
    * Get featured designers
-   * @returns {Promise<Array>} 精选设计师列表 Featured designer list
+   * @returns {Promise<Array>} Featured designer list
    */
   getFeaturedDesigners: async function() {
     try {
@@ -228,10 +219,9 @@ const DataService = {
   },
   
   /**
-   * 按ID获取设计师
    * Get designer by ID
-   * @param {number|string} id 设计师ID Designer ID
-   * @returns {Promise<Object|null>} 设计师对象或null Designer object or null
+   * @param {number|string} id Designer ID
+   * @returns {Promise<Object|null>} Designer object or null
    */
   getDesignerById: async function(id) {
     try {
@@ -248,10 +238,9 @@ const DataService = {
   },
   
   /**
-   * 获取新到货产品
    * Get new arrival products
-   * @param {number} days 天数 Number of days
-   * @returns {Promise<Array>} 新产品列表 New products list
+   * @param {number} days Number of days
+   * @returns {Promise<Array>} New products list
    */
   getNewArrivals: async function(days = 7) {
     try {
@@ -270,9 +259,8 @@ const DataService = {
   },
   
   /**
-   * 获取特色产品
    * Get featured products
-   * @returns {Promise<Array>} 特色产品列表 Featured products list
+   * @returns {Promise<Array>} Featured products list
    */
   getFeaturedProducts: async function() {
     try {
@@ -285,9 +273,8 @@ const DataService = {
   },
   
   /**
-   * 获取促销产品
    * Get on sale products
-   * @returns {Promise<Array>} 促销产品列表 On sale products list
+   * @returns {Promise<Array>} On sale products list
    */
   getOnSaleProducts: async function() {
     try {
@@ -300,10 +287,9 @@ const DataService = {
   },
   
   /**
-   * 获取按类别分类的产品
    * Get products by category
-   * @param {number|string} categoryId 类别ID Category ID
-   * @returns {Promise<Array>} 产品列表 Product list
+   * @param {number|string} categoryId Category ID
+   * @returns {Promise<Array>} Product list
    */
   getProductsByCategory: async function(categoryId) {
     try {
@@ -314,10 +300,10 @@ const DataService = {
       return [];
     }
   },
-  
+
   /**
-   * 获取当前登录用户信息
-   * @returns {Object|null} 当前用户信息或null
+   * Get current user information
+   * @returns {Object|null} Current user information or null
    */
   getCurrentUser: function() {
     try {
@@ -330,9 +316,8 @@ const DataService = {
   },
   
   /**
-   * 获取当前用户信息（从API）
    * Get current user profile from API
-   * @returns {Promise<Object|null>} 用户对象或null User object or null
+   * @returns {Promise<Object|null>} User object or null
    */
   getUserProfile: async function() {
     try {
@@ -341,7 +326,7 @@ const DataService = {
       });
       
       if (result.success) {
-        // 更新本地存储的用户信息
+        // Update local storage user information
         this.setCurrentUser(result.data, this.getAuthToken());
         return result.data;
       }
@@ -353,9 +338,9 @@ const DataService = {
   },
   
   /**
-   * 设置当前登录用户
-   * @param {Object} user 用户信息对象
-   * @param {string} token JWT令牌
+   * Set current user
+   * @param {Object} user User information object
+   * @param {string} token JWT token
    */
   setCurrentUser: function(user, token) {
     if (user) {
@@ -368,7 +353,7 @@ const DataService = {
   },
   
   /**
-   * 清除当前用户登录状态
+   * Clear current user login status
    */
   clearCurrentUser: function() {
     localStorage.removeItem('currentUser');
@@ -376,19 +361,19 @@ const DataService = {
   },
   
   /**
-   * 获取购物车数据
-   * @returns {Promise<Array>} 购物车商品数组
+   * Get cart data
+   * @returns {Promise<Array>} Cart items array
    */
   getCart: async function() {
     try {
-      // 检查用户是否登录
+      // Check if user is logged in
       const currentUser = this.getCurrentUser();
       if (!currentUser) {
         console.log('User not logged in');
         return [];
       }
       
-      // 调用API获取购物车数据
+      // Call API to get cart data
       const result = await this.apiRequest(`/cart?userId=${currentUser.id}`, {
         method: 'GET'
       });
@@ -405,29 +390,29 @@ const DataService = {
   },
   
   /**
-   * 保存购物车数据
-   * @param {Array} cartItems 购物车项目数组
+   * Save cart data
+   * @param {Array} cartItems Cart items array
    */
   saveCart: function(cartItems) {
     localStorage.setItem('cart', JSON.stringify(cartItems || []));
   },
   
   /**
-   * 添加商品到购物车
-   * @param {string|number} productId 产品ID
-   * @param {number} quantity 数量
-   * @returns {Promise<boolean>} 操作是否成功
+   * Add product to cart
+   * @param {string|number} productId Product ID
+   * @param {number} quantity Quantity
+   * @returns {Promise<boolean>} Operation success
    */
   addToCart: async function(productId, quantity = 1) {
     try {
-      // 检查用户是否登录
+      // Check if user is logged in
       const currentUser = this.getCurrentUser();
       if (!currentUser) {
         console.error('User not logged in');
         return false;
       }
       
-      // 调用API添加商品到购物车
+      // Call API to add product to cart
       const result = await this.apiRequest('/cart/add', {
         method: 'POST',
         body: JSON.stringify({
@@ -445,20 +430,20 @@ const DataService = {
   },
   
   /**
-   * 从购物车移除商品
-   * @param {string|number} productId 产品ID
-   * @returns {Promise<boolean>} 操作是否成功
+   * Remove product from cart
+   * @param {string|number} productId Product ID
+   * @returns {Promise<boolean>} Operation success
    */
   removeFromCart: async function(productId) {
     try {
-      // 检查用户是否登录
+      // Check if user is logged in
       const currentUser = this.getCurrentUser();
       if (!currentUser) {
         console.error('User not logged in');
         return false;
       }
       
-      // 调用API从购物车删除商品
+      // Call API to remove product from cart
       const result = await this.apiRequest('/cart/remove', {
         method: 'POST',
         body: JSON.stringify({
@@ -475,23 +460,23 @@ const DataService = {
   },
   
   /**
-   * 更新购物车中商品数量
-   * @param {string|number} productId 产品ID
-   * @param {number} quantity 新数量
-   * @returns {Promise<boolean>} 操作是否成功
+   * Update the quantity of an item in the cart
+   * @param {string|number} productId Product ID
+   * @param {number} quantity New quantity
+   * @returns {Promise<boolean>} Operation success
    */
   updateCartItemQuantity: async function(productId, quantity) {
     try {
       if (quantity < 1) return false;
       
-      // 检查用户是否登录
+      // Check if user is logged in
       const currentUser = this.getCurrentUser();
       if (!currentUser) {
         console.error('User not logged in');
         return false;
       }
       
-      // 调用API更新购物车商品数量
+      // Call API to update cart item quantity
       const result = await this.apiRequest('/cart/update', {
         method: 'POST',
         body: JSON.stringify({
@@ -509,15 +494,15 @@ const DataService = {
   },
   
   /**
-   * 清空购物车
+   * Clear cart
    */
   clearCart: function() {
     localStorage.removeItem('cart');
   },
   
   /**
-   * 获取购物车总金额
-   * @returns {number} 总金额
+   * Get cart total
+   * @returns {number} Total amount
    */
   getCartTotal: function() {
     const cart = this.getCart();
@@ -525,8 +510,8 @@ const DataService = {
   },
   
   /**
-   * 获取购物车商品总数
-   * @returns {number} 商品总数
+   * Get cart item count
+   * @returns {number} Total items
    */
   getCartItemCount: function() {
     const cart = this.getCart();
@@ -534,10 +519,9 @@ const DataService = {
   },
   
   /**
-   * 用户注册
    * User registration
-   * @param {Object} userData 用户数据 User data
-   * @returns {Promise<Object>} 注册结果 Registration result
+   * @param {Object} userData User data
+   * @returns {Promise<Object>} Registration result
    */
   register: async function(userData) {
     try {
@@ -549,20 +533,19 @@ const DataService = {
       if (result.success) {
         return { success: true, user: result.data };
       } else {
-        return { success: false, message: result.message || '注册失败' };
+        return { success: false, message: result.message || 'Registration failed' };
       }
     } catch (e) {
       console.error('Error during registration:', e);
-      return { success: false, message: '注册时发生错误，请稍后再试' };
+      return { success: false, message: 'Registration failed' };
     }
   },
   
   /**
-   * 用户登录
    * User login
-   * @param {string} identifier 邮箱 Email or username
-   * @param {string} password 密码 Password
-   * @returns {Promise<Object>} 登录结果 Login result
+   * @param {string} identifier Email or username
+   * @param {string} password Password
+   * @returns {Promise<Object>} Login result
    */
   login: async function(identifier, password) {
     try {
@@ -576,18 +559,17 @@ const DataService = {
         this.setCurrentUser(user, token);
         return { success: true, user };
       } else {
-        return { success: false, message: result.message || '登录失败' };
+        return { success: false, message: result.message || 'Login failed' };
       }
     } catch (e) {
       console.error('Error during login:', e);
-      return { success: false, message: '登录时发生错误，请稍后再试' };
+      return { success: false, message: 'Login failed' };
     }
   },
   
   /**
-   * 获取当前用户的订单
    * Get current user's orders
-   * @returns {Promise<Array>} 订单列表 Order list
+   * @returns {Promise<Array>} Order list
    */
   getUserOrders: async function() {
     try {
@@ -604,10 +586,9 @@ const DataService = {
   },
   
   /**
-   * 获取订单详情
    * Get order details
-   * @param {number} orderId 订单ID
-   * @returns {Promise<Object|null>} 订单详情
+   * @param {number} orderId Order ID
+   * @returns {Promise<Object|null>} Order details
    */
   getOrderDetails: async function(orderId) {
     try {
@@ -624,10 +605,9 @@ const DataService = {
   },
   
   /**
-   * 创建订单
    * Create order
-   * @param {Object} orderData 订单数据 Order data
-   * @returns {Promise<Object>} 创建结果 Creation result
+   * @param {Object} orderData Order data
+   * @returns {Promise<Object>} Creation result
    */
   createOrder: async function(orderData) {
     try {
@@ -639,19 +619,18 @@ const DataService = {
       if (result.success) {
         return { success: true, order: result.data };
       }
-      return { success: false, message: result.message || '创建订单失败' };
+      return { success: false, message: result.message || 'Order creation failed' };
     } catch (e) {
       console.error('Error creating order:', e);
-      return { success: false, message: '创建订单时发生错误，请稍后再试' };
+      return { success: false, message: 'Order creation failed' };
     }
   },
   
   /**
-   * 提交产品评论
    * Submit product review
-   * @param {string} productId 产品ID Product ID
-   * @param {Object} reviewData 评论数据 Review data
-   * @returns {Promise<Object>} 提交结果 Submission result
+   * @param {string} productId Product ID
+   * @param {Object} reviewData Review data
+   * @returns {Promise<Object>} Submission result
    */
   submitReview: async function(productId, reviewData) {
     try {
@@ -666,18 +645,17 @@ const DataService = {
       if (result.success) {
         return { success: true, review: result.data };
       }
-      return { success: false, message: result.message || '提交评论失败' };
+      return { success: false, message: result.message || 'Review submission failed' };
     } catch (e) {
       console.error('Error submitting review:', e);
-      return { success: false, message: '提交评论时发生错误，请稍后再试' };
+      return { success: false, message: 'Review submission failed' };
     }
   },
   
   /**
-   * 获取产品评论
    * Get product reviews
-   * @param {string} productId 产品ID Product ID
-   * @returns {Promise<Array>} 评论列表 Review list
+   * @param {string} productId Product ID
+   * @returns {Promise<Array>} Review list
    */
   getProductReviews: async function(productId) {
     try {
@@ -694,17 +672,16 @@ const DataService = {
   },
   
   /**
-   * 根据关键词搜索产品
    * Search products by keyword
-   * @param {string} keyword 搜索关键词 Search keyword
-   * @param {number} page 页码 Page number
-   * @param {number} limit 每页数量 Items per page
-   * @returns {Promise<Object>} 搜索结果 Search results
+   * @param {string} keyword Search keyword
+   * @param {number} page Page number
+   * @param {number} limit Items per page
+   * @returns {Promise<Object>} Search results
    */
   searchProducts: async function(keyword, page = 1, limit = 10) {
     try {
       console.log('DataService: searchProducts() - Calling API with keyword:', keyword);
-      // 构建带有搜索参数的URL
+      // Build URL with search parameters
       const queryParams = new URLSearchParams({
         search: keyword,
         page: page,
@@ -728,9 +705,13 @@ const DataService = {
   }
 };
 
-// 导出模块，支持CommonJS和浏览器环境
+// Ensure DataService is registered in the global scope
+if (typeof window !== 'undefined') {
+  window.DataService = DataService;
+  console.log('DataService registered to global scope');
+}
+
+// Export DataService (if using module system)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = DataService;
-} else if (typeof window !== 'undefined') {
-  window.DataService = DataService;
 } 

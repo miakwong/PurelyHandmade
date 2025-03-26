@@ -67,7 +67,7 @@ window.loadProducts = async function(containerId, options = {}) {
   
   // 自动修复：如果containerId为undefined，尝试使用默认值
   if (!containerId) {
-    console.warn('API loadProducts() - containerId参数未定义，使用默认容器ID："products-container"');
+    console.warn('API loadProducts() - containerId is undefined, using default container ID: "products-container"');
     containerId = 'products-container'; // 使用默认的容器ID
   }
   
@@ -171,20 +171,20 @@ window.loadProducts = async function(containerId, options = {}) {
       }
       
       // Product image
-      const imgSrc = product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || '/src/client/assets/placeholder.jpg';
+      const imgSrc = product.image || (product.gallery ? JSON.parse(product.gallery)[0] : null) || `${CONFIG.BASE_URL}/assets/placeholder.jpg`;
       
       // Create product card
       const productHtml = `
         <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
           <div class="product-card">
             <div class="product-img-wrapper">
-              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+              <a href="${CONFIG.getViewPath('product/product_detail.html')}?id=${product.id}">
                 <img src="${imgSrc}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
               </a>
             </div>
             <div class="product-card-body">
-              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+              <a href="${CONFIG.getViewPath('product/product_detail.html')}?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <h2 class="product-title">${product.name}</h2>
               </a>
               ${priceHtml}
@@ -220,24 +220,24 @@ window.loadProducts = async function(containerId, options = {}) {
  * @param {boolean} options.featured - Whether to show only featured categories
  */
 window.loadCategories = async function(containerId, options = {}) {
-  console.log(`API loadCategories() - 开始加载，参数:`, { containerId, options });
+  console.log(`API loadCategories() - Starting with parameters:`, { containerId, options });
   
   // 自动修复：如果containerId为undefined，尝试使用默认值
   if (!containerId) {
-    console.warn('API loadCategories() - containerId参数未定义，使用默认容器ID："category-cards-container"');
+    console.warn('API loadCategories() - containerId is undefined, using default container ID: "category-cards-container"');
     containerId = 'category-cards-container'; // 使用默认的容器ID
   }
   
   // 检查DataService可用性
   if (typeof DataService === 'undefined') {
-    console.error('API loadCategories() - DataService未定义');
-    showErrorInContainer(containerId, 'DataService未定义，无法加载数据');
+    console.error('API loadCategories() - DataService is not defined');
+    showErrorInContainer(containerId, 'DataService is not defined, cannot load data');
     return;
   }
   
   const container = window.getContainerSafely(containerId);
   if (!container) {
-    console.error(`API loadCategories() - 找不到容器: "${containerId}"`);
+    console.error(`API loadCategories() - Unable to find container using ID or alternatives: "${containerId}"`);
     return;
   }
   
@@ -248,20 +248,20 @@ window.loadCategories = async function(containerId, options = {}) {
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading categories...</span>
         </div>
-        <p class="mt-2">加载分类中...</p>
+        <p class="mt-2">Loading categories...</p>
       </div>
     `;
     
-    // 获取分类数据
-    console.log(`API loadCategories() - 从API获取分类数据...`);
+    // Get category data
+    console.log(`API loadCategories() - Fetching categories from API...`);
     let categoryResponse;
     
     try {
       categoryResponse = await DataService.getAllCategories();
-      console.log(`API loadCategories() - API响应:`, categoryResponse);
-    } catch (apiError) {
-      console.error(`API loadCategories() - API调用错误:`, apiError);
-      showErrorInContainer(containerId, `加载分类失败: ${apiError.message || '未知错误'}`);
+      console.log(`API loadCategories() - API response:`, categoryResponse);
+    } catch (apiError) {  
+      console.error(`API loadCategories() - API call error:`, apiError);
+      showErrorInContainer(containerId, `Failed to load categories: ${apiError.message || 'Unknown error'}`);
       return;
     }
     
@@ -269,9 +269,9 @@ window.loadCategories = async function(containerId, options = {}) {
     let categories = [];
     
     if (!categoryResponse || !categoryResponse.success) {
-      const errorMessage = categoryResponse?.message || '未知错误';
-      console.error(`API loadCategories() - API请求失败: ${errorMessage}`);
-      showErrorInContainer(containerId, `加载分类失败: ${errorMessage}`);
+      const errorMessage = categoryResponse?.message || 'Unknown error';
+      console.error(`API loadCategories() - API request failed: ${errorMessage}`);
+      showErrorInContainer(containerId, `Load categories failed: ${errorMessage}`);
       return;
     }
     
@@ -283,48 +283,48 @@ window.loadCategories = async function(containerId, options = {}) {
     } else if (Array.isArray(categoryResponse.categories)) {
       categories = categoryResponse.categories;
     } else {
-      console.warn(`API loadCategories() - API响应格式异常，无法提取分类数据`);
+      console.warn(`API loadCategories() - API response format is abnormal, cannot extract category data`);
       categories = [];
     }
     
-    console.log(`API loadCategories() - 筛选前的分类数量:`, categories.length);
+    console.log(`API loadCategories() - Number of categories before filtering:`, categories.length);
     
     // 应用筛选
     let filteredCategories = [...categories];
     
     // 特色分类筛选
     if (options.featured) {
-      console.log(`API loadCategories() - 筛选特色分类`);
+      console.log(`API loadCategories() - Filtering featured categories`);
       filteredCategories = filteredCategories.filter(category => category.featured);
-      console.log(`API loadCategories() - 特色分类数量:`, filteredCategories.length);
+      console.log(`API loadCategories() - Number of featured categories:`, filteredCategories.length);
     }
     
     // 数量限制
     if (options.limit && filteredCategories.length > options.limit) {
-      console.log(`API loadCategories() - 限制显示数量: ${options.limit}`);
+      console.log(`API loadCategories() - Limiting to ${options.limit} categories`);
       filteredCategories = filteredCategories.slice(0, options.limit);
     }
     
     // 检查结果是否为空
     if (filteredCategories.length === 0) {
-      console.log(`API loadCategories() - 筛选后无分类数据`);
+      console.log(`API loadCategories() - No categories available after filtering`);
       container.innerHTML = `
         <div class="col-12 text-center py-4">
-          <p class="text-muted">当前没有可用分类</p>
+          <p class="text-muted">No categories available at the moment</p>
         </div>
       `;
       return;
     }
     
     // 渲染分类
-    console.log(`API loadCategories() - 渲染${filteredCategories.length}个分类`);
+    console.log(`API loadCategories() - Rendering ${filteredCategories.length} categories`);
     container.innerHTML = '';
     
     filteredCategories.forEach(category => {
-      console.log(`API loadCategories() - 渲染分类:`, category.id, category.name);
+      console.log(`API loadCategories() - Rendering category:`, category.id, category.name);
       
       // 处理图像
-      const imgSrc = category.image || '/src/client/img/category-placeholder.jpg';
+      const imgSrc = category.image || '/~xzy2020c/PurelyHandmade/img/category-placeholder.jpg';
       
       // 创建分类卡片
       const categoryHtml = `
@@ -336,7 +336,7 @@ window.loadCategories = async function(containerId, options = {}) {
                 <div class="category-overlay">
                   <h3 class="category-title">${category.name}</h3>
                   <p class="category-desc">${category.description || ''}</p>
-                  <span class="btn-browse">浏览产品</span>
+                  <span class="btn-browse">Browse products</span>
                 </div>
               </div>
             </a>
@@ -347,10 +347,10 @@ window.loadCategories = async function(containerId, options = {}) {
       container.innerHTML += categoryHtml;
     });
     
-    console.log(`API loadCategories() - 分类渲染完成`);
+    console.log(`API loadCategories() - Categories rendered`);
   } catch (error) {
-    console.error('API loadCategories() - 错误:', error);
-    showErrorInContainer(containerId, `加载分类时发生错误: ${error.message || '未知错误'}`);
+    console.error('API loadCategories() - Error:', error);
+    showErrorInContainer(containerId, `Error loading categories: ${error.message || 'Unknown error'}`);
   }
 };
 
@@ -380,7 +380,7 @@ window.loadDesigners = async function(containerId, options = {}) {
   
   // 自动修复：如果containerId为undefined，尝试使用默认值
   if (!containerId) {
-    console.warn('API loadDesigners() - containerId参数未定义，使用默认容器ID："designers-container"');
+    console.warn('API loadDesigners() - containerId is undefined, using default container ID: "designers-container"');
     containerId = 'designers-container'; // 使用默认的容器ID
   }
   
@@ -470,7 +470,7 @@ window.loadDesigners = async function(containerId, options = {}) {
     
     designers.forEach(designer => {
       console.log(`API loadDesigners() - Rendering designer:`, designer.id, designer.name);
-      const imgSrc = designer.image || '/src/client/assets/placeholder.jpg';
+      const imgSrc = designer.image || `${CONFIG.BASE_URL}/assets/placeholder.jpg`;
       
       // Truncate bio if too long
       const shortenedBio = designer.bio 
@@ -479,7 +479,7 @@ window.loadDesigners = async function(containerId, options = {}) {
       
       const designerHtml = `
         <div class="col-lg-3 col-md-6 mb-4">
-          <a href="/src/client/views/designer/designer-page.html?id=${designer.id}" class="text-decoration-none text-dark">
+          <a href="${CONFIG.getViewPath('designer/designer-page.html')}?id=${designer.id}" class="text-decoration-none text-dark">
             <div class="card designer-card h-100 shadow-sm">
               <div class="text-center pt-4">
                 <img src="${imgSrc}" alt="${designer.name}" class="rounded-circle designer-card-img" style="width: 120px; height: 120px; object-fit: cover;">
@@ -531,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 如果用户未登录，提示登录
         showToast('Please login to add items to cart', 'error');
         setTimeout(() => {
-          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+          window.location.href = `${CONFIG.getViewPath('auth/login.html')}?returnUrl=${encodeURIComponent(window.location.href)}`;
         }, 1500);
         return false;
       }
@@ -540,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
       showLoadingOverlay('Adding to cart...');
       
       // 调用API添加商品到购物车
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${CONFIG.getApiPath('cart/add')}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -588,8 +588,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Helper function to ensure all API-related scripts are loaded on any page
 window.ensureApiScriptsLoaded = function() {
   const requiredScripts = [
-    '/src/client/js/data-service.js',
-    '/src/client/js/api-data-loader.js'
+    `${CONFIG.getJsPath('data-service.js')}`,
+    `${CONFIG.getJsPath('api-data-loader.js')}`
   ];
   
   // Check if scripts are already loaded
