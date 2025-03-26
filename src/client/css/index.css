@@ -1,6 +1,6 @@
     /* 英雄区块样式 */
     .hero-section {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/src/client/img/hero-bg.jpg');
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/~xzy2020c/PurelyHandmade/img/hero-bg.jpg');
       background-size: cover;
       background-position: center;
       color: white;
