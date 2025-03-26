@@ -1,49 +1,56 @@
-<!-- 双层导航栏 -->
-<!-- 顶部导航栏 - 包含logo和用户功能 -->
+<!-- Double-layer navigation bar -->
+<!-- Top navigation bar - contains logo and user functions -->
 <div class="navbar navbar-expand navbar-light bg-light py-2 border-bottom">
   <div class="container">
     <!-- Logo -->
-    <a class="navbar-brand" href="/src/client/html/index.html">
-      <img src="/src/client/img/logo.png" alt="Purely Homemade Logo" height="40" class="d-inline-block align-text-top me-2">
+    <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/index.html">
+      <img src="/~xzy2020c/PurelyHandmade/img/logo.png" alt="Purely Homemade Logo" height="40"
+        class="d-inline-block align-text-top me-2">
       Purely Homemade
     </a>
-    
-    <!-- 右侧功能区 -->
+
+    <!-- Right-side functionality area -->
     <div class="d-flex align-items-center">
-      <!-- 搜索框 - 更长 -->
-      <form class="d-flex me-3 navbar-search" style="width: 300px;" action="/src/client/views/product/product-list.html" method="GET">
+      <!-- Search box - longer -->
+      <form class="d-flex me-3 navbar-search" style="width: 300px;"
+        action="/~xzy2020c/PurelyHandmade/views/product/product-list.html" method="GET">
         <input class="form-control me-2" type="search" name="q" placeholder="Search products..." aria-label="Search">
         <button class="btn btn-outline-primary" type="submit">
           <i class="bi bi-search"></i>
         </button>
       </form>
-      
-      <!-- 用户菜单 -->
+
+      <!-- User menu -->
       <div class="d-flex">
-        <!-- 用户下拉菜单 - 带边框 -->
+        <!-- User dropdown menu - with border -->
         <div class="dropdown me-2">
-          <button class="btn btn-outline-primary" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <button class="btn btn-outline-primary" type="button" id="userDropdown" data-bs-toggle="dropdown"
+            aria-expanded="false">
             <i class="bi bi-person-circle"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
             <li>
-              <a class="dropdown-item" href="/src/client/views/auth/login.html" id="login-button">
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/login.html" id="login-button">
                 <i class="bi bi-box-arrow-in-right me-2"></i>Login
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="/src/client/views/auth/register.html" id="register-button">
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/register.html" id="register-button">
                 <i class="bi bi-person-plus me-2"></i>Register
               </a>
             </li>
-            <li><hr class="dropdown-divider"></li>
             <li>
-              <a class="dropdown-item" href="/src/client/views/auth/profile.html" id="profile-button" style="display: none;">
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/profile.html" id="profile-button"
+                style="display: none;">
                 <i class="bi bi-person me-2"></i>Profile
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="/src/client/views/orders/order-history.html" id="order-history-button" style="display: none;">
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/orders/order-history.html"
+                id="order-history-button" style="display: none;">
                 <i class="bi bi-clock-history me-2"></i>Order History
               </a>
             </li>
@@ -54,11 +61,12 @@
             </li>
           </ul>
         </div>
-        
-        <!-- 购物车 - 带边框 -->
-        <a href="/src/client/views/checkout/cart.html" class="btn btn-outline-primary position-relative">
+
+        <!-- Shopping cart - with border -->
+        <a href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html" class="btn btn-outline-primary position-relative">
           <i class="bi bi-cart3"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count" style="display: none;">
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count"
+            style="display: none;">
             0
             <span class="visually-hidden">items in cart</span>
           </span>
@@ -68,31 +76,32 @@
   </div>
 </div>
 
-<!-- 底部导航栏 - 主要导航菜单 -->
+<!-- Bottom navigation bar - main navigation menu -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-1">
   <div class="container">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/html/index.html">Home</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/index.html">Home</a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/views/new-arrivals.html">New Arrivals</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/new-arrivals.html">New Arrivals</a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/views/product/product-list.html">Products</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/product/product-list.html">Products</a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/views/designer/designers.html">Designers</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/designer/designers.html">Designers</a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/views/on-sale.html">Sale</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/on-sale.html">Sale</a>
         </li>
         <li class="nav-item mx-2">
-          <a class="nav-link" href="/src/client/views/about.html">About Us</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/about.html">About Us</a>
         </li>
       </ul>
     </div>
@@ -100,8 +109,8 @@
 </nav>
 
 <script>
-  // 确保函数在全局范围内可用，这样外部脚本可以调用它们
-  window.updateAuthButton = function() {
+  // Ensure functions are available in the global scope so external scripts can call them
+  window.updateAuthButton = function () {
     console.log('Navbar updateAuthButton called');
     const currentUser = localStorage.getItem('currentUser');
     const loginButton = document.getElementById('login-button');
@@ -109,30 +118,30 @@
     const profileButton = document.getElementById('profile-button');
     const orderHistoryButton = document.getElementById('order-history-button');
     const logoutButton = document.getElementById('logout-button');
-    
+
     console.log('Auth status: User is', currentUser ? 'logged in' : 'not logged in');
-    
+
     if (currentUser) {
-      // 用户已登录
+      // User is logged in
       if (loginButton) loginButton.style.display = 'none';
       if (registerButton) registerButton.style.display = 'none';
       if (profileButton) profileButton.style.display = 'block';
       if (orderHistoryButton) orderHistoryButton.style.display = 'block';
       if (logoutButton) {
         logoutButton.style.display = 'block';
-        
-        // 移除所有现有的事件监听器，避免多次添加
+
+        // Remove all existing event listeners to avoid multiple additions
         const newLogoutButton = logoutButton.cloneNode(true);
         logoutButton.parentNode.replaceChild(newLogoutButton, logoutButton);
-        
-        newLogoutButton.addEventListener('click', function(e) {
+
+        newLogoutButton.addEventListener('click', function (e) {
           e.preventDefault();
           localStorage.removeItem('currentUser');
-          window.location.href = '../../html/index.html';
+          window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
         });
       }
     } else {
-      // 用户未登录
+      // User is not logged in
       if (loginButton) loginButton.style.display = 'block';
       if (registerButton) registerButton.style.display = 'block';
       if (profileButton) profileButton.style.display = 'none';
@@ -140,31 +149,31 @@
       if (logoutButton) logoutButton.style.display = 'none';
     }
   };
-  
-  window.updateCartCount = async function() {
+
+  window.updateCartCount = async function () {
     const cartCountElement = document.getElementById('cart-count');
     if (!cartCountElement) return;
-    
+
     try {
-      // 检查用户是否登录
+      // Check if user is logged in
       const currentUser = DataService.getCurrentUser();
       if (!currentUser) {
-        // 用户未登录，隐藏购物车数量
+        // User is not logged in, hide cart count
         cartCountElement.style.display = 'none';
         return;
       }
-      
-      // 从API获取购物车数据
-      const response = await fetch(`/api/cart?userId=${currentUser.id}`, {
+
+      // Get cart data from API
+      const response = await fetch(`${CONFIG.getApiPath('cart')}?userId=${currentUser.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${DataService.getAuthToken()}`
         }
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success && Array.isArray(result.data)) {
         const count = result.data.reduce((total, item) => total + (item.quantity || 1), 0);
         if (count > 0) {
@@ -174,7 +183,7 @@
           cartCountElement.style.display = 'none';
         }
       } else {
-        // API返回错误或没有购物车数据
+        // API returned an error or no cart data
         cartCountElement.style.display = 'none';
       }
     } catch (e) {
@@ -183,38 +192,38 @@
     }
   };
 
-  // 当脚本加载完成后立即尝试运行一次，这对于通过fetch加载的导航栏很重要
+  // Run once immediately when the script loads, which is important for the navbar loaded via fetch
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       updateAuthButton();
       updateCartCount();
     });
   } else {
-    // 如果DOM已经加载完毕，直接执行
+    // If the DOM is already loaded, execute immediately
     updateAuthButton();
     updateCartCount();
   }
-  
-  // 立即初始化
-  setTimeout(function() {
+
+  // Immediately initialize
+  setTimeout(function () {
     console.log('Additional initialization for navbar buttons');
     updateAuthButton();
     updateCartCount();
-    
-    // 确保购物车按钮可点击
-    const cartButton = document.querySelector('a.btn[href="/src/client/views/checkout/cart.html"]');
+
+    // Ensure the cart button is clickable
+    const cartButton = document.querySelector('a.btn[href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html"]');
     if (cartButton) {
       console.log('Cart button found, ensuring it is clickable');
       cartButton.style.pointerEvents = 'auto';
       cartButton.style.cursor = 'pointer';
     }
-    
-    // 添加测试登录按钮（仅供开发测试用）
+
+    // Add test login button (only for development testing)
     if (window.location.hostname === 'localhost') {
       const testLoginBtn = document.createElement('button');
       testLoginBtn.className = 'btn btn-sm btn-info ms-2';
       testLoginBtn.innerHTML = 'Test Login';
-      testLoginBtn.onclick = function() {
+      testLoginBtn.onclick = function () {
         const testUser = {
           id: 1,
           username: 'testuser',
@@ -226,21 +235,21 @@
         updateAuthButton();
         console.log('Test user logged in');
       };
-      
+
       const testLogoutBtn = document.createElement('button');
       testLogoutBtn.className = 'btn btn-sm btn-warning ms-2';
       testLogoutBtn.innerHTML = 'Test Logout';
-      testLogoutBtn.onclick = function() {
+      testLogoutBtn.onclick = function () {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('authToken');
         updateAuthButton();
         console.log('Test user logged out');
       };
-      
+
       const testCartBtn = document.createElement('button');
       testCartBtn.className = 'btn btn-sm btn-success ms-2';
       testCartBtn.innerHTML = 'Add Test Item';
-      testCartBtn.onclick = function() {
+      testCartBtn.onclick = function () {
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         cart.push({
           id: Date.now(),
@@ -252,11 +261,11 @@
         updateCartCount();
         console.log('Test item added to cart');
       };
-      
+
       const container = document.querySelector('.navbar .container');
       container.appendChild(testLoginBtn);
       container.appendChild(testLogoutBtn);
       container.appendChild(testCartBtn);
     }
   }, 500);
-</script> 
+</script>
