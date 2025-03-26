@@ -176,21 +176,19 @@ const DataService = {
    */
   getAllDesigners: async function() {
     try {
-      console.log('DataService: getAllDesigners() - Calling API...');
+      console.log("DataService: getAllDesigners() - Making request...");
       const result = await this.apiRequest('/designers');
-      console.log('DataService: getAllDesigners() - API response:', result);
-      
+  
       if (result.success) {
-        console.log('DataService: getAllDesigners() - Successfully fetched designers');
-        
-        // Return the full response to allow for consistent handling at the API data loader
+        console.log("DataService: getAllDesigners() - Successfully fetched designers");
         return result;
+      } else {
+        console.error("DataService: getAllDesigners() - API request failed: ", result.message);
+        return { success: false, message: result.message };
       }
-      console.error('DataService: getAllDesigners() - API request failed:', result.message);
-      return { success: false, message: result.message };
-    } catch (e) {
-      console.error('DataService: getAllDesigners() - Error getting designers:', e);
-      return { success: false, message: e.message };
+    } catch (error) {
+      console.error("DataService: getAllDesigners() - Error in API request: ", error);
+      return { success: false, message: error.message };
     }
   },
   
@@ -202,7 +200,6 @@ const DataService = {
     try {
       console.log('DataService: getFeaturedDesigners() - Calling API...');
       const result = await this.apiRequest('/designers/featured');
-      console.log('DataService: getFeaturedDesigners() - API response:', result);
       
       if (result.success) {
         console.log('DataService: getFeaturedDesigners() - Successfully fetched featured designers');

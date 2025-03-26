@@ -11,17 +11,29 @@ const CONFIG = {
         IMAGES: '/assets/images',
         API: '/api'
     },
+
+    // Track how many times getPath is called
+    pathCallCount: 0,
     
     // Helper function to get the full path
     getPath: function(type, path = '') {
+        this.pathCallCount++;
+        
         if (!this.PATHS[type]) {
-            console.error(`Invalid path type: ${type}`);
+            console.error(`[CONFIG ERROR] Invalid path type: "${type}". Available types: ${Object.keys(this.PATHS).join(', ')}`);
             return '';
         }
+
         return `${this.BASE_URL}${this.PATHS[type]}${path}`;
     },
     
-    // Common path retrieval function
+    // Get the absolute URL for a given path
+    getAbsoluteUrl: function(type, path = '') {
+        const fullPath = this.getPath(type, path);
+        return window.location.origin + fullPath;
+    },
+
+    // Common path retrieval functions
     getJsPath: function(filename) {
         return this.getPath('JS', `/${filename}`);
     },
@@ -40,6 +52,12 @@ const CONFIG = {
     
     getApiPath: function(endpoint) {
         return this.getPath('API', `/${endpoint}`);
+    },
+    getStats: function() {
+        return {
+            totalPathCalls: this.pathCallCount,
+            availablePathTypes: Object.keys(this.PATHS)
+        };
     }
 };
 
@@ -48,4 +66,4 @@ Object.freeze(CONFIG);
 Object.freeze(CONFIG.PATHS);
 
 // Export configuration
-window.CONFIG = CONFIG; 
+window.CONFIG = CONFIG;
