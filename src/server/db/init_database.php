@@ -18,7 +18,7 @@ $DB_NAME = $env['DB_NAME'];       // The database name from the .env file (ignor
 $DB_PORT = $env['DB_PORT'] ?? 3306; // Database port (default is 3306)
 
 // !!Force the database name to "miakuang" instead of using the .env value
-$DB_NAME_REAL = "miakuang";
+$DB_NAME_REAL = "xzy2020c";
 
 try {
     // Establish database connection
@@ -37,8 +37,8 @@ try {
     // Read SQL initialization file
     $sqlFile = file_get_contents("init_database.sql");
 
-    // Replace all occurrences of "purely_handmade" with "miakuang"
-    $sqlFile = str_replace("purely_handmade", "miakuang", $sqlFile);
+    // !! Replace all occurrences of "purely_handmade" with "cwl"
+    $sqlFile = str_replace("purely_handmade", "xzy2020c", $sqlFile);
 
     // Execute SQL queries one by one
     $queries = explode(";", $sqlFile);
