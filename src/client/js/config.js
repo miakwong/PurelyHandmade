@@ -39,7 +39,7 @@ const CONFIG = {
     },
     
     getApiPath: function(endpoint) {
-        return this.getPath('API', `/${endpoint}`);
+        return this.getPath('API', `${endpoint}`);
     }
 };
 
