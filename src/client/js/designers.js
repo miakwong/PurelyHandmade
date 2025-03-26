@@ -55,21 +55,10 @@ async function loadDesignersFromAPI() {
     let designers = [];
     
     if (designersResponse && designersResponse.success) {
-      // 处理不同可能的响应格式
+      // 直接获取 data.designers 数组
       if (designersResponse.data && Array.isArray(designersResponse.data.designers)) {
         designers = designersResponse.data.designers;
-      } else if (designersResponse.data && typeof designersResponse.data === 'object') {
-        designers = Object.values(designersResponse.data);
-        if (designers.length === 1 && Array.isArray(designers[0])) {
-          designers = designers[0];
-        }
-      } else if (designersResponse.designers && Array.isArray(designersResponse.designers)) {
-        designers = designersResponse.designers;
-      } else if (Array.isArray(designersResponse)) {
-        designers = designersResponse;
       }
-    } else if (Array.isArray(designersResponse)) {
-      designers = designersResponse;
     }
     
     console.log(`Successfully retrieved ${designers.length} designers:`, designers);
