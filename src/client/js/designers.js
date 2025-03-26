@@ -1,9 +1,8 @@
-
-// 初始化页面
+// Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
   console.log("DOM loaded - starting designers page initialization");
   
-  // DataService可用性
+  // Check DataService availability
   if (typeof DataService === 'undefined') {
     console.error('DataService is undefined, cannot get API data');
     showToast('Data service unavailable, please refresh the page or contact the administrator', 'danger');
@@ -12,19 +11,19 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log("DataService Loaded:", typeof DataService);
   
-  // 确保数据初始化
+  // Ensure data initialization
   if (typeof window.initializeData === 'function') {
     window.initializeData();
   }
   
-  // 加载设计师数据
+  // Load designer data
   loadDesignersFromAPI();
   
-  // 加载特色产品
+  // Load featured designs
   loadFeaturedDesigns();
 });
 
-// 从API加载设计师数据并渲染
+// Load designer data from API and render
 async function loadDesignersFromAPI() {
   console.log("Loading designers from API");
   try {
@@ -36,7 +35,7 @@ async function loadDesignersFromAPI() {
       return;
     }
     
-    // 显示加载状态
+    // Show loading state
     designersContainer.innerHTML = `
       <div class="col-12 text-center" id="loading-indicator">
         <div class="spinner-border text-primary" role="status">
@@ -47,15 +46,15 @@ async function loadDesignersFromAPI() {
     `;
     
     console.log("Requesting API data...");
-    // 从API获取设计师数据
+    // Fetch designer data from API
     const designersResponse = await DataService.getAllDesigners();
     console.log("API response:", designersResponse);
     
-    // 提取设计师数据
+    // Extract designer data
     let designers = [];
     
     if (designersResponse && designersResponse.success) {
-      // 直接获取 data.designers 数组
+      // Directly get the data.designers array
       if (designersResponse.data && Array.isArray(designersResponse.data.designers)) {
         designers = designersResponse.data.designers;
       }
@@ -63,12 +62,12 @@ async function loadDesignersFromAPI() {
     
     console.log(`Successfully retrieved ${designers.length} designers:`, designers);
     
-    // 移除加载指示器
+    // Remove loading indicator
     if (loadingIndicator) {
       loadingIndicator.remove();
     }
     
-    // 如果没有找到设计师数据，显示空状态
+    // If no designer data is found, show empty state
     if (!designers || designers.length === 0) {
       designersContainer.innerHTML = `
         <div class="col-12">
@@ -82,27 +81,27 @@ async function loadDesignersFromAPI() {
       return;
     }
     
-    // 生成设计师卡片
+    // Generate designer cards
     let designersHTML = '';
     designers.forEach(designer => {
-      // 准备社交媒体链接 - 使用默认空对象避免错误
+      // Prepare social media links - use default empty object to avoid errors
       const social = designer.social || {};
       const instagramUrl = social.instagram || '#';
       const pinterestUrl = social.pinterest || '#';
       const etsyUrl = social.etsy || '#';
       
-      // 确定是否显示每个社交媒体图标
+      // Determine whether to show each social media icon
       const showInstagram = social.instagram ? '' : 'style="display:none"';
       const showPinterest = social.pinterest ? '' : 'style="display:none"';
       const showEtsy = social.etsy ? '' : 'style="display:none"';
       
-      // 处理设计师图片
+      // Handle designer image
       const designerImage = designer.image 
         ? `/~xzy2020c/PurelyHandmade//img/designers/${designer.image}`
         : '/~xzy2020c/PurelyHandmade//img/designers/placeholder.jpg';
 
       
-      // 处理设计师简介，确保有合适的长度
+      // Handle designer bio, ensure appropriate length
       const designerBio = designer.bio || 'No bio available';
       const shortBio = designerBio.length > 150 ? designerBio.substring(0, 150) + '...' : designerBio;
       
@@ -153,7 +152,7 @@ async function loadDesignersFromAPI() {
   }
 }
 
-// 加载特色设计和展示设计师作品
+// Load featured designs and showcase designer works
 async function loadFeaturedDesigns() {
   console.log("Loading featured designs");
   try {
@@ -164,7 +163,7 @@ async function loadFeaturedDesigns() {
       return;
     }
     
-    // 获取特色设计师数据
+    // Fetch featured designer data
     let featuredDesigners = [];
     try {
       const response = await DataService.getFeaturedDesigners();
@@ -184,7 +183,7 @@ async function loadFeaturedDesigns() {
       }
     } catch (e) {
       console.warn('Failed to get featured designers, trying to filter from all designers:', e);
-      // 失败时尝试从全部设计师中筛选特色设计师
+      // On failure, try filtering featured designers from all designers
       const allDesignersResponse = await DataService.getAllDesigners();
       
       if (allDesignersResponse && allDesignersResponse.success) {
@@ -203,18 +202,18 @@ async function loadFeaturedDesigns() {
     
     console.log(`Found ${featuredDesigners.length} featured designers`);
     
-    // 如果没有特色设计师，显示全部设计师的作品
+    // If no featured designers, show works from all designers
     if (featuredDesigners.length === 0) {
       console.log("No featured designers, trying to get all designers");
       const allDesignersResponse = await DataService.getAllDesigners();
       
       if (allDesignersResponse && allDesignersResponse.success && 
           allDesignersResponse.data && Array.isArray(allDesignersResponse.data.designers)) {
-        featuredDesigners = allDesignersResponse.data.designers.slice(0, 3);  // 只取前3个
+        featuredDesigners = allDesignersResponse.data.designers.slice(0, 3);  // Take the first 3
       }
     }
     
-    // 如果仍然没有设计师数据，显示空状态
+    // If still no designer data, show empty state
     if (featuredDesigners.length === 0) {
       featuredDesignsContainer.innerHTML = `
         <div class="col-12">
@@ -226,10 +225,10 @@ async function loadFeaturedDesigns() {
       return;
     }
     
-    // 生成特色设计
+    // Generate featured designs
     let featuredHTML = '';
     featuredDesigners.forEach(designer => {
-      // 准备设计师集合描述
+      // Prepare designer collection description
       const collectionDescription = designer.collectionDescription || 
         `Explore ${designer.name}'s handmade collection. Each piece is crafted with exquisite craftsmanship and unique creativity.`;
       
@@ -265,7 +264,7 @@ async function loadFeaturedDesigns() {
   }
 }
 
-// 显示通知提示
+// Show toast notifications
 function showToast(message, type = 'info') {
   const toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
@@ -292,7 +291,7 @@ function showToast(message, type = 'info') {
   const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
   toast.show();
   
-  //自动移除toast元素
+  // Automatically remove toast element
   toastElement.addEventListener('hidden.bs.toast', function () {
     this.remove();
   });
