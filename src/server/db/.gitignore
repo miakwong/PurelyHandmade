@@ -1,5 +1,6 @@
 # Local environment configuration file
 .env.local
+.env.example
 
 # Test files
 *.test.php
