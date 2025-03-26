@@ -308,3 +308,117 @@ Authorization: Bearer <JWT Token>
   "message": "Order ID is required"
 }
 ```
+
+### Example Response (Error - 401 Unauthorized)
+```
+{
+  "success": false,
+  "message": "Unauthorized: Invalid or missing token."
+}
+```
+
+### Example Response (Error - 404 Not Found)
+```
+{
+  "success": false,
+  "message": "Order not found for the specified user."
+}
+```
+
+### Example Response (Error - 500 Internal Server Error)
+```
+{
+  "success": false,
+  "message": "An error occurred while processing your request."
+}
+```
+
+
+## Get Orders (`GET /api/orders/index.php`)
+- **Description:** Retrieves a list of orders for the authenticated user. Supports pagination, filtering, and admin access.
+- **Request Headers:**  
+  - `Authorization: Bearer <JWT Token>` (Required)
+
+### Request Parameters (Query)
+| Parameter | Type    | Required | Description                              |
+|-----------|---------|----------|-----------------------------------------|
+| `userId`  | integer  | Yes      | The ID of the user making the request.  |
+| `isAdmin` | boolean  | No       | Indicates if the requester is an admin. |
+| `status`  | string   | No       | Filter orders by status (e.g., `pending`, `completed`). |
+| `page`    | integer  | No       | The page number for pagination (default: 1). |
+| `limit`   | integer  | No       | The number of orders per page (default: 10). |
+
+### Example Request (HTTP)
+```
+GET /api/orders/index.php?userId=1&isAdmin=true&status=pending&page=1&limit=10
+Authorization: Bearer <JWT Token>
+```
+
+### Example Response (Success - 200 OK)
+```
+{
+  "success": true,
+  "data": {
+    "orders": [
+      {
+        "id": 101,
+        "userId": 1,
+        "orderDate": "2025-03-24T10:30:00",
+        "status": "pending",
+        "totalAmount": 120,
+        "items": [
+          { "productId": 1, "quantity": 2, "price": 40, "name": "Handmade Necklace" },
+          { "productId": 2, "quantity": 1, "price": 40, "name": "Wooden Sculpture" }
+        ]
+      },
+      {
+        "id": 102,
+        "userId": 1,
+        "orderDate": "2025-03-23T14:20:00",
+        "status": "completed",
+        "totalAmount": 80,
+        "items": [
+          { "productId": 3, "quantity": 1, "price": 80, "name": "Leather Bag" }
+        ]
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 5,
+      "totalOrders": 50
+    }
+  }
+}
+```
+
+### Example Response (Error - 400 Bad Request)
+```
+{
+  "success": false,
+  "message": "User ID is required"
+}
+```
+
+### Example Response (Error - 401 Unauthorized)
+```
+{
+  "success": false,
+  "message": "Unauthorized: Invalid or missing token."
+}
+```
+
+### Example Response (Error - 404 Not Found)
+```
+{
+  "success": false,
+  "message": "No orders found for the specified user."
+}
+```
+
+### Example Response (Error - 500 Internal Server Error)
+```
+{
+  "success": false,
+  "message": "An error occurred while processing your request."
+}
+```
