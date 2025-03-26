@@ -9,8 +9,13 @@ RewriteBase /~xzy2020c/PurelyHandmade/
 
 # Handle API requests first
 RewriteCond %{REQUEST_URI} ^/~xzy2020c/PurelyHandmade/api [NC]
+
 # Handle subdirectory API files (e.g., /api/designers/featured)
 RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
+
+# Handle specific designer detail requests (e.g., /api/designers/detail?id=123)
+RewriteRule ^api/designers/detail$ src/server/api/designers/detail.php [QSA,L]
+
 # Handle main directory API files (e.g., /api/products)
 RewriteRule ^api/([^/]+)$ src/server/api/$1/index.php [QSA,L]
 
