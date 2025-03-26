@@ -4,24 +4,45 @@
 # Enable rewrite engine
 RewriteEngine On
 
-# SSH TEST CHANGE
 # Set base URL (if in a subdirectory)
-# RewriteBase /purelyhandmade/
+RewriteBase /~xzy2020c/PurelyHandmade/
+
+# Handle API requests first
+RewriteCond %{REQUEST_URI} ^/~xzy2020c/PurelyHandmade/api [NC]
+# Handle subdirectory API files (e.g., /api/designers/featured)
+RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
+# Handle main directory API files (e.g., /api/products)
+RewriteRule ^api/([^/]+)$ src/server/api/$1/index.php [QSA,L]
 
 # If the requested file or directory exists, access directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Handle API requests
-RewriteRule ^api/([^/]+)\.php$ src/server/api/$1/$2.php [QSA,L]
-RewriteRule ^api/(.*)$ src/server/api.php [QSA,L]
+# Frontend resource routing rules
+# Example URLs:
+# https://cosc360.ok.ubc.ca/~xzy2020c/PurelyHandmade/css/style.css
+# https://cosc360.ok.ubc.ca/~xzy2020c/PurelyHandmade/js/main.js
+# https://cosc360.ok.ubc.ca/~xzy2020c/PurelyHandmade/img/logo.png
+# https://cosc360.ok.ubc.ca/~xzy2020c/PurelyHandmade/assets/images/product1.jpg
 
-# If the requested file is a client file, route it
-RewriteRule ^client/(.*)$ src/client/$1 [QSA,L]
+# CSS files
+RewriteRule ^css/(.*)$ src/client/css/$1 [QSA,L]
+
+# JavaScript files
+RewriteRule ^js/(.*)$ src/client/js/$1 [QSA,L]
+
+# Images
+RewriteRule ^img/(.*)$ src/client/img/$1 [QSA,L]
+
+# Assets (including images, fonts, etc.)
+RewriteRule ^assets/(.*)$ src/client/assets/$1 [QSA,L]
+
+# Views (for dynamic content)
+RewriteRule ^views/(.*)$ src/client/views/$1 [QSA,L]
 
 # All other requests are routed to the main entry file
-RewriteRule ^(.*)$ src/index.php [QSA,L]
+RewriteRule ^(.*)$ src/client/html/index.html [QSA,L]
 
 # PHP settings
 # php_flag display_errors on
@@ -43,4 +64,9 @@ AddDefaultCharset UTF-8
 </Files>
 
 # Define default document
-DirectoryIndex src/index.php 
+DirectoryIndex src/client/html/index.html
+
+# Enable CORS for API requests
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization" 
