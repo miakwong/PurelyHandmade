@@ -4,7 +4,7 @@
 
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch('/src/client/assets/layout/navbar.html')
+  fetch(`${CONFIG.BASE_URL}/assets/layout/navbar.html`)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -18,7 +18,7 @@ function loadNavbar() {
       // Update cart count after navbar is loaded
       try {
         if (typeof UIHelpers !== 'undefined' && typeof UIHelpers.updateCartCount === 'function') {
-          // 使用UIHelpers中的updateCartCount方法
+          // Use UIHelpers's updateCartCount method
           const result = UIHelpers.updateCartCount();
           if (result && typeof result.catch === 'function') {
             result.catch(err => {
@@ -26,7 +26,7 @@ function loadNavbar() {
             });
           }
         } else if (typeof updateCartCount === 'function') {
-          // 兼容性处理：如果UIHelpers不存在但有全局updateCartCount函数
+          // Compatibility handling: If UIHelpers doesn't exist but there's a global updateCartCount function
           const result = updateCartCount();
           if (result && typeof result.catch === 'function') {
             result.catch(err => {
@@ -69,7 +69,7 @@ function loadNavbar() {
                 logoutButton.addEventListener('click', function(e) {
                   e.preventDefault();
                   localStorage.removeItem('currentUser');
-                  window.location.href = '/src/client/html/index.html';
+                  window.location.href = CONFIG.getViewPath('index.html');
                 });
               }
               
@@ -110,7 +110,7 @@ function loadNavbar() {
 
 // Load the footer
 function loadFooter() {
-  fetch('/src/client/assets/layout/footer.html')
+  fetch(`${CONFIG.BASE_URL}/assets/layout/footer.html`)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);
