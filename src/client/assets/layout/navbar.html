@@ -9,6 +9,16 @@
       Purely Homemade
     </a>
 
+    <!-- Mobile direct login buttons - only visible on small screens -->
+    <div class="d-flex d-md-none ms-auto me-2">
+      <a href="/~xzy2020c/PurelyHandmade/views/auth/login.html" class="btn btn-sm btn-outline-primary me-1 mobile-auth-btn">
+        <i class="bi bi-box-arrow-in-right"></i>
+      </a>
+      <a href="/~xzy2020c/PurelyHandmade/views/auth/register.html" class="btn btn-sm btn-outline-primary mobile-auth-btn">
+        <i class="bi bi-person-plus"></i>
+      </a>
+    </div>
+
     <!-- Mobile toggle for top navbar functionality -->
     <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#topNavFunctions"
       aria-controls="topNavFunctions" aria-expanded="false" aria-label="Toggle top navigation">
@@ -124,6 +134,9 @@
     const profileButton = document.getElementById('profile-button');
     const orderHistoryButton = document.getElementById('order-history-button');
     const logoutButton = document.getElementById('logout-button');
+    
+    // Mobile auth buttons
+    const mobileAuthBtns = document.querySelectorAll('.mobile-auth-btn');
 
     console.log('Auth status: User is', currentUser ? 'logged in' : 'not logged in');
 
@@ -133,6 +146,10 @@
       if (registerButton) registerButton.style.display = 'none';
       if (profileButton) profileButton.style.display = 'block';
       if (orderHistoryButton) orderHistoryButton.style.display = 'block';
+      
+      // Hide mobile auth buttons when logged in
+      mobileAuthBtns.forEach(btn => btn.style.display = 'none');
+      
       if (logoutButton) {
         logoutButton.style.display = 'block';
 
@@ -153,6 +170,9 @@
       if (profileButton) profileButton.style.display = 'none';
       if (orderHistoryButton) orderHistoryButton.style.display = 'none';
       if (logoutButton) logoutButton.style.display = 'none';
+      
+      // Show mobile auth buttons when not logged in
+      mobileAuthBtns.forEach(btn => btn.style.display = 'inline-flex');
     }
   };
 
