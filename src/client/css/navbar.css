@@ -100,23 +100,94 @@
   font-family: var(--body-font);
 }
 
-/* 移动菜单 */
-@media (max-width: 992px) {
+/* 移动菜单增强响应式设计 */
+@media (max-width: 1199.98px) {
+  .navbar-search {
+    width: 250px !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  /* 改善主导航菜单在移动设备上的显示 */
   .navbar-dark .nav-link {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
   }
   
   .navbar-dark .navbar-nav .nav-item:last-child .nav-link {
     border-bottom: none;
   }
-  
-  .top-navbar form {
-    margin: 1rem 0;
+
+  /* 导航菜单折叠项的样式调整 */
+  .navbar-collapse {
+    background-color: var(--accent-color);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 0.5rem;
   }
   
+  /* 汉堡菜单按钮样式增强 */
+  .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.25);
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* 顶部导航栏样式优化 */
+  .top-navbar .container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .navbar-brand {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* 搜索框在移动设备上占满宽度 */
+  .navbar-search {
+    width: 100% !important;
+    margin: 0.5rem 0;
+  }
+  
+  /* 用户菜单和购物车按钮的对齐 */
   .top-navbar .d-flex.align-items-center {
-    margin-top: 1rem;
-    justify-content: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* 菜单项垂直间距调整 */
+  .navbar-dark .nav-item {
+    margin: 0;
+  }
+  
+  .navbar-dark .nav-link {
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* 超小屏幕样式调整 */
+  .top-navbar {
+    padding: 0.5rem;
+  }
+  
+  /* 压缩小屏幕上的品牌名称 */
+  .navbar-brand {
+    font-size: 1rem;
+  }
+  
+  .navbar-brand img {
+    height: 30px !important;
+  }
+
+  /* 购物车和用户菜单样式调整 */
+  .btn-outline-primary {
+    padding: 0.25rem 0.5rem;
   }
 }

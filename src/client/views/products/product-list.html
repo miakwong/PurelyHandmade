@@ -76,10 +76,16 @@
     <div class="container-custom">
       <h1 class="page-title" id="product-list-title">All Products</h1>
 
+      <!-- 移动端筛选器切换按钮 - 仅在小屏幕显示 -->
+      <button class="btn w-100 d-lg-none mb-3" id="product-filters-mobile-toggle"
+        style="background-color: var(--accent-color); color: white;">
+        <i class="bi bi-funnel-fill me-2"></i> Show Filters
+      </button>
+
       <div class="row">
         <!-- 左侧筛选栏 -->
         <div class="col-lg-3">
-          <div class="filter-sidebar">
+          <div class="filter-sidebar filter-sidebar-mobile-collapse d-lg-block">
             <h4>Refine Selection</h4>
 
             <!-- 分类筛选 -->
@@ -185,9 +191,9 @@
           <!-- 产品工具栏 -->
           <div class="product-toolbar">
             <div id="product-count">Showing 0 products</div>
-            <div class="d-flex align-items-center">
-              <label for="sort-select" class="me-3">Sort By:</label>
-              <select class="sort-select me-4" id="sort-select">
+            <div class="d-flex align-items-center flex-wrap">
+              <label for="sort-select" class="me-3 mb-2 mb-sm-0">Sort By:</label>
+              <select class="sort-select me-3 me-sm-4 mb-2 mb-sm-0" id="sort-select">
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
@@ -195,7 +201,7 @@
                 <option value="newest">Newest</option>
               </select>
 
-              <label for="products-per-page" class="me-2">Show:</label>
+              <label for="products-per-page" class="me-2 mb-2 mb-sm-0">Show:</label>
               <select class="products-per-page-select" id="products-per-page">
                 <option value="8">8</option>
                 <option value="12" selected>12</option>
@@ -230,6 +236,26 @@
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/api-data-loader.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/navbar-handler.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/product-list.js"></script>
+  
+  <!-- 添加移动端筛选器显示隐藏功能 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterToggleBtn = document.getElementById('product-filters-mobile-toggle');
+      const filterSidebar = document.querySelector('.filter-sidebar');
+      
+      if (filterToggleBtn && filterSidebar) {
+        filterToggleBtn.addEventListener('click', function() {
+          filterSidebar.classList.toggle('show');
+          
+          if (filterSidebar.classList.contains('show')) {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel-fill me-2"></i> Hide Filters';
+          } else {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel-fill me-2"></i> Show Filters';
+          }
+        });
+      }
+    });
+  </script>
 
 </body>
 
