@@ -1,6 +1,7 @@
 /* 全局样式变量 */
 :root {
   --primary-color: #eae2d6; /* 温暖的米色 */
+  --primary-color-rgb: 234, 226, 214; /* primary-color的RGB值，用于rgba */
   --secondary-color: #d5c3aa; /* 浅棕色 */
   --accent-color: #867666; /* 深棕色，用于强调 */
   --text-color: #5e4b3e; /* 棕色文字 */
