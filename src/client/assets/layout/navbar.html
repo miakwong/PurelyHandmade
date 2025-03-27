@@ -4,7 +4,7 @@
   <div class="container">
     <!-- Logo -->
     <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/index.html">
-      <img src="/~xzy2020c/PurelyHandmade/img/logo.png" alt="Purely Homemade Logo" height="40"
+      <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" alt="Purely Homemade Logo" height="40"
         class="d-inline-block align-text-top me-2">
       Purely Homemade
     </a>
@@ -155,6 +155,13 @@
     if (!cartCountElement) return;
 
     try {
+      // 检查DataService是否定义
+      if (typeof DataService === 'undefined') {
+        console.warn('DataService未定义，无法更新购物车数量');
+        cartCountElement.style.display = 'none';
+        return;
+      }
+      
       // Check if user is logged in
       const currentUser = DataService.getCurrentUser();
       if (!currentUser) {
@@ -164,7 +171,7 @@
       }
 
       // Get cart data from API
-      const response = await fetch(`${CONFIG.getApiPath('cart')}?userId=${currentUser.id}`, {
+      const response = await fetch(`${CONFIG?.getApiPath ? CONFIG.getApiPath('cart') : '/~xzy2020c/PurelyHandmade/api/cart'}?userId=${currentUser.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

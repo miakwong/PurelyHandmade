@@ -10,6 +10,27 @@ RewriteBase /~xzy2020c/PurelyHandmade/
 # Handle API requests first
 RewriteCond %{REQUEST_URI} ^/~xzy2020c/PurelyHandmade/api [NC]
 
+# Handle specific API endpoints with multiple segments
+# Featured products
+RewriteRule ^api/products/featured$ src/server/api/products/featured.php [QSA,L]
+
+# On-sale products
+RewriteRule ^api/products/on-sale$ src/server/api/products/on-sale.php [QSA,L]
+
+# Admin statistics
+RewriteRule ^api/admin/statistics$ src/server/api/admin/statistics.php [QSA,L]
+
+# Admin users
+RewriteRule ^api/admin/users$ src/server/api/admin/users.php [QSA,L]
+
+# Authentication routes
+RewriteRule ^api/auth/login$ src/server/api/auth/login.php [QSA,L]
+RewriteRule ^api/auth/register$ src/server/api/auth/register.php [QSA,L]
+RewriteRule ^api/auth/profile$ src/server/api/auth/profile.php [QSA,L]
+
+# User profile
+RewriteRule ^api/user/profile$ src/server/api/user/profile.php [QSA,L]
+
 # Handle subdirectory API files (e.g., /api/designers/featured)
 RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
 
@@ -17,15 +38,10 @@ RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
 RewriteRule ^api/designers/detail$ src/server/api/designers/detail.php [QSA,L]
 
 # Handle specific product detail requests (e.g., /api/products/detail?id=123)
-RewriteRule ^api/products/product_detail$ src/server/api/products/detail.php [QSA,L]
+RewriteRule ^api/products/detail$ src/server/api/products/detail.php [QSA,L]
 
 # Handle main directory API files (e.g., /api/products)
 RewriteRule ^api/([^/]+)$ src/server/api/$1/index.php [QSA,L]
-
-# If the requested file or directory exists, access directly
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
 
 # Frontend resource routing rules
 # Example URLs:
@@ -46,8 +62,31 @@ RewriteRule ^img/(.*)$ src/client/img/$1 [QSA,L]
 # Assets (including images, fonts, etc.)
 RewriteRule ^assets/(.*)$ src/client/assets/$1 [QSA,L]
 
+# Assets layout files
+RewriteRule ^assets/layout/(.*)$ src/client/assets/layout/$1 [QSA,L]
+
 # Views (for dynamic content)
 RewriteRule ^views/(.*)$ src/client/views/$1 [QSA,L]
+
+# Special rules for handling absolute paths
+# This section handles URLs with the full path pattern like /~xzy2020c/PurelyHandmade/...
+
+# Full path CSS requests
+RewriteRule ^/~xzy2020c/PurelyHandmade/css/(.*)$ src/client/css/$1 [QSA,L]
+
+# Full path Image requests
+RewriteRule ^/~xzy2020c/PurelyHandmade/img/(.*)$ src/client/img/$1 [QSA,L]
+
+# Full path Assets requests
+RewriteRule ^/~xzy2020c/PurelyHandmade/assets/(.*)$ src/client/assets/$1 [QSA,L]
+
+# Full path Views requests
+RewriteRule ^/~xzy2020c/PurelyHandmade/views/(.*)$ src/client/views/$1 [QSA,L]
+
+# If the requested file or directory exists, access directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
 # All other requests are routed to the main entry file
 RewriteRule ^(.*)$ src/client/html/index.html [QSA,L]

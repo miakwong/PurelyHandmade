@@ -10,7 +10,7 @@ const ApiService = {
    * 基础API URL
    * Base API URL
    */
-  baseUrl: '/api',
+  baseUrl: '/~xzy2020c/PurelyHandmade/api',
   
   /**
    * 处理API响应
@@ -42,6 +42,21 @@ const ApiService = {
       error.statusText = response.statusText;
       error.data = errorData;
       
+      // 特殊处理401未授权错误
+      if (response.status === 401) {
+        console.warn('Authentication error (401 Unauthorized)');
+        // 在控制台中显示详细信息，便于调试
+        console.log('URL:', response.url);
+        console.log('Status:', response.status, response.statusText);
+        console.log('Error data:', errorData);
+        
+        // 如果是后台管理相关的路径
+        if (response.url.includes('/admin/') || 
+            window.location.href.includes('/admin/')) {
+          console.warn('Admin endpoint unauthorized access detected');
+        }
+      }
+      
       throw error;
     }
     
@@ -68,6 +83,12 @@ const ApiService = {
       credentials: 'same-origin',
     };
     
+    // 添加认证令牌到请求头
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+    }
+    
     // 合并选项
     const fetchOptions = {
       ...defaultOptions,
@@ -79,6 +100,7 @@ const ApiService = {
     };
     
     try {
+      console.log(`API Request: ${options.method || 'GET'} ${fullUrl}`, fetchOptions);
       const response = await fetch(fullUrl, fetchOptions);
       return await this.handleResponse(response);
     } catch (error) {

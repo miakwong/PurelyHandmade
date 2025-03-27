@@ -8,52 +8,82 @@
 // Log when this script loads
 console.log('API Loader Helper loaded at', new Date().toISOString());
 
+// Define base URL for scripts - this ensures paths work in all environments
+let API_HELPER_BASE_URL = '/~xzy2020c/PurelyHandmade';
+
+// Function to load a script and return a promise that resolves when it's loaded
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false; // Load scripts in order
+    script.defer = false; // Don't defer loading
+    
+    script.onload = () => {
+      console.log(`Script loaded successfully: ${src}`);
+      resolve();
+    };
+    
+    script.onerror = (error) => {
+      console.error(`Error loading script: ${src}`, error);
+      reject(error);
+    };
+    
+    document.head.appendChild(script);
+  });
+}
+
 // Function to ensure all API-related scripts are loaded
 function ensureApiScriptsLoaded() {
-  const requiredScripts = [
-    `${CONFIG.getJsPath('data-service.js')}`,
-    `${CONFIG.getJsPath('api-data-loader.js')}`
-  ];
+  // Check if CONFIG is already defined
+  const configNeeded = typeof CONFIG === 'undefined';
   
-  // Track which scripts we've added
-  const addedScripts = [];
+  // Define the scripts we need to load in the correct order
+  const scriptsToLoad = [];
+  
+  // First, load config.js if it's not already loaded
+  if (configNeeded) {
+    scriptsToLoad.push(`${API_HELPER_BASE_URL}/js/config.js`);
+  }
+  
+  // Then load the other required scripts
+  scriptsToLoad.push(
+    `${API_HELPER_BASE_URL}/js/data-service.js`,
+    `${API_HELPER_BASE_URL}/js/api-data-loader.js`
+  );
   
   // Check if scripts are already loaded
   const loadedScripts = Array.from(document.querySelectorAll('script')).map(script => script.src);
   
-  // Add any missing scripts
-  requiredScripts.forEach(scriptSrc => {
-    const fullSrc = new URL(scriptSrc, window.location.origin).href;
-    if (!loadedScripts.some(src => src === fullSrc)) {
-      console.log(`Adding missing script: ${scriptSrc}`);
-      const script = document.createElement('script');
-      script.src = scriptSrc;
-      script.async = false; // Load scripts in order
-      script.defer = false; // Don't defer loading
-      addedScripts.push(new Promise((resolve, reject) => {
-        script.onload = () => {
-          console.log(`Script loaded successfully: ${scriptSrc}`);
-          resolve();
-        };
-        script.onerror = (error) => {
-          console.error(`Error loading script: ${scriptSrc}`, error);
-          reject(error);
-        };
-      }));
-      document.head.appendChild(script);
-    }
-  });
-  
-  // Return a promise that resolves when all scripts are loaded
-  return Promise.all(addedScripts).then(() => {
+  // Load scripts in sequence
+  return scriptsToLoad.reduce((promise, scriptSrc) => {
+    return promise.then(() => {
+      const fullSrc = new URL(scriptSrc, window.location.origin).href;
+      
+      // Skip already loaded scripts
+      if (loadedScripts.some(src => src === fullSrc || src.includes(scriptSrc))) {
+        console.log(`Script already loaded: ${scriptSrc}`);
+        return Promise.resolve();
+      }
+      
+      console.log(`Loading script: ${scriptSrc}`);
+      return loadScript(scriptSrc);
+    });
+  }, Promise.resolve())
+  .then(() => {
     console.log('All API scripts loaded successfully');
-    // Verify DataService is available
+    // Verify critical objects are available
+    if (typeof CONFIG === 'undefined') {
+      console.error('CONFIG is not defined after loading scripts');
+      return false;
+    }
     if (typeof DataService === 'undefined') {
       console.error('DataService is not defined after loading scripts');
       return false;
     }
     return true;
-  }).catch(error => {
+  })
+  .catch(error => {
     console.error('Error loading API scripts:', error);
     return false;
   });
@@ -97,4 +127,4 @@ if (document.readyState === 'complete') {
 }
 
 // Make this function available globally
-window.ensureApiScriptsLoaded = ensureApiScriptsLoaded; 
+window.ensureApiScriptsLoaded = ensureApiScriptsLoaded;
