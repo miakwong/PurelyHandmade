@@ -97,8 +97,8 @@ async function loadDesignersFromAPI() {
       
       // Handle designer image
       const designerImage = designer.image 
-        ? `/~xzy2020c/PurelyHandmade//img/designers/${designer.image}`
-        : '/~xzy2020c/PurelyHandmade//img/designers/placeholder.jpg';
+        ? CONFIG.getImagePath(`/designers/${designer.image}`)
+        : CONFIG.getImagePath(`/designers/placeholder.jpg`);
 
       
       // Handle designer bio, ensure appropriate length
@@ -235,11 +235,11 @@ async function loadFeaturedDesigns() {
       featuredHTML += `
         <div class="col-md-4 mb-4">
           <div class="featured-design-card">
-            <h4 class="mb-3">${designer.name}'s Collection</h4>
-            <p class="mb-3">${collectionDescription}</p>
-            <div class="mt-3">
-              <a href="./~xzy2020c/PurelyHandmade/views/product/product-list.html?designer=${designer.id}" class="btn btn-primary">Browse Collection</a>
-            </div>
+        <h4 class="mb-3">${designer.name}'s Collection</h4>
+        <p class="mb-3">${collectionDescription}</p>
+        <div class="mt-3">
+          <a href="${CONFIG.getViewPath(`/products/product-list.html?designer=${designer.id}`)}" class="btn btn-primary">Browse Collection</a>
+        </div>
           </div>
         </div>
       `;
