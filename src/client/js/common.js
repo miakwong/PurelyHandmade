@@ -247,7 +247,7 @@ window.handleLogout = function(event) {
   PurelyHandmadeEvents.trigger('auth:logout');
   
   // Redirect to home page
-  window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
+  window.location.href = '/~xzy2020c/PurelyHandmade/src/client/html/index.html';
 };
 
 // Legacy function for backward compatibility
