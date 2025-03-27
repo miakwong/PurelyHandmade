@@ -16,7 +16,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getAllUsers: function() {
-    return ApiService.get('/api/users?all=1');
+    return ApiService.get('/users?all=1');
   },
   
   /**
@@ -25,7 +25,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getUserById: function(userId) {
-    return ApiService.get(`/api/admin/users/detail?id=${userId}`);
+    return ApiService.get(`/admin/users/detail?id=${userId}`);
   },
   
   /**
@@ -34,7 +34,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   deleteUser: function(userId) {
-    return ApiService.delete(`/api/admin/users?id=${userId}`);
+    return ApiService.delete(`/admin/users?id=${userId}`);
   },
   
   /**
@@ -44,7 +44,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   toggleUserStatus: function(userId, isEnabled) {
-    return ApiService.put(`/api/users/${userId}/status`, {
+    return ApiService.put(`/users/${userId}/status`, {
       isEnabled: isEnabled
     });
   },
@@ -54,7 +54,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getAllProducts: function() {
-    return ApiService.get('/api/products');
+    return ApiService.get('/products');
   },
   
   /**
@@ -63,7 +63,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   addProduct: function(productData) {
-    return ApiService.post('/api/products', productData);
+    return ApiService.post('/products', productData);
   },
   
   /**
@@ -73,7 +73,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   updateProduct: function(productId, productData) {
-    return ApiService.put(`/api/products/${productId}`, productData);
+    return ApiService.put(`/products/${productId}`, productData);
   },
   
   /**
@@ -82,7 +82,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   deleteProduct: function(productId) {
-    return ApiService.delete(`/api/products/${productId}`);
+    return ApiService.delete(`/products/${productId}`);
   },
   
   /**
@@ -90,7 +90,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getAllCategories: function() {
-    return ApiService.get('/api/categories');
+    return ApiService.get('/categories');
   },
   
   /**
@@ -99,7 +99,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   addCategory: function(categoryData) {
-    return ApiService.post('/api/categories', categoryData);
+    return ApiService.post('/categories', categoryData);
   },
   
   /**
@@ -109,7 +109,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   updateCategory: function(categoryId, categoryData) {
-    return ApiService.put(`/api/categories/${categoryId}`, categoryData);
+    return ApiService.put(`/categories/${categoryId}`, categoryData);
   },
   
   /**
@@ -118,7 +118,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   deleteCategory: function(categoryId) {
-    return ApiService.delete(`/api/categories/${categoryId}`);
+    return ApiService.delete(`/categories/${categoryId}`);
   },
   
   /**
@@ -126,7 +126,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getAllDesigners: function() {
-    return ApiService.get('/api/designers');
+    return ApiService.get('/designers');
   },
   
   /**
@@ -135,7 +135,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   addDesigner: function(designerData) {
-    return ApiService.post('/api/designers', designerData);
+    return ApiService.post('/designers', designerData);
   },
   
   /**
@@ -145,7 +145,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   updateDesigner: function(designerId, designerData) {
-    return ApiService.put(`/api/designers/${designerId}`, designerData);
+    return ApiService.put(`/designers/${designerId}`, designerData);
   },
   
   /**
@@ -154,7 +154,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   deleteDesigner: function(designerId) {
-    return ApiService.delete(`/api/designers/${designerId}`);
+    return ApiService.delete(`/designers/${designerId}`);
   },
   
   /**
@@ -162,7 +162,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getAllOrders: function() {
-    return ApiService.get('/api/orders?all=1');
+    return ApiService.get('/orders?all=1');
   },
   
   /**
@@ -172,7 +172,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   updateOrderStatus: function(orderId, status) {
-    return ApiService.put(`/api/orders/${orderId}/status`, {
+    return ApiService.put(`/orders/${orderId}/status`, {
       status: status
     });
   },
@@ -183,7 +183,7 @@ const AdminApiService = {
    */
   getAllReviews: function() {
     // 假设有一个获取所有评论的API
-    return ApiService.get('/api/reviews');
+    return ApiService.get('/reviews');
   },
   
   /**
@@ -192,7 +192,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   deleteReview: function(reviewId) {
-    return ApiService.delete(`/api/reviews/${reviewId}`);
+    return ApiService.delete(`/reviews/${reviewId}`);
   },
   
   /**
@@ -200,7 +200,7 @@ const AdminApiService = {
    * @returns {Promise} 请求结果
    */
   getSiteStatistics: function() {
-    return ApiService.get('/api/admin/statistics');
+    return ApiService.get('/admin/statistics');
   }
 };
 

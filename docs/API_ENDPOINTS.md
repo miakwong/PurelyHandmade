@@ -4,16 +4,21 @@ This document lists all available API endpoints in the PurelyHandmade project.
 
 ## Base URL
 
-All API endpoints have a base URL prefix: `/api`
+All API endpoints have a base URL prefix: `/~xzy2020c/PurelyHandmade/api`
 
 ## Authentication APIs
 
 | Endpoint | Method | Description | Parameters | Permission |
 |----------|---------|-------------|------------|------------|
-| `/auth/register` | POST | User registration | `username`, `email`, `password`, `isAdmin` (optional) | Public |
-| `/auth/login` | POST | User login | `email`, `password` | Public |
-| `/auth/profile` | GET | Get current user profile | None | Requires login |
+| `/register` | POST | User registration | `username`, `email`, `password`, `isAdmin` (optional) | Public |
+| `/login` | POST | User login | `identifier`, `password` | Public |
+| `/check_username` | POST | Check username availability | `username` | Public |
+| `/check_email` | POST | Check email availability | `email` | Public |
+| `/profile` | GET | Get current user profile | None | Requires login |
+| `/profile/update` | POST | Update user profile | Profile data | Requires login |
+| `/auth/validate` | GET | Validate authentication token | None | Requires login |
 | `/auth/profile?all=1` | GET | Get all user profiles | None | Admin |
+| `/user/profile` | GET | Get detailed user profile | None | Requires login |
 
 ## Product APIs
 
@@ -21,9 +26,12 @@ All API endpoints have a base URL prefix: `/api`
 |----------|---------|-------------|------------|------------|
 | `/products` | GET | Get all products | Optional: `page`, `limit`, `sort_by`, `sort_dir`, `category` | Public |
 | `/products/detail` | GET | Get product details | `id` (required) | Public |
-| `/products/create` | POST | Create new product | Product data | Admin |
-| `/products/update` | PUT | Update product | `id` (required), Updated product data | Admin |
-| `/products` (with id) | DELETE | Delete product | `id` (required) | Admin |
+| `/products` | POST | Create new product | Product data | Admin |
+| `/products/:id` | PUT | Update product | Product data | Admin |
+| `/products/:id` | DELETE | Delete product | None | Admin |
+| `/products/featured` | GET | Get featured products | None | Public |
+| `/products/on-sale` | GET | Get products on sale | None | Public |
+| `/products/new-arrivals` | GET | Get new products | `days` (optional) | Public |
 
 ## Category APIs
 
@@ -31,9 +39,9 @@ All API endpoints have a base URL prefix: `/api`
 |----------|---------|-------------|------------|------------|
 | `/categories` | GET | Get all categories | Optional: `page`, `limit` | Public |
 | `/categories/detail` | GET | Get category details | `id` (required) | Public |
-| `/categories/create` | POST | Create new category | Category data | Admin |
-| `/categories/update` | PUT | Update category | `id` (required), Updated category data | Admin |
-| `/categories` (with id) | DELETE | Delete category | `id` (required) | Admin |
+| `/categories` | POST | Create new category | Category data | Admin |
+| `/categories/:id` | PUT | Update category | Category data | Admin |
+| `/categories/:id` | DELETE | Delete category | None | Admin |
 
 ## Designer APIs
 
@@ -41,9 +49,10 @@ All API endpoints have a base URL prefix: `/api`
 |----------|---------|-------------|------------|------------|
 | `/designers` | GET | Get all designers | Optional: `page`, `limit` | Public |
 | `/designers/detail` | GET | Get designer details | `id` (required) | Public |
-| `/designers/create` | POST | Create new designer | Designer data | Admin |
-| `/designers/update` | PUT | Update designer | `id` (required), Updated designer data | Admin |
-| `/designers` (with id) | DELETE | Delete designer | `id` (required) | Admin |
+| `/designers` | POST | Create new designer | Designer data | Admin |
+| `/designers/:id` | PUT | Update designer | Updated designer data | Admin |
+| `/designers/:id` | DELETE | Delete designer | None | Admin |
+| `/designers/featured` | GET | Get featured designers | None | Public |
 
 ## Review APIs
 
@@ -51,26 +60,36 @@ All API endpoints have a base URL prefix: `/api`
 |----------|---------|-------------|------------|------------|
 | `/reviews` | GET | Get all reviews | Optional: `productId`, `userId`, `status` | Public |
 | `/reviews/create` | POST | Create new review | Review data, including `productId` | Requires login |
-| `/reviews/update` | PUT | Update review | `id` (required), Updated review data | User/Admin |
-| `/reviews` (with id) | DELETE | Delete review | `id` (required) | User/Admin |
+| `/reviews/:id` | PUT | Update review | Updated review data | User/Admin |
+| `/reviews/:id` | DELETE | Delete review | None | User/Admin |
 
 ## Order APIs
 
 | Endpoint | Method | Description | Parameters | Permission |
 |----------|---------|-------------|------------|------------|
-| `/orders` | GET | Get current user orders or all orders | None | Requires login/Admin |
-| `/orders/detail` | GET | Get order details | `id` (required) | Order owner/Admin |
-| `/orders/create` | POST | Create new order | Order data | Requires login |
-| `/orders/update` | PUT | Update order status | `id` (required), `status`, `action` (optional) | Order owner/Admin |
-| `/orders` (with id) | DELETE | Delete order | `id` (required) | Admin |
+| `/orders` | GET | Get current user orders | None | Requires login |
+| `/orders?all=1` | GET | Get all orders | None | Admin |
+| `/orders/:id` | GET | Get order details | None | Order owner/Admin |
+| `/orders` | POST | Create new order | Order data | Requires login |
+| `/orders/:id/status` | PUT | Update order status | `status` | Admin |
+| `/orders/:id` | DELETE | Delete order | None | Admin |
+
+## Cart APIs
+
+| Endpoint | Method | Description | Parameters | Permission |
+|----------|---------|-------------|------------|------------|
+| `/cart` | GET | Get cart contents | None | Requires login |
+| `/cart/add` | POST | Add item to cart | `product_id`, `quantity` | Requires login |
+| `/cart/update` | PUT | Update cart item | `item_id`, `quantity` | Requires login |
+| `/cart/remove` | DELETE | Remove item from cart | `item_id` | Requires login |
 
 ## Admin APIs
 
 | Endpoint | Method | Description | Parameters | Permission |
 |----------|---------|-------------|------------|------------|
-| `/admin/users` | GET | Get all users | Optional: `status`, `role`, `page`, `limit` | Admin |
-| `/admin/dashboard` | GET | Get dashboard data | None | Admin |
-| `/admin/reports` | GET | Get report data | Optional: `type`, `period`, `start`, `end` | Admin |
+| `/users?all=1` | GET | Get all users | Optional: `status`, `role`, `page`, `limit` | Admin |
+| `/admin/users/detail` | GET | Get user details | `id` | Admin |
+| `/admin/statistics` | GET | Get dashboard statistics | None | Admin |
 
 ## Data Formats
 

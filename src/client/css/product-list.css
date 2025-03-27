@@ -119,11 +119,33 @@
   }
   
   .filter-group-content.show {
-    max-height: 300px; /* 一个合理的默认值 */
+    max-height: none; /* 移除高度限制，使其自动适应内容 */
     opacity: 1;
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
     pointer-events: auto;
+    overflow-y: auto; /* 当内容过多时允许滚动 */
+  }
+  
+  /* 特别为分类添加的样式 */
+  #category-filters.show {
+    max-height: none; /* 确保分类列表不受高度限制 */
+    overflow-y: auto; /* 当分类太多时允许滚动 */
+    max-height: 400px; /* 设置一个较大的最大高度，防止过度占用页面空间 */
+  }
+  
+  /* 当分类过多时，添加美观的滚动条样式 */
+  #category-filters.show::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  #category-filters.show::-webkit-scrollbar-track {
+    background: var(--card-background);
+  }
+  
+  #category-filters.show::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 10px;
   }
   
   .price-range-inputs {

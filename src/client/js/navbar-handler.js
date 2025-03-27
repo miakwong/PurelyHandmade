@@ -2,9 +2,25 @@
  * Navbar Handler - Standardizes navbar loading and authentication across all pages
  */
 
+// 确保CONFIG对象已定义
+if (typeof CONFIG === 'undefined') {
+  console.warn('CONFIG is not defined. Creating default CONFIG object');
+  window.CONFIG = {
+    BASE_URL: '/~xzy2020c/PurelyHandmade',
+    getViewPath: function(path) {
+      return '/~xzy2020c/PurelyHandmade/src/client/views/' + path;
+    }
+  };
+}
+
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch(`${CONFIG.BASE_URL}/assets/layout/navbar.html`)
+  // 使用带错误处理的方式获取BASE_URL
+  const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.BASE_URL) 
+    ? CONFIG.BASE_URL 
+    : '/~xzy2020c/PurelyHandmade';
+  
+  fetch(`${baseUrl}/assets/layout/navbar.html`)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -69,7 +85,11 @@ function loadNavbar() {
                 logoutButton.addEventListener('click', function(e) {
                   e.preventDefault();
                   localStorage.removeItem('currentUser');
-                  window.location.href = CONFIG.getViewPath('index.html');
+                  // 使用安全的方式获取路径
+                  const homePath = (typeof CONFIG !== 'undefined' && CONFIG.getViewPath) 
+                    ? CONFIG.getViewPath('index.html')
+                    : '/~xzy2020c/PurelyHandmade/src/client/views/index.html';
+                  window.location.href = homePath;
                 });
               }
               
@@ -110,7 +130,12 @@ function loadNavbar() {
 
 // Load the footer
 function loadFooter() {
-  fetch(`${CONFIG.BASE_URL}/assets/layout/footer.html`)
+  // 使用带错误处理的方式获取BASE_URL
+  const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.BASE_URL) 
+    ? CONFIG.BASE_URL 
+    : '/~xzy2020c/PurelyHandmade';
+    
+  fetch(`${baseUrl}/assets/layout/footer.html`)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);

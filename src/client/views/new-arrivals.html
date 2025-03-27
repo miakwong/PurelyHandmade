@@ -17,17 +17,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/navbar.css">
-  <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/new-arrivals.css">
+  <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/css/style.css">
+  <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/css/navbar.css">
+  <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/css/global.css">
+  <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/css/new-arrivals.css">
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- API Helper -->
-  <script src="/src/client/js/api-loader-helper.js"></script>
+  <!-- 核心脚本必须在head中按顺序加载 -->
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/config.js"></script>
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/data-service.js"></script>
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/api-data-loader.js"></script>
 
 </head>
 <body>
@@ -45,7 +47,7 @@
         <p>Each piece is unique, made with care and passion by our talented makers.</p>
       </div>
       <div class="col-md-6 text-center">
-        <img src="../img/logo.jpg" class="img-fluid rounded" alt="New Arrivals" style="max-height: 250px;">
+        <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" class="img-fluid rounded" alt="New Arrivals" style="max-height: 250px;">
       </div>
     </div>
   </div>
@@ -92,15 +94,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Data Service scripts - Must load before init-data.js -->
-<script src="/src/client/js/data-service.js"></script>
-<script src="/src/client/js/api-data-loader.js"></script>
-
-<!-- 初始化数据脚本 -->
-<script src="/src/client/js/init-data.js"></script>
-
 <!-- Navbar Handler -->
-<script src="/src/client/js/navbar-handler.js"></script>
+<script src="/~xzy2020c/PurelyHandmade/src/client/js/navbar-handler.js"></script>
 
 <script>
   console.log('Script block starting...');
@@ -109,15 +104,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded event fired');
     
-    // Ensure data is initialized
-    if (typeof window.initializeData === 'function') {
-      console.log('Calling initializeData function');
-      window.initializeData();
-    } else {
-      console.warn('initializeData function not found');
-    }
-    
-    // Load new arrivals
+    // 直接加载新上架产品，不再调用initializeData
     console.log('Calling loadNewArrivals function');
     loadNewArrivals();
   });
@@ -142,30 +129,18 @@
       </div>
     `;
     
-    // Check if the API method is available
+    // 直接调用API函数，不再检查是否存在
+    console.log('Using API loadProducts function');
+    
+    // 确保有全局作用域的loadProducts函数
     if (typeof window.loadProducts === 'function') {
-      console.log('Using API loadProducts function');
-      
       window.loadProducts('new-products-container', {
         newArrivals: true,
         limit: 20
       });
     } else {
-      console.error('API loadProducts function not available. Ensure api-data-loader.js is loaded');
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Cannot load products: API unavailable</p></div>';
-      
-      // Try to load the API scripts and retry
-      if (typeof window.ensureApiScriptsLoaded === 'function') {
-        window.ensureApiScriptsLoaded().then(() => {
-          if (typeof window.loadProducts === 'function') {
-            console.log('API loaded successfully, retrying loadNewArrivals');
-            window.loadProducts('new-products-container', {
-              newArrivals: true,
-              limit: 20
-            });
-          }
-        });
-      }
+      console.error('API loadProducts function not available. Check console for errors');
+      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Cannot load products: API unavailable. Please refresh the page</p></div>';
     }
   }
   
@@ -222,7 +197,7 @@
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="product-card">
             <div class="product-img-wrapper">
-              <a href="/src/client/views/product/product_detail.html?id=${product.id}">
+              <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}">
                 <img src="${product.images[0]}" class="product-img" alt="${product.name}">
                 ${daysListed <= 7 ? '<div class="product-badge">NEW</div>' : ''}
                 ${product.onSale ? `<div class="product-badge" style="left: ${daysListed <= 7 ? '80px' : '15px'}">Sale</div>` : ''}
@@ -230,7 +205,7 @@
               </a>
             </div>
             <div class="product-card-body">
-              <a href="/src/client/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+              <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <h2 class="product-title">${product.name}</h2>
               </a>
               ${priceHtml}
@@ -267,7 +242,7 @@
         // 如果用户未登录，提示登录
         showToast('Please login to add items to cart', 'error');
         setTimeout(() => {
-          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+          window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
         }, 1500);
         return false;
       }
@@ -276,7 +251,7 @@
       showLoading('Adding to cart...');
       
       // 调用API添加商品到购物车
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch('/~xzy2020c/PurelyHandmade/api/cart/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

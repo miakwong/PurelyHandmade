@@ -20,7 +20,7 @@ const UIHelpers = {
         return reject(new Error(`Navbar container #${containerId} not found`));
       }
       
-      fetch('/src/client/assets/layout/navbar.html')
+      fetch('/~xzy2020c/PurelyHandmade/assets/layout/navbar.html')
         .then(response => {
           if (!response.ok) {
             throw new Error(`Failed to load navbar (${response.status})`);
@@ -67,7 +67,7 @@ const UIHelpers = {
         return resolve(); // 如果没有找到容器，静默处理
       }
       
-      fetch('/src/client/assets/layout/footer.html')
+      fetch('/~xzy2020c/PurelyHandmade/assets/layout/footer.html')
         .then(response => {
           if (!response.ok) {
             throw new Error(`Failed to load footer (${response.status})`);
@@ -93,6 +93,12 @@ const UIHelpers = {
    * Update navbar authentication state
    */
   updateAuthState: function() {
+    // 确保DataService对象存在
+    if (typeof DataService === 'undefined') {
+      console.error('UIHelpers: updateAuthState() - DataService object is not defined');
+      return;
+    }
+    
     const currentUser = DataService.getCurrentUser();
     const loginButton = document.getElementById('login-button');
     const registerButton = document.getElementById('register-button');
@@ -156,13 +162,13 @@ const UIHelpers = {
   checkAdminPermissions: function() {
     const currentUser = DataService.getCurrentUser();
     if (!currentUser) {
-      window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
       return false;
     }
     
     if (currentUser.isAdmin !== true) {
       this.showToast('You must be logged in as an administrator to access this page.', 'danger');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=admin';
       return false;
     }
     return true;
@@ -226,6 +232,13 @@ const UIHelpers = {
   updateCartCount: async function() {
     const cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
+    
+    // 确保DataService对象存在
+    if (typeof DataService === 'undefined') {
+      console.error('UIHelpers: updateCartCount() - DataService object is not defined');
+      cartCount.style.display = 'none';
+      return;
+    }
     
     try {
       // 首先检查用户是否登录

@@ -7,44 +7,59 @@
 use Controllers\CartController;
 use Utils\Response;
 use Utils\Logger;
+use Middleware\AuthMiddleware;
 
 // Create response object
 $response = new Response();
 $logger = new Logger('cart-api.log');
 
-// Check if request method is GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    $response->methodNotAllowed('Method not allowed. Only GET requests are accepted.');
-    exit;
-}
-
+// 应用身份验证中间件，确保用户已登录
 try {
-    // Create cart controller
-    $cartController = new CartController();
+    $authMiddleware = new AuthMiddleware();
+    $userData = $authMiddleware->handle();
     
-    // Get cart items
-    $result = $cartController->getCart();
+    // 获取用户ID
+    $userId = $userData['id'];
     
-    // Log the result for debugging
-    $logger->info('Cart API response', [
-        'success' => $result['success'],
-        'message' => $result['message'],
-        'dataType' => gettype($result['data']),
-        'dataIsArray' => is_array($result['data']),
-        'dataCount' => is_array($result['data']) ? count($result['data']) : 0
-    ]);
+    // 检查是否为GET请求
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        $response->methodNotAllowed('Method not allowed. Only GET requests are accepted.');
+        exit;
+    }
     
-    // Return response
-    if ($result['success']) {
-        // Fixed parameter order to match Response::success($data, $message, $statusCode)
-        $response->success($result['data'], $result['message']);
-    } else {
-        $response->badRequest($result['message']);
+    try {
+        // 创建购物车控制器
+        $cartController = new CartController();
+        
+        // 获取购物车商品
+        $result = $cartController->getCart($userId);
+        
+        // 记录结果
+        $logger->info('Cart API response', [
+            'success' => $result['success'],
+            'message' => $result['message'],
+            'dataType' => gettype($result['data']),
+            'dataIsArray' => is_array($result['data']),
+            'dataCount' => is_array($result['data']) ? count($result['data']) : 0
+        ]);
+        
+        // 返回响应
+        if ($result['success']) {
+            $response->success($result['data'], $result['message']);
+        } else {
+            $response->badRequest($result['message']);
+        }
+    } catch (Exception $e) {
+        $logger->error('Cart API error', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        $response->error('Failed to get cart items: ' . $e->getMessage());
     }
 } catch (Exception $e) {
-    $logger->error('Cart API error', [
-        'error' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
+    // 认证失败，返回401响应
+    $logger->error('Cart API auth error', [
+        'error' => $e->getMessage()
     ]);
-    $response->error('Failed to get cart items: ' . $e->getMessage());
+    $response->unauthorized('Authentication required to access cart');
 } 
