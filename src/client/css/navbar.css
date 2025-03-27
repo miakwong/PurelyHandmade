@@ -39,23 +39,6 @@
   transform: scale(1.05);
 }
 
-/* 移动端登录按钮 */
-.mobile-auth-btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  border-radius: var(--border-radius);
-  color: var(--accent-color);
-  border-color: var(--accent-color);
-  transition: all 0.3s;
-}
-
-.mobile-auth-btn:hover, 
-.mobile-auth-btn:focus {
-  background-color: var(--accent-color);
-  color: white;
-  transform: translateY(-1px);
-}
-
 .navbar-dark {
   background-color: var(--accent-color) !important;
   padding: 0.5rem 1rem;
