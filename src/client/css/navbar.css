@@ -23,6 +23,10 @@
   padding: 0.75rem 1rem;
 }
 
+.navbar-top-wrapper {
+  width: 100%;
+}
+
 .navbar-brand {
   color: var(--text-color) !important;
   font-weight: 600;
@@ -37,6 +41,84 @@
 
 .navbar-brand:hover img {
   transform: scale(1.05);
+}
+
+/* 搜索框居中且宽度优化 */
+.search-bar-wrapper {
+  width: 100%;
+}
+
+.navbar-search {
+  width: 100%;
+  max-width: 600px; /* 限制最大宽度，确保在大屏幕上不会过宽 */
+}
+
+/* 移动端展开菜单中的统一按钮样式 */
+.mobile-menu-btn {
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  text-align: left;
+  margin-bottom: 0.75rem !important; /* 强制统一间距 */
+  display: flex;
+  align-items: center;
+  height: 44px; /* 设置固定高度确保一致性 */
+  width: 100%; /* 确保宽度一致 */
+}
+
+.mobile-menu-btn:last-child {
+  margin-bottom: 0 !important; /* 最后一个按钮不需要下边距 */
+}
+
+.mobile-menu-btn i {
+  font-size: 1.1rem;
+  margin-right: 0.5rem;
+  min-width: 1.5rem; /* 确保图标宽度一致 */
+  text-align: center;
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:focus {
+  background-color: var(--accent-color);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动端菜单组件的强制显示/隐藏 */
+#mobile-auth-buttons {
+  display: block !important;
+}
+
+body.user-logged-in #mobile-auth-buttons {
+  display: none !important;
+}
+
+#mobile-profile-buttons {
+  display: none !important;
+}
+
+body.user-logged-in #mobile-profile-buttons {
+  display: block !important;
+}
+
+.mobile-menu-buttons {
+  margin-bottom: 1rem;
+}
+
+/* 桌面端Profile按钮样式 */
+#desktop-profile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+#desktop-profile-button:hover {
+  background-color: var(--accent-color);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .navbar-dark {
@@ -94,7 +176,7 @@
 }
 
 /* 购物车徽章 */
-#cart-count {
+#cart-count, #mobile-cart-count {
   font-size: 0.65rem;
   padding: 0.25em 0.5em;
   font-family: var(--body-font);
@@ -103,7 +185,7 @@
 /* 移动菜单增强响应式设计 */
 @media (max-width: 1199.98px) {
   .navbar-search {
-    width: 250px !important;
+    max-width: 450px;
   }
 }
 
@@ -136,31 +218,14 @@
   .navbar-toggler:focus {
     box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.25);
   }
+  
+  /* 让搜索框在中等屏幕上也能有较合适的宽度 */
+  .navbar-search {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 767.98px) {
-  /* 顶部导航栏样式优化 */
-  .top-navbar .container {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .navbar-brand {
-    margin-bottom: 0.5rem;
-  }
-  
-  /* 搜索框在移动设备上占满宽度 */
-  .navbar-search {
-    width: 100% !important;
-    margin: 0.5rem 0;
-  }
-  
-  /* 用户菜单和购物车按钮的对齐 */
-  .top-navbar .d-flex.align-items-center {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
   /* 菜单项垂直间距调整 */
   .navbar-dark .nav-item {
     margin: 0;
@@ -168,6 +233,15 @@
   
   .navbar-dark .nav-link {
     padding: 0.5rem 1rem;
+  }
+
+  /* 移动端展开菜单样式增强 */
+  #topNavFunctions {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 0.5rem;
+    box-shadow: var(--shadow);
   }
 }
 
@@ -180,10 +254,15 @@
   /* 压缩小屏幕上的品牌名称 */
   .navbar-brand {
     font-size: 1rem;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .navbar-brand img {
     height: 30px !important;
+    margin-right: 0.25rem !important;
   }
 
   /* 购物车和用户菜单样式调整 */

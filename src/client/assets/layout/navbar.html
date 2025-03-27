@@ -2,34 +2,70 @@
 <!-- Top navigation bar - contains logo and user functions -->
 <div class="navbar navbar-expand-md navbar-light bg-light py-2 border-bottom top-navbar">
   <div class="container">
-    <!-- Logo -->
-    <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/index.html">
-      <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" alt="Purely Homemade Logo" height="40"
-        class="d-inline-block align-text-top me-2">
-      Purely Homemade
-    </a>
+    <div class="d-flex align-items-center navbar-top-wrapper">
+      <!-- Logo -->
+      <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/index.html">
+        <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" alt="Purely Homemade Logo" height="40"
+          class="d-inline-block align-text-top me-2">
+        Purely Homemade
+      </a>
 
-    <!-- Mobile toggle for top navbar functionality -->
-    <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#topNavFunctions"
-      aria-controls="topNavFunctions" aria-expanded="false" aria-label="Toggle top navigation">
-      <i class="bi bi-three-dots"></i>
-    </button>
+      <!-- Mobile toggle for top navbar functionality -->
+      <button class="navbar-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#topNavFunctions"
+        aria-controls="topNavFunctions" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-three-dots"></i>
+      </button>
+    </div>
 
-    <!-- Right-side functionality area -->
-    <div class="collapse navbar-collapse mt-2 mt-md-0" id="topNavFunctions">
-      <!-- Search box - longer -->
-      <form class="d-flex me-md-3 navbar-search w-100 w-md-auto" style="width: 300px;"
+    <!-- Search bar - Always visible and centered -->
+    <div class="search-bar-wrapper my-2 d-flex justify-content-center">
+      <form class="d-flex navbar-search w-100"
         action="/~xzy2020c/PurelyHandmade/views/Products/product-list.html" method="GET">
         <input class="form-control me-2" type="search" name="q" placeholder="Search products..." aria-label="Search">
         <button class="btn btn-outline-primary" type="submit">
           <i class="bi bi-search"></i>
         </button>
       </form>
+    </div>
 
-      <!-- User menu -->
-      <div class="d-flex mt-2 mt-md-0 ms-auto">
-        <!-- User dropdown menu - with border -->
-        <div class="dropdown me-2">
+    <!-- Right-side functionality area -->
+    <div class="collapse navbar-collapse mt-2 mt-md-0" id="topNavFunctions">
+      <!-- Mobile menu navigation items - only in collapsed menu -->
+      <div class="d-md-none mb-3">
+        <!-- Login and Register buttons - only visible when not logged in -->
+        <div class="mobile-menu-buttons" id="mobile-auth-buttons" style="display: block !important;">
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/login.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-login-button">
+            <i class="bi bi-box-arrow-in-right"></i>Login
+          </a>
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/register.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-register-button">
+            <i class="bi bi-person-plus"></i>Register
+          </a>
+        </div>
+        
+        <!-- Profile and Order History - only visible when logged in -->
+        <div class="mobile-menu-buttons" id="mobile-profile-buttons" style="display: none !important;">
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/profile.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-profile-button">
+            <i class="bi bi-person"></i>Profile
+          </a>
+          <a href="/~xzy2020c/PurelyHandmade/views/orders/order-history.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-order-history-button">
+            <i class="bi bi-clock-history"></i>Order History
+          </a>
+          <a href="javascript:void(0);" class="btn btn-outline-primary mobile-menu-btn" id="mobile-logout-button" onclick="handleLogout(event)">
+            <i class="bi bi-box-arrow-right"></i>Logout
+          </a>
+        </div>
+        
+        <!-- Mobile shopping cart button -->
+        <a href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html" class="btn btn-outline-primary mobile-menu-btn">
+          <i class="bi bi-cart3"></i>Shopping Cart
+          <span class="badge rounded-pill bg-danger ms-2" id="mobile-cart-count" style="display: none;">0</span>
+        </a>
+      </div>
+
+      <!-- Desktop user menu - keep original logic -->
+      <div class="d-none d-md-flex mt-2 mt-md-0 ms-auto">
+        <!-- Desktop dropdown menu - original dropdown logic -->
+        <div class="dropdown me-2 d-none d-md-block">
           <button class="btn btn-outline-primary" type="button" id="userDropdown" data-bs-toggle="dropdown"
             aria-expanded="false">
             <i class="bi bi-person-circle"></i>
@@ -61,7 +97,7 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="#" id="logout-button" style="display: none;">
+              <a class="dropdown-item" href="javascript:void(0);" id="logout-button" style="display: none;" onclick="handleLogout(event)">
                 <i class="bi bi-box-arrow-right me-2"></i>Logout
               </a>
             </li>
@@ -115,68 +151,112 @@
 </nav>
 
 <script>
-  // Ensure functions are available in the global scope so external scripts can call them
-  window.updateAuthButton = function () {
-    console.log('Navbar updateAuthButton called');
-    const currentUser = localStorage.getItem('currentUser');
-    const loginButton = document.getElementById('login-button');
-    const registerButton = document.getElementById('register-button');
-    const profileButton = document.getElementById('profile-button');
-    const orderHistoryButton = document.getElementById('order-history-button');
-    const logoutButton = document.getElementById('logout-button');
-
-    console.log('Auth status: User is', currentUser ? 'logged in' : 'not logged in');
-
-    if (currentUser) {
-      // User is logged in
-      if (loginButton) loginButton.style.display = 'none';
-      if (registerButton) registerButton.style.display = 'none';
-      if (profileButton) profileButton.style.display = 'block';
-      if (orderHistoryButton) orderHistoryButton.style.display = 'block';
-      if (logoutButton) {
-        logoutButton.style.display = 'block';
-
-        // Remove all existing event listeners to avoid multiple additions
-        const newLogoutButton = logoutButton.cloneNode(true);
-        logoutButton.parentNode.replaceChild(newLogoutButton, logoutButton);
-
-        newLogoutButton.addEventListener('click', function (e) {
-          e.preventDefault();
-          localStorage.removeItem('currentUser');
-          window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
-        });
-      }
+  // Use centralized logout handler
+  function handleLogout(event) {
+    event.preventDefault();
+    console.log('Navbar: logout button clicked');
+    
+    if (window.handleLogout) {
+      // Use the centralized handler
+      window.handleLogout(event);
     } else {
-      // User is not logged in
-      if (loginButton) loginButton.style.display = 'block';
-      if (registerButton) registerButton.style.display = 'block';
-      if (profileButton) profileButton.style.display = 'none';
-      if (orderHistoryButton) orderHistoryButton.style.display = 'none';
-      if (logoutButton) logoutButton.style.display = 'none';
+      // Fallback if common.js not loaded
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('authToken');
+      document.body.classList.remove('user-logged-in');
+      window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
+    }
+  }
+
+  // Use centralized updateAuthButton function
+  window.updateAuthButton = function() {
+    console.log('Navbar: updateAuthButton called');
+    
+    // Check if centralized system exists and use it
+    if (window.checkAuthState) {
+      window.checkAuthState();
+    } else {
+      // Fallback implementation if common.js not loaded
+      try {
+        const currentUser = localStorage.getItem('currentUser');
+        console.log('Auth status:', currentUser ? 'logged in' : 'not logged in');
+        
+        if (currentUser) {
+          document.body.classList.add('user-logged-in');
+        } else {
+          document.body.classList.remove('user-logged-in');
+        }
+        
+        // Desktop elements
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const profileButton = document.getElementById('profile-button');
+        const orderHistoryButton = document.getElementById('order-history-button');
+        const logoutButton = document.getElementById('logout-button');
+        
+        // Mobile elements
+        const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+        const mobileProfileButtons = document.getElementById('mobile-profile-buttons');
+
+        if (currentUser) {
+          // Desktop elements when logged in
+          if (loginButton) loginButton.style.cssText = 'display: none !important';
+          if (registerButton) registerButton.style.cssText = 'display: none !important';
+          if (profileButton) profileButton.style.cssText = 'display: block !important';
+          if (orderHistoryButton) orderHistoryButton.style.cssText = 'display: block !important';
+          if (logoutButton) logoutButton.style.cssText = 'display: block !important';
+          
+          // Mobile elements when logged in
+          if (mobileAuthButtons) mobileAuthButtons.style.cssText = 'display: none !important; visibility: hidden !important;';
+          if (mobileProfileButtons) mobileProfileButtons.style.cssText = 'display: block !important; visibility: visible !important;';
+        } else {
+          // Desktop elements when logged out
+          if (loginButton) loginButton.style.cssText = 'display: block !important';
+          if (registerButton) registerButton.style.cssText = 'display: block !important';
+          if (profileButton) profileButton.style.cssText = 'display: none !important';
+          if (orderHistoryButton) orderHistoryButton.style.cssText = 'display: none !important';
+          if (logoutButton) logoutButton.style.cssText = 'display: none !important';
+          
+          // Mobile elements when logged out
+          if (mobileAuthButtons) mobileAuthButtons.style.cssText = 'display: block !important; visibility: visible !important;';
+          if (mobileProfileButtons) mobileProfileButtons.style.cssText = 'display: none !important; visibility: hidden !important;';
+        }
+
+        // Ensure parent elements are visible
+        if (mobileAuthButtons && mobileAuthButtons.parentElement) {
+          mobileAuthButtons.parentElement.style.display = 'block';
+        }
+        if (mobileProfileButtons && mobileProfileButtons.parentElement) {
+          mobileProfileButtons.parentElement.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Error updating navbar auth state:', err);
+      }
     }
   };
 
-  window.updateCartCount = async function () {
+  // Cart count update function
+  window.updateCartCount = async function() {
     const cartCountElement = document.getElementById('cart-count');
-    if (!cartCountElement) return;
+    const mobileCartCountElement = document.getElementById('mobile-cart-count');
+    
+    if (!cartCountElement && !mobileCartCountElement) return;
 
     try {
-      // 检查DataService是否定义
       if (typeof DataService === 'undefined') {
         console.warn('DataService未定义，无法更新购物车数量');
-        cartCountElement.style.display = 'none';
+        if (cartCountElement) cartCountElement.style.display = 'none';
+        if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
         return;
       }
       
-      // Check if user is logged in
       const currentUser = DataService.getCurrentUser();
       if (!currentUser) {
-        // User is not logged in, hide cart count
-        cartCountElement.style.display = 'none';
+        if (cartCountElement) cartCountElement.style.display = 'none';
+        if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
         return;
       }
 
-      // Get cart data from API
       const response = await fetch(`${CONFIG?.getApiPath ? CONFIG.getApiPath('cart') : '/~xzy2020c/PurelyHandmade/api/cart'}?userId=${currentUser.id}`, {
         method: 'GET',
         headers: {
@@ -190,95 +270,77 @@
       if (result.success && Array.isArray(result.data)) {
         const count = result.data.reduce((total, item) => total + (item.quantity || 1), 0);
         if (count > 0) {
-          cartCountElement.textContent = count;
-          cartCountElement.style.display = 'inline-block';
+          if (cartCountElement) {
+            cartCountElement.textContent = count;
+            cartCountElement.style.display = 'inline-block';
+          }
+          
+          if (mobileCartCountElement) {
+            mobileCartCountElement.textContent = count;
+            mobileCartCountElement.style.display = 'inline-block';
+          }
         } else {
-          cartCountElement.style.display = 'none';
+          if (cartCountElement) cartCountElement.style.display = 'none';
+          if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
         }
       } else {
-        // API returned an error or no cart data
-        cartCountElement.style.display = 'none';
+        if (cartCountElement) cartCountElement.style.display = 'none';
+        if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
       }
     } catch (e) {
       console.error('Error updating cart count', e);
-      cartCountElement.style.display = 'none';
+      if (cartCountElement) cartCountElement.style.display = 'none';
+      if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
     }
   };
 
-  // Run once immediately when the script loads, which is important for the navbar loaded via fetch
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      updateAuthButton();
-      updateCartCount();
-    });
-  } else {
-    // If the DOM is already loaded, execute immediately
-    updateAuthButton();
-    updateCartCount();
+  // Register with event system if available
+  function registerWithEventSystem() {
+    if (window.PurelyHandmadeEvents) {
+      console.log('Navbar: Registering with PurelyHandmadeEvents');
+      
+      // Register to receive auth events
+      window.PurelyHandmadeEvents.on('auth:login', function() {
+        console.log('Navbar: Received auth:login event');
+        updateCartCount().catch(err => console.error('Cart update failed:', err));
+      });
+      
+      window.PurelyHandmadeEvents.on('auth:logout', function() {
+        console.log('Navbar: Received auth:logout event'); 
+        // Clear cart display
+        const cartCountElement = document.getElementById('cart-count');
+        const mobileCartCountElement = document.getElementById('mobile-cart-count');
+        if (cartCountElement) cartCountElement.style.display = 'none';
+        if (mobileCartCountElement) mobileCartCountElement.style.display = 'none';
+      });
+    }
   }
 
-  // Immediately initialize
-  setTimeout(function () {
-    console.log('Additional initialization for navbar buttons');
-    updateAuthButton();
-    updateCartCount();
-
-    // Ensure the cart button is clickable
-    const cartButton = document.querySelector('a.btn[href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html"]');
-    if (cartButton) {
-      console.log('Cart button found, ensuring it is clickable');
-      cartButton.style.pointerEvents = 'auto';
-      cartButton.style.cursor = 'pointer';
+  // Initialize navbar
+  function initNavbar() {
+    console.log('Initializing navbar');
+    
+    // Register with event system
+    registerWithEventSystem();
+    
+    // Check if we should use centralized system
+    if (window.checkAuthState) {
+      window.checkAuthState();
+    } else {
+      // Fall back to local implementation
+      updateAuthButton();
     }
-
-    // Add test login button (only for development testing)
-    if (window.location.hostname === 'localhost') {
-      const testLoginBtn = document.createElement('button');
-      testLoginBtn.className = 'btn btn-sm btn-info ms-2';
-      testLoginBtn.innerHTML = 'Test Login';
-      testLoginBtn.onclick = function () {
-        const testUser = {
-          id: 1,
-          username: 'testuser',
-          email: 'test@example.com',
-          isAdmin: false
-        };
-        localStorage.setItem('currentUser', JSON.stringify(testUser));
-        localStorage.setItem('authToken', 'test-token-12345');
-        updateAuthButton();
-        console.log('Test user logged in');
-      };
-
-      const testLogoutBtn = document.createElement('button');
-      testLogoutBtn.className = 'btn btn-sm btn-warning ms-2';
-      testLogoutBtn.innerHTML = 'Test Logout';
-      testLogoutBtn.onclick = function () {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('authToken');
-        updateAuthButton();
-        console.log('Test user logged out');
-      };
-
-      const testCartBtn = document.createElement('button');
-      testCartBtn.className = 'btn btn-sm btn-success ms-2';
-      testCartBtn.innerHTML = 'Add Test Item';
-      testCartBtn.onclick = function () {
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        cart.push({
-          id: Date.now(),
-          name: 'Test Product',
-          price: 9.99,
-          quantity: 1
-        });
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
-        console.log('Test item added to cart');
-      };
-
-      const container = document.querySelector('.navbar .container');
-      container.appendChild(testLoginBtn);
-      container.appendChild(testLogoutBtn);
-      container.appendChild(testCartBtn);
-    }
-  }, 500);
+    
+    updateCartCount().catch(err => console.error('Cart update failed:', err));
+  }
+  
+  // Initialize on load or immediately if ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavbar);
+  } else {
+    initNavbar();
+  }
+  
+  // Additional safety check
+  setTimeout(initNavbar, 500);
 </script>
