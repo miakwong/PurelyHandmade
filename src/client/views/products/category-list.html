@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Designer Products - Purely Homemade</title>
+  <title>Purely Homemade - All Categories</title>
 
   <!-- Configuration file - must be loaded first -->
   <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
@@ -18,17 +18,11 @@
   <!-- Custom CSS -->
   <script>
     document.write(`
-      <link rel="stylesheet" href="${CONFIG.getCssPath('designer-page.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('category-list.css')}">
       <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
       <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
-      <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
     `);
   </script>
-
-  <!-- Google Material Icons -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
 
 <body>
@@ -39,32 +33,38 @@
   <!-- Breadcrumb -->
   <div class="container mt-3">
     <nav>
-      <ol class="breadcrumb" id="breadcrumb">
+      <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/~xzy2020c/PurelyHandmade/index.html">Home</a></li>
-        <li class="breadcrumb-item"><a href="/~xzy2020c/PurelyHandmade/views/designer/designers.html">Designers</a></li>
-        <li class="breadcrumb-item active" id="designer-name">Designer</li>
+        <li class="breadcrumb-item active">All Categories</li>
       </ol>
     </nav>
   </div>
 
-  <!-- Main Content -->
-  <div class="container mt-5">
-    <div id="designer-info" class="mb-5">
-      <!-- Designer details will be loaded here -->
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1 class="page-title">Browse All Categories</h1>
+      <p class="page-subtitle">Discover our collection of handcrafted products by category</p>
     </div>
-    <h2 class="mb-4" id="products-header">Products</h2>
-    <div class="row" id="products-container">
-      <!-- Product cards will be dynamically injected here -->
-    </div>
-  </div>
+  </section>
 
-  <!-- Toast Container for notifications -->
-  <div class="modern-toast-container" id="toast-container"></div>
+  <!-- Categories Section -->
+  <section class="container mb-5">
+    <div class="row" id="categories-container">
+      <!-- Categories will be loaded dynamically -->
+      <div class="col-12 text-center py-5" id="loading-indicator">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading categories...</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
 
-  <!-- Bootstrap JS and jQuery -->
+  <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -74,9 +74,10 @@
     <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
     <script src="${CONFIG.getJsPath('api-data-loader.js')}"><\/script>
     <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
-    <script src="${CONFIG.getJsPath('designer-page.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('category-list.js')}"><\/script>
   `);
   </script>
+
 
 </body>
 

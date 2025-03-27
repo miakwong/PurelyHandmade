@@ -277,7 +277,7 @@ function showToast(message, type = 'success') {
     }
   
     // Handle image URL
-    let imageUrl = '/~xzy2020c/PurelyHandmade/assets/placeholder.jpg';
+    let imageUrl = CONFIG.getImagePath(`/product-placeholder.jpg`);
     if (product.image) {
       imageUrl = product.image;
     } else if (product.gallery) {
@@ -296,25 +296,25 @@ function showToast(message, type = 'success') {
   
     return `
       <div class="col-md-4">
-        <div class="product-card">
-          <div class="product-img-wrapper">
-            <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}">
-              <img src="${imageUrl}" class="product-img" alt="${product.name || 'Product'}">
-              ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
-            </a>
-          </div>
-          <div class="product-card-body">
-            <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
-              <h2 class="product-title">${product.name}</h2>
-            </a>
-            ${priceHtml}
-            ${starsHtml}
-            <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
-            <button class="add-to-cart-btn" data-product-id="${productId}" onclick="addToCart('${productId}', 1); return false;">
-              <i class="bi bi-cart-plus me-2"></i> Add to Cart
-            </button>
-          </div>
+      <div class="product-card">
+        <div class="product-img-wrapper">
+        <a href="${CONFIG.getViewPath(`/products/product_detail.html?id=${product.id}`)}">
+          <img src="${imageUrl}" class="product-img" alt="${product.name || 'Product'}">
+          ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
+        </a>
         </div>
+        <div class="product-card-body">
+        <a href="${CONFIG.getViewPath(`/products/product_detail.html?id=${product.id}`)}" style="text-decoration: none; color: inherit;">
+          <h2 class="product-title">${product.name}</h2>
+        </a>
+        ${priceHtml}
+        ${starsHtml}
+        <p class="product-desc">${product.description ? product.description.substring(0, 80) + '...' : 'No description available'}</p>
+        <button class="add-to-cart-btn" data-product-id="${productId}" onclick="addToCart('${productId}', 1); return false;">
+          <i class="bi bi-cart-plus me-2"></i> Add to Cart
+        </button>
+        </div>
+      </div>
       </div>
     `;
   }
@@ -334,7 +334,7 @@ function showToast(message, type = 'success') {
   
     try {
       // Fetch designer data from API
-      const designerResponse = await fetch(`/~xzy2020c/PurelyHandmade/api/designers/detail?id=${designerId}`);
+      const designerResponse = await fetch(CONFIG.getApiPath(`/designers/detail?id=${designerId}`));
       const designerResult = await designerResponse.json();
   
       console.log('Designer API response:', designerResult);

@@ -28,7 +28,7 @@
 |  9 | Woodwork      | woodwork      | Handmade wooden products and furniture | NULL  |        0 | 2025-03-22 11:40:56.368 | 2025-03-22 11:40:56.368 |
 | 10 | Jewelry       | jewelry       | Handcrafted jewelry                    | NULL  |        0 | 2025-03-22 11:40:56.369 | 2025-03-22 11:40:56.369 |
 | 11 | Leather       | leather       | Handmade leather goods                 | NULL  |        1 | 2025-03-22 11:40:56.370 | 2025-03-22 11:40:56.370 |
-| 12 | Textile       | textile       | Handcrafted textiles and fabric arts   | NULL  |        0 | 2025-03-22 11:40:56.370 | 2025-03-22 11:40:56.370 |
+| 12 | Textile       | textile       | Handcrafted textiles and fabric arts   | /category/textile.jpg  |        0 | 2025-03-22 11:40:56.370 | 2025-03-22 11:40:56.370 |
 | 13 | Glass         | glass         | Handcrafted glassware and artworks     | NULL  |        1 | 2025-03-22 11:40:56.372 | 2025-03-22 11:40:56.372 |
 | 17 | Test Category | test-category | This is a test category                | NULL  |        0 | 2025-03-23 13:41:28.000 | 2025-03-23 13:41:28.000 |
 

@@ -8,7 +8,7 @@ const CONFIG = {
         JS: '/js',
         CSS: '/css',
         VIEWS: '/views',
-        IMAGES: '/assets/images',
+        IMAGES: '/img',
         API: '/api'
     },
     

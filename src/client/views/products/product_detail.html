@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purely Homemade - Product Detail</title>
+
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('product_detail.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('product-list.css')}">
+    `);
+  </script>
+
+  <!-- Google Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- Breadcrumb -->
+  <div class="container mt-3">
+    <nav>
+      <ol class="breadcrumb" id="breadcrumb">
+        <li class="breadcrumb-item"><a href="/~xzy2020c/PurelyHandmade/index.html">Home</a></li>
+        <li class="breadcrumb-item" id="breadcrumb-category-link"><a href="#">Category</a></li>
+        <li class="breadcrumb-item active" id="breadcrumb-product">Item Name</li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Product Detail Section -->
+  <div class="container mb-5">
+    <div class="row">
+      <!-- Product Images -->
+      <div class="col-md-6">
+        <div id="product-carousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carousel-images">
+            <!-- Images loaded dynamically -->
+            <div class="carousel-item active">
+              <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" class="d-block w-100" alt="Product image">
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#product-carousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#product-carousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-md-6">
+        <div id="product-status" class="mb-2">
+          <!-- Product status (in stock, low stock, etc) will be set here -->
+        </div>
+        <h1 id="product-title" class="mb-2">Loading product...</h1>
+        <div class="rating mb-3" id="product-rating">
+          <!-- Rating stars added here -->
+        </div>
+
+        <div id="product-price-container" class="mb-3">
+          <span id="product-price" class="fw-bold fs-4"></span>
+          <span id="product-original-price" class="text-decoration-line-through text-muted ms-2"></span>
+        </div>
+
+        <div class="d-flex align-items-center mb-4">
+          <div class="input-group" style="width: 120px;">
+            <button class="btn btn-outline-secondary" type="button" id="decrease-quantity">-</button>
+            <input type="text" class="form-control text-center" id="product-quantity" value="1">
+            <button class="btn btn-outline-secondary" type="button" id="increase-quantity">+</button>
+          </div>
+          <button class="btn btn-primary ms-3" id="add-to-cart"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button>
+          <button class="btn btn-outline-secondary ms-2" id="wishlist-btn"><i class="bi bi-heart"></i></button>
+        </div>
+
+        <div class="product-description mb-4" id="product-description">
+          <p class="text-muted">Loading product description...</p>
+        </div>
+
+        <div class="product-meta mb-4">
+          <div class="d-flex mb-2">
+            <span class="text-muted me-2">Category:</span>
+            <span id="product-category">Loading...</span>
+          </div>
+          <div class="d-flex mb-2">
+            <span class="text-muted me-2">Designer:</span>
+            <span id="product-designer">Loading...</span>
+          </div>
+          <div class="d-flex mb-2">
+            <span class="text-muted me-2">Item Code:</span>
+            <span id="product-code">Loading...</span>
+          </div>
+        </div>
+
+        <div class="social-share mb-4">
+          <span class="text-muted me-2">Share:</span>
+          <a href="#" class="social-icon me-2"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="social-icon me-2"><i class="bi bi-twitter"></i></a>
+          <a href="#" class="social-icon me-2"><i class="bi bi-pinterest"></i></a>
+          <a href="#" class="social-icon me-2"><i class="bi bi-link-45deg"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Tabs -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <ul class="nav nav-tabs" id="productTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description"
+              type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button"
+              role="tab" aria-controls="details" aria-selected="false">Details</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button"
+              role="tab" aria-controls="reviews" aria-selected="false">Reviews</button>
+          </li>
+        </ul>
+        <div class="tab-content p-4 border border-top-0 rounded-bottom" id="productTabsContent">
+          <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+            <div id="full-description">
+              <p class="text-muted">Loading product description...</p>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+            <div id="product-details">
+              <p class="text-muted">Loading product details...</p>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+            <div id="reviews-container">
+              <p class="text-muted">Loading product reviews...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <h3 class="mb-4">You May Also Like</h3>
+        <div class="row" id="related-products-container">
+          <!-- Related products loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Toast Container for notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Navbar Handler and Data Initialization -->
+  <script>
+    document.write(`
+    <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('api-data-loader.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('ui-helpers.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('product_detail.js')}"><\/script>
+  `);
+  </script>
+
+
+</body>
+
+</html>

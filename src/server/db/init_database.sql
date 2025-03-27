@@ -213,15 +213,14 @@ INSERT INTO `User`
 INSERT INTO `Category` 
     (`id`, `name`, `slug`, `description`, `image`, `featured`, `createdAt`, `updatedAt`) 
     VALUES 
-    (1,'Ceramics','ceramics','Handcrafted ceramic items','/src/client/img/category/ceramics.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'),
-    (2,'Wood Crafts','wood-crafts','Handmade wooden items and carvings','/src/client/img/category/wood.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'),
-    (3,'Textiles','textiles','Handwoven and textile-based products','/src/client/img/category/textiles.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'),
+    (1,'Ceramics','ceramics','Handcrafted ceramic items','/category/ceramics.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'),
+    (2,'Wood Crafts','wood-crafts','Handmade wooden items and carvings','/category/wood.jpg','0','2025-03-23 18:23:13.000','2025-03-23 18:23:13.000'),
     (7, 'Pottery', 'pottery', 'Handmade ceramics and pottery artworks', null, 0, '2025-03-22 11:40:56.365', '2025-03-22 11:40:56.365'),
     (8, 'Woven', 'woven', 'Handwoven products and accessories', null, 0, '2025-03-22 11:40:56.366', '2025-03-22 11:40:56.366'),
     (9, 'Woodwork', 'woodwork', 'Handmade wooden products and furniture', null, 0, '2025-03-22 11:40:56.368', '2025-03-22 11:40:56.368'),
     (10, 'Jewelry', 'jewelry', 'Handcrafted jewelry', null, 0, '2025-03-22 11:40:56.369', '2025-03-22 11:40:56.369'),
     (11, 'Leather', 'leather', 'Handmade leather goods', null, 1, '2025-03-22 11:40:56.370', '2025-03-22 11:40:56.370'),
-    (12, 'Textile', 'textile', 'Handcrafted textiles and fabric arts', null, 0, '2025-03-22 11:40:56.370', '2025-03-22 11:40:56.370'),
+    (12, 'Textile', 'textile', 'Handcrafted textiles and fabric arts','/category/textile.jpg','0','2025-03-22 11:40:56.370', '2025-03-22 11:40:56.370'),
     (13, 'Glass', 'glass', 'Handcrafted glassware and artworks', null, 1, '2025-03-22 11:40:56.372', '2025-03-22 11:40:56.372'),
     (17, 'Test Category', 'test-category', 'This is a test category', null, 0, '2025-03-23 13:41:28.000', '2025-03-23 13:41:28.000');
 
