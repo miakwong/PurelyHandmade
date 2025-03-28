@@ -4,8 +4,8 @@
   <div class="container">
     <div class="d-flex align-items-center navbar-top-wrapper">
       <!-- Logo -->
-      <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/src/client/html/index.html">
-        <img src="/~xzy2020c/PurelyHandmade/src/client/assets/placeholder.jpg" alt="Purely Homemade Logo" height="40"
+      <a class="navbar-brand" href="/~xzy2020c/PurelyHandmade/index.html">
+        <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" alt="Purely Homemade Logo" height="40"
           class="d-inline-block align-text-top me-2">
         Purely Homemade
       </a>
@@ -20,7 +20,7 @@
     <!-- Search bar - Always visible and centered -->
     <div class="search-bar-wrapper my-2 d-flex justify-content-center">
       <form class="d-flex navbar-search w-100"
-        action="/~xzy2020c/PurelyHandmade/src/client/views/products/product-list.html" method="GET">
+        action="/~xzy2020c/PurelyHandmade/views/Products/product-list.html" method="GET">
         <input class="form-control me-2" type="search" name="q" placeholder="Search products..." aria-label="Search">
         <button class="btn btn-outline-primary" type="submit">
           <i class="bi bi-search"></i>
@@ -34,20 +34,20 @@
       <div class="d-md-none mb-3">
         <!-- Login and Register buttons - only visible when not logged in -->
         <div class="mobile-menu-buttons" id="mobile-auth-buttons" style="display: block !important;">
-          <a href="/~xzy2020c/PurelyHandmade/src/client/views/auth/login.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-login-button">
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/login.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-login-button">
             <i class="bi bi-box-arrow-in-right"></i>Login
           </a>
-          <a href="/~xzy2020c/PurelyHandmade/src/client/views/auth/register.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-register-button">
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/register.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-register-button">
             <i class="bi bi-person-plus"></i>Register
           </a>
         </div>
         
         <!-- Profile and Order History - only visible when logged in -->
         <div class="mobile-menu-buttons" id="mobile-profile-buttons" style="display: none !important;">
-          <a href="/~xzy2020c/PurelyHandmade/src/client/views/auth/profile.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-profile-button">
+          <a href="/~xzy2020c/PurelyHandmade/views/auth/profile.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-profile-button">
             <i class="bi bi-person"></i>Profile
           </a>
-          <a href="/~xzy2020c/PurelyHandmade/src/client/views/orders/order-history.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-order-history-button">
+          <a href="/~xzy2020c/PurelyHandmade/views/orders/order-history.html" class="btn btn-outline-primary mobile-menu-btn" id="mobile-order-history-button">
             <i class="bi bi-clock-history"></i>Order History
           </a>
           <a href="javascript:void(0);" class="btn btn-outline-primary mobile-menu-btn" id="mobile-logout-button" onclick="handleLogout(event)">
@@ -56,7 +56,7 @@
         </div>
         
         <!-- Mobile shopping cart button -->
-        <a href="/~xzy2020c/PurelyHandmade/src/client/views/checkout/cart.html" class="btn btn-outline-primary mobile-menu-btn">
+        <a href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html" class="btn btn-outline-primary mobile-menu-btn">
           <i class="bi bi-cart3"></i>Shopping Cart
           <span class="badge rounded-pill bg-danger ms-2" id="mobile-cart-count" style="display: none;">0</span>
         </a>
@@ -72,12 +72,12 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
             <li>
-              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/src/client/views/auth/login.html" id="login-button">
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/login.html" id="login-button">
                 <i class="bi bi-box-arrow-in-right me-2"></i>Login
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/src/client/views/auth/register.html" id="register-button">
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/register.html" id="register-button">
                 <i class="bi bi-person-plus me-2"></i>Register
               </a>
             </li>
@@ -85,13 +85,13 @@
               <hr class="dropdown-divider">
             </li>
             <li>
-              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/src/client/views/auth/profile.html" id="profile-button"
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/auth/profile.html" id="profile-button"
                 style="display: none;">
                 <i class="bi bi-person me-2"></i>Profile
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/src/client/views/orders/order-history.html"
+              <a class="dropdown-item" href="/~xzy2020c/PurelyHandmade/views/orders/order-history.html"
                 id="order-history-button" style="display: none;">
                 <i class="bi bi-clock-history me-2"></i>Order History
               </a>
@@ -105,7 +105,7 @@
         </div>
 
         <!-- Shopping cart - with border -->
-        <a href="/~xzy2020c/PurelyHandmade/src/client/views/checkout/cart.html" class="btn btn-outline-primary position-relative">
+        <a href="/~xzy2020c/PurelyHandmade/views/checkout/cart.html" class="btn btn-outline-primary position-relative">
           <i class="bi bi-cart3"></i>
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count"
             style="display: none;">
@@ -128,22 +128,22 @@
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/html/index.html">Home</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/index.html">Home</a>
         </li>
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/views/new-arrivals.html">New Arrivals</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/new-arrivals.html">New Arrivals</a>
         </li>
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/views/products/product-list.html">Products</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/products/product-list.html">Products</a>
         </li>
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/views/designer/designers.html">Designers</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/designer/designers.html">Designers</a>
         </li>
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/views/on-sale.html">Sale</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/on-sale.html">Sale</a>
         </li>
         <li class="nav-item mx-lg-2">
-          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/src/client/views/about.html">About Us</a>
+          <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/about.html">About Us</a>
         </li>
       </ul>
     </div>
@@ -164,7 +164,7 @@
       localStorage.removeItem('currentUser');
       localStorage.removeItem('authToken');
       document.body.classList.remove('user-logged-in');
-      window.location.href = '/~xzy2020c/PurelyHandmade/src/client/html/index.html';
+      window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
     }
   }
 
