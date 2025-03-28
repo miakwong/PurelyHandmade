@@ -87,7 +87,7 @@ function loadNavbar() {
                   localStorage.removeItem('currentUser');
                   // 使用安全的方式获取路径
                   const homePath = (typeof CONFIG !== 'undefined' && CONFIG.getViewPath) 
-                    ? CONFIG.getViewPath('index.html')
+                    ? `${CONFIG.BASE_URL('index.html')}`
                     : '/~xzy2020c/PurelyHandmade/src/client/views/index.html';
                   window.location.href = homePath;
                 });
