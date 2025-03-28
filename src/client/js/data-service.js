@@ -77,15 +77,6 @@ if (typeof window.DataService === 'undefined') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('currentUser');
       console.log('DataService: logout() - User logged out');
-      
-      // Trigger logout event through centralized system
-      if (window.PurelyHandmadeEvents) {
-        window.PurelyHandmadeEvents.trigger('auth:logout');
-      }
-      
-      // For backward compatibility - these will be handled by the event
-      // but keeping for safety in case common.js isn't loaded first
-      document.body.classList.remove('user-logged-in');
     },
     
     /**
@@ -120,15 +111,6 @@ if (typeof window.DataService === 'undefined') {
             if (user) {
               this.setCurrentUser(user);
               console.log('DataService: login() - User logged in successfully:', user.username || user.email);
-              
-              // Trigger login event through centralized system
-              if (window.PurelyHandmadeEvents) {
-                window.PurelyHandmadeEvents.trigger('auth:login');
-              }
-              
-              // For backward compatibility - these will be handled by the event
-              // but keeping for safety in case common.js isn't loaded first
-              document.body.classList.add('user-logged-in');
             } else {
               console.warn('DataService: login() - No user data received with token');
               // 获取用户数据

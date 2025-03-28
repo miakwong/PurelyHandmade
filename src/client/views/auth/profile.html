@@ -11,8 +11,7 @@
   <link href="/~xzy2020c/PurelyHandmade/src/client/css/profile.css" rel="stylesheet">
   <link href="/~xzy2020c/PurelyHandmade/src/client/css/admin.css" rel="stylesheet">
   
-  <!-- Load scripts in the correct order: common.js first -->
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/common.js"></script>
+  <!-- 预先加载关键JavaScript文件 -->
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/config.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/data-service.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/ui-helpers.js"></script>
@@ -401,58 +400,9 @@
 <script src="/~xzy2020c/PurelyHandmade/src/client/js/navbar-handler.js"></script>
 
 <script>
+  // Single DOMContentLoaded event listener to handle all initialization
   document.addEventListener('DOMContentLoaded', function() {
-    // Load navbar and footer using common.js if available
-    if (typeof loadNavbar === 'function') {
-      loadNavbar();
-    } else {
-      // Fallback to UIHelpers
-      UIHelpers.loadNavbar();
-    }
-    
-    if (typeof loadFooter === 'function') {
-      loadFooter();
-    } else {
-      UIHelpers.loadFooter();
-    }
-    
-    // Check authentication
-    const currentUser = DataService.getCurrentUser();
-    if (!currentUser) {
-      if (typeof showToast === 'function') {
-        showToast('Please log in to access your profile', 'warning');
-      } else {
-        UIHelpers.showToast('Please log in to access your profile', 'warning');
-      }
-      
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 1000);
-      return;
-    }
-    
-    // Listen for logout events 
-    if (window.PurelyHandmadeEvents) {
-      PurelyHandmadeEvents.on('auth:logout', function() {
-        console.log('Profile page received auth:logout event');
-        // Redirect to login page when logged out
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 500);
-      });
-    }
-    
-    // Attach logout handler directly using the centralized handler
-    document.getElementById('logout-button-profile').addEventListener('click', function(e) {
-      e.preventDefault();
-      if (window.handleLogout) {
-        window.handleLogout(e);
-      } else {
-        // Fallback
-        DataService.logout();
-        window.location.href = 'login.html';
-      }
-    });
+    console.log('DOM fully loaded - initializing page');
     
     // Set up initial user data
     initUserProfile();

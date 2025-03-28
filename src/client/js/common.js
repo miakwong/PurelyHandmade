@@ -3,120 +3,8 @@
  * This file contains shared functions used across multiple pages
  */
 
-// Central event management system
-const PurelyHandmadeEvents = {
-  // Store event handlers
-  handlers: {},
-  
-  // Register a handler for an event
-  on: function(eventName, handler) {
-    if (!this.handlers[eventName]) {
-      this.handlers[eventName] = [];
-    }
-    this.handlers[eventName].push(handler);
-  },
-  
-  // Trigger an event
-  trigger: function(eventName, data) {
-    console.log(`PurelyHandmadeEvents: Triggered '${eventName}'`, data || '');
-    if (this.handlers[eventName]) {
-      this.handlers[eventName].forEach(handler => {
-        try {
-          handler(data);
-        } catch (error) {
-          console.error(`Error in handler for event '${eventName}':`, error);
-        }
-      });
-    }
-  }
-};
-
-// Expose to window
-window.PurelyHandmadeEvents = PurelyHandmadeEvents;
-
-// Register built-in event handlers
-PurelyHandmadeEvents.on('auth:login', function() {
-  updateUIForAuthState(true);
-});
-
-PurelyHandmadeEvents.on('auth:logout', function() {
-  updateUIForAuthState(false);
-});
-
-// Central function to update all UI elements based on auth state
-function updateUIForAuthState(isLoggedIn) {
-  console.log('Common.js: updateUIForAuthState called, isLoggedIn:', isLoggedIn);
-  
-  // Apply body class
-  if (isLoggedIn) {
-    document.body.classList.add('user-logged-in');
-  } else {
-    document.body.classList.remove('user-logged-in');
-  }
-  
-  // Update mobile elements
-  const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
-  const mobileProfileButtons = document.getElementById('mobile-profile-buttons');
-  
-  if (mobileAuthButtons) {
-    mobileAuthButtons.style.cssText = isLoggedIn ? 
-      'display: none !important; visibility: hidden !important;' : 
-      'display: block !important; visibility: visible !important;';
-  }
-  
-  if (mobileProfileButtons) {
-    mobileProfileButtons.style.cssText = isLoggedIn ? 
-      'display: block !important; visibility: visible !important;' : 
-      'display: none !important; visibility: hidden !important;';
-  }
-  
-  // Update desktop elements
-  const loginButton = document.getElementById('login-button');
-  const registerButton = document.getElementById('register-button');
-  const profileButton = document.getElementById('profile-button');
-  const orderHistoryButton = document.getElementById('order-history-button');
-  const logoutButton = document.getElementById('logout-button');
-  
-  if (loginButton) loginButton.style.cssText = isLoggedIn ? 'display: none !important' : 'display: block !important';
-  if (registerButton) registerButton.style.cssText = isLoggedIn ? 'display: none !important' : 'display: block !important';
-  if (profileButton) profileButton.style.cssText = isLoggedIn ? 'display: block !important' : 'display: none !important';
-  if (orderHistoryButton) orderHistoryButton.style.cssText = isLoggedIn ? 'display: block !important' : 'display: none !important';
-  if (logoutButton) logoutButton.style.cssText = isLoggedIn ? 'display: block !important' : 'display: none !important';
-  
-  // Ensure parent elements are visible
-  if (mobileAuthButtons && mobileAuthButtons.parentElement) {
-    mobileAuthButtons.parentElement.style.display = 'block';
-  }
-  if (mobileProfileButtons && mobileProfileButtons.parentElement) {
-    mobileProfileButtons.parentElement.style.display = 'block';
-  }
-  
-  // Update cart count if function exists
-  if (typeof updateCartCount === 'function') {
-    updateCartCount().catch(err => {
-      console.error('Error updating cart count:', err);
-    });
-  }
-}
-
-// Check and update auth state
-function checkAuthState() {
-  const currentUser = localStorage.getItem('currentUser');
-  const isLoggedIn = !!currentUser;
-  updateUIForAuthState(isLoggedIn);
-  return isLoggedIn;
-}
-
 // Load the navbar and handle authentication
 function loadNavbar() {
-  // Set body class immediately for CSS control
-  const currentUser = localStorage.getItem('currentUser');
-  if (currentUser) {
-    document.body.classList.add('user-logged-in');
-  } else {
-    document.body.classList.remove('user-logged-in');
-  }
-
   fetch('/~xzy2020c/PurelyHandmade/src/client/assets/layout/navbar.html')
     .then(response => {
       if (!response.ok) {
@@ -128,23 +16,16 @@ function loadNavbar() {
       document.getElementById('navbar-placeholder').innerHTML = html;
       console.log('Navbar loaded successfully');
       
-      // Use MutationObserver to detect when navbar is fully inserted into DOM
-      const observer = new MutationObserver(function(mutations) {
-        observer.disconnect(); // Stop observing
-        console.log('Navbar DOM changes detected, updating auth state');
-        
-        // Update UI based on current auth state
-        checkAuthState();
-      });
-      
-      // Start observing navbar-placeholder
-      observer.observe(document.getElementById('navbar-placeholder'), {
-        childList: true,
-        subtree: true
-      });
-      
-      // Additional safety timeout
-      setTimeout(checkAuthState, 100);
+      // Update authentication button state after navbar is loaded
+      setTimeout(() => {
+        updateAuthState();
+        // Update cart count if function exists
+        if (typeof updateCartCount === 'function') {
+          updateCartCount().catch(err => {
+            console.error('Error updating cart count:', err);
+          });
+        }
+      }, 100);
     })
     .catch(error => {
       console.error('Error loading navbar:', error);
@@ -176,10 +57,47 @@ function loadFooter() {
     });
 }
 
-// Update authentication state in the navbar - Legacy function for backward compatibility
+// Update authentication state in the navbar
 function updateAuthState() {
-  console.log('common.js: updateAuthState called (legacy function)');
-  checkAuthState();
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const loginButton = document.getElementById('login-button');
+  const logoutButton = document.getElementById('logout-button');
+  const registerButton = document.getElementById('register-button');
+  const profileButton = document.getElementById('profile-button');
+  const adminButton = document.getElementById('admin-dashboard-button');
+  
+  if (!loginButton || !logoutButton) {
+    console.log('Login/logout buttons not found in this page');
+    return;
+  }
+  
+  if (currentUser) {
+    // User is logged in
+    loginButton.style.display = 'none';
+    if (registerButton) registerButton.style.display = 'none';
+    logoutButton.style.display = 'block';
+    if (profileButton) profileButton.style.display = 'block';
+    
+    // Show admin dashboard button for admins
+    if (currentUser.isAdmin === true && adminButton) {
+      adminButton.style.display = 'block';
+    } else if (adminButton) {
+      adminButton.style.display = 'none';
+    }
+    
+    // Update username display if available
+    const userNameElement = document.getElementById('user-name');
+    if (userNameElement) {
+      userNameElement.textContent = currentUser.username || currentUser.name || 'User';
+    }
+  } else {
+    // User is not logged in
+    loginButton.style.display = 'block';
+    if (registerButton) registerButton.style.display = 'block';
+    logoutButton.style.display = 'none';
+    if (profileButton) profileButton.style.display = 'none';
+    if (adminButton) adminButton.style.display = 'none';
+  }
 }
 
 // Check admin permissions
@@ -232,93 +150,4 @@ function showToast(message, type = 'primary') {
   toastElement.addEventListener('hidden.bs.toast', function () {
     toastElement.remove();
   });
-}
-
-// Global logout handler
-window.handleLogout = function(event) {
-  if (event) event.preventDefault();
-  console.log('Logout handler called');
-  
-  // Remove user data and token
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('authToken');
-  
-  // Trigger the logout event
-  PurelyHandmadeEvents.trigger('auth:logout');
-  
-  // Redirect to home page
-  window.location.href = '/~xzy2020c/PurelyHandmade/index.html';
-};
-
-// Legacy function for backward compatibility
-const updateNavAfterAuthChange = function() {
-  console.log('updateNavAfterAuthChange called (legacy function)');
-  checkAuthState();
-};
-
-// Legacy function for backward compatibility
-function updateNavbarManually() {
-  console.log('updateNavbarManually called (legacy function)');
-  checkAuthState();
-}
-
-// Legacy function for backward compatibility
-function tryFixMobileElements() {
-  console.log('tryFixMobileElements called (legacy function)');
-  checkAuthState();
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOMContentLoaded: Initializing auth state');
-  checkAuthState();
-});
-
-// Override localStorage methods to trigger events
-const originalSetItem = localStorage.setItem;
-localStorage.setItem = function(key, value) {
-  // Call original method
-  originalSetItem.call(this, key, value);
-  
-  // Trigger events for auth-related keys
-  if (key === 'currentUser' || key === 'authToken') {
-    console.log(`localStorage.setItem: ${key} changed, triggering auth:login event`);
-    if (key === 'currentUser' && value) {
-      PurelyHandmadeEvents.trigger('auth:login');
-    }
-  }
-};
-
-const originalRemoveItem = localStorage.removeItem;
-localStorage.removeItem = function(key) {
-  // Call original method
-  originalRemoveItem.call(this, key);
-  
-  // Trigger events for auth-related keys
-  if (key === 'currentUser' || key === 'authToken') {
-    console.log(`localStorage.removeItem: ${key} removed, triggering auth:logout event`);
-    if (key === 'currentUser') {
-      PurelyHandmadeEvents.trigger('auth:logout');
-    }
-  }
-};
-
-// Cross-tab synchronization
-window.addEventListener('storage', function(e) {
-  if (e.key === 'currentUser') {
-    console.log('Storage event detected:', e);
-    if (e.newValue) {
-      PurelyHandmadeEvents.trigger('auth:login');
-    } else {
-      PurelyHandmadeEvents.trigger('auth:logout');
-    }
-  }
-});
-
-// Make these functions accessible globally for backward compatibility
-window.updateAuthState = updateAuthState;
-window.updateNavAfterAuthChange = updateNavAfterAuthChange;
-window.updateNavbarManually = updateNavbarManually;
-window.tryFixMobileElements = tryFixMobileElements;
-window.checkAuthState = checkAuthState;
-window.updateUIForAuthState = updateUIForAuthState; 
+} 
