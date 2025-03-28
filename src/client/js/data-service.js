@@ -4,8 +4,6 @@
  * Provides a unified data access layer for handling client-side data retrieval and management
  */
 
-// API base URL - 确保CONFIG对象存在
-let API_BASE_URL = '/~xzy2020c/PurelyHandmade/api';
 
 // 检查CONFIG对象是否已加载
 if (typeof CONFIG !== 'undefined' && CONFIG.getApiPath) {
