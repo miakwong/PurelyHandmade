@@ -10,11 +10,6 @@
   <link href="/src/client/css/navbar.css" rel="stylesheet">
   <link href="/src/client/css/register.css" rel="stylesheet">
 
-  <!-- Load scripts in the correct order: common.js first -->
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/common.js"></script>
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/config.js"></script>
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/data-service.js"></script>
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/ui-helpers.js"></script>
 </head>
 <body>
   <!-- Navbar Placeholder -->
@@ -169,341 +164,14 @@
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
 
+  <script src="/src/client/js/navbar-handler.js"></script>
+
   <script>
+    // Initialize toast
     document.addEventListener('DOMContentLoaded', function() {
-      // Load navbar and footer using loadNavbar() from common.js if available
-      if (typeof loadNavbar === 'function') {
-        loadNavbar();
-      } else {
-        // Fallback to UIHelpers
-        UIHelpers.loadNavbar();
-      }
-      
-      if (typeof loadFooter === 'function') {
-        loadFooter();
-      } else {
-        UIHelpers.loadFooter();
-      }
-      
-      // Register auth event listeners
-      if (window.PurelyHandmadeEvents) {
-        PurelyHandmadeEvents.on('auth:login', function() {
-          console.log('Register page received auth:login event');
-          
-          // Redirect after successful registration/login
-          setTimeout(() => {
-            window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/auth/profile.html';
-          }, 1000);
-        });
-      }
-      
-      // Registration form validation and submission
-      const form = document.getElementById('register-form');
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Clear previous validation errors
-        clearValidationErrors();
-        
-        // Native form validation
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-        
-        // Fetch field values
-        const firstName = document.getElementById('firstName').value.trim();
-        const lastName = document.getElementById('lastName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const username = document.getElementById('username').value.trim();
-        const pass = document.getElementById('regPassword').value;
-        const confirmPass = document.getElementById('regPasswordConfirm').value;
-        const termsAccepted = document.getElementById('termsCheck').checked;
-        const birthday = document.getElementById('birthday').value;
-        const gender = document.querySelector('input[name="gender"]:checked');
-        
-        let isValid = true;
-        
-        // Gender validation
-        if (!gender) {
-          isValid = false;
-          showValidationError('gender-error', 'Please select your gender.');
-        }
-
-        // Email format validation
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          isValid = false;
-          showValidationError('email-error', 'Please enter a valid email address.');
-        }
-        
-        // Username validation
-        if (username.length < 3) {
-          isValid = false;
-          showValidationError('username-error', 'Username must be at least 3 characters long.');
-        }
-        
-        // Password strength validation
-        if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
-          isValid = false;
-          showValidationError('password-error', 'Password must be at least 8 characters long and include at least one uppercase letter and one number.');
-        }
-        
-        // Password match validation
-        if (pass !== confirmPass) {
-          isValid = false;
-          showValidationError('password-match-error', 'The passwords you entered do not match.');
-        }
-        
-        // Terms & Conditions checked
-        if (!termsAccepted) {
-          isValid = false;
-          showValidationError('terms-error', 'Please agree to the terms and conditions to complete the registration.');
-        }
-        
-        if (!isValid) {
-          // Show overall error message
-          const formError = document.getElementById('form-validation-error');
-          formError.textContent = 'Please correct the errors in the form before submitting.';
-          formError.classList.remove('d-none');
-          return;
-        }
-        
-        // Create user object to send to server
-        const userData = {
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          username: username,
-          password: pass,
-          avatar: avatarBase64 || null, // 如果没有头像，使用null代替空字符串
-          birthday: birthday ? (new Date(birthday)).toISOString().split('T')[0] : null, // 确保日期格式正确
-          gender: gender ? gender.value : null, // 使用null而不是空字符串
-          role: 'user',
-          isAdmin: 0,
-          status: 'active'
-        };
-        
-        // Debug object, avoid console printing large image data
-        const debugData = {
-          firstName, 
-          lastName,
-          email,
-          username,
-          passwordLength: pass.length,
-          birthday,
-          gender: gender ? gender.value : 'not selected',
-          avatarProvided: !!avatarBase64,
-          role: 'user',
-          isAdmin: 0
-        };
-        
-        console.log('Form submitted with data:', debugData);
-        
-        // Try to reduce avatar size to avoid large data transmission
-        let optimizedUserData = {...userData};
-        if (avatarBase64 && avatarBase64.length > 200000) { // Avatar exceeds 200KB
-          console.log('Avatar is large, removing for this registration attempt');
-          optimizedUserData.avatar = null; // Temporarily do not send avatar data
-        }
-        
-        // Show loading indicator
-        const submitBtn = form.querySelector('.submit-btn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
-        submitBtn.disabled = true;
-        
-        // Send registration data to server API
-        fetch('/src/server/api/auth/register.php', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(optimizedUserData)
-        })
-        .then(response => {
-          console.log('Server response status:', response.status);
-          return response.text().then(text => {
-            console.log('Raw server response:', text);
-            try {
-              return JSON.parse(text);
-            } catch (e) {
-              console.error('Error parsing JSON response:', e);
-              return { success: false, message: 'Invalid server response format' };
-            }
-          });
-        })
-        .then(data => {
-          // Record server response
-          console.log('Parsed server response data:', data);
-          
-          // Reset button
-          submitBtn.innerHTML = originalBtnText;
-          submitBtn.disabled = false;
-          
-          if (data.success) {
-            // Show success toast using common.js if available
-            if (typeof showToast === 'function') {
-              showToast('Registration successful! Welcome to Purely Handmade!', 'success');
-            } else {
-              UIHelpers.showToast('Registration successful! Welcome to Purely Handmade!', 'success');
-            }
-            
-            // The auth:login event will be triggered by DataService.login
-            // and our event handler above will handle the redirect
-          } else {
-            // Show error message
-            const formError = document.getElementById('form-validation-error');
-            formError.textContent = data.message || 'Registration failed. Please try again.';
-            formError.classList.remove('d-none');
-            
-              // 检查错误的详细信息
-            console.error('Registration failed with message:', data.message);
-            if (data.errors) {
-              console.error('Validation errors:', data.errors);
-              if (data.errors.email) {
-                showValidationError('email-error', data.errors.email[0]);
-              }
-              if (data.errors.username) {
-                showValidationError('username-error', data.errors.username[0]);
-              }
-              if (data.errors.password) {
-                showValidationError('password-error', data.errors.password[0]);
-              }
-            }
-          }
-        })
-        .catch(error => {
-          // Reset button
-          submitBtn.innerHTML = originalBtnText;
-          submitBtn.disabled = false;
-          
-          // Show error message
-          const formError = document.getElementById('form-validation-error');
-          formError.textContent = 'An error occurred while connecting to the server. Please try again later.';
-          formError.classList.remove('d-none');
-          console.error('Registration fetch error:', error);
-        });
-      });
-      
-      // Avatar Upload Preview
-      const avatarUpload = document.getElementById('avatarUpload');
-      const avatarPreview = document.getElementById('avatarPreview');
-      let avatarBase64 = ''; // To store the base64 encoded image
-      
-      avatarUpload.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-          if (file.size > 5 * 1024 * 1024) {
-            showValidationError('avatar-error', 'Image size should not exceed 5MB');
-            return;
-          }
-          
-          const reader = new FileReader();
-          
-          reader.onload = function(e) {
-            // Store the base64 data
-            avatarBase64 = e.target.result;
-            
-            // Update preview - clear the preview area first
-            avatarPreview.innerHTML = '';
-            
-            // Create and append the image
-            const img = document.createElement('img');
-            img.src = avatarBase64;
-            img.alt = "Profile Picture Preview";
-            avatarPreview.appendChild(img);
-          };
-          
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Password strength meter
-      const passwordInput = document.getElementById('regPassword');
-      const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
-      const passwordHint = document.getElementById('passwordHint');
-      
-      passwordInput.addEventListener('input', function() {
-        const password = this.value;
-        let strength = 0;
-        
-        // Clear previous classes
-        passwordStrengthMeter.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
-        
-        if (password.length > 0) {
-          // Length check
-          if (password.length >= 8) strength += 1;
-          
-          // Uppercase check
-          if (/[A-Z]/.test(password)) strength += 1;
-          
-          // Number check
-          if (/\d/.test(password)) strength += 1;
-          
-          // Update meter
-          if (strength === 1) {
-            passwordStrengthMeter.classList.add('strength-weak');
-            passwordHint.textContent = 'Weak password - add uppercase letters and numbers';
-          } else if (strength === 2) {
-            passwordStrengthMeter.classList.add('strength-medium');
-            passwordHint.textContent = 'Medium password - add one more requirement';
-          } else if (strength === 3) {
-            passwordStrengthMeter.classList.add('strength-strong');
-            passwordHint.textContent = 'Strong password';
-          }
-        } else {
-          passwordHint.textContent = 'Password must be at least 8 characters with numbers and uppercase letters';
-        }
-      });
-
-      // Delete user name real-time duplicate detection local storage part
-      document.getElementById('username').addEventListener('blur', async function() {
-        const username = this.value.trim();
-        if (!username) return;
-        
-        // Check username length
-        if (username.length < 3) {
-          showValidationError('username-error', 'Username must be at least 3 characters long.');
-          return;
-        }
-        
-        try {
-          // Check username from server
-          const response = await fetch('/src/server/api/auth/check_username.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username })
-          });
-          
-          const text = await response.text();
-            let result;
-            try {
-              result = JSON.parse(text);
-              console.log("Username check response:", result);
-          
-              // Ensure result.data exists, avoid errors
-              if (result.data && typeof result.data.exists !== "undefined") {
-                  if (result.data.exists) {
-                      showValidationError('username-error', result.data.message);
-                  } else {
-                      const usernameErrorDiv = document.getElementById('username-error');
-                      usernameErrorDiv.textContent = ''; // Clear text
-                      usernameErrorDiv.classList.remove('show', 'text-danger'); // Hide error prompt
-                  }
-              } else {
-                  // JSON data format does not match expectations
-                  console.warn("Unexpected response format:", result);
-                  showValidationError('email-error', 'Unexpected response format.');
-              }
-          } catch (jsonError) {
-              console.error('Error parsing JSON:', text);
-              showValidationError('email-error', 'Server error: Invalid response format.');
-              return;
-          }
-        } catch (error) {
-          console.error('Error checking username:', error);
-        }
-      });
+      // Initialize Bootstrap Toast
+      const toastEl = document.getElementById('notification-toast');
+      window.toast = new bootstrap.Toast(toastEl, { delay: 3000 });
     });
 
     // Helper function to show validation errors
@@ -533,6 +201,363 @@
       document.getElementById('form-validation-error').classList.add('d-none');
       document.getElementById('form-validation-error').textContent = '';
     }
+
+    // Avatar Upload Preview
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarPreview = document.getElementById('avatarPreview');
+    let avatarBase64 = ''; // To store the base64 encoded image
+    
+    avatarUpload.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showValidationError('avatar-error', 'Image size should not exceed 5MB');
+          return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          // Store the base64 data
+          avatarBase64 = e.target.result;
+          
+          // Update preview - clear the preview area first
+          avatarPreview.innerHTML = '';
+          
+          // Create and append the image
+          const img = document.createElement('img');
+          img.src = avatarBase64;
+          img.alt = "Profile Picture Preview";
+          avatarPreview.appendChild(img);
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Password strength meter
+    const passwordInput = document.getElementById('regPassword');
+    const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
+    const passwordHint = document.getElementById('passwordHint');
+    
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      let strength = 0;
+      
+      // Clear previous classes
+      passwordStrengthMeter.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
+      
+      if (password.length > 0) {
+        // Length check
+        if (password.length >= 8) strength += 1;
+        
+        // Uppercase check
+        if (/[A-Z]/.test(password)) strength += 1;
+        
+        // Number check
+        if (/\d/.test(password)) strength += 1;
+        
+        // Update meter
+        if (strength === 1) {
+          passwordStrengthMeter.classList.add('strength-weak');
+          passwordHint.textContent = 'Weak password - add uppercase letters and numbers';
+        } else if (strength === 2) {
+          passwordStrengthMeter.classList.add('strength-medium');
+          passwordHint.textContent = 'Medium password - add one more requirement';
+        } else if (strength === 3) {
+          passwordStrengthMeter.classList.add('strength-strong');
+          passwordHint.textContent = 'Strong password';
+        }
+      } else {
+        passwordHint.textContent = 'Password must be at least 8 characters with numbers and uppercase letters';
+      }
+    });
+
+    // Handle Registration form submission
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+      
+      // Clear previous validation errors
+      clearValidationErrors();
+      
+      // Native form validation
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // Fetch field values
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const pass = document.getElementById('regPassword').value;
+      const confirmPass = document.getElementById('regPasswordConfirm').value;
+      const termsAccepted = document.getElementById('termsCheck').checked;
+      const birthday = document.getElementById('birthday').value;
+      const gender = document.querySelector('input[name="gender"]:checked');
+      
+      let isValid = true;
+      
+      // Gender validation
+      if (!gender) {
+        isValid = false;
+        showValidationError('gender-error', 'Please select your gender.');
+      }
+
+      // Email format validation
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        isValid = false;
+        showValidationError('email-error', 'Please enter a valid email address.');
+      }
+      
+      // Username validation
+      if (username.length < 3) {
+        isValid = false;
+        showValidationError('username-error', 'Username must be at least 3 characters long.');
+      }
+      
+      // Password strength validation
+      if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
+        isValid = false;
+        showValidationError('password-error', 'Password must be at least 8 characters long and include at least one uppercase letter and one number.');
+      }
+      
+      // Password match validation
+      if (pass !== confirmPass) {
+        isValid = false;
+        showValidationError('password-match-error', 'The passwords you entered do not match.');
+      }
+      
+      // Terms & Conditions checked
+      if (!termsAccepted) {
+        isValid = false;
+        showValidationError('terms-error', 'Please agree to the terms and conditions to complete the registration.');
+      }
+      
+      if (!isValid) {
+        // Show overall error message
+        const formError = document.getElementById('form-validation-error');
+        formError.textContent = 'Please correct the errors in the form before submitting.';
+        formError.classList.remove('d-none');
+        return;
+      }
+      
+      // Create user object to send to server
+      const userData = {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        username: username,
+        password: pass,
+        avatar: avatarBase64 || null, // 如果没有头像，使用null代替空字符串
+        birthday: birthday ? (new Date(birthday)).toISOString().split('T')[0] : null, // 确保日期格式正确
+        gender: gender ? gender.value : null, // 使用null而不是空字符串
+        role: 'user',
+        isAdmin: 0,
+        status: 'active'
+      };
+      
+      // Debug object, avoid console printing large image data
+      const debugData = {
+        firstName, 
+        lastName,
+        email,
+        username,
+        passwordLength: pass.length,
+        birthday,
+        gender: gender ? gender.value : 'not selected',
+        avatarProvided: !!avatarBase64,
+        role: 'user',
+        isAdmin: 0
+      };
+      
+      console.log('Form submitted with data:', debugData);
+      
+      // Try to reduce avatar size to avoid large data transmission
+      let optimizedUserData = {...userData};
+      if (avatarBase64 && avatarBase64.length > 200000) { // Avatar exceeds 200KB
+        console.log('Avatar is large, removing for this registration attempt');
+        optimizedUserData.avatar = null; // Temporarily do not send avatar data
+      }
+      
+      // Show loading indicator
+      const submitBtn = form.querySelector('.submit-btn');
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
+      submitBtn.disabled = true;
+      
+      // Send registration data to server API
+      fetch('/src/server/api/auth/register.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(optimizedUserData)
+      })
+      .then(response => {
+        console.log('Server response status:', response.status);
+        return response.text().then(text => {
+          console.log('Raw server response:', text);
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            console.error('Error parsing JSON response:', e);
+            return { success: false, message: 'Invalid server response format' };
+          }
+        });
+      })
+      .then(data => {
+        // Record server response
+        console.log('Parsed server response data:', data);
+        
+        // Reset button
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        
+        if (data.success) {
+          // Show success message
+          showToast('Account created successfully! Redirecting to login page...', 'success');
+          
+          // Redirect to login page after delay
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          // Show error message
+          const formError = document.getElementById('form-validation-error');
+          formError.textContent = data.message || 'Registration failed. Please try again.';
+          formError.classList.remove('d-none');
+          
+            // 检查错误的详细信息
+          console.error('Registration failed with message:', data.message);
+          if (data.errors) {
+            console.error('Validation errors:', data.errors);
+            if (data.errors.email) {
+              showValidationError('email-error', data.errors.email[0]);
+            }
+            if (data.errors.username) {
+              showValidationError('username-error', data.errors.username[0]);
+            }
+            if (data.errors.password) {
+              showValidationError('password-error', data.errors.password[0]);
+            }
+          }
+        }
+      })
+      .catch(error => {
+        // Reset button
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        
+        // Show error message
+        const formError = document.getElementById('form-validation-error');
+        formError.textContent = 'An error occurred while connecting to the server. Please try again later.';
+        formError.classList.remove('d-none');
+        console.error('Registration fetch error:', error);
+      });
+    });
+
+  
+    document.getElementById('regEmail').addEventListener('blur', async function() {
+      const email = this.value.trim();
+      if (!email) return;
+  
+      // Validate email format
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showValidationError('email-error', 'Please enter a valid email address.');
+          return;
+      }
+  
+      try {
+          const response = await fetch('/src/server/api/auth/check_email.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+          });
+  
+          const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+            console.log("Email check response:", result);
+        
+            if (result.data && typeof result.data.exists !== "undefined") {
+                if (result.data.exists) {
+                    // If exists is true, the email is registered, show error
+                    showValidationError('email-error', result.data.message);
+                } else {
+                    // If exists is false, clear error information
+                    const emailErrorDiv = document.getElementById('email-error');
+                    emailErrorDiv.textContent = ''; // Clear text
+                    emailErrorDiv.classList.remove('show', 'text-danger'); // Hide error prompt
+                }
+            } else {
+                // JSON data format does not match expectations
+                console.warn("Unexpected response format:", result);
+                showValidationError('email-error', 'Unexpected response format.');
+            }
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', text);
+            showValidationError('email-error', 'Server error: Invalid response format.');
+            return;
+        }
+      } catch (error) {
+          console.error('Error checking email:', error);
+          showValidationError('email-error', 'An error occurred while checking the email. Please try again.');
+      }
+  });
+  
+  
+    // Delete user name real-time duplicate detection local storage part
+    document.getElementById('username').addEventListener('blur', async function() {
+      const username = this.value.trim();
+      if (!username) return;
+      
+      // Check username length
+      if (username.length < 3) {
+        showValidationError('username-error', 'Username must be at least 3 characters long.');
+        return;
+      }
+      
+      try {
+        // Check username from server
+        const response = await fetch('/src/server/api/auth/check_username.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        
+        const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+            console.log("Username check response:", result);
+        
+            // Ensure result.data exists, avoid errors
+            if (result.data && typeof result.data.exists !== "undefined") {
+                if (result.data.exists) {
+                    showValidationError('username-error', result.data.message);
+                } else {
+                    const usernameErrorDiv = document.getElementById('username-error');
+                    usernameErrorDiv.textContent = ''; // Clear text
+                    usernameErrorDiv.classList.remove('show', 'text-danger'); // Hide error prompt
+                }
+            } else {
+                // JSON data format does not match expectations
+                console.warn("Unexpected response format:", result);
+                showValidationError('email-error', 'Unexpected response format.');
+            }
+        } catch (jsonError) {
+            console.error('Error parsing JSON:', text);
+            showValidationError('email-error', 'Server error: Invalid response format.');
+            return;
+        }
+      } catch (error) {
+        console.error('Error checking username:', error);
+      }
+    });
 
     // Toast notification function
     function showToast(message, type = 'info') {

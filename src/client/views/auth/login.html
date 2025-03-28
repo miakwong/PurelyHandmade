@@ -86,8 +86,7 @@
       20%, 40%, 60%, 80% { transform: translateX(5px); }
     }
   </style>
-  <!-- 加载顺序很重要：先加载common.js，然后是其他依赖项 -->
-  <script src="/~xzy2020c/PurelyHandmade/src/client/js/common.js"></script>
+  <!-- 核心脚本必须按顺序加载 -->
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/config.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/data-service.js"></script>
   <script src="/~xzy2020c/PurelyHandmade/src/client/js/ui-helpers.js"></script>
@@ -181,44 +180,12 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Load navbar and footer using loadNavbar() from common.js if available
-      if (typeof loadNavbar === 'function') {
-        loadNavbar();
-      } else {
-        // Fallback to UIHelpers
-        UIHelpers.loadNavbar();
-      }
-      
-      if (typeof loadFooter === 'function') {
-        loadFooter();
-      } else {
-        UIHelpers.loadFooter();
-      }
-      
-      // Register auth event listeners
-      if (window.PurelyHandmadeEvents) {
-        PurelyHandmadeEvents.on('auth:login', function() {
-          console.log('Login page received auth:login event');
-          
-          // Update UI if necessary
-          checkAuthState();
-          
-          // Redirect after login if not already redirecting
-          if (window.location.pathname.includes('/auth/login.html')) {
-            // Check for redirect parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectTo = urlParams.get('redirect');
-            
-            setTimeout(() => {
-              if (redirectTo === 'admin') {
-                window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/admin/dashboard.html';
-              } else {
-                window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/auth/profile.html';
-              }
-            }, 1000);
-          }
-        });
-      }
+      // Load navbar and footer
+      UIHelpers.loadNavbar().then(() => {
+        // Check for current user and show appropriate buttons
+        UIHelpers.updateAuthState();
+      });
+      UIHelpers.loadFooter();
       
       // Check if the form was submitted
       const loginForm = document.getElementById('login-form');
@@ -254,94 +221,52 @@
           if (result && result.success === true) {
             console.log('Login successful via API');
             
-            // Check for user info
+            // 检查是否有用户信息
             if (!result.user) {
               console.warn('No user data in response');
-              result.user = { username: 'User' }; // Provide default value
+              result.user = { username: 'User' }; // 提供默认值
             }
             
-            // Show success message
-            if (typeof showToast === 'function') {
-              showToast(`Welcome back, ${result.user.username || 'User'}!`, 'success');
-            } else {
-              UIHelpers.showToast(`Welcome back, ${result.user.username || 'User'}!`, 'success');
-            }
+            // 显示成功消息
+            UIHelpers.showToast(`Welcome back, ${result.user.username || 'User'}!`, 'success');
             
-            // The auth:login event will be triggered by DataService.login
-            // and our event handler above will handle the redirect
+            // 检查是否有重定向参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get('redirect');
+            
+            // 在重定向前稍微延迟，让用户看到成功消息
+            setTimeout(() => {
+              if (redirectTo === 'admin') {
+                window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/admin/dashboard.html';
+              } else {
+                window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/auth/profile.html';
+              }
+            }, 1000);
           } else {
-            // Show error message
+            // 显示错误消息
             errorMessageElement.textContent = result.message || "Login failed. Please check your credentials.";
             loginError.classList.remove('d-none');
             loginError.style.animation = "none";
             setTimeout(() => {
               loginError.style.animation = "shake 0.5s";
             }, 10);
-            
-            // Reset button
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
           }
         } catch (error) {
-          console.error("Login error:", error);
-          
-          // Show error message
-          errorMessageElement.textContent = error.message || "An unexpected error occurred. Please try again.";
+          console.error('Login error:', error);
+          errorMessageElement.textContent = "An error occurred during login. Please try again.";
           loginError.classList.remove('d-none');
-          
-          // Reset button
+        } finally {
+          // 恢复按钮状态
           const submitButton = document.querySelector('button[type="submit"]');
           submitButton.innerHTML = 'Log In';
           submitButton.disabled = false;
         }
       });
-      
-      // Password reset functionality
-      const forgotPasswordLink = document.getElementById('forgot-password');
-      const resetModal = new bootstrap.Modal(document.getElementById('passwordResetModal'));
-      
-      forgotPasswordLink.addEventListener('click', function(e) {
+
+      // 忘记密码功能
+      document.getElementById('forgot-password').addEventListener('click', function(e) {
         e.preventDefault();
-        resetModal.show();
-      });
-      
-      const sendResetLinkButton = document.getElementById('sendResetLink');
-      sendResetLinkButton.addEventListener('click', async function() {
-        const resetEmail = document.getElementById('resetEmail').value.trim();
-        if (!resetEmail) {
-          alert('Please enter your email address');
-          return;
-        }
-        
-        // Show loading state
-        const originalButtonText = sendResetLinkButton.innerHTML;
-        sendResetLinkButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
-        sendResetLinkButton.disabled = true;
-        
-        try {
-          // Implement password reset functionality here
-          // This is a placeholder
-          setTimeout(() => {
-            resetModal.hide();
-            if (typeof showToast === 'function') {
-              showToast(`Password reset instructions sent to ${resetEmail}`, 'info');
-            } else {
-              UIHelpers.showToast(`Password reset instructions sent to ${resetEmail}`, 'info');
-            }
-            
-            // Reset form
-            document.getElementById('resetEmail').value = '';
-            sendResetLinkButton.innerHTML = originalButtonText;
-            sendResetLinkButton.disabled = false;
-          }, 1500);
-        } catch (error) {
-          console.error("Reset error:", error);
-          alert('Error sending reset email: ' + (error.message || 'Unknown error'));
-          
-          // Reset button
-          sendResetLinkButton.innerHTML = originalButtonText;
-          sendResetLinkButton.disabled = false;
-        }
+        UIHelpers.showToast('Password reset functionality is not available yet.', 'info');
       });
     });
   </script>
