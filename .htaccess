@@ -32,9 +32,6 @@ RewriteRule ^api/auth/check_email$ src/server/api/auth/check_email.php [QSA,L]
 RewriteRule ^api/auth/logout$ src/server/api/auth/logout.php [QSA,L]
 
 
-# User profile
-RewriteRule ^api/user/profile$ src/server/api/user/profile.php [QSA,L]
-
 # Handle subdirectory API files (e.g., /api/designers/featured)
 RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
 
