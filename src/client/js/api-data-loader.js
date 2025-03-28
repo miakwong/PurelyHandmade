@@ -345,7 +345,7 @@ window.loadCategories = async function(containerId, options = {}) {
       console.log(`API loadCategories() - Rendering category:`, category.id, category.name);
       
       // 处理图像 - 使用备选方案以避免函数调用错误
-      let imgSrc = category.image;
+      let imgSrc = `${CONFIG.getImagePath(category.image)}`;
       if (!imgSrc) {
         // 直接使用相对路径，避免使用可能不存在的函数
         imgSrc = `${CONFIG.BASE_URL}/img/category-placeholder.jpg`;

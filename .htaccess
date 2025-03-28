@@ -27,6 +27,10 @@ RewriteRule ^api/admin/users$ src/server/api/admin/users.php [QSA,L]
 RewriteRule ^api/auth/login$ src/server/api/auth/login.php [QSA,L]
 RewriteRule ^api/auth/register$ src/server/api/auth/register.php [QSA,L]
 RewriteRule ^api/auth/profile$ src/server/api/auth/profile.php [QSA,L]
+RewriteRule ^api/auth/check_username$ src/server/api/auth/check_username.php [QSA,L]
+RewriteRule ^api/auth/check_email$ src/server/api/auth/check_email.php [QSA,L]
+RewriteRule ^api/auth/logout$ src/server/api/auth/logout.php [QSA,L]
+
 
 # User profile
 RewriteRule ^api/user/profile$ src/server/api/user/profile.php [QSA,L]
