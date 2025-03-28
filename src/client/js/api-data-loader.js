@@ -178,13 +178,13 @@ window.loadProducts = async function(containerId, options = {}) {
         <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
           <div class="product-card">
             <div class="product-img-wrapper">
-              <a href="${CONFIG.getViewPath('product/product_detail.html')}?id=${product.id}">
+              <a href="${CONFIG.getViewPath('products/product_detail.html')}?id=${product.id}">
                 <img src="${imgSrc}" class="product-img" alt="${product.name || 'Product'}">
                 ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
               </a>
             </div>
             <div class="product-card-body">
-              <a href="${CONFIG.getViewPath('product/product_detail.html')}?id=${product.id}" style="text-decoration: none; color: inherit;">
+              <a href="${CONFIG.getViewPath('Products/product_detail.html')}?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <h2 class="product-title">${product.name}</h2>
               </a>
               ${priceHtml}
@@ -330,7 +330,7 @@ window.loadCategories = async function(containerId, options = {}) {
       const categoryHtml = `
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="category-card">
-            <a href="/src/client/views/product/product-list.html?id=${category.id}" class="category-link">
+            <a href="/~xzy2020c/PurelyHandmade/products/product-list.html?id=${category.id}" class="category-link">
               <div class="category-img-wrapper">
                 <img src="${imgSrc}" class="category-img" alt="${category.name}">
                 <div class="category-overlay">

@@ -3,7 +3,9 @@
  * This file contains shared functions used across multiple pages
  */
 
-// Load the navbar and handle authentication
+/**
+ * Load the navbar and handle authentication
+ */
 function loadNavbar() {
   fetch('/src/client/assets/layout/navbar.html')
     .then(response => {
@@ -34,7 +36,9 @@ function loadNavbar() {
     });
 }
 
-// Load the footer
+/**
+ * Load the footer
+ */
 function loadFooter() {
   const footerPlaceholder = document.getElementById('footer-placeholder');
   if (!footerPlaceholder) return;
@@ -57,7 +61,9 @@ function loadFooter() {
     });
 }
 
-// Update authentication state in the navbar
+/**
+ * Update authentication state in the navbar
+ */
 function updateAuthState() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const loginButton = document.getElementById('login-button');
@@ -100,7 +106,10 @@ function updateAuthState() {
   }
 }
 
-// Check admin permissions
+/**
+ * Check admin permissions
+ * @returns {boolean} True if the user is an admin, false otherwise
+ */
 function checkAdminPermissions() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   
@@ -120,7 +129,11 @@ function checkAdminPermissions() {
   return true; // User is an admin
 }
 
-// Helper function to show toast notifications
+/**
+ * Helper function to show toast notifications
+ * @param {string} message - The message to display in the toast
+ * @param {string} [type='primary'] - The type of the toast ('primary', 'success', 'danger', etc.)
+ */
 function showToast(message, type = 'primary') {
   const toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
@@ -150,4 +163,4 @@ function showToast(message, type = 'primary') {
   toastElement.addEventListener('hidden.bs.toast', function () {
     toastElement.remove();
   });
-} 
+}

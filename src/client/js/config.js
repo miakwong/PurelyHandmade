@@ -8,7 +8,7 @@ const CONFIG = {
         JS: '/js',
         CSS: '/css',
         VIEWS: '/views',
-        IMAGES: '/assets/images',
+        IMAGES: '/img',
         API: '/api'
     },
     
@@ -39,7 +39,7 @@ const CONFIG = {
     },
     
     getApiPath: function(endpoint) {
-        return this.getPath('API', `/${endpoint}`);
+        return this.getPath('API', `${endpoint}`);
     }
 };
 
