@@ -5,7 +5,7 @@ use Utils\Database;
 
 class Review {
     private $db;
-    private $table = 'Review';
+    public $table = 'Review';
     
     public function __construct($db) {
         $this->db = $db;

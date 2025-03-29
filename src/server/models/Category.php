@@ -5,7 +5,7 @@ use Utils\Database;
 use Utils\Logger;
 class Category {
     private $db;
-    private $table = 'Category';
+    public $table = 'Category';
     
     public function __construct($db) {
         $this->db = $db;

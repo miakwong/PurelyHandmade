@@ -42,7 +42,6 @@ try {
         'password' => $password ? 'set' : 'not set'
     ]);
     
-    
     // Validate required fields
     if (!$identifier || !$password) {
         $response->error('Username/Email and password are required');

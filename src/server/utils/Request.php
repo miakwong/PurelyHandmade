@@ -18,17 +18,30 @@ class Request {
         }
         
         // Parse POST data
-        if ($method === 'POST' && !empty($_POST)) {
-            $data = array_merge($data, $_POST);
-        }
-        
-        // Parse JSON data from request body
-        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-        if (strpos($contentType, 'application/json') !== false) {
-            $json = file_get_contents('php://input');
-            $jsonData = json_decode($json, true);
-            if ($jsonData) {
-                $data = array_merge($data, $jsonData);
+        if ($method === 'POST') {
+            // 首先尝试获取原始请求体
+            $rawBody = file_get_contents('php://input');
+            
+            // 检查 Content-Type
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            
+            // 如果是 JSON 请求
+            if (strpos($contentType, 'application/json') !== false) {
+                $jsonData = json_decode($rawBody, true);
+                if ($jsonData) {
+                    $data = array_merge($data, $jsonData);
+                }
+            }
+            // 如果是表单数据
+            else if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
+                parse_str($rawBody, $formData);
+                if ($formData) {
+                    $data = array_merge($data, $formData);
+                }
+            }
+            // 如果是 multipart/form-data
+            else if (strpos($contentType, 'multipart/form-data') !== false) {
+                $data = array_merge($data, $_POST);
             }
         }
         

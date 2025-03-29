@@ -1,13 +1,17 @@
 <?php
 namespace Utils;
 
+use Models\User;
+
 class Auth {
     private $secretKey;
     private $expiryTime;
+    private $db;
     
     public function __construct() {
         $this->secretKey = $_ENV['JWT_SECRET'] ?? 'default-secret-key';
         $this->expiryTime = $_ENV['JWT_EXPIRY'] ?? '24h';
+        $this->db = new Database();
     }
     
     public function generateToken($userId) {
@@ -74,6 +78,50 @@ class Auth {
         $payload = json_decode($this->base64UrlDecode($parts[1]), true);
         
         return $payload['sub'] ?? null;
+    }
+
+    /**
+     * 获取当前用户信息
+     * @return array|null
+     */
+    public function getCurrentUser() {
+        try {
+            // 从请求头获取token
+            $headers = getallheaders();
+            if (!isset($headers['Authorization'])) {
+                return null;
+            }
+
+            // 提取token
+            $token = str_replace('Bearer ', '', $headers['Authorization']);
+            if (!$this->validateToken($token)) {
+                return null;
+            }
+
+            // 获取用户ID
+            $userId = $this->getUserIdFromToken($token);
+            if (!$userId) {
+                return null;
+            }
+
+            // 从数据库获取用户信息
+            $userModel = new User($this->db);
+            $user = $userModel->findById($userId);
+            
+            if (!$user) {
+                return null;
+            }
+
+            // 移除敏感信息
+            unset($user['password']);
+            unset($user['token']);
+
+            return $user;
+        } catch (\Exception $e) {
+            $logger = new Logger();
+            $logger->error('Error getting current user', Logger::formatException($e));
+            return null;
+        }
     }
     
     private function base64UrlEncode($data) {

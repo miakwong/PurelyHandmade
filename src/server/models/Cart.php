@@ -7,7 +7,7 @@ use Utils\Logger;
 class Cart {
     private $db;
     private $logger;
-    private $table = 'Cart';
+    public $table = 'Cart';
     private $itemsTable = 'CartItem';
     
     public function __construct(Database $db) {

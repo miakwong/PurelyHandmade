@@ -5,7 +5,7 @@ use Utils\Database;
 
 class User {
     private $db;
-    private $table = 'User';
+    public $table = 'User';
     
     public function __construct($db) {
         $this->db = $db;
