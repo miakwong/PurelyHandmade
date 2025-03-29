@@ -6,93 +6,98 @@
  */
 
 const UIHelpers = {
-  /**
+    /**
    * 加载导航栏
    * Load navbar
    * @param {string} containerId 容器ID Container ID
    * @returns {Promise} 加载完成的Promise Promise that resolves when loaded
    */
-  loadNavbar: function(containerId = 'navbar-placeholder') {
-    return new Promise((resolve, reject) => {
-      const container = document.getElementById(containerId);
-      if (!container) {
-        console.warn(`Navbar container #${containerId} not found`);
-        return reject(new Error(`Navbar container #${containerId} not found`));
-      }
-      
-      fetch('/src/client/assets/layout/navbar.html')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to load navbar (${response.status})`);
-          }
-          return response.text();
-        })
-        .then(html => {
-          container.innerHTML = html;
-          console.log('Navbar loaded successfully');
-          
-          // 初始化导航栏状态
-          setTimeout(() => {
-            this.updateAuthState();
-            // 更新购物车数量（如果函数存在）
-            if (typeof this.updateCartCount === 'function') {
-              this.updateCartCount().catch(err => {
-                console.error('Error updating cart count:', err);
-              });
+    loadNavbar: function(containerId = 'navbar-placeholder') {
+      return new Promise((resolve, reject) => {
+        const container = document.getElementById(containerId);
+        if (!container) {
+          console.warn(`Navbar container #${containerId} not found`);
+          return reject(new Error(`Navbar container #${containerId} not found`));
+        }
+        
+        fetch('/~xzy2020c/PurelyHandmade/assets/layout/navbar.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load navbar (${response.status})`);
             }
-          }, 100);
-          
-          resolve();
-        })
-        .catch(error => {
-          console.error('Error loading navbar:', error);
-          container.innerHTML =
-            '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
-          reject(error);
-        });
-    });
-  },
-  
-  /**
-   * 加载页脚
-   * Load footer
-   * @param {string} containerId 容器ID Container ID
-   * @returns {Promise} 加载完成的Promise Promise that resolves when loaded
-   */
-  loadFooter: function(containerId = 'footer-placeholder') {
-    return new Promise((resolve, reject) => {
-      const container = document.getElementById(containerId);
-      if (!container) {
-        console.warn(`Footer container #${containerId} not found`);
-        return resolve(); // 如果没有找到容器，静默处理
-      }
-      
-      fetch('/src/client/assets/layout/footer.html')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to load footer (${response.status})`);
-          }
-          return response.text();
-        })
-        .then(html => {
-          container.innerHTML = html;
-          console.log('Footer loaded successfully');
-          resolve();
-        })
-        .catch(error => {
-          console.error('Error loading footer:', error);
-          container.innerHTML =
-            '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
-          reject(error);
-        });
-    });
-  },
-  
+            return response.text();
+          })
+          .then(html => {
+            container.innerHTML = html;
+            console.log('Navbar loaded successfully');
+            
+            // 初始化导航栏状态
+            setTimeout(() => {
+              this.updateAuthState();
+              // 更新购物车数量（如果函数存在）
+              if (typeof this.updateCartCount === 'function') {
+                this.updateCartCount().catch(err => {
+                  console.error('Error updating cart count:', err);
+                });
+              }
+            }, 100);
+            
+            resolve();
+          })
+          .catch(error => {
+            console.error('Error loading navbar:', error);
+            container.innerHTML =
+              '<div class="alert alert-danger">Failed to load navigation bar. Please check console for details.</div>';
+            reject(error);
+          });
+      });
+    },
+    
+    /**
+     * 加载页脚
+     * Load footer
+     * @param {string} containerId 容器ID Container ID
+     * @returns {Promise} 加载完成的Promise Promise that resolves when loaded
+     */
+    loadFooter: function(containerId = 'footer-placeholder') {
+      return new Promise((resolve, reject) => {
+        const container = document.getElementById(containerId);
+        if (!container) {
+          console.warn(`Footer container #${containerId} not found`);
+          return resolve(); // 如果没有找到容器，静默处理
+        }
+        
+        fetch('/~xzy2020c/PurelyHandmade/assets/layout/footer.html')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load footer (${response.status})`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            container.innerHTML = html;
+            console.log('Footer loaded successfully');
+            resolve();
+          })
+          .catch(error => {
+            console.error('Error loading footer:', error);
+            container.innerHTML =
+              '<div class="alert alert-danger">Failed to load footer. Please check console for details.</div>';
+            reject(error);
+          });
+      });
+    },
   /**
    * 更新导航栏认证状态
    * Update navbar authentication state
    */
   updateAuthState: function() {
+    // 确保DataService对象存在
+    if (typeof DataService === 'undefined') {
+      console.error('UIHelpers: updateAuthState() - DataService object is not defined');
+      return;
+    }
+    
     const currentUser = DataService.getCurrentUser();
     const loginButton = document.getElementById('login-button');
     const registerButton = document.getElementById('register-button');
@@ -156,13 +161,13 @@ const UIHelpers = {
   checkAdminPermissions: function() {
     const currentUser = DataService.getCurrentUser();
     if (!currentUser) {
-      window.location.href = '/src/client/views/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
       return false;
     }
     
     if (currentUser.isAdmin !== true) {
       this.showToast('You must be logged in as an administrator to access this page.', 'danger');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
+      window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=admin';
       return false;
     }
     return true;
@@ -226,6 +231,13 @@ const UIHelpers = {
   updateCartCount: async function() {
     const cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
+    
+    // 确保DataService对象存在
+    if (typeof DataService === 'undefined') {
+      console.error('UIHelpers: updateCartCount() - DataService object is not defined');
+      cartCount.style.display = 'none';
+      return;
+    }
     
     try {
       // 首先检查用户是否登录

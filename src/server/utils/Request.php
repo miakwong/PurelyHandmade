@@ -89,10 +89,19 @@ class Request {
     }
     
     public function getHeaders() {
+        // 优先使用getallheaders函数，这是获取HTTP头的标准方法
+        if (function_exists('getallheaders')) {
+            return getallheaders();
+        }
+        
+        // 备用方法：从$_SERVER提取头信息
         $headers = [];
         foreach ($_SERVER as $key => $value) {
             if (substr($key, 0, 5) === 'HTTP_') {
                 $header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
+                $headers[$header] = $value;
+            } else if ($key === 'CONTENT_TYPE' || $key === 'CONTENT_LENGTH') {
+                $header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($key))));
                 $headers[$header] = $value;
             }
         }
@@ -101,16 +110,54 @@ class Request {
     
     public function getHeader($key, $default = null) {
         $headers = $this->getHeaders();
-        $key = str_replace(' ', '-', ucwords(str_replace('-', ' ', strtolower($key))));
-        return $headers[$key] ?? $default;
+        
+        // 尝试直接匹配
+        if (isset($headers[$key])) {
+            return $headers[$key];
+        }
+        
+        // 尝试不区分大小写的匹配
+        foreach ($headers as $headerKey => $headerValue) {
+            if (strtolower($headerKey) === strtolower($key)) {
+                return $headerValue;
+            }
+        }
+        
+        return $default;
     }
     
     public function getBearerToken() {
-        $headers = $this->getHeaders();
-        $authHeader = $headers['Authorization'] ?? '';
+        // 首先尝试从getallheaders中获取原始Authorization头
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            foreach ($headers as $key => $value) {
+                if (strtolower($key) === 'authorization') {
+                    if (strpos($value, 'Bearer ') === 0) {
+                        return substr($value, 7);
+                    }
+                }
+            }
+        }
         
-        if (strpos($authHeader, 'Bearer ') === 0) {
-            return substr($authHeader, 7);
+        // 然后尝试从$_SERVER中获取
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+            if (strpos($authHeader, 'Bearer ') === 0) {
+                return substr($authHeader, 7);
+            }
+        }
+        
+        // Apache可能传递不带HTTP_前缀的Authorization头
+        if (isset($_SERVER['Authorization'])) {
+            $authHeader = $_SERVER['Authorization'];
+            if (strpos($authHeader, 'Bearer ') === 0) {
+                return substr($authHeader, 7);
+            }
+        }
+        
+        // 最后尝试从URL参数中获取token
+        if (isset($_GET['token'])) {
+            return $_GET['token'];
         }
         
         return null;

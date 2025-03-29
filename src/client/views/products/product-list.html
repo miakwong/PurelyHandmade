@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purely Homemade - Products</title>
 
-  <!-- Configuration file - must be loaded first -->
-  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
-
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -22,25 +19,40 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap"
     rel="stylesheet">
 
+  <!-- Core libraries first - Load in proper order -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Configuration and core services - load in proper order -->
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/config.js"></script>
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/data-service.js"></script>
+
   <!-- Custom CSS -->
   <script>
-    document.write(`
-      <link rel="stylesheet" href="${CONFIG.getCssPath('product-list.css')}">
-      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
-      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
-      <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
-    `);
+    // 确保CONFIG已加载
+    if (typeof CONFIG !== 'undefined') {
+      document.write(`
+        <link rel="stylesheet" href="${CONFIG.getCssPath('product-list.css')}">
+        <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+        <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+        <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
+      `);
+    } else {
+      console.error('CONFIG not loaded, unable to load CSS files');
+      // 使用直接路径作为备选
+      document.write(`
+        <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/src/client/css/product-list.css">
+        <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/src/client/css/navbar.css">
+        <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/src/client/css/global.css">
+        <link rel="stylesheet" href="/~xzy2020c/PurelyHandmade/src/client/css/toast.css">
+      `);
+    }
   </script>
 
   <!-- Make sure Bootstrap Icons are loaded -->
   <style>
     @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css");
   </style>
-
-  <!-- Core libraries first - Load in proper order -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </head>
 
 <body>
@@ -54,7 +66,7 @@
     <div class="container-custom">
       <nav aria-label="breadcrumb" class="modern-breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/~xzy2020c/PurelyHandmade/index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="CONFIG.ge">Home</a></li>
           <li class="breadcrumb-item active" id="breadcrumb-category">All Products</li>
         </ol>
       </nav>
@@ -64,10 +76,16 @@
     <div class="container-custom">
       <h1 class="page-title" id="product-list-title">All Products</h1>
 
+      <!-- 移动端筛选器切换按钮 - 仅在小屏幕显示 -->
+      <button class="btn w-100 d-lg-none mb-3" id="product-filters-mobile-toggle"
+        style="background-color: var(--accent-color); color: white;">
+        <i class="bi bi-funnel-fill me-2"></i> Show Filters
+      </button>
+
       <div class="row">
         <!-- 左侧筛选栏 -->
         <div class="col-lg-3">
-          <div class="filter-sidebar">
+          <div class="filter-sidebar filter-sidebar-mobile-collapse d-lg-block">
             <h4>Refine Selection</h4>
 
             <!-- 分类筛选 -->
@@ -173,9 +191,9 @@
           <!-- 产品工具栏 -->
           <div class="product-toolbar">
             <div id="product-count">Showing 0 products</div>
-            <div class="d-flex align-items-center">
-              <label for="sort-select" class="me-3">Sort By:</label>
-              <select class="sort-select me-4" id="sort-select">
+            <div class="d-flex align-items-center flex-wrap">
+              <label for="sort-select" class="me-3 mb-2 mb-sm-0">Sort By:</label>
+              <select class="sort-select me-3 me-sm-4 mb-2 mb-sm-0" id="sort-select">
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
@@ -183,7 +201,7 @@
                 <option value="newest">Newest</option>
               </select>
 
-              <label for="products-per-page" class="me-2">Show:</label>
+              <label for="products-per-page" class="me-2 mb-2 mb-sm-0">Show:</label>
               <select class="products-per-page-select" id="products-per-page">
                 <option value="8">8</option>
                 <option value="12" selected>12</option>
@@ -214,17 +232,30 @@
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
 
-  <!-- Navbar Handler and Data Initialization -->
+  <!-- 其他脚本加载 - 按正确顺序加载 -->
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/api-data-loader.js"></script>
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/navbar-handler.js"></script>
+  <script src="/~xzy2020c/PurelyHandmade/src/client/js/product-list.js"></script>
+  
+  <!-- 添加移动端筛选器显示隐藏功能 -->
   <script>
-    document.write(`
-    <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
-    <script src="${CONFIG.getJsPath('api-data-loader.js')}"><\/script>
-    <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
-    <script src="${CONFIG.getJsPath('product-list.js')}"><\/script>
-    <script src="${CONFIG.getJsPath('product_detail.js')}"><\/script>
-  `);
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterToggleBtn = document.getElementById('product-filters-mobile-toggle');
+      const filterSidebar = document.querySelector('.filter-sidebar');
+      
+      if (filterToggleBtn && filterSidebar) {
+        filterToggleBtn.addEventListener('click', function() {
+          filterSidebar.classList.toggle('show');
+          
+          if (filterSidebar.classList.contains('show')) {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel-fill me-2"></i> Hide Filters';
+          } else {
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel-fill me-2"></i> Show Filters';
+          }
+        });
+      }
+    });
   </script>
-
 
 </body>
 

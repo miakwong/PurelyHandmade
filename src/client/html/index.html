@@ -36,6 +36,12 @@
       <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
     `);
   </script>
+  <script>
+    document.write(`
+    <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('api-data-loader.js')}"><\/script>
+  `);
+  </script>
 
   <!-- API Loader Helper -->
   <script>

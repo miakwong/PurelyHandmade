@@ -1,1404 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Profile - Purely Homemade</title>
+
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="../../css/global.css" rel="stylesheet">
-  <link href="../../css/navbar.css" rel="stylesheet">
-  <link href="../../css/profile.css" rel="stylesheet">
-  <link href="../../css/admin.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('profile.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('admin.css')}">
+    `);
+  </script>
+
+  <!-- Pre loading key JavaScript文件 -->
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('data-service.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('ui-helpers.css')}">
+    `);
+  </script>
 </head>
+
 <body>
 
-<!-- Navbar Placeholder -->
+  <!-- Navbar Placeholder -->
   <div id="navbar-placeholder"></div>
 
-<div class="container my-5">
-  <h1 class="mb-4">My Profile</h1>
+  <div class="container my-5">
+    <h1 class="mb-4">My Profile</h1>
 
-  <!-- Profile Overview Section -->
-  <div class="profile-section">
-    <div class="row">
-      <div class="col-md-3 text-center">
-        <!-- Avatar section -->
-        <div class="avatar-wrapper" onclick="document.getElementById('avatar-upload').click(); console.log('Avatar clicked - triggering file upload dialog');">
-          <img src="../../img/profile.png" alt="Profile Photo" id="profile-img" class="profile-avatar">
-          <input type="file" id="avatar-upload" class="hidden-upload" accept="image/*">
-        </div>
-        <h3 id="user-full-name" class="mt-3">John Doe</h3>
-        <!-- Add username display with edit functionality -->
-        <div class="username-container mb-2">
-          <span id="username-display" class="d-inline-block">@johndoe</span>
-          <button class="btn btn-sm btn-link p-0 ms-2" onclick="toggleUsernameEdit()">
-            <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
-          </button>
-          <div id="username-edit-container" class="mt-2 d-none">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text">@</span>
-              <input type="text" id="username-input" class="form-control form-control-sm" maxlength="20">
-              <button class="btn btn-sm btn-primary" onclick="saveUsername()">Save</button>
-              <button class="btn btn-sm btn-secondary" onclick="cancelUsernameEdit()">Cancel</button>
-            </div>
-            <small class="text-muted">Username must be 3-20 characters long</small>
+    <!-- Profile Overview Section -->
+    <div class="profile-section">
+      <div class="row">
+        <div class="col-md-3 text-center">
+          <!-- Avatar section -->
+          <div class="avatar-wrapper"
+            onclick="document.getElementById('avatar-upload').click(); console.log('Avatar clicked - triggering file upload dialog');">
+            <img src="/~xzy2020c/PurelyHandmade/src/client/img/profile.png" alt="Profile Photo" id="profile-img"
+              class="profile-avatar">
+            <input type="file" id="avatar-upload" class="hidden-upload" accept="image/*">
           </div>
-        </div>
-        <p id="user-email" class="text-muted"></p>
-        <p class="mb-0"><small class="text-muted">Member since <span id="join-date">January 2023</span></small></p>
-        
-        <!-- Admin Dashboard Link - Updated with better styling -->
-        <div id="admin-tab-container" class="mt-3" style="display: none;">
-          <a href="/src/client/views/admin/dashboard.html" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
-          </a>
-        </div>
-      </div>
-      <div class="col-md-9">
-        <ul class="nav nav-tabs" id="profileTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal-info" type="button" role="tab" aria-controls="personal-info" aria-selected="true">Personal Info</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" data-bs-target="#addresses" type="button" role="tab" aria-controls="addresses" aria-selected="false">Addresses</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">Security</button>
-          </li>
-        </ul>
-        
-        <div class="tab-content" id="profileTabsContent">
-          <!-- Personal Info Tab -->
-          <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-person-badge me-2 text-primary"></i>Personal Information
-                </h4>
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                  <i class="bi bi-pencil me-1"></i>Edit Profile
-                </button>
+          <h3 id="user-full-name" class="mt-3">John Doe</h3>
+          <!-- Add username display with edit functionality -->
+          <div class="username-container mb-2">
+            <span id="username-display" class="d-inline-block">@johndoe</span>
+            <button class="btn btn-sm btn-link p-0 ms-2" onclick="toggleUsernameEdit()">
+              <i class="bi bi-pencil-fill" style="font-size: 0.8rem;"></i>
+            </button>
+            <div id="username-edit-container" class="mt-2 d-none">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">@</span>
+                <input type="text" id="username-input" class="form-control form-control-sm" maxlength="20">
+                <button class="btn btn-sm btn-primary" onclick="saveUsername()">Save</button>
+                <button class="btn btn-sm btn-secondary" onclick="cancelUsernameEdit()">Cancel</button>
               </div>
-            
-              <!-- Redesigned Personal Information layout with cards -->
-              <div class="row g-3">
-                <!-- Username -->
-                <div class="col-md-4">
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        <i class="bi bi-person-badge me-2 text-primary"></i>Username
-                      </h5>
-                      <p class="card-text fs-5 mt-3" id="username-display-profile">@johndoe</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Name information -->
-                <div class="col-md-8">
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        <i class="bi bi-person me-2 text-primary"></i>Full Name
-                      </h5>
-                      <div class="row mt-3">
-                        <div class="col-md-6">
-                          <p class="text-muted mb-1">First Name</p>
-                          <p class="fs-5 fw-medium" id="first-name">John</p>
-                        </div>
-                        <div class="col-md-6">
-                          <p class="text-muted mb-1">Last Name</p>
-                          <p class="fs-5 fw-medium" id="last-name">Doe</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Contact Information -->
-                <div class="col-md-6">
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        <i class="bi bi-envelope me-2 text-primary"></i>Contact Information
-                      </h5>
-                      <div class="mt-3">
-                        <p class="text-muted mb-1">Email</p>
-                        <p class="fw-medium" id="email-display">johndoe@example.com</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Personal Details -->
-                <div class="col-md-6">
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                      <h5 class="card-title">
-                        <i class="bi bi-info-circle me-2 text-primary"></i>Personal Details
-                      </h5>
-                      <div class="row mt-3">
-                        <div class="col-md-6">
-                          <p class="text-muted mb-1">Birthday</p>
-                          <p class="fw-medium" id="birthday-display">January 1, 1990</p>
-                        </div>
-                        <div class="col-md-6">
-                          <p class="text-muted mb-1">Gender</p>
-                          <p class="fw-medium" id="gender-display">Male</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <small class="text-muted">Username must be 3-20 characters long</small>
             </div>
           </div>
-          
-          <!-- Order History Tab -->
-          <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-            <!-- Add order history content here -->
-          </div>
-          
-          <!-- Addresses Tab -->
-          <div class="tab-pane fade" id="addresses" role="tabpanel" aria-labelledby="addresses-tab">
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-geo-alt me-2 text-primary"></i>My Addresses
-                </h4>
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal" onclick="addAddress()">
-                  <i class="bi bi-plus-lg me-1"></i>Add New Address
-                </button>
-              </div>
-              
-              <div id="addresses-container" class="mt-4">
-                <!-- Addresses will be loaded here -->
-                <div class="no-addresses text-center py-5">
-                  <i class="bi bi-geo-alt display-4 text-muted"></i>
-                  <p class="mt-3 text-muted">You don't have any saved addresses yet.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Security Tab -->
-          <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-            <div class="admin-section">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                  <i class="bi bi-shield-lock me-2 text-primary"></i>Security Settings
-                </h4>
-              </div>
-              
-              <div class="card shadow-sm mt-4">
-                <div class="card-body">
-                  <h5 class="card-title mb-4">Change Password</h5>
-                  <div class="row">
-                    <div class="col-md-6">
-                      <form id="change-password-form">
-                        <div class="mb-3">
-                          <label for="current-password" class="form-label text-start w-100">Current Password</label>
-                          <input type="password" class="form-control" id="current-password" required>
-                        </div>
-                        <div class="mb-3">
-                          <label for="new-password" class="form-label text-start w-100">New Password</label>
-                          <input type="password" class="form-control" id="new-password" required>
-                        </div>
-                        <div class="mb-3">
-                          <label for="confirm-password" class="form-label text-start w-100">Confirm New Password</label>
-                          <input type="password" class="form-control" id="confirm-password" required>
-                        </div>
-                        <div id="password-error" class="alert alert-danger d-none"></div>
-                        <button type="submit" class="btn btn-primary">Update Password</button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-              </div>
-      </div>
-    </div>
-  </div>
-</div>
+          <p id="user-email" class="text-muted"></p>
+          <p class="mb-0"><small class="text-muted">Member since <span id="join-date">January 2023</span></small></p>
 
-<!-- Add Address Modal -->
-<div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="address-form">
-          <input type="hidden" id="address-id">
-          <div class="mb-3">
-            <label for="addressName" class="form-label">Address Name</label>
-            <input type="text" class="form-control" id="addressName" placeholder="e.g. Home, Work, etc." required>
-          </div>
-          <div class="mb-3">
-            <label for="fullName" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="fullName" required>
-          </div>
-          <div class="mb-3">
-            <label for="phone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="phone" required>
-          </div>
-          <div class="mb-3">
-            <label for="addressLine1" class="form-label">Address Line 1</label>
-            <input type="text" class="form-control" id="addressLine1" required>
-          </div>
-          <div class="mb-3">
-            <label for="addressLine2" class="form-label">Address Line 2 (Optional)</label>
-            <input type="text" class="form-control" id="addressLine2">
-          </div>
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="city" class="form-label">City</label>
-              <input type="text" class="form-control" id="city" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="state" class="form-label">State/Province</label>
-              <input type="text" class="form-control" id="state" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="zipCode" class="form-label">ZIP/Postal Code</label>
-              <input type="text" class="form-control" id="zipCode" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="country" class="form-label">Country</label>
-            <select class="form-select" id="country" required>
-              <option value="" selected disabled>Select Country</option>
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-              <option value="UK">United Kingdom</option>
-              <option value="AU">Australia</option>
-              <option value="FR">France</option>
-              <option value="DE">Germany</option>
-              <option value="JP">Japan</option>
-              <option value="CN">China</option>
-              <option value="IN">India</option>
-              <option value="BR">Brazil</option>
-              <option value="MX">Mexico</option>
-            </select>
-          </div>
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="defaultAddress">
-            <label class="form-check-label" for="defaultAddress">
-              Set as default shipping address
-            </label>
-          </div>
-          <div id="address-error" class="alert alert-danger d-none"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="save-address">Save Address</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Address Modal - uses same form as Add Address but with different title -->
-<div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="edit-address-form">
-          <input type="hidden" id="edit-address-id">
-              <div class="mb-3">
-            <label for="edit-addressName" class="form-label">Address Name</label>
-            <input type="text" class="form-control" id="edit-addressName" placeholder="e.g. Home, Work, etc." required>
-              </div>
-              <div class="mb-3">
-            <label for="edit-fullName" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="edit-fullName" required>
-              </div>
-              <div class="mb-3">
-            <label for="edit-phone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="edit-phone" required>
-              </div>
-              <div class="mb-3">
-            <label for="edit-addressLine1" class="form-label">Address Line 1</label>
-            <input type="text" class="form-control" id="edit-addressLine1" required>
-          </div>
-          <div class="mb-3">
-            <label for="edit-addressLine2" class="form-label">Address Line 2 (Optional)</label>
-            <input type="text" class="form-control" id="edit-addressLine2">
-            </div>
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label for="edit-city" class="form-label">City</label>
-              <input type="text" class="form-control" id="edit-city" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="edit-state" class="form-label">State/Province</label>
-              <input type="text" class="form-control" id="edit-state" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label for="edit-zipCode" class="form-label">ZIP/Postal Code</label>
-              <input type="text" class="form-control" id="edit-zipCode" required>
-          </div>
-            </div>
-              <div class="mb-3">
-            <label for="edit-country" class="form-label">Country</label>
-            <select class="form-select" id="edit-country" required>
-              <option value="" selected disabled>Select Country</option>
-              <option value="US">United States</option>
-              <option value="CA">Canada</option>
-              <option value="UK">United Kingdom</option>
-              <option value="AU">Australia</option>
-              <option value="FR">France</option>
-              <option value="DE">Germany</option>
-              <option value="JP">Japan</option>
-              <option value="CN">China</option>
-              <option value="IN">India</option>
-              <option value="BR">Brazil</option>
-              <option value="MX">Mexico</option>
-                  </select>
-                </div>
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="edit-defaultAddress">
-            <label class="form-check-label" for="edit-defaultAddress">
-              Set as default shipping address
-            </label>
-                </div>
-          <div id="edit-address-error" class="alert alert-danger d-none"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="saveEditedAddress()">Save Address</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Footer Placeholder -->
-<div id="footer-placeholder"></div>
-
-<!-- Include Bootstrap and other scripts only once -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="../../js/common.js"></script>
-
-  <script src="../../js/navbar-handler.js"></script>
-<script>
-  // Single DOMContentLoaded event listener to handle all initialization
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM fully loaded - initializing page');
-    
-    // Set up initial user data
-    initUserProfile();
-    
-    // Set up event listeners
-    setupEventListeners();
-    
-    // Show admin tab if user is admin
-    checkAdminStatus();
-    
-    // Load saved addresses
-    loadAddresses();
-    
-    // Initialize all modals with proper options
-    console.log('Initializing all modals on page...');
-    var modals = document.querySelectorAll('.modal');
-    modals.forEach(function(modal) {
-      try {
-        var modalInstance = new bootstrap.Modal(modal, {
-          backdrop: true,
-          keyboard: true,
-          focus: true
-        });
-        console.log(`Modal initialized: #${modal.id}`);
-      } catch (err) {
-        console.error(`Failed to initialize modal #${modal.id}:`, err);
-      }
-    });
-    
-    // Set up tab change handlers
-    const tabEls = document.querySelectorAll('a[data-bs-toggle="tab"]');
-    if (tabEls.length > 0) {
-      tabEls.forEach(function(tabEl) {
-        tabEl.addEventListener('shown.bs.tab', function (event) {
-          const targetId = event.target.getAttribute('data-bs-target');
-          if (targetId === '#users-panel') {
-            loadUsers();
-          } else if (targetId === '#products-panel') {
-            if (typeof loadProducts === 'function') {
-              loadProducts();
-            }
-          } else if (targetId === '#orders-panel') {
-            if (typeof loadOrders === 'function') {
-              loadOrders();
-            }
-          } else if (targetId === '#comments-panel') {
-            if (typeof loadComments === 'function') {
-              loadComments();
-            }
-          }
-        });
-      });
-    }
-
-    // Call specific functions when admin tab is shown
-    const adminTab = document.getElementById('admin-tab');
-    if (adminTab) {
-      adminTab.addEventListener('shown.bs.tab', function (event) {
-        loadUsers();
-      });
-    }
-    
-    console.log('Page initialization complete');
-  });
-  
-  function initUserProfile() {
-    // Get current user data
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Loading user profile data:', currentUser);
-    
-    if (currentUser) {
-      // Set user profile data
-      document.getElementById('user-full-name').textContent = `${currentUser.name || ''}`;
-      document.getElementById('username-display').textContent = `@${currentUser.username || ''}`;
-      document.getElementById('username-display-profile').textContent = `@${currentUser.username || ''}`;
-      document.getElementById('email-display').textContent = currentUser.email || '';
-      
-      // 更新个人信息卡片中的名字和姓氏
-      const firstNameElem = document.getElementById('first-name');
-      const lastNameElem = document.getElementById('last-name');
-      if (firstNameElem) firstNameElem.textContent = currentUser.firstName || '';
-      if (lastNameElem) lastNameElem.textContent = currentUser.lastName || '';
-      
-      if (currentUser.avatar) {
-        document.getElementById('profile-img').src = currentUser.avatar;
-      }
-      
-      // Fill in edit profile form
-      const firstNameInput = document.getElementById('firstName');
-      const lastNameInput = document.getElementById('lastName');
-      const emailInput = document.getElementById('email');
-      const usernameInput = document.getElementById('username');
-      const birthdayInput = document.getElementById('birthday');
-      
-      if (firstNameInput) firstNameInput.value = currentUser.firstName || '';
-      if (lastNameInput) lastNameInput.value = currentUser.lastName || '';
-      if (emailInput) emailInput.value = currentUser.email || '';
-      if (usernameInput) usernameInput.value = currentUser.username || '';
-      if (birthdayInput) birthdayInput.value = currentUser.birthday || '';
-      
-      // Set gender radio buttons
-      if (currentUser.gender) {
-        const genderRadio = document.getElementById(`gender${currentUser.gender.charAt(0).toUpperCase() + currentUser.gender.slice(1)}`);
-        if (genderRadio) genderRadio.checked = true;
-      }
-      
-      // Update display fields
-      updateProfileDisplayFields();
-    } else {
-      console.error('No user data found in localStorage');
-      // Redirect to login page if no user is logged in
-      // window.location.href = '/src/client/views/auth/login.html';
-    }
-  }
-
-  async function updateProfileDisplayFields() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    
-    if (currentUser) {
-      // Format the birthday for display if it exists
-      if (currentUser.birthday) {
-        // 修复日期显示问题：使用日期字符串分割，避免时区影响
-        const birthdayParts = currentUser.birthday.split('-');
-        // 注意：这里月份参数是从0开始的，所以要减1
-        const birthdayDate = new Date(
-          parseInt(birthdayParts[0]), // 年
-          parseInt(birthdayParts[1]) - 1, // 月（减1，因为JavaScript月份从0开始）
-          parseInt(birthdayParts[2]) // 日
-        );
-        
-        const formattedBirthday = birthdayDate.toLocaleDateString('en-US', {
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        });
-        document.getElementById('birthday-display').textContent = formattedBirthday;
-      } else {
-        document.getElementById('birthday-display').textContent = 'Not set';
-      }
-      
-      // Display gender if it exists
-      if (currentUser.gender) {
-        document.getElementById('gender-display').textContent = currentUser.gender;
-      } else {
-        document.getElementById('gender-display').textContent = 'Not set';
-      }
-    }
-  }
-  
-  function setupEventListeners() {
-    // Avatar upload handler
-    const avatarUpload = document.getElementById('avatar-upload');
-    if (avatarUpload) {
-      avatarUpload.addEventListener('change', function(event) {
-      const file = event.target.files[0];
-        if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const profileImg = document.getElementById('profile-img');
-            profileImg.src = e.target.result;
-            
-            // Save the new avatar to user profile
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser) {
-              currentUser.avatar = e.target.result;
-              localStorage.setItem('currentUser', JSON.stringify(currentUser));
-          }
-        };
-        reader.readAsDataURL(file);
-        }
-      });
-    }
-    
-    // Setup save address button for add address modal
-    const saveAddressBtn = document.getElementById('save-address');
-    if (saveAddressBtn) {
-      // Remove previous listeners by cloning and replacing the button
-      const newSaveBtn = saveAddressBtn.cloneNode(true);
-      saveAddressBtn.parentNode.replaceChild(newSaveBtn, saveAddressBtn);
-      
-      // Add fresh event listener
-      document.getElementById('save-address').addEventListener('click', function() {
-        console.log('Save address button clicked');
-        saveAddress();
-      });
-    }
-    
-    // Profile edit form submission
-    const editProfileForm = document.getElementById('edit-profile-form');
-    if (editProfileForm) {
-      editProfileForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-          // Update user data
-          currentUser.firstName = document.getElementById('edit-first-name').value;
-          currentUser.lastName = document.getElementById('edit-last-name').value;
-          currentUser.name = `${currentUser.firstName} ${currentUser.lastName}`;
-          currentUser.email = document.getElementById('edit-email').value;
-          currentUser.birthday = document.getElementById('edit-birthday').value;
-          currentUser.gender = document.getElementById('edit-gender').value;
-          
-          // Save updated user
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-          
-          // Update users array if exists
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const userIndex = users.findIndex(user => user.id === currentUser.id);
-      if (userIndex !== -1) {
-            users[userIndex] = { ...users[userIndex], ...currentUser };
-        localStorage.setItem('users', JSON.stringify(users));
-      }
-      
-          // Refresh displayed profile data
-          document.getElementById('user-full-name').textContent = `${currentUser.name}`;
-          updateProfileDisplayFields();
-          
-          // Close modal
-          const modalElement = document.getElementById('editProfileModal')
-          modalElement.removeAttribute('aria-hidden'); // ✅ 先移除 aria-hidden
-          const modal = bootstrap.Modal.getInstance(modalElement);
-          modal.hide();    // ✅ 现在可以正常隐藏
-
-          
-          // Show success message
-          alert('Profile updated successfully!');
-        }
-      });
-    }
-    
-    // Password change form
-    const changePasswordForm = document.getElementById('change-password-form');
-    if (changePasswordForm) {
-      changePasswordForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const currentPassword = document.getElementById('current-password').value;
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        const errorElement = document.getElementById('password-error');
-        
-        // Reset error message
-        errorElement.classList.add('d-none');
-        
-        // Check if new passwords match
-        if (newPassword !== confirmPassword) {
-          errorElement.textContent = 'New passwords do not match!';
-          errorElement.classList.remove('d-none');
-      return;
-    }
-    
-        // Get current user
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-            // 发送密码更新请求到后端
-            fetch('/api/auth/update.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: currentUser.id,
-                    currentPassword: currentPassword,
-                    newPassword: newPassword
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    // 更新本地存储的密码
-                    currentUser.password = newPassword;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    
-                    // 更新users数组（如果存在）
-                    const users = JSON.parse(localStorage.getItem('users') || '[]');
-                    const userIndex = users.findIndex(user => user.id === currentUser.id);
-                    if (userIndex !== -1) {
-                        users[userIndex].password = newPassword;
-                        localStorage.setItem('users', JSON.stringify(users));
-                    }
-                    
-                    // 重置表单
-                    changePasswordForm.reset();
-                    
-                    // 显示成功消息
-                    showToast('密码更新成功！', 'success');
-                } else {
-                    // 显示错误消息
-                    errorElement.textContent = result.message || '密码更新失败，请重试。';
-                    errorElement.classList.remove('d-none');
-                }
-            })
-            .catch(error => {
-                console.error('更新密码时出错:', error);
-                errorElement.textContent = '更新密码时出错，请重试。';
-                errorElement.classList.remove('d-none');
-            });
-        }
-      });
-    }
-  }
-  
-  function toggleUsernameEdit() {
-    const usernameDisplay = document.getElementById('username-display');
-    const currentText = usernameDisplay.textContent;
-    
-    // Create input for editing
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'form-control form-control-sm d-inline-block';
-    input.value = currentText.substring(1); // Remove @ symbol
-    input.style.width = '120px';
-    
-    // Create save button
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'btn btn-sm btn-success ms-2';
-    saveBtn.innerHTML = '<i class="bi bi-check"></i>';
-    
-    saveBtn.onclick = async function () {
-      const newUsername = input.value.trim();
-      if (!newUsername) {
-          alert('Username cannot be empty!');
-          return;
-      }
-
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      if (!currentUser) {
-          alert('User not found in localStorage!');
-          return;
-      }
-
-      // 向数据库发送更新请求
-      try {
-          const response = await fetch('src/server/api/auth/updateProfile', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  userId: currentUser.id,
-                  username: newUsername
-              })
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-              // 更新 `localStorage` 数据
-              currentUser.username = newUsername;
-              localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-              // 更新 `users` 数组（如果存在）
-              const users = JSON.parse(localStorage.getItem('users') || '[]');
-              const userIndex = users.findIndex(user => user.id === currentUser.id);
-              if (userIndex !== -1) {
-                  users[userIndex].username = newUsername;
-                  localStorage.setItem('users', JSON.stringify(users));
-              }
-
-              // 更新前端页面
-              usernameDisplay.textContent = `@${newUsername}`;
-              document.getElementById('username-display-profile').textContent = `@${newUsername}`;
-              
-              // 成功提示
-              showToast('Username updated successfully!', 'success');
-          } else {
-              console.error('Failed to update username:', result.message);
-              showToast('Failed to update username!', 'danger');
-          }
-      } catch (error) {
-          console.error('Error updating username:', error);
-          showToast('Error updating username!', 'danger');
-      }
-        
-        // 恢复原始显示
-        toggleUsernameEdit();
-      }
-    };
-    
-    // Create cancel button
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'btn btn-sm btn-danger ms-1';
-    cancelBtn.innerHTML = '<i class="bi bi-x"></i>';
-    cancelBtn.onclick = function() {
-      usernameDisplay.textContent = currentText;
-      usernameDisplay.nextElementSibling.style.display = 'inline-block';
-    };
-    
-    // Replace content
-    usernameDisplay.textContent = '';
-    usernameDisplay.appendChild(document.createTextNode('@'));
-    usernameDisplay.appendChild(input);
-    usernameDisplay.appendChild(saveBtn);
-    usernameDisplay.appendChild(cancelBtn);
-    
-    // Hide edit button
-    usernameDisplay.nextElementSibling.style.display = 'none';
-    
-    // Focus input
-    input.focus();
-  
-  
-  function checkAdminStatus() {
-    // Check if user is admin and show admin tab if yes
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const adminTabContainer = document.getElementById('admin-tab-container');
-    
-    if (adminTabContainer) {
-      // 默认隐藏管理员按钮
-      adminTabContainer.style.display = 'none';
-      
-      // 只有当用户存在且是管理员时才显示
-      if (currentUser && (currentUser.isAdmin === true || currentUser.role === "admin")) {
-        adminTabContainer.style.display = 'block';
-        console.log('Admin status detected, showing admin dashboard button');
-      } else {
-        console.log('User is not an admin or not logged in, hiding admin dashboard button');
-      }
-    } else {
-      console.error('Admin tab container element not found');
-    }
-  }
-  
-  // Address management functions
-  function loadAddresses() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    console.log('Loading addresses for user:', currentUser);
-    
-    if (!currentUser) {
-      console.error('No user found in localStorage');
-      return;
-    }
-    
-    const addresses = currentUser.addresses || [];
-    console.log('Found addresses:', addresses);
-    
-    const container = document.getElementById('addresses-container');
-    
-    if (!container) {
-      console.error('Addresses container not found in the DOM');
-      return;
-    }
-    
-    if (addresses.length === 0) {
-      console.log('No addresses found, showing empty state');
-      container.innerHTML = `
-        <div class="no-addresses text-center py-5">
-          <i class="bi bi-geo-alt display-4 text-muted"></i>
-          <p class="mt-3 text-muted">You don't have any saved addresses yet.</p>
-          </div>
-        `;
-      return;
-    }
-    
-    console.log('Rendering address cards');
-    container.innerHTML = '<div class="row">' + 
-      addresses.map((address, index) => `
-        <div class="col-md-6 mb-3">
-          <div class="card h-100 ${address.isDefault ? 'border-primary' : ''}">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title">${address.name || 'Address'}</h5>
-                ${address.isDefault ? '<span class="badge bg-primary">Default</span>' : ''}
-          </div>
-              <p class="card-text mb-1"><strong>${address.fullName || ''}</strong></p>
-              <p class="card-text mb-1">${address.streetAddress || address.addressLine1 || ''}</p>
-              ${address.aptSuite || address.addressLine2 ? `<p class="card-text mb-1">${address.aptSuite || address.addressLine2}</p>` : ''}
-              <p class="card-text mb-1">${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}</p>
-              <p class="card-text mb-3">${address.country || ''}</p>
-              <p class="card-text"><small class="text-muted">Phone: ${address.phone || ''}</small></p>
-            </div>
-            <div class="card-footer bg-transparent border-top-0">
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" onclick="editAddress(${index})">
-                  <i class="bi bi-pencil me-1"></i>Edit
-              </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteAddress(${index})">
-                  <i class="bi bi-trash me-1"></i>Delete
-              </button>
-                ${!address.isDefault ? `<button class="btn btn-sm btn-outline-secondary" onclick="setDefaultAddress(${index})">Set as Default</button>` : ''}
-            </div>
-            </div>
+          <!-- Admin Dashboard Link - Updated with better styling -->
+          <div id="admin-tab-container" class="mt-3" style="display: none;">
+            <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/dashboard.html"
+              class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
+            </a>
           </div>
         </div>
-      `).join('') + '</div>';
-  }
+        <div class="col-md-9">
+          <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal-info"
+                type="button" role="tab" aria-controls="personal-info" aria-selected="true">Personal Info</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="addresses-tab" data-bs-toggle="tab" data-bs-target="#addresses" type="button"
+                role="tab" aria-controls="addresses" aria-selected="false">Addresses</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button"
+                role="tab" aria-controls="security" aria-selected="false">Security</button>
+            </li>
+          </ul>
 
-  let currentAddressIndex = -1;
-  
-  function addAddress() {
-    currentAddressIndex = -1;
-    document.getElementById('address-form').reset();
-    document.querySelector('#addAddressModal .modal-title').textContent = 'Add New Address';
-    document.getElementById('defaultAddress').checked = false;
-  }
-  
-  function editAddress(index) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.addresses) return;
-    
-    const address = currentUser.addresses[index];
-    if (!address) return;
-    
-    currentAddressIndex = index;
-    
-    // Fill form fields
-    document.getElementById('edit-addressName').value = address.name || '';
-    document.getElementById('edit-fullName').value = address.fullName || '';
-    document.getElementById('edit-phone').value = address.phone || '';
-    document.getElementById('edit-addressLine1').value = address.streetAddress || address.addressLine1 || '';
-    document.getElementById('edit-addressLine2').value = address.aptSuite || address.addressLine2 || '';
-    document.getElementById('edit-city').value = address.city || '';
-    document.getElementById('edit-state').value = address.state || '';
-    document.getElementById('edit-zipCode').value = address.zipCode || '';
-    document.getElementById('edit-country').value = address.country || '';
-    document.getElementById('edit-defaultAddress').checked = address.isDefault || false;
-    
-    // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('editAddressModal'));
-    modal.show();
-  }
-  
-  function saveAddress() {
-    console.log('Saving address');
-    
-    const addressForm = document.getElementById('address-form');
-    
-    // Validate form
-    if (!addressForm) {
-      console.error('Address form not found');
-      return;
-    }
-    
-    if (!addressForm.checkValidity()) {
-      console.log('Form validation failed');
-      addressForm.reportValidity();
-      return;
-    }
-    
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      console.error('No user found in localStorage');
-      return;
-    }
-    
-    // Initialize addresses array if it doesn't exist
-    if (!currentUser.addresses) {
-      currentUser.addresses = [];
-    }
-    
-    // Collect form data
-    const newAddress = {
-      name: document.getElementById('addressName').value,
-      fullName: document.getElementById('fullName').value,
-      streetAddress: document.getElementById('addressLine1').value,
-      aptSuite: document.getElementById('addressLine2').value,
-      city: document.getElementById('city').value,
-      state: document.getElementById('state').value,
-      zipCode: document.getElementById('zipCode').value,
-      country: document.getElementById('country').value,
-      phone: document.getElementById('phone').value,
-      isDefault: document.getElementById('defaultAddress').checked
-    };
-    
-    console.log('New address data:', newAddress);
-    
-    // If setting as default, remove default from other addresses
-    if (newAddress.isDefault) {
-      currentUser.addresses.forEach(addr => addr.isDefault = false);
-    }
-    
-    // Add new address
-    if (currentUser.addresses.length === 0) {
-      newAddress.isDefault = true;
-    }
-    currentUser.addresses.push(newAddress);
-    
-    // Save changes
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Update users array if exists
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(user => user.id === currentUser.id);
-    if (userIndex !== -1) {
-      users[userIndex].addresses = currentUser.addresses;
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addAddressModal'));
-    if (modal) modal.hide();
-    
-    // Show success message
-    showToast('Address saved successfully', 'success');
-    
-    // Reload addresses
-    loadAddresses();
-  }
-  
-  function deleteAddress(index) {
-    if (!confirm('Are you sure you want to delete this address?')) return;
-    
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.addresses) return;
-    
-    // Remove address
-    currentUser.addresses.splice(index, 1);
-    
-    // If we deleted the default address and there are other addresses, set first as default
-    if (currentUser.addresses.length > 0) {
-      let hasDefault = currentUser.addresses.some(addr => addr.isDefault);
-      if (!hasDefault) {
-        currentUser.addresses[0].isDefault = true;
-      }
-    }
-    
-    // Save changes
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Update users array if exists
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(user => user.id === currentUser.id);
-    if (userIndex !== -1) {
-      users[userIndex].addresses = currentUser.addresses;
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-    
-    // Reload addresses
-    loadAddresses();
-  }
-  
-  function setDefaultAddress(index) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.addresses) return;
-    
-    // Remove default from all addresses
-    currentUser.addresses.forEach(addr => addr.isDefault = false);
-    
-    // Set new default
-    currentUser.addresses[index].isDefault = true;
-    
-    // Save changes
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Update users array if exists
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(user => user.id === currentUser.id);
-      if (userIndex !== -1) {
-      users[userIndex].addresses = currentUser.addresses;
-        localStorage.setItem('users', JSON.stringify(users));
-      }
-      
-    // Reload addresses
-    loadAddresses();
-  }
-  
-  // Helper function to show loading spinner
-  function showLoadingSpinner(element) {
-    element.innerHTML = `
-      <div class="d-flex justify-content-center my-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-            </div>
-            </div>
-    `;
-  }
-  
-  // Add missing saveProfileChanges function
-  function saveProfileChanges() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        showToast('No user logged in', 'danger');
-        return;
-    }
-    
-    // Get form values
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const birthday = document.getElementById('birthday').value;
-    
-    // Get selected gender
-    let gender = '';
-    const genderRadios = document.getElementsByName('gender');
-    for (let i = 0; i < genderRadios.length; i++) {
-        if (genderRadios[i].checked) {
-            gender = genderRadios[i].value;
-            break;
-        }
-    }
-    
-    // Validate inputs
-    if (!firstName || !lastName || !email || !username) {
-        document.getElementById('profile-error').textContent = 'Please fill in all required fields.';
-        document.getElementById('profile-error').classList.remove('d-none');
-        return;
-    }
-    
-    // Prepare update data
-    const updateData = {
-        userId: currentUser.id,
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        username: username,
-        birthday: birthday,
-        gender: gender
-    };
-    
-    // Send update request to backend
-    fetch('/src/server/api/auth/update.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updateData)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            // Update local storage user data
-            currentUser.firstName = firstName;
-            currentUser.lastName = lastName;
-            currentUser.name = `${firstName} ${lastName}`;          
-            currentUser.email = email;
-            currentUser.username = username;
-            currentUser.birthday = birthday;
-            currentUser.gender = gender;
-            
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Update users array if exists
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const userIndex = users.findIndex(user => user.id === currentUser.id);
-            if (userIndex !== -1) {
-                users[userIndex] = { ...users[userIndex], ...currentUser };
-                localStorage.setItem('users', JSON.stringify(users));
-            }
-            
-            // Close modal
-            const modalElement = document.getElementById('editProfileModal');
-            modalElement.removeAttribute('aria-hidden');  
-
-            const modal = bootstrap.Modal.getInstance(modalElement);
-
-            modal.hide();  //
-            
-            // Update displayed user information
-            document.getElementById('user-full-name').textContent = currentUser.name;
-            document.getElementById('username-display').textContent = `@${currentUser.username}`;
-            document.getElementById('username-display-profile').textContent = `@${currentUser.username}`;
-            document.getElementById('email-display').textContent = currentUser.email;
-            
-            // Update first name and last name in the personal info card
-            const firstNameDisplay = document.getElementById('first-name');
-            const lastNameDisplay = document.getElementById('last-name');
-            if (firstNameDisplay) firstNameDisplay.textContent = currentUser.firstName;
-            if (lastNameDisplay) lastNameDisplay.textContent = currentUser.lastName;
-            
-            updateProfileDisplayFields();
-            
-            // Show success message
-            showToast('Profile updated successfully', 'success');
-        } else {
-            // Show error message
-            document.getElementById('profile-error').textContent = result.message || 'Update failed, please try again.';
-            document.getElementById('profile-error').classList.remove('d-none');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating profile:', error);
-        document.getElementById('profile-error').textContent = 'Update failed, please try again.';
-        document.getElementById('profile-error').classList.remove('d-none');
-    });
-}
-
-  function saveEditedAddress() {
-    console.log('Saving edited address');
-    
-    const addressForm = document.getElementById('edit-address-form');
-    
-    // Validate form
-    if (!addressForm) {
-      console.error('Edit address form not found');
-      return;
-    }
-    
-    if (!addressForm.checkValidity()) {
-      console.log('Form validation failed');
-      addressForm.reportValidity();
-      return;
-    }
-    
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      console.error('No user found in localStorage');
-      return;
-    }
-    
-    // Initialize addresses array if it doesn't exist
-    if (!currentUser.addresses) {
-      currentUser.addresses = [];
-    }
-    
-    // Collect form data
-    const editedAddress = {
-      name: document.getElementById('edit-addressName').value,
-      fullName: document.getElementById('edit-fullName').value,
-      streetAddress: document.getElementById('edit-addressLine1').value,
-      aptSuite: document.getElementById('edit-addressLine2').value,
-      city: document.getElementById('edit-city').value,
-      state: document.getElementById('edit-state').value,
-      zipCode: document.getElementById('edit-zipCode').value,
-      country: document.getElementById('edit-country').value,
-      phone: document.getElementById('edit-phone').value,
-      isDefault: document.getElementById('edit-defaultAddress').checked
-    };
-    
-    console.log('Edited address data:', editedAddress);
-    
-    // If setting as default, remove default from other addresses
-    if (editedAddress.isDefault) {
-      currentUser.addresses.forEach(addr => addr.isDefault = false);
-    }
-    
-    // Update existing address
-    if (currentAddressIndex >= 0 && currentAddressIndex < currentUser.addresses.length) {
-      currentUser.addresses[currentAddressIndex] = editedAddress;
-      } else {
-      console.error('Invalid address index:', currentAddressIndex);
-      return;
-    }
-    
-    // Save changes
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Update users array if exists
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex(user => user.id === currentUser.id);
-      if (userIndex !== -1) {
-      users[userIndex].addresses = currentUser.addresses;
-        localStorage.setItem('users', JSON.stringify(users));
-      }
-    
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
-    if (modal) modal.hide();
-      
-      // Show success message
-    showToast('Address updated successfully', 'success');
-    
-    // Reload addresses
-    loadAddresses();
-  }
-</script>
-
-<!-- Add confirmation delete modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this product? This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger">Delete</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Add toast container for notifications -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
-
-<!-- Add/Edit Category Modal -->
-<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content border-0 shadow admin-modal">
-      <div class="modal-header">
-        <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="category-form">
-          <input type="hidden" id="category-id">
-          
-          <div class="admin-form-group">
-            <label for="category-name" class="admin-form-label">Category Name<span class="text-danger">*</span></label>
-            <input type="text" class="admin-form-control" id="category-name" required placeholder="Enter category name">
-            <div class="form-text">A clear, concise name for your product category</div>
-          </div>
-          
-          <div class="admin-form-group">
-            <label for="category-description" class="admin-form-label">Description</label>
-            <textarea class="admin-form-control" id="category-description" rows="3" placeholder="Briefly describe what types of products belong in this category"></textarea>
-            <div class="form-text">Optional: Describe the types of products that will be included</div>
-          </div>
-          
-          <div class="admin-form-group">
-            <label class="admin-form-label">Category Image</label>
-            <div class="d-flex align-items-start mb-2">
-              <div class="product-preview me-3" style="width: 120px; height: 120px;">
-                <img id="category-img-preview" src="../../img/profile.png" alt="Category preview">
-              </div>
-              <div class="flex-grow-1">
-                <input type="file" class="admin-form-control mb-2" id="category-image-file" accept="image/*">
-                <div class="form-text mb-2">Recommended size: 400×400px</div>
-                <div class="d-grid">
-                  <button type="button" class="admin-btn admin-btn-warning" onclick="resetCategoryImage()">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Image
+          <div class="tab-content" id="profileTabsContent">
+            <!-- Personal Info Tab -->
+            <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-tab">
+              <div class="admin-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="mb-0">
+                    <i class="bi bi-person-badge me-2 text-primary"></i>Personal Information
+                  </h4>
+                  <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#editProfileModal">
+                    <i class="bi bi-pencil me-1"></i>Edit Profile
                   </button>
                 </div>
+
+                <!-- Redesigned Personal Information layout with cards -->
+                <div class="row g-3">
+                  <!-- Username -->
+                  <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                      <div class="card-body">
+                        <h5 class="card-title">
+                          <i class="bi bi-person-badge me-2 text-primary"></i>Username
+                        </h5>
+                        <p class="card-text fs-5 mt-3" id="username-display-profile">@johndoe</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Name information -->
+                  <div class="col-md-8">
+                    <div class="card h-100 shadow-sm">
+                      <div class="card-body">
+                        <h5 class="card-title">
+                          <i class="bi bi-person me-2 text-primary"></i>Full Name
+                        </h5>
+                        <div class="row mt-3">
+                          <div class="col-md-6">
+                            <p class="text-muted mb-1">First Name</p>
+                            <p class="fs-5 fw-medium" id="first-name">John</p>
+                          </div>
+                          <div class="col-md-6">
+                            <p class="text-muted mb-1">Last Name</p>
+                            <p class="fs-5 fw-medium" id="last-name">Doe</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Contact Information -->
+                  <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                      <div class="card-body">
+                        <h5 class="card-title">
+                          <i class="bi bi-envelope me-2 text-primary"></i>Contact Information
+                        </h5>
+                        <div class="mt-3">
+                          <p class="text-muted mb-1">Email</p>
+                          <p class="fw-medium" id="email-display">johndoe@example.com</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Personal Details -->
+                  <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                      <div class="card-body">
+                        <h5 class="card-title">
+                          <i class="bi bi-info-circle me-2 text-primary"></i>Personal Details
+                        </h5>
+                        <div class="row mt-3">
+                          <div class="col-md-6">
+                            <p class="text-muted mb-1">Birthday</p>
+                            <p class="fw-medium" id="birthday-display">January 1, 1990</p>
+                          </div>
+                          <div class="col-md-6">
+                            <p class="text-muted mb-1">Gender</p>
+                            <p class="fw-medium" id="gender-display">Male</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- Order History Tab -->
+            <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+              <!-- Add order history content here -->
+            </div>
+
+            <!-- Addresses Tab -->
+            <div class="tab-pane fade" id="addresses" role="tabpanel" aria-labelledby="addresses-tab">
+              <div class="admin-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="mb-0">
+                    <i class="bi bi-geo-alt me-2 text-primary"></i>My Addresses
+                  </h4>
+                  <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#addAddressModal" onclick="addAddress()">
+                    <i class="bi bi-plus-lg me-1"></i>Add New Address
+                  </button>
+                </div>
+
+                <div id="addresses-container" class="mt-4">
+                  <!-- Addresses will be loaded here -->
+                  <div class="no-addresses text-center py-5">
+                    <i class="bi bi-geo-alt display-4 text-muted"></i>
+                    <p class="mt-3 text-muted">You don't have any saved addresses yet.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+              <div class="admin-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4 class="mb-0">
+                    <i class="bi bi-shield-lock me-2 text-primary"></i>Security Settings
+                  </h4>
+                </div>
+
+                <div class="card shadow-sm mt-4">
+                  <div class="card-body">
+                    <h5 class="card-title mb-4">Change Password</h5>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <form id="change-password-form">
+                          <div class="mb-3">
+                            <label for="current-password" class="form-label text-start w-100">Current Password</label>
+                            <input type="password" class="form-control" id="current-password" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="new-password" class="form-label text-start w-100">New Password</label>
+                            <input type="password" class="form-control" id="new-password" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="confirm-password" class="form-label text-start w-100">Confirm New
+                              Password</label>
+                            <input type="password" class="form-control" id="confirm-password" required>
+                          </div>
+                          <div id="password-error" class="alert alert-danger d-none"></div>
+                          <button type="submit" class="btn btn-primary">Update Password</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-          
-          <div class="admin-form-group">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="category-featured">
-              <label class="form-check-label" for="category-featured">
-                Featured Category
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Address Modal -->
+  <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="address-form">
+            <input type="hidden" id="address-id">
+            <div class="mb-3">
+              <label for="addressName" class="form-label">Address Name</label>
+              <input type="text" class="form-control" id="addressName" placeholder="e.g. Home, Work, etc." required>
+            </div>
+            <div class="mb-3">
+              <label for="fullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullName" required>
+            </div>
+            <div class="mb-3">
+              <label for="phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" required>
+            </div>
+            <div class="mb-3">
+              <label for="addressLine1" class="form-label">Address Line 1</label>
+              <input type="text" class="form-control" id="addressLine1" required>
+            </div>
+            <div class="mb-3">
+              <label for="addressLine2" class="form-label">Address Line 2 (Optional)</label>
+              <input type="text" class="form-control" id="addressLine2">
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="state" class="form-label">State/Province</label>
+                <input type="text" class="form-control" id="state" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="zipCode" class="form-label">ZIP/Postal Code</label>
+                <input type="text" class="form-control" id="zipCode" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="country" class="form-label">Country</label>
+              <select class="form-select" id="country" required>
+                <option value="" selected disabled>Select Country</option>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="UK">United Kingdom</option>
+                <option value="AU">Australia</option>
+                <option value="FR">France</option>
+                <option value="DE">Germany</option>
+                <option value="JP">Japan</option>
+                <option value="CN">China</option>
+                <option value="IN">India</option>
+                <option value="BR">Brazil</option>
+                <option value="MX">Mexico</option>
+              </select>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="defaultAddress">
+              <label class="form-check-label" for="defaultAddress">
+                Set as default shipping address
               </label>
-              <div class="form-text">Featured categories will be highlighted on the homepage</div>
             </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="admin-btn admin-btn-danger" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="admin-btn admin-btn-primary" onclick="saveCategory()">
-          <i class="bi bi-check2 me-1"></i>Save Category
-        </button>
+            <div id="address-error" class="alert alert-danger d-none"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-address">Save Address</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-
-<!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editProfileModalLabel">Edit Personal Information</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="profile-form">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="firstName" class="form-label">First Name</label>
-              <input type="text" class="form-control" id="firstName" required>
+  <!-- Edit Address Modal - uses same form as Add Address but with different title -->
+  <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-address-form">
+            <input type="hidden" id="edit-address-id">
+            <div class="mb-3">
+              <label for="edit-addressName" class="form-label">Address Name</label>
+              <input type="text" class="form-control" id="edit-addressName" placeholder="e.g. Home, Work, etc."
+                required>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="lastName" class="form-label">Last Name</label>
-              <input type="text" class="form-control" id="lastName" required>
+            <div class="mb-3">
+              <label for="edit-fullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="edit-fullName" required>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email Address</label>
-            <input type="email" class="form-control" id="email" required>
-          </div>
-          <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" required>
-          </div>
-          <div class="mb-3">
-            <label for="birthday" class="form-label">Birthday</label>
-            <input type="date" class="form-control" id="birthday">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Gender</label>
-            <div class="d-flex gap-3">
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male">
-                <label class="form-check-label" for="genderMale">Male</label>
+            <div class="mb-3">
+              <label for="edit-phone" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="edit-phone" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-addressLine1" class="form-label">Address Line 1</label>
+              <input type="text" class="form-control" id="edit-addressLine1" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-addressLine2" class="form-label">Address Line 2 (Optional)</label>
+              <input type="text" class="form-control" id="edit-addressLine2">
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="edit-city" class="form-label">City</label>
+                <input type="text" class="form-control" id="edit-city" required>
               </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
-                <label class="form-check-label" for="genderFemale">Female</label>
+              <div class="col-md-4 mb-3">
+                <label for="edit-state" class="form-label">State/Province</label>
+                <input type="text" class="form-control" id="edit-state" required>
               </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="gender" id="genderOther" value="other">
-                <label class="form-check-label" for="genderOther">Other</label>
+              <div class="col-md-4 mb-3">
+                <label for="edit-zipCode" class="form-label">ZIP/Postal Code</label>
+                <input type="text" class="form-control" id="edit-zipCode" required>
               </div>
             </div>
-          </div>
-          <div id="profile-error" class="alert alert-danger d-none"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="save-profile" onclick="saveProfileChanges()">Save Changes</button>
+            <div class="mb-3">
+              <label for="edit-country" class="form-label">Country</label>
+              <select class="form-select" id="edit-country" required>
+                <option value="" selected disabled>Select Country</option>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="UK">United Kingdom</option>
+                <option value="AU">Australia</option>
+                <option value="FR">France</option>
+                <option value="DE">Germany</option>
+                <option value="JP">Japan</option>
+                <option value="CN">China</option>
+                <option value="IN">India</option>
+                <option value="BR">Brazil</option>
+                <option value="MX">Mexico</option>
+              </select>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="edit-defaultAddress">
+              <label class="form-check-label" for="edit-defaultAddress">
+                Set as default shipping address
+              </label>
+            </div>
+            <div id="edit-address-error" class="alert alert-danger d-none"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditedAddress()">Save Address</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
+  <!-- Add confirmation delete modal -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Category Modal -->
+  <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow admin-modal">
+        <div class="modal-header">
+          <h5 class="modal-title" id="categoryModalLabel">Add Category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="category-form">
+            <input type="hidden" id="category-id">
+
+            <div class="admin-form-group">
+              <label for="category-name" class="admin-form-label">Category Name<span
+                  class="text-danger">*</span></label>
+              <input type="text" class="admin-form-control" id="category-name" required
+                placeholder="Enter category name">
+              <div class="form-text">A clear, concise name for your product category</div>
+            </div>
+
+            <div class="admin-form-group">
+              <label for="category-description" class="admin-form-label">Description</label>
+              <textarea class="admin-form-control" id="category-description" rows="3"
+                placeholder="Briefly describe what types of products belong in this category"></textarea>
+              <div class="form-text">Optional: Describe the types of products that will be included</div>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Category Image</label>
+              <div class="d-flex align-items-start mb-2">
+                <div class="product-preview me-3" style="width: 120px; height: 120px;">
+                  <img id="category-img-preview" src="/~xzy2020c/PurelyHandmade/src/client/img/profile.png"
+                    alt="Category preview">
+                </div>
+                <div class="flex-grow-1">
+                  <input type="file" class="admin-form-control mb-2" id="category-image-file" accept="image/*">
+                  <div class="form-text mb-2">Recommended size: 400×400px</div>
+                  <div class="d-grid">
+                    <button type="button" class="admin-btn admin-btn-warning" onclick="resetCategoryImage()">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-form-group">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="category-featured">
+                <label class="form-check-label" for="category-featured">
+                  Featured Category
+                </label>
+                <div class="form-text">Featured categories will be highlighted on the homepage</div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="admin-btn admin-btn-danger" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="admin-btn admin-btn-primary" onclick="saveCategory()">
+            <i class="bi bi-check2 me-1"></i>Save Category
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Edit Profile Modal -->
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProfileModalLabel">Edit Personal Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="profile-form">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+              <label for="birthday" class="form-label">Birthday</label>
+              <input type="date" class="form-control" id="birthday">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Gender</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male">
+                  <label class="form-check-label" for="genderMale">Male</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
+                  <label class="form-check-label" for="genderFemale">Female</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="gender" id="genderOther" value="other">
+                  <label class="form-check-label" for="genderOther">Other</label>
+                </div>
+              </div>
+            </div>
+            <div id="profile-error" class="alert alert-danger d-none"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-profile" onclick="saveProfileChanges()">Save
+            Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Add toast container for notifications -->
+  <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Include Bootstrap and other scripts only once -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script>
+    document.write(`
+      <script src="${CONFIG.getJsPath('common.js')}"><\/script>
+      <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
+        <script src="${CONFIG.getJsPath('profile.js')}"><\/script>
+  `);
+  </script>
+
+</body>
 
 </html>

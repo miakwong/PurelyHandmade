@@ -5,7 +5,7 @@
 
 // Load the navbar and handle authentication
 function loadNavbar() {
-  fetch('/src/client/assets/layout/navbar.html')
+  fetch('/~xzy2020c/PurelyHandmade/src/client/assets/layout/navbar.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load navbar (${response.status})`);
@@ -39,7 +39,7 @@ function loadFooter() {
   const footerPlaceholder = document.getElementById('footer-placeholder');
   if (!footerPlaceholder) return;
   
-  fetch('/src/client/assets/layout/footer.html')
+  fetch('/~xzy2020c/PurelyHandmade/src/client/assets/layout/footer.html')
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to load footer (${response.status})`);
@@ -106,13 +106,13 @@ function checkAdminPermissions() {
   
   if (!currentUser) {
     // User not logged in, redirect to login page
-    window.location.replace('/src/client/views/auth/login.html');
+    window.location.replace('/~xzy2020c/PurelyHandmade/src/client/views/auth/login.html');
     return false;
   }
   
   if (currentUser.isAdmin !== true) {
     // User is not an admin, redirect to home page
-    window.location.replace('/');
+    window.location.replace('/~xzy2020c/PurelyHandmade/index.html');
     alert('You do not have permission to access this page.');
     return false;
   }

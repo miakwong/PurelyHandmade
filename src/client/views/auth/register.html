@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register - Purely Homemade</title>
+
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="/src/client/css/global.css" rel="stylesheet">
-  <link href="/src/client/css/navbar.css" rel="stylesheet">
-  <link href="/src/client/css/register.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('register.css')}">
+    `);
+  </script>
 
 </head>
+
 <body>
   <!-- Navbar Placeholder -->
   <div id="navbar-placeholder"></div>
@@ -25,7 +37,7 @@
           <div class="card-body">
             <!-- Main validation message area -->
             <div id="form-validation-error" class="alert alert-danger mb-4 d-none"></div>
-            
+
             <form id="register-form" novalidate>
               <!-- Avatar Upload -->
               <div class="avatar-container">
@@ -104,7 +116,7 @@
                     </label>
                   </div>
                 </div>
-                <div id="gender-error" class="validation-message"></div> 
+                <div id="gender-error" class="validation-message"></div>
               </div>
 
               <!-- Password Section -->
@@ -141,7 +153,8 @@
               </button>
             </form>
             <p class="text-center mt-4">
-              Already have an account? <a href="login.html" class="login-link">Log In</a>
+              Already have an account? <a href="/~xzy2020c/PurelyHandmade/views/auth/login.html" class="login-link">Log
+                In</a>
             </p>
           </div>
         </div>
@@ -151,12 +164,14 @@
 
   <!-- Toast for notifications -->
   <div class="position-fixed top-0 end-0 p-3" style="z-index: 1060">
-    <div id="notification-toast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="notification-toast" class="toast align-items-center text-white bg-primary border-0" role="alert"
+      aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body" id="toast-message">
           <!-- Toast message will be set dynamically -->
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Close"></button>
       </div>
     </div>
   </div>
@@ -164,451 +179,15 @@
   <!-- Footer Placeholder -->
   <div id="footer-placeholder"></div>
 
-  <script src="/src/client/js/navbar-handler.js"></script>
-
   <script>
-    // Initialize toast
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Bootstrap Toast
-      const toastEl = document.getElementById('notification-toast');
-      window.toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-    });
-
-    // Helper function to show validation errors
-    function showValidationError(elementId, message) {
-      const element = document.getElementById(elementId);
-      console.log(`Calling showValidationError for ${elementId} with message: ${message}`);
-
-      if (element) {
-          element.textContent = message;
-          element.classList.add('show', 'text-danger');
-          element.classList.remove('text-success', 'd-none');
-          return false;
-      }
-      console.warn(`Element with ID '${elementId}' not found.`);
-      return true;
-    }
-  
-
-    // Helper function to clear validation errors
-    function clearValidationErrors() {
-      const errorElements = document.querySelectorAll('.validation-message');
-      errorElements.forEach(element => {
-        element.textContent = '';
-        element.classList.remove('show');
-      });
-      
-      document.getElementById('form-validation-error').classList.add('d-none');
-      document.getElementById('form-validation-error').textContent = '';
-    }
-
-    // Avatar Upload Preview
-    const avatarUpload = document.getElementById('avatarUpload');
-    const avatarPreview = document.getElementById('avatarPreview');
-    let avatarBase64 = ''; // To store the base64 encoded image
-    
-    avatarUpload.addEventListener('change', function() {
-      const file = this.files[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-          showValidationError('avatar-error', 'Image size should not exceed 5MB');
-          return;
-        }
-        
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-          // Store the base64 data
-          avatarBase64 = e.target.result;
-          
-          // Update preview - clear the preview area first
-          avatarPreview.innerHTML = '';
-          
-          // Create and append the image
-          const img = document.createElement('img');
-          img.src = avatarBase64;
-          img.alt = "Profile Picture Preview";
-          avatarPreview.appendChild(img);
-        };
-        
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // Password strength meter
-    const passwordInput = document.getElementById('regPassword');
-    const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
-    const passwordHint = document.getElementById('passwordHint');
-    
-    passwordInput.addEventListener('input', function() {
-      const password = this.value;
-      let strength = 0;
-      
-      // Clear previous classes
-      passwordStrengthMeter.classList.remove('strength-weak', 'strength-medium', 'strength-strong');
-      
-      if (password.length > 0) {
-        // Length check
-        if (password.length >= 8) strength += 1;
-        
-        // Uppercase check
-        if (/[A-Z]/.test(password)) strength += 1;
-        
-        // Number check
-        if (/\d/.test(password)) strength += 1;
-        
-        // Update meter
-        if (strength === 1) {
-          passwordStrengthMeter.classList.add('strength-weak');
-          passwordHint.textContent = 'Weak password - add uppercase letters and numbers';
-        } else if (strength === 2) {
-          passwordStrengthMeter.classList.add('strength-medium');
-          passwordHint.textContent = 'Medium password - add one more requirement';
-        } else if (strength === 3) {
-          passwordStrengthMeter.classList.add('strength-strong');
-          passwordHint.textContent = 'Strong password';
-        }
-      } else {
-        passwordHint.textContent = 'Password must be at least 8 characters with numbers and uppercase letters';
-      }
-    });
-
-    // Handle Registration form submission
-    document.getElementById('register-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      
-      // Clear previous validation errors
-      clearValidationErrors();
-      
-      // Native form validation
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      
-      // Fetch field values
-      const firstName = document.getElementById('firstName').value.trim();
-      const lastName = document.getElementById('lastName').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const pass = document.getElementById('regPassword').value;
-      const confirmPass = document.getElementById('regPasswordConfirm').value;
-      const termsAccepted = document.getElementById('termsCheck').checked;
-      const birthday = document.getElementById('birthday').value;
-      const gender = document.querySelector('input[name="gender"]:checked');
-      
-      let isValid = true;
-      
-      // Gender validation
-      if (!gender) {
-        isValid = false;
-        showValidationError('gender-error', 'Please select your gender.');
-      }
-
-      // Email format validation
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        isValid = false;
-        showValidationError('email-error', 'Please enter a valid email address.');
-      }
-      
-      // Username validation
-      if (username.length < 3) {
-        isValid = false;
-        showValidationError('username-error', 'Username must be at least 3 characters long.');
-      }
-      
-      // Password strength validation
-      if (pass.length < 8 || !/[A-Z]/.test(pass) || !/\d/.test(pass)) {
-        isValid = false;
-        showValidationError('password-error', 'Password must be at least 8 characters long and include at least one uppercase letter and one number.');
-      }
-      
-      // Password match validation
-      if (pass !== confirmPass) {
-        isValid = false;
-        showValidationError('password-match-error', 'The passwords you entered do not match.');
-      }
-      
-      // Terms & Conditions checked
-      if (!termsAccepted) {
-        isValid = false;
-        showValidationError('terms-error', 'Please agree to the terms and conditions to complete the registration.');
-      }
-      
-      if (!isValid) {
-        // Show overall error message
-        const formError = document.getElementById('form-validation-error');
-        formError.textContent = 'Please correct the errors in the form before submitting.';
-        formError.classList.remove('d-none');
-        return;
-      }
-      
-      // Create user object to send to server
-      const userData = {
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        username: username,
-        password: pass,
-        avatar: avatarBase64 || null, // 如果没有头像，使用null代替空字符串
-        birthday: birthday ? (new Date(birthday)).toISOString().split('T')[0] : null, // 确保日期格式正确
-        gender: gender ? gender.value : null, // 使用null而不是空字符串
-        role: 'user',
-        isAdmin: 0,
-        status: 'active'
-      };
-      
-      // Debug object, avoid console printing large image data
-      const debugData = {
-        firstName, 
-        lastName,
-        email,
-        username,
-        passwordLength: pass.length,
-        birthday,
-        gender: gender ? gender.value : 'not selected',
-        avatarProvided: !!avatarBase64,
-        role: 'user',
-        isAdmin: 0
-      };
-      
-      console.log('Form submitted with data:', debugData);
-      
-      // Try to reduce avatar size to avoid large data transmission
-      let optimizedUserData = {...userData};
-      if (avatarBase64 && avatarBase64.length > 200000) { // Avatar exceeds 200KB
-        console.log('Avatar is large, removing for this registration attempt');
-        optimizedUserData.avatar = null; // Temporarily do not send avatar data
-      }
-      
-      // Show loading indicator
-      const submitBtn = form.querySelector('.submit-btn');
-      const originalBtnText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
-      submitBtn.disabled = true;
-      
-      // Send registration data to server API
-      fetch('/src/server/api/auth/register.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(optimizedUserData)
-      })
-      .then(response => {
-        console.log('Server response status:', response.status);
-        return response.text().then(text => {
-          console.log('Raw server response:', text);
-          try {
-            return JSON.parse(text);
-          } catch (e) {
-            console.error('Error parsing JSON response:', e);
-            return { success: false, message: 'Invalid server response format' };
-          }
-        });
-      })
-      .then(data => {
-        // Record server response
-        console.log('Parsed server response data:', data);
-        
-        // Reset button
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
-        
-        if (data.success) {
-          // Show success message
-          showToast('Account created successfully! Redirecting to login page...', 'success');
-          
-          // Redirect to login page after delay
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 2000);
-        } else {
-          // Show error message
-          const formError = document.getElementById('form-validation-error');
-          formError.textContent = data.message || 'Registration failed. Please try again.';
-          formError.classList.remove('d-none');
-          
-            // 检查错误的详细信息
-          console.error('Registration failed with message:', data.message);
-          if (data.errors) {
-            console.error('Validation errors:', data.errors);
-            if (data.errors.email) {
-              showValidationError('email-error', data.errors.email[0]);
-            }
-            if (data.errors.username) {
-              showValidationError('username-error', data.errors.username[0]);
-            }
-            if (data.errors.password) {
-              showValidationError('password-error', data.errors.password[0]);
-            }
-          }
-        }
-      })
-      .catch(error => {
-        // Reset button
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
-        
-        // Show error message
-        const formError = document.getElementById('form-validation-error');
-        formError.textContent = 'An error occurred while connecting to the server. Please try again later.';
-        formError.classList.remove('d-none');
-        console.error('Registration fetch error:', error);
-      });
-    });
-
-  
-    document.getElementById('regEmail').addEventListener('blur', async function() {
-      const email = this.value.trim();
-      if (!email) return;
-  
-      // Validate email format
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showValidationError('email-error', 'Please enter a valid email address.');
-          return;
-      }
-  
-      try {
-          const response = await fetch('/src/server/api/auth/check_email.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email })
-          });
-  
-          const text = await response.text();
-          let result;
-          try {
-            result = JSON.parse(text);
-            console.log("Email check response:", result);
-        
-            if (result.data && typeof result.data.exists !== "undefined") {
-                if (result.data.exists) {
-                    // If exists is true, the email is registered, show error
-                    showValidationError('email-error', result.data.message);
-                } else {
-                    // If exists is false, clear error information
-                    const emailErrorDiv = document.getElementById('email-error');
-                    emailErrorDiv.textContent = ''; // Clear text
-                    emailErrorDiv.classList.remove('show', 'text-danger'); // Hide error prompt
-                }
-            } else {
-                // JSON data format does not match expectations
-                console.warn("Unexpected response format:", result);
-                showValidationError('email-error', 'Unexpected response format.');
-            }
-        } catch (jsonError) {
-            console.error('Error parsing JSON:', text);
-            showValidationError('email-error', 'Server error: Invalid response format.');
-            return;
-        }
-      } catch (error) {
-          console.error('Error checking email:', error);
-          showValidationError('email-error', 'An error occurred while checking the email. Please try again.');
-      }
-  });
-  
-  
-    // Delete user name real-time duplicate detection local storage part
-    document.getElementById('username').addEventListener('blur', async function() {
-      const username = this.value.trim();
-      if (!username) return;
-      
-      // Check username length
-      if (username.length < 3) {
-        showValidationError('username-error', 'Username must be at least 3 characters long.');
-        return;
-      }
-      
-      try {
-        // Check username from server
-        const response = await fetch('/src/server/api/auth/check_username.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username })
-        });
-        
-        const text = await response.text();
-          let result;
-          try {
-            result = JSON.parse(text);
-            console.log("Username check response:", result);
-        
-            // Ensure result.data exists, avoid errors
-            if (result.data && typeof result.data.exists !== "undefined") {
-                if (result.data.exists) {
-                    showValidationError('username-error', result.data.message);
-                } else {
-                    const usernameErrorDiv = document.getElementById('username-error');
-                    usernameErrorDiv.textContent = ''; // Clear text
-                    usernameErrorDiv.classList.remove('show', 'text-danger'); // Hide error prompt
-                }
-            } else {
-                // JSON data format does not match expectations
-                console.warn("Unexpected response format:", result);
-                showValidationError('email-error', 'Unexpected response format.');
-            }
-        } catch (jsonError) {
-            console.error('Error parsing JSON:', text);
-            showValidationError('email-error', 'Server error: Invalid response format.');
-            return;
-        }
-      } catch (error) {
-        console.error('Error checking username:', error);
-      }
-    });
-
-    // Toast notification function
-    function showToast(message, type = 'info') {
-      // Check if toast container already exists
-      let toastContainer = document.querySelector('.toast-container');
-      
-      // If not, create one
-      if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container';
-        toastContainer.style.position = 'fixed';
-        toastContainer.style.top = '20px';
-        toastContainer.style.right = '20px';
-        toastContainer.style.zIndex = '1060';
-        document.body.appendChild(toastContainer);
-      }
-      
-      // Create toast element
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-white bg-${type} border-0`;
-      toast.setAttribute('role', 'alert');
-      toast.setAttribute('aria-live', 'assertive');
-      toast.setAttribute('aria-atomic', 'true');
-      toast.style.minWidth = '250px';
-      
-      toast.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body">
-            ${message}
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"></button>
-        </div>
-      `;
-      
-      // Add to container
-      toastContainer.appendChild(toast);
-      
-      // Add event to close button
-      const closeBtn = toast.querySelector('.btn-close');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-          toast.remove();
-        });
-      }
-      
-      // Automatically close
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-    }
+    document.write(`
+    <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('register.js')}"><\/script>
+  `);
   </script>
+
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

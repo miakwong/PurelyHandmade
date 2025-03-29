@@ -217,7 +217,7 @@
       if (!categoryId) {
         showError('No category specified. Redirecting to categories page...');
         setTimeout(() => {
-          window.location.href = 'category-list.html';
+          window.location.href = CONFIG.getViewPath('/products/category-list.html');
         }, 2000);
         return;
       }

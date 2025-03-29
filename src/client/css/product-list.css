@@ -119,11 +119,33 @@
   }
   
   .filter-group-content.show {
-    max-height: 300px; /* 一个合理的默认值 */
+    max-height: none; /* 移除高度限制，使其自动适应内容 */
     opacity: 1;
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
     pointer-events: auto;
+    overflow-y: auto; /* 当内容过多时允许滚动 */
+  }
+  
+  /* 特别为分类添加的样式 */
+  #category-filters.show {
+    max-height: none; /* 确保分类列表不受高度限制 */
+    overflow-y: auto; /* 当分类太多时允许滚动 */
+    max-height: 400px; /* 设置一个较大的最大高度，防止过度占用页面空间 */
+  }
+  
+  /* 当分类过多时，添加美观的滚动条样式 */
+  #category-filters.show::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  #category-filters.show::-webkit-scrollbar-track {
+    background: var(--card-background);
+  }
+  
+  #category-filters.show::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 10px;
   }
   
   .price-range-inputs {
@@ -427,25 +449,145 @@
   }
   
   /* 响应式调整 */
+  @media (max-width: 1199px) {
+    .product-card-body {
+      padding: 1.25rem;
+    }
+    
+    .product-title {
+      font-size: 1.1rem;
+    }
+  }
+  
   @media (max-width: 991px) {
     .filter-sidebar {
-      margin-bottom: 2rem;
       position: static;
+      margin-bottom: 2rem;
+      padding: 1.25rem;
     }
     
     .product-toolbar {
       flex-direction: column;
       align-items: flex-start;
+      gap: 1rem;
     }
     
     .product-toolbar > div:first-child {
-      margin-bottom: 1rem;
+      margin-bottom: 0;
+    }
+    
+    .product-img-wrapper {
+      height: 220px;
     }
   }
   
   @media (max-width: 767px) {
     .page-title {
       font-size: 1.75rem;
+    }
+    
+    .product-img-wrapper {
+      height: 200px;
+    }
+    
+    .price-range-inputs {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .modern-breadcrumb {
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .filter-sidebar h4 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .container-custom {
+      padding: 0 1rem;
+    }
+    
+    .product-badge {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.6rem;
+    }
+  }
+  
+  @media (max-width: 575px) {
+    .page-title {
+      font-size: 1.5rem;
+    }
+    
+    .page-title:after {
+      width: 40px;
+      bottom: -8px;
+    }
+    
+    .filter-sidebar {
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    
+    .product-card {
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .product-img-wrapper {
+      height: 180px;
+    }
+    
+    .product-card-body {
+      padding: 1rem;
+    }
+    
+    .product-title {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-price {
+      font-size: 1.1rem;
+    }
+    
+    .add-to-cart-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .modern-pagination .page-link {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    
+    /* 改进移动设备上滤镜展示 */
+    .filter-group-title {
+      font-size: 1rem;
+    }
+    
+    #product-filters-mobile-toggle {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .filter-sidebar-mobile-collapse {
+      display: none;
+    }
+    
+    .filter-sidebar-mobile-collapse.show {
+      display: block;
+    }
+  }
+  
+  /* 特别优化小型移动设备 */
+  @media (max-width: 360px) {
+    .product-grid .col-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
     }
     
     .product-img-wrapper {

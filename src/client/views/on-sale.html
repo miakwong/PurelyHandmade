@@ -1,30 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>On Sale - Purely Homemade</title>
 
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/src/client/css/style.css">
-  <link rel="stylesheet" href="/src/client/css/navbar.css">
-  <link rel="stylesheet" href="/src/client/css/global.css">
-  <link rel="stylesheet" href="/src/client/css/on-sale.css">
-  <link rel="stylesheet" href="/src/client/css/toast.css">
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('on-sale.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('toast.css')}">
+    `);
+  </script>
 
   <!-- Google Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- API Helper -->
-  <script src="/src/client/js/api-loader-helper.js"></script>
-  <script src="/src/client/js/navbar-handler.js"></script>
+  <!-- Data Service scripts -->
+  <script>
+    document.write(`
+    <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('api-data-loader.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('navbar-handler.js')}"><\/script>
+  `);
+  </script>
 
   <style>
     @keyframes slideUpIn {
@@ -32,16 +44,18 @@
         transform: translateY(20px);
         opacity: 0;
       }
+
       to {
         transform: translateY(0);
         opacity: 1;
       }
     }
-    
+
     @keyframes fadeOut {
       from {
         opacity: 1;
       }
+
       to {
         opacity: 0;
       }
@@ -49,164 +63,155 @@
   </style>
 
 </head>
+
 <body>
 
-<!-- Navbar Placeholder -->
-<div id="navbar-placeholder"></div>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
 
-<!-- Limited Time Banner -->
-<div class="countdown-banner">
-  <div class="container">
-    <p class="m-0">Special Sale! Limited Time Offer on Handcrafted Items</p>
-  </div>
-</div>
-
-<!-- Hero Section -->
-<div class="container-fluid bg-light py-5">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-6">
-        <h1 class="display-4 fw-bold text-danger">Sale Items</h1>
-        <p class="lead">Exclusive discounts on our handcrafted products.</p>
-        <p>Don't miss out on these limited-time offers on our most popular artisan pieces.</p>
-      </div>
-      <div class="col-md-6 text-center">
-        <img src="/src/client/img/logo.jpg" class="img-fluid rounded" alt="Sales" style="max-height: 250px;">
-      </div>
+  <!-- Limited Time Banner -->
+  <div class="countdown-banner">
+    <div class="container">
+      <p class="m-0">Special Sale! Limited Time Offer on Handcrafted Items</p>
     </div>
   </div>
-</div>
 
-<!-- Sale Timer Section -->
-<div class="container mt-5">
-  <div class="limited-time text-center">
-    <h3>Limited Time Offers End In:</h3>
-    <div class="timer" id="sale-timer">
-      <div class="timer-unit">
-        <div class="timer-value" id="days">00</div>
-        <div class="timer-label">Days</div>
-      </div>
-      <div class="timer-unit">
-        <div class="timer-value" id="hours">00</div>
-        <div class="timer-label">Hours</div>
-      </div>
-      <div class="timer-unit">
-        <div class="timer-value" id="minutes">00</div>
-        <div class="timer-label">Minutes</div>
-      </div>
-      <div class="timer-unit">
-        <div class="timer-value" id="seconds">00</div>
-        <div class="timer-label">Seconds</div>
-      </div>
-    </div>
-    <p>Shop now before these deals expire!</p>
-    <a href="#sale-products" class="btn btn-danger">View Sale Items</a>
-  </div>
-</div>
-
-<!-- Products Section -->
-<div class="container mt-5" id="sale-products">
-  <h2 class="section-title">Special Offers</h2>
-  
-  <div class="row" id="sale-products-container">
-    <!-- Products will be loaded dynamically -->
-    <div class="text-center my-5">
-      <div class="spinner-border text-danger" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading sale items...</p>
-    </div>
-  </div>
-</div>
-
-<!-- Coupon Section -->
-<div class="container-fluid bg-light py-5 mt-5">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 text-center">
-        <h3 class="text-danger">Extra 10% Off Your First Order</h3>
-        <p class="mb-4">Subscribe to our newsletter to receive a discount code for your first purchase, plus exclusive sales alerts!</p>
-        <div class="input-group mb-3">
-          <input type="email" class="form-control" placeholder="Your email address">
-          <button class="btn btn-danger" type="button">Get My Discount</button>
+  <!-- Hero Section -->
+  <div class="container-fluid bg-light py-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h1 class="display-4 fw-bold text-danger">Sale Items</h1>
+          <p class="lead">Exclusive discounts on our handcrafted products.</p>
+          <p>Don't miss out on these limited-time offers on our most popular artisan pieces.</p>
+        </div>
+        <div class="col-md-6 text-center">
+          <img src="/~xzy2020c/PurelyHandmade/assets/placeholder.jpg" class="img-fluid rounded" alt="Sales"
+            style="max-height: 250px;">
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Footer Placeholder -->
-<div id="footer-placeholder"></div>
+  <!-- Sale Timer Section -->
+  <div class="container mt-5">
+    <div class="limited-time text-center">
+      <h3>Limited Time Offers End In:</h3>
+      <div class="timer" id="sale-timer">
+        <div class="timer-unit">
+          <div class="timer-value" id="days">00</div>
+          <div class="timer-label">Days</div>
+        </div>
+        <div class="timer-unit">
+          <div class="timer-value" id="hours">00</div>
+          <div class="timer-label">Hours</div>
+        </div>
+        <div class="timer-unit">
+          <div class="timer-value" id="minutes">00</div>
+          <div class="timer-label">Minutes</div>
+        </div>
+        <div class="timer-unit">
+          <div class="timer-value" id="seconds">00</div>
+          <div class="timer-label">Seconds</div>
+        </div>
+      </div>
+      <p>Shop now before these deals expire!</p>
+      <a href="#sale-products" class="btn btn-danger">View Sale Items</a>
+    </div>
+  </div>
 
-<!-- Toast通知容器 -->
-<div class="modern-toast-container" id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+  <!-- Products Section -->
+  <div class="container mt-5" id="sale-products">
+    <h2 class="section-title">Special Offers</h2>
 
-<!-- Bootstrap JS and jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="row" id="sale-products-container">
+      <!-- Products will be loaded dynamically -->
+      <div class="text-center my-5">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading sale items...</p>
+      </div>
+    </div>
+  </div>
 
-<!-- Data Service scripts - Make sure this loads FIRST -->
-<script src="/src/client/js/data-service.js"></script>
-<script src="/src/client/js/api-data-loader.js"></script>
+  <!-- Coupon Section -->
+  <div class="container-fluid bg-light py-5 mt-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+          <h3 class="text-danger">Extra 10% Off Your First Order</h3>
+          <p class="mb-4">Subscribe to our newsletter to receive a discount code for your first purchase, plus exclusive
+            sales alerts!</p>
+          <div class="input-group mb-3">
+            <input type="email" class="form-control" placeholder="Your email address">
+            <button class="btn btn-danger" type="button">Get My Discount</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<!-- 初始化数据脚本 -->
-<script src="/src/client/js/init-data.js"></script>
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
 
-<!-- Navbar Handler -->
-<script src="/src/client/js/navbar-handler.js"></script>
+  <!-- Toast通知容器 -->
+  <div class="modern-toast-container" id="toast-container"
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
 
-<script>
-  // Sale countdown timer
-  function updateSaleTimer() {
-    // Set sale end date to 7 days from now
-    const saleEndDate = new Date();
-    saleEndDate.setDate(saleEndDate.getDate() + 7);
-    
-    // Update the timer
-    const timerInterval = setInterval(function() {
-      const now = new Date().getTime();
-      const distance = saleEndDate - now;
-      
-      // Time calculations
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      
-      // Display results
-      document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
-      document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
-      document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
-      document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
-      
-      // If timer expired
-      if (distance < 0) {
-        clearInterval(timerInterval);
-        document.getElementById("sale-timer").innerHTML = "<p class='lead'>Sale Ended</p>";
-      }
-    }, 1000);
-  }
-    
-  // 确保数据初始化
-  document.addEventListener('DOMContentLoaded', function() {
-    // 初始化数据
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
+  <!-- Bootstrap JS and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Sale countdown timer
+    function updateSaleTimer() {
+      // Set sale end date to 7 days from now
+      const saleEndDate = new Date();
+      saleEndDate.setDate(saleEndDate.getDate() + 7);
+
+      // Update the timer
+      const timerInterval = setInterval(function () {
+        const now = new Date().getTime();
+        const distance = saleEndDate - now;
+
+        // Time calculations
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Display results
+        document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+        document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+        document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+
+        // If timer expired
+        if (distance < 0) {
+          clearInterval(timerInterval);
+          document.getElementById("sale-timer").innerHTML = "<p class='lead'>Sale Ended</p>";
+        }
+      }, 1000);
     }
-    
-    // Start countdown timer
-    updateSaleTimer();
-    
-    // Load sale products
-    loadSaleProducts();
-  });
-  
-  // 加载促销产品
-  function loadSaleProducts() {
-    const productsContainer = document.getElementById('sale-products-container');
-    
-    // Show loading state
-    productsContainer.innerHTML = `
+
+    // 确保数据初始化
+    document.addEventListener('DOMContentLoaded', function () {
+      // 直接开始定时器和加载产品，不再调用initializeData
+
+      // Start countdown timer
+      updateSaleTimer();
+
+      // Load sale products
+      loadSaleProducts();
+    });
+
+    // 加载促销产品
+    function loadSaleProducts() {
+      const productsContainer = document.getElementById('sale-products-container');
+
+      // Show loading state
+      productsContainer.innerHTML = `
       <div class="col-12 text-center py-4">
         <div class="spinner-border text-danger" role="status">
           <span class="visually-hidden">Loading sale products...</span>
@@ -214,122 +219,122 @@
         <p class="mt-2">Loading sale products...</p>
       </div>
     `;
-    
-    // Use API to get products
-    if (typeof DataService !== 'undefined') {
-      DataService.getAllProducts()
-        .then(result => {
-          console.log('API response:', result); // Debug log
-          
-          let products = [];
-          
-          // Extract products array from the response based on its structure
-          if (result.success) {
-            if (result.data && result.data.products && Array.isArray(result.data.products)) {
-              // Most common case: products are in result.data.products array
-              products = result.data.products;
-              console.log('Found products in result.data.products:', products.length);
-            } else if (Array.isArray(result.data)) {
-              // Alternative case: result.data is directly the array
-              products = result.data;
-              console.log('Found products directly in result.data:', products.length);
-            } else if (result.products && Array.isArray(result.products)) {
-              // Another case: products directly in the root
-              products = result.products;
-              console.log('Found products in result.products:', products.length);
-            } else if (result.data && typeof result.data === 'object') {
-              // Last resort: data is an object, try to convert its values to an array
-              products = Object.values(result.data).filter(item => typeof item === 'object');
-              console.log('Extracted products from object values:', products.length);
+
+      // Use API to get products
+      if (typeof DataService !== 'undefined') {
+        DataService.getAllProducts()
+          .then(result => {
+            console.log('API response:', result); // Debug log
+
+            let products = [];
+
+            // Extract products array from the response based on its structure
+            if (result.success) {
+              if (result.data && result.data.products && Array.isArray(result.data.products)) {
+                // Most common case: products are in result.data.products array
+                products = result.data.products;
+                console.log('Found products in result.data.products:', products.length);
+              } else if (Array.isArray(result.data)) {
+                // Alternative case: result.data is directly the array
+                products = result.data;
+                console.log('Found products directly in result.data:', products.length);
+              } else if (result.products && Array.isArray(result.products)) {
+                // Another case: products directly in the root
+                products = result.products;
+                console.log('Found products in result.products:', products.length);
+              } else if (result.data && typeof result.data === 'object') {
+                // Last resort: data is an object, try to convert its values to an array
+                products = Object.values(result.data).filter(item => typeof item === 'object');
+                console.log('Extracted products from object values:', products.length);
+              }
             }
-          }
-          
-          if (products.length > 0) {
-            // Filter for products on sale
-            const saleProducts = products.filter(product => product.onSale === true);
-            console.log('Sale products found:', saleProducts.length);
-            
-            if (saleProducts.length === 0) {
-              productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
-              return;
-            }
-            
-            // Clear container
-            productsContainer.innerHTML = '';
-            
-            // Display products
-            saleProducts.forEach(product => {
-              const productHTML = createProductCard(product);
-              productsContainer.innerHTML += productHTML;
-            });
-            
-            // Add "Add to Cart" button events
-            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-              button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = parseInt(this.getAttribute('data-product-id'));
-                addToCart(productId, 1);
+
+            if (products.length > 0) {
+              // Filter for products on sale
+              const saleProducts = products.filter(product => product.onSale === true);
+              console.log('Sale products found:', saleProducts.length);
+
+              if (saleProducts.length === 0) {
+                productsContainer.innerHTML = '<div class="col-12 text-center"><p>No products currently on sale. Please check back later for new offers.</p></div>';
+                return;
+              }
+
+              // Clear container
+              productsContainer.innerHTML = '';
+
+              // Display products
+              saleProducts.forEach(product => {
+                const productHTML = createProductCard(product);
+                productsContainer.innerHTML += productHTML;
               });
-            });
-          } else {
-            productsContainer.innerHTML = `<div class="col-12 text-center"><p class="text-danger">Error loading products: ${result.message || 'No products found in the API response'}</p></div>`;
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching sale products:', error);
-          productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading products. Please try again later.</p></div>';
-        });
-    } else {
-      console.error('DataService is not defined');
-      productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error: API service not available</p></div>';
+
+              // Add "Add to Cart" button events
+              document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                  e.preventDefault();
+                  const productId = parseInt(this.getAttribute('data-product-id'));
+                  addToCart(productId, 1);
+                });
+              });
+            } else {
+              productsContainer.innerHTML = `<div class="col-12 text-center"><p class="text-danger">Error loading products: ${result.message || 'No products found in the API response'}</p></div>`;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching sale products:', error);
+            productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading products. Please try again later.</p></div>';
+          });
+      } else {
+        console.error('DataService is not defined');
+        productsContainer.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error: API service not available</p></div>';
+      }
     }
-  }
-  
-  // 创建产品卡片HTML
-  function createProductCard(product) {
-    // 生成星级评分HTML
-    const fullStars = Math.floor(product.rating || 0);
-    const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
-    
-    let starsHtml = '<div class="product-rating">';
-    for (let i = 0; i < fullStars; i++) {
-      starsHtml += '<i class="bi bi-star-fill"></i>';
-    }
-    if (hasHalfStar) {
-      starsHtml += '<i class="bi bi-star-half"></i>';
-    }
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    for (let i = 0; i < emptyStars; i++) {
-      starsHtml += '<i class="bi bi-star"></i>';
-    }
-    starsHtml += '</div>';
-    
-    // 价格显示
-    let priceHtml = '';
-    if (product.onSale && product.salePrice) {
-      priceHtml = `
+
+    // 创建产品卡片HTML
+    function createProductCard(product) {
+      // 生成星级评分HTML
+      const fullStars = Math.floor(product.rating || 0);
+      const hasHalfStar = (product.rating || 0) % 1 >= 0.5;
+
+      let starsHtml = '<div class="product-rating">';
+      for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="bi bi-star-fill"></i>';
+      }
+      if (hasHalfStar) {
+        starsHtml += '<i class="bi bi-star-half"></i>';
+      }
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="bi bi-star"></i>';
+      }
+      starsHtml += '</div>';
+
+      // 价格显示
+      let priceHtml = '';
+      if (product.onSale && product.salePrice) {
+        priceHtml = `
         <div class="product-price-wrapper">
           <span class="product-price">$${product.salePrice.toFixed(2)}</span>
           <span class="product-price-discount">$${product.price.toFixed(2)}</span>
         </div>
       `;
-    } else if (product.price) {
-      priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
-    } else {
-      priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
-    }
-    
-    return `
+      } else if (product.price) {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">$${product.price.toFixed(2)}</span></div>`;
+      } else {
+        priceHtml = `<div class="product-price-wrapper"><span class="product-price">Price unavailable</span></div>`;
+      }
+
+      return `
       <div class="col-md-6 col-lg-4">
         <div class="product-card">
           <div class="product-img-wrapper">
-            <a href="product/product_detail.html?id=${product.id}">
-              <img src="${product.images && product.images.length > 0 ? product.images[0] : '/src/client/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
+            <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}">
+              <img src="${product.images && product.images.length > 0 ? product.images[0] : '/~xzy2020c/PurelyHandmade/assets/placeholder.jpg'}" class="product-img" alt="${product.name || 'Product'}">
               ${product.onSale ? '<div class="product-badge">Sale</div>' : ''}
             </a>
           </div>
           <div class="product-card-body">
-            <a href="product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
+            <a href="/~xzy2020c/PurelyHandmade/views/product/product_detail.html?id=${product.id}" style="text-decoration: none; color: inherit;">
               <h2 class="product-title">${product.name}</h2>
             </a>
             ${priceHtml}
@@ -342,221 +347,217 @@
         </div>
       </div>
     `;
-  }
-  
-  // 添加到购物车
-  async function addToCart(productId, quantity) {
-    try {
-      // 获取当前用户信息
-      const currentUser = DataService.getCurrentUser();
-      
-      if (!currentUser) {
-        // 如果用户未登录，提示登录
-        showToast('Please login to add items to cart', 'error');
-        setTimeout(() => {
-          window.location.href = '/src/client/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
-        }, 1500);
-        return false;
-      }
-      
-      // 显示加载中提示
-      showLoading('Adding to cart...');
-      
-      // 调用API添加商品到购物车
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${DataService.getAuthToken()}`
-        },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          productId: productId,
-          quantity: quantity
-        })
-      });
-      
-      const result = await response.json();
-      hideLoading();
-      
-      if (result.success) {
-        // 获取产品信息用于显示成功消息
-        const product = onSaleProducts.find(p => p.id == productId);
-        const productName = product ? product.name : 'Product';
-        
-        // 显示成功消息
-        showToast(`${productName} added to your cart!`, 'success');
-        
-        // 更新购物车计数
-        if (typeof updateCartCount === 'function') {
-          updateCartCount();
-        }
-        
-        return true;
-      } else {
-        showToast(result.message || 'Failed to add item to cart', 'error');
-        return false;
-      }
-    } catch (error) {
-      hideLoading();
-      console.error('Error adding product to cart:', error);
-      showToast('Error adding product to cart', 'error');
-      return false;
     }
-  }
-  
-  // 显示加载提示
-  function showLoading(message = 'Loading...') {
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'loading-overlay';
-    loadingEl.style.position = 'fixed';
-    loadingEl.style.top = '0';
-    loadingEl.style.left = '0';
-    loadingEl.style.width = '100%';
-    loadingEl.style.height = '100%';
-    loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-    loadingEl.style.display = 'flex';
-    loadingEl.style.flexDirection = 'column';
-    loadingEl.style.justifyContent = 'center';
-    loadingEl.style.alignItems = 'center';
-    loadingEl.style.zIndex = '9999';
-    
-    const spinner = document.createElement('div');
-    spinner.className = 'loading-spinner';
-    spinner.style.width = '40px';
-    spinner.style.height = '40px';
-    spinner.style.border = '4px solid #f3f3f3';
-    spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
-    spinner.style.borderRadius = '50%';
-    spinner.style.animation = 'spin 1s linear infinite';
-    spinner.style.marginBottom = '15px';
-    
-    const messageEl = document.createElement('div');
-    messageEl.className = 'loading-message';
-    messageEl.textContent = message;
-    messageEl.style.fontSize = '16px';
-    
-    loadingEl.appendChild(spinner);
-    loadingEl.appendChild(messageEl);
-    document.body.appendChild(loadingEl);
-    
-    // 添加动画样式
-    if (!document.getElementById('loading-spinner-style')) {
-      const style = document.createElement('style');
-      style.id = 'loading-spinner-style';
-      style.textContent = `
+
+    // 添加到购物车
+    async function addToCart(productId, quantity) {
+      try {
+        // 获取当前用户信息
+        const currentUser = DataService.getCurrentUser();
+
+        if (!currentUser) {
+          // 如果用户未登录，提示登录
+          showToast('Please login to add items to cart', 'error');
+          setTimeout(() => {
+            window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?returnUrl=' + encodeURIComponent(window.location.href);
+          }, 1500);
+          return false;
+        }
+
+        // 显示加载中提示
+        showLoading('Adding to cart...');
+
+        // 调用API添加商品到购物车
+        const response = await fetch('/~xzy2020c/PurelyHandmade/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${DataService.getAuthToken()}`
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            productId: productId,
+            quantity: quantity
+          })
+        });
+
+        const result = await response.json();
+        hideLoading();
+
+        if (result.success) {
+          // 获取产品信息用于显示成功消息
+          const product = onSaleProducts.find(p => p.id == productId);
+          const productName = product ? product.name : 'Product';
+
+          // 显示成功消息
+          showToast(`${productName} added to your cart!`, 'success');
+
+          // 更新购物车计数
+          if (typeof updateCartCount === 'function') {
+            updateCartCount();
+          }
+
+          return true;
+        } else {
+          showToast(result.message || 'Failed to add item to cart', 'error');
+          return false;
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Error adding product to cart:', error);
+        showToast('Error adding product to cart', 'error');
+        return false;
+      }
+    }
+
+    // 显示加载提示
+    function showLoading(message = 'Loading...') {
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'loading-overlay';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '0';
+      loadingEl.style.left = '0';
+      loadingEl.style.width = '100%';
+      loadingEl.style.height = '100%';
+      loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      loadingEl.style.display = 'flex';
+      loadingEl.style.flexDirection = 'column';
+      loadingEl.style.justifyContent = 'center';
+      loadingEl.style.alignItems = 'center';
+      loadingEl.style.zIndex = '9999';
+
+      const spinner = document.createElement('div');
+      spinner.className = 'loading-spinner';
+      spinner.style.width = '40px';
+      spinner.style.height = '40px';
+      spinner.style.border = '4px solid #f3f3f3';
+      spinner.style.borderTop = '4px solid var(--accent-color, #4CAF50)';
+      spinner.style.borderRadius = '50%';
+      spinner.style.animation = 'spin 1s linear infinite';
+      spinner.style.marginBottom = '15px';
+
+      const messageEl = document.createElement('div');
+      messageEl.className = 'loading-message';
+      messageEl.textContent = message;
+      messageEl.style.fontSize = '16px';
+
+      loadingEl.appendChild(spinner);
+      loadingEl.appendChild(messageEl);
+      document.body.appendChild(loadingEl);
+
+      // 添加动画样式
+      if (!document.getElementById('loading-spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'loading-spinner-style';
+        style.textContent = `
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
       `;
-      document.head.appendChild(style);
+        document.head.appendChild(style);
+      }
     }
-  }
-  
-  // 隐藏加载提示
-  function hideLoading() {
-    const loadingEl = document.getElementById('loading-overlay');
-    if (loadingEl) {
-      loadingEl.remove();
+
+    // 隐藏加载提示
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-overlay');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
     }
-  }
-  
-  // 显示Toast通知
-  function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toast-container');
-    
-    if (!toastContainer) return;
-    
-    // 创建toast元素
-    const toast = document.createElement('div');
-    toast.className = `modern-toast ${type}`;
-    toast.style.animation = 'slideUpIn 0.3s forwards';
-    toast.style.backgroundColor = type === 'success' ? '#5cb85c' : 
-                                 type === 'error' ? '#d9534f' : 
-                                 type === 'info' ? '#5bc0de' : '#f0ad4e';
-    toast.style.color = '#fff';
-    toast.style.padding = '12px 20px';
-    toast.style.borderRadius = '4px';
-    toast.style.marginBottom = '10px';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.justifyContent = 'space-between';
-    toast.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
-    
-    // 添加内容
-    toast.innerHTML = `
+
+    // 显示Toast通知
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toast-container');
+
+      if (!toastContainer) return;
+
+      // 创建toast元素
+      const toast = document.createElement('div');
+      toast.className = `modern-toast ${type}`;
+      toast.style.animation = 'slideUpIn 0.3s forwards';
+      toast.style.backgroundColor = type === 'success' ? '#5cb85c' :
+        type === 'error' ? '#d9534f' :
+          type === 'info' ? '#5bc0de' : '#f0ad4e';
+      toast.style.color = '#fff';
+      toast.style.padding = '12px 20px';
+      toast.style.borderRadius = '4px';
+      toast.style.marginBottom = '10px';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.justifyContent = 'space-between';
+      toast.style.boxShadow = '0 3px 6px rgba(0,0,0,0.16)';
+
+      // 添加内容
+      toast.innerHTML = `
       <div style="flex: 1; padding-right: 10px;">
-        <i class="bi ${type === 'success' ? 'bi-check-circle' : 
-                      type === 'error' ? 'bi-exclamation-circle' : 
-                      type === 'info' ? 'bi-info-circle' : 'bi-exclamation-triangle'} me-2"></i>
+        <i class="bi ${type === 'success' ? 'bi-check-circle' :
+          type === 'error' ? 'bi-exclamation-circle' :
+            type === 'info' ? 'bi-info-circle' : 'bi-exclamation-triangle'} me-2"></i>
         ${message}
       </div>
       <div style="cursor: pointer; font-size: 16px; color: #fff;">&times;</div>
     `;
-    
-    // 添加到容器
-    toastContainer.appendChild(toast);
-    
-    // 添加关闭按钮事件
-    const closeBtn = toast.querySelector('div:last-child');
-    closeBtn.addEventListener('click', function() {
-      toast.style.animation = 'fadeOut 0.3s forwards';
+
+      // 添加到容器
+      toastContainer.appendChild(toast);
+
+      // 添加关闭按钮事件
+      const closeBtn = toast.querySelector('div:last-child');
+      closeBtn.addEventListener('click', function () {
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      });
+
+      // 自动3秒后移除
       setTimeout(() => {
-        toast.remove();
-      }, 300);
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3000);
+    }
+
+    // 更新购物车计数函数
+    function updateCartCount() {
+      const cartData = localStorage.getItem('cart');
+      const cartCount = document.getElementById('cart-count');
+
+      if (!cartCount) return;
+
+      if (cartData) {
+        const cart = JSON.parse(cartData);
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        cartCount.textContent = count;
+        cartCount.style.display = count > 0 ? 'inline-block' : 'none';
+      } else {
+        cartCount.style.display = 'none';
+      }
+    }
+
+    // 在文档完全加载后再次检查并更新身份验证状态和购物车
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOMContentLoaded: Document fully loaded, checking auth and cart state');
+
+      // 加载打折商品
+      loadSaleProducts();
+
+      // 添加额外的延迟来确保导航栏已完全加载并且身份验证状态得到正确更新
+      setTimeout(() => {
+        console.log('Document fully loaded, updating auth state again');
+        if (typeof window.updateAuthButton === 'function') {
+          window.updateAuthButton();
+        }
+
+        if (typeof window.updateCartCount === 'function') {
+          window.updateCartCount();
+        }
+      }, 500);
     });
-    
-    // 自动3秒后移除
-    setTimeout(() => {
-      toast.style.animation = 'fadeOut 0.3s forwards';
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
-    }, 3000);
-  }
-  
-  // 更新购物车计数函数
-  function updateCartCount() {
-    const cartData = localStorage.getItem('cart');
-    const cartCount = document.getElementById('cart-count');
-    
-    if (!cartCount) return;
-    
-    if (cartData) {
-      const cart = JSON.parse(cartData);
-      const count = cart.reduce((total, item) => total + item.quantity, 0);
-      cartCount.textContent = count;
-      cartCount.style.display = count > 0 ? 'inline-block' : 'none';
-    } else {
-      cartCount.style.display = 'none';
-    }
-  }
-  
-  // 在文档完全加载后再次检查并更新身份验证状态和购物车
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded: Document fully loaded, checking auth and cart state');
-    
-    // 确保数据初始化
-    if (typeof window.initializeData === 'function') {
-      window.initializeData();
-    }
-    
-    // 加载打折商品
-    loadSaleProducts();
-    
-    // 添加额外的延迟来确保导航栏已完全加载并且身份验证状态得到正确更新
-    setTimeout(() => {
-      console.log('Document fully loaded, updating auth state again');
-      if (typeof window.updateAuthButton === 'function') {
-        window.updateAuthButton();
-      }
-      
-      if (typeof window.updateCartCount === 'function') {
-        window.updateCartCount();
-      }
-    }, 500);
-  });
-</script>
+  </script>
 </body>
-</html> 
+
+</html>

@@ -8,13 +8,23 @@
 // Log when this script is loaded
 console.log('api-data-loader.js loaded at', new Date().toISOString());
 
-// Universal fix to handle port issues - change API base URL if needed
-if (typeof DataService !== 'undefined' && DataService.apiBaseUrl) {
-  // If we're on port 8001, update the API base URL
-  if (window.location.port === '8001') {
-    DataService.apiBaseUrl = '/api';
-    console.log('Updated API base URL for port 8001:', DataService.apiBaseUrl);
+// 确保CONFIG对象已加载
+(function ensureConfigLoaded() {
+  if (typeof window.CONFIG === 'undefined') {
+    console.warn('CONFIG object not found, waiting for it to be defined...');
+    // CONFIG未找到，但我们不再尝试加载它，因为这会导致重复定义
+    // 它应该由HTML文件中的<script>标签加载
+    console.error('Please make sure config.js is loaded before api-data-loader.js');
+  } else {
+    console.log('CONFIG object detected:', CONFIG.BASE_URL);
   }
+})();
+
+// Universal fix to handle port issues - change API base URL if needed
+if (typeof window.DataService !== 'undefined') {
+  console.log('DataService detected');
+} else {
+  console.warn('DataService not detected, waiting for it to be defined...');
 }
 
 // Universal container ID helper function
@@ -184,7 +194,7 @@ window.loadProducts = async function(containerId, options = {}) {
               </a>
             </div>
             <div class="product-card-body">
-              <a href="${CONFIG.getViewPath('Products/product_detail.html')}?id=${product.id}" style="text-decoration: none; color: inherit;">
+              <a href="${CONFIG.getViewPath('products/product_detail.html')}?id=${product.id}" style="text-decoration: none; color: inherit;">
                 <h2 class="product-title">${product.name}</h2>
               </a>
               ${priceHtml}
@@ -227,6 +237,17 @@ window.loadCategories = async function(containerId, options = {}) {
     console.warn('API loadCategories() - containerId is undefined, using default container ID: "category-cards-container"');
     containerId = 'category-cards-container'; // 使用默认的容器ID
   }
+  
+  // 检查CONFIG对象是否正确加载
+  if (typeof CONFIG === 'undefined') {
+    console.error('API loadCategories() - CONFIG is not defined');
+    showErrorInContainer(containerId, 'Configuration is not loaded, cannot proceed');
+    return;
+  }
+  
+  // 输出CONFIG对象状态以诊断问题
+  console.log('API loadCategories() - CONFIG object:', CONFIG);
+  console.log('API loadCategories() - CONFIG.getImagePath exists:', typeof CONFIG.getImagePath === 'function');
   
   // 检查DataService可用性
   if (typeof DataService === 'undefined') {
@@ -323,14 +344,19 @@ window.loadCategories = async function(containerId, options = {}) {
     filteredCategories.forEach(category => {
       console.log(`API loadCategories() - Rendering category:`, category.id, category.name);
       
-      // 处理图像
-      const imgSrc = category.image || '/~xzy2020c/PurelyHandmade/img/category-placeholder.jpg';
+      // 处理图像 - 使用备选方案以避免函数调用错误
+      let imgSrc = `${CONFIG.getImagePath(category.image)}`;
+      if (!imgSrc) {
+        // 直接使用相对路径，避免使用可能不存在的函数
+        imgSrc = `${CONFIG.BASE_URL}/img/category-placeholder.jpg`;
+        console.log(`API loadCategories() - Using fallback image path: ${imgSrc}`);
+      }
       
       // 创建分类卡片
       const categoryHtml = `
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="category-card">
-            <a href="/~xzy2020c/PurelyHandmade/products/product-list.html?id=${category.id}" class="category-link">
+            <a href="${CONFIG.getViewPath(`/products/product-list.html?id=${category.id}`)}" class="category-link">
               <div class="category-img-wrapper">
                 <img src="${imgSrc}" class="category-img" alt="${category.name}">
                 <div class="category-overlay">
@@ -588,23 +614,34 @@ document.addEventListener('DOMContentLoaded', function() {
 // Helper function to ensure all API-related scripts are loaded on any page
 window.ensureApiScriptsLoaded = function() {
   const requiredScripts = [
-    `${CONFIG.getJsPath('data-service.js')}`,
-    `${CONFIG.getJsPath('api-data-loader.js')}`
+    '/~xzy2020c/PurelyHandmade/js/config.js', // 确保config.js首先加载
+    '/~xzy2020c/PurelyHandmade/js/data-service.js',
+    '/~xzy2020c/PurelyHandmade/js/api-data-loader.js'
   ];
   
   // Check if scripts are already loaded
   const loadedScripts = Array.from(document.querySelectorAll('script')).map(script => script.src);
   
-  // Add any missing scripts
+  // Add any missing scripts in sequence
+  let loadPromise = Promise.resolve();
+  
   requiredScripts.forEach(scriptSrc => {
     const fullSrc = new URL(scriptSrc, window.location.origin).href;
     if (!loadedScripts.some(loadedSrc => loadedSrc.includes(scriptSrc))) {
-      const script = document.createElement('script');
-      script.src = scriptSrc;
-      document.head.appendChild(script);
-      console.log('Loaded missing script:', scriptSrc);
+      loadPromise = loadPromise.then(() => {
+        return new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = scriptSrc;
+          script.onload = resolve;
+          script.onerror = resolve; // Continue even if error
+          document.head.appendChild(script);
+          console.log('Loading script:', scriptSrc);
+        });
+      });
     }
   });
+  
+  return loadPromise;
 };
 
 /**

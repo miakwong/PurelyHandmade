@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Management - Purely Homemade</title>
+
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="/src/client/css/global.css" rel="stylesheet">
-  <link href="/src/client/css/navbar.css" rel="stylesheet">
-  <link href="/src/client/css/admin.css" rel="stylesheet">
-  
+
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('admin.css')}">
+    `);
+  </script>
+
   <style>
     /* Style for action buttons */
     .action-buttons {
@@ -18,7 +28,7 @@
       align-items: center;
       gap: 0.5rem;
     }
-    
+
     /* Admin button styles */
     .admin-btn-sm {
       display: inline-flex;
@@ -29,28 +39,28 @@
       padding: 0;
       border-radius: 4px;
     }
-    
+
     /* Style for badges */
     .badge-success {
       background-color: #5a8c70;
       color: white;
     }
-    
+
     .badge-warning {
       background-color: #e6a23c;
       color: white;
     }
-    
+
     .badge-danger {
       background-color: #d9534f;
       color: white;
     }
-    
+
     .user-management-card {
       border-radius: 12px;
       overflow: hidden;
     }
-    
+
     .user-table th {
       font-weight: 600;
       font-size: 0.9rem;
@@ -58,11 +68,11 @@
       letter-spacing: 0.5px;
       color: #555;
     }
-    
+
     .user-table tbody tr:hover {
       background-color: rgba(134, 118, 102, 0.05);
     }
-    
+
     .empty-state-icon {
       width: 70px;
       height: 70px;
@@ -74,9 +84,9 @@
       color: #ccc;
       background-color: #f8f9fa;
       border: 1px solid #f0f0f0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-    
+
     .user-avatar {
       width: 50px;
       height: 50px;
@@ -88,33 +98,33 @@
       justify-content: center;
       border: 1px solid #eaeaea;
     }
-    
+
     .user-avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     .user-role-admin {
       background-color: #5a8c70;
       color: white;
     }
-    
+
     .user-role-user {
       background-color: #6c757d;
       color: white;
     }
-    
+
     .user-status-active {
       background-color: #5a8c70;
       color: white;
     }
-    
+
     .user-status-inactive {
       background-color: #dc3545;
       color: white;
     }
-    
+
     /* Filter section styles */
     .filter-section {
       background-color: #f8f9fa;
@@ -123,7 +133,7 @@
       margin-bottom: 20px;
       border: 1px solid #e9ecef;
     }
-    
+
     .user-preview {
       position: relative;
       width: 120px;
@@ -133,13 +143,13 @@
       border: 2px solid #eaeaea;
       margin: 0 auto;
     }
-    
+
     .user-preview img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     .user-stats-card {
       background-color: #f8f9fa;
       border-radius: 8px;
@@ -147,7 +157,7 @@
       margin-bottom: 20px;
       border: 1px solid #e9ecef;
     }
-    
+
     .user-stat {
       display: flex;
       flex-direction: column;
@@ -155,21 +165,21 @@
       padding: 15px;
       background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
-    
+
     .user-stat-icon {
       font-size: 1.8rem;
       margin-bottom: 10px;
       color: #5a8c70;
     }
-    
+
     .user-stat-value {
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 5px;
     }
-    
+
     .user-stat-label {
       font-size: 0.85rem;
       color: #6c757d;
@@ -178,678 +188,691 @@
     }
   </style>
 </head>
+
 <body>
 
-<!-- Navbar Placeholder -->
-<div id="navbar-placeholder"></div>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
 
-<div class="container-fluid">
-  <div class="row">
-    <!-- Sidebar -->
-    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-      <div class="position-sticky pt-3">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard.html">
-              <i class="bi bi-speedometer2 me-2"></i>
-              Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="products.html">
-              <i class="bi bi-box me-2"></i>
-              Products
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="categories.html">
-              <i class="bi bi-tags me-2"></i>
-              Categories
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="designers.html">
-              <i class="bi bi-palette me-2"></i>
-              Designers
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="orders.html">
-              <i class="bi bi-cart-check me-2"></i>
-              Orders
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="users.html">
-              <i class="bi bi-people me-2"></i>
-              Users
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="comments.html">
-              <i class="bi bi-chat-dots me-2"></i>
-              Reviews
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="reports.html">
-              <i class="bi bi-graph-up me-2"></i>
-              Reports
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="settings.html">
-              <i class="bi bi-gear me-2"></i>
-              Settings
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    
-    <!-- Main content -->
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2"><i class="bi bi-people me-2 text-primary"></i>User Management</h1>
-        <div>
-          <a href="/src/client/views/auth/profile.html" class="btn btn-outline-secondary">
-            <i class="bi bi-person me-2"></i>Back to Profile
-          </a>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="position-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/dashboard.html">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/products.html">
+                <i class="bi bi-box me-2"></i>
+                Products
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/categories.html">
+                <i class="bi bi-tags me-2"></i>
+                Categories
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/designers.html">
+                <i class="bi bi-palette me-2"></i>
+                Designers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/orders.html">
+                <i class="bi bi-cart-check me-2"></i>
+                Orders
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/~xzy2020c/PurelyHandmade/views/admin/users.html">
+                <i class="bi bi-people me-2"></i>
+                Users
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/comments.html">
+                <i class="bi bi-chat-dots me-2"></i>
+                Reviews
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/reports.html">
+                <i class="bi bi-graph-up me-2"></i>
+                Reports
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/settings.html">
+                <i class="bi bi-gear me-2"></i>
+                Settings
+              </a>
+            </li>
+          </ul>
         </div>
-      </div>
-      
-      <!-- User Stats -->
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <div class="user-stat">
-            <div class="user-stat-icon">
-              <i class="bi bi-people-fill"></i>
-            </div>
-            <div class="user-stat-value" id="total-users-count">0</div>
-            <div class="user-stat-label">Total Users</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="user-stat">
-            <div class="user-stat-icon">
-              <i class="bi bi-person-check-fill"></i>
-            </div>
-            <div class="user-stat-value" id="active-users-count">0</div>
-            <div class="user-stat-label">Active Users</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="user-stat">
-            <div class="user-stat-icon">
-              <i class="bi bi-person-fill-lock"></i>
-            </div>
-            <div class="user-stat-value" id="admin-users-count">0</div>
-            <div class="user-stat-label">Administrators</div>
-          </div>
-        </div>
-      </div>
+      </nav>
 
-      <!-- Filter Section -->
-      <div class="filter-section mb-4">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label for="filter-role" class="form-label">Role</label>
-            <select class="form-select" id="filter-role">
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label for="filter-status" class="form-label">Status</label>
-            <select class="form-select" id="filter-status">
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label for="filter-search" class="form-label">Search</label>
-            <input type="text" class="form-control" id="filter-search" placeholder="Search by name or email...">
+      <!-- Main content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="bi bi-people me-2 text-primary"></i>User Management</h1>
+          <div>
+            <a href="/~xzy2020c/PurelyHandmade/views/auth/profile.html" class="btn btn-outline-secondary">
+              <i class="bi bi-person me-2"></i>Back to Profile
+            </a>
           </div>
         </div>
-        <div class="row mt-3">
-          <div class="col-12 d-flex justify-content-end">
-            <button class="btn btn-secondary me-2" onclick="resetFilters()">
-              <i class="bi bi-x-circle me-2"></i>Clear Filters
-            </button>
-            <button class="btn btn-primary" onclick="applyFilters()">
-              <i class="bi bi-funnel me-2"></i>Apply Filters
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div class="card mb-4 user-management-card">
-        <div class="card-header">
-          <div class="row align-items-center">
-            <div class="col">
-              <h5 class="mb-0">User Management</h5>
-            </div>
-            <div class="col-auto">
-              <button class="btn btn-primary" onclick="resetUserForm()">
-                <i class="bi bi-plus-circle me-2"></i>Add User
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover user-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Joined Date</th>
-                  <th>Last Login</th>
-                  <th class="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="user-table-body">
-                <!-- User data will be loaded here -->
-              </tbody>
-            </table>
-            <div id="no-users-message" class="d-none text-center py-5">
-              <div class="empty-state-icon mx-auto mb-3">
-                <i class="bi bi-people"></i>
+        <!-- User Stats -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="user-stat">
+              <div class="user-stat-icon">
+                <i class="bi bi-people-fill"></i>
               </div>
-              <p class="text-muted mb-3">No users found</p>
-              <button class="btn btn-primary" onclick="resetUserForm()">
-                Add Your First User
+              <div class="user-stat-value" id="total-users-count">0</div>
+              <div class="user-stat-label">Total Users</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="user-stat">
+              <div class="user-stat-icon">
+                <i class="bi bi-person-check-fill"></i>
+              </div>
+              <div class="user-stat-value" id="active-users-count">0</div>
+              <div class="user-stat-label">Active Users</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="user-stat">
+              <div class="user-stat-icon">
+                <i class="bi bi-person-fill-lock"></i>
+              </div>
+              <div class="user-stat-value" id="admin-users-count">0</div>
+              <div class="user-stat-label">Administrators</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section mb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="filter-role" class="form-label">Role</label>
+              <select class="form-select" id="filter-role">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="filter-status" class="form-label">Status</label>
+              <select class="form-select" id="filter-status">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="filter-search" class="form-label">Search</label>
+              <input type="text" class="form-control" id="filter-search" placeholder="Search by name or email...">
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-secondary me-2" onclick="resetFilters()">
+                <i class="bi bi-x-circle me-2"></i>Clear Filters
+              </button>
+              <button class="btn btn-primary" onclick="applyFilters()">
+                <i class="bi bi-funnel me-2"></i>Apply Filters
               </button>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+
+        <div class="card mb-4 user-management-card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h5 class="mb-0">User Management</h5>
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-primary" onclick="resetUserForm()">
+                  <i class="bi bi-plus-circle me-2"></i>Add User
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover user-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined Date</th>
+                    <th>Last Login</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="user-table-body">
+                  <!-- User data will be loaded here -->
+                </tbody>
+              </table>
+              <div id="no-users-message" class="d-none text-center py-5">
+                <div class="empty-state-icon mx-auto mb-3">
+                  <i class="bi bi-people"></i>
+                </div>
+                <p class="text-muted mb-3">No users found</p>
+                <button class="btn btn-primary" onclick="resetUserForm()">
+                  Add Your First User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
-</div>
 
-<!-- Add/Edit User Modal -->
-<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content border-0 shadow admin-modal">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title" id="userModalLabel">Edit User</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-0">
-        <form id="user-form">
-          <input type="hidden" id="user-id">
-          
-          <!-- User Profile Header -->
-          <div class="bg-light p-4 text-center border-bottom">
-            <div class="user-preview mb-3 mx-auto">
-              <img id="user-img-preview" src="/src/client/img/profile.png" alt="User preview">
+  <!-- Add/Edit User Modal -->
+  <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content border-0 shadow admin-modal">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="userModalLabel">Edit User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <form id="user-form">
+            <input type="hidden" id="user-id">
+
+            <!-- User Profile Header -->
+            <div class="bg-light p-4 text-center border-bottom">
+              <div class="user-preview mb-3 mx-auto">
+                <img id="user-img-preview" src="/~xzy2020c/PurelyHandmade/img/profile.png" alt="User preview">
+              </div>
+              <h4 id="user-full-name" class="mb-1">User Name</h4>
+              <p id="user-email-display" class="text-muted mb-0">user@example.com</p>
             </div>
-            <h4 id="user-full-name" class="mb-1">User Name</h4>
-            <p id="user-email-display" class="text-muted mb-0">user@example.com</p>
-          </div>
-          
-          <div class="row g-0">
-            <!-- Admin Controls Column -->
-            <div class="col-md-6 border-end p-4">
-              <h5 class="mb-4 pb-2 border-bottom text-primary">
-                <i class="bi bi-shield-lock me-2"></i>Admin Controls
-              </h5>
-              
-              <!-- Account Permissions -->
-              <div class="admin-form-group mb-4">
-                <label for="user-role" class="admin-form-label fw-bold">Account Type<span class="text-danger">*</span></label>
-                <select class="admin-form-control form-select" id="user-role" required>
-                  <option value="user">Standard User</option>
-                  <option value="admin">Administrator</option>
-                </select>
-                <small class="form-text">Administrator accounts have full access to the admin panel</small>
-              </div>
-              
-              <div class="admin-form-group mb-4">
-                <label for="user-status" class="admin-form-label fw-bold">Account Status<span class="text-danger">*</span></label>
-                <select class="admin-form-control form-select" id="user-status" required>
-                  <option value="active">Active (Unlocked)</option>
-                  <option value="inactive">Inactive (Locked)</option>
-                </select>
-                <small class="form-text text-muted">Inactive accounts cannot log in to the system</small>
-              </div>
-              
-              <div class="admin-form-group mb-4">
-                <label for="user-can-order" class="admin-form-label fw-bold">Ordering Permission<span class="text-danger">*</span></label>
-                <select class="admin-form-control form-select" id="user-can-order" required>
-                  <option value="true">Allowed</option>
-                  <option value="false">Blocked</option>
-                </select>
-                <small class="form-text text-muted">Blocked users cannot place new orders</small>
-              </div>
-              
-              <!-- Password Reset -->
-              <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light">
-                  <h6 class="mb-0">Password Reset</h6>
+
+            <div class="row g-0">
+              <!-- Admin Controls Column -->
+              <div class="col-md-6 border-end p-4">
+                <h5 class="mb-4 pb-2 border-bottom text-primary">
+                  <i class="bi bi-shield-lock me-2"></i>Admin Controls
+                </h5>
+
+                <!-- Account Permissions -->
+                <div class="admin-form-group mb-4">
+                  <label for="user-role" class="admin-form-label fw-bold">Account Type<span
+                      class="text-danger">*</span></label>
+                  <select class="admin-form-control form-select" id="user-role" required>
+                    <option value="user">Standard User</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                  <small class="form-text">Administrator accounts have full access to the admin panel</small>
                 </div>
-                <div class="card-body">
-                  <div class="admin-form-group mb-3">
-                    <label for="user-password" class="admin-form-label">New Password</label>
-                    <input type="password" class="admin-form-control" id="user-password" placeholder="Enter new password to reset">
+
+                <div class="admin-form-group mb-4">
+                  <label for="user-status" class="admin-form-label fw-bold">Account Status<span
+                      class="text-danger">*</span></label>
+                  <select class="admin-form-control form-select" id="user-status" required>
+                    <option value="active">Active (Unlocked)</option>
+                    <option value="inactive">Inactive (Locked)</option>
+                  </select>
+                  <small class="form-text text-muted">Inactive accounts cannot log in to the system</small>
+                </div>
+
+                <div class="admin-form-group mb-4">
+                  <label for="user-can-order" class="admin-form-label fw-bold">Ordering Permission<span
+                      class="text-danger">*</span></label>
+                  <select class="admin-form-control form-select" id="user-can-order" required>
+                    <option value="true">Allowed</option>
+                    <option value="false">Blocked</option>
+                  </select>
+                  <small class="form-text text-muted">Blocked users cannot place new orders</small>
+                </div>
+
+                <!-- Password Reset -->
+                <div class="card shadow-sm mb-4">
+                  <div class="card-header bg-light">
+                    <h6 class="mb-0">Password Reset</h6>
                   </div>
-                  <div class="admin-form-group">
-                    <label for="user-password-confirm" class="admin-form-label">Confirm Password</label>
-                    <input type="password" class="admin-form-control" id="user-password-confirm" placeholder="Confirm new password">
+                  <div class="card-body">
+                    <div class="admin-form-group mb-3">
+                      <label for="user-password" class="admin-form-label">New Password</label>
+                      <input type="password" class="admin-form-control" id="user-password"
+                        placeholder="Enter new password to reset">
+                    </div>
+                    <div class="admin-form-group">
+                      <label for="user-password-confirm" class="admin-form-label">Confirm Password</label>
+                      <input type="password" class="admin-form-control" id="user-password-confirm"
+                        placeholder="Confirm new password">
+                    </div>
+                    <div class="form-text mt-2">Only fill this section when a password reset is needed</div>
                   </div>
-                  <div class="form-text mt-2">Only fill this section when a password reset is needed</div>
+                </div>
+
+                <!-- Admin Notes -->
+                <div class="admin-form-group">
+                  <label for="user-bio" class="admin-form-label fw-bold">Admin Notes</label>
+                  <textarea class="admin-form-control" id="user-bio" rows="3"
+                    placeholder="Private notes visible to administrators only..."></textarea>
                 </div>
               </div>
-              
-              <!-- Admin Notes -->
-              <div class="admin-form-group">
-                <label for="user-bio" class="admin-form-label fw-bold">Admin Notes</label>
-                <textarea class="admin-form-control" id="user-bio" rows="3" placeholder="Private notes visible to administrators only..."></textarea>
+
+              <!-- User Information Column (Read-only) -->
+              <div class="col-md-6 p-4 bg-light bg-opacity-50">
+                <h5 class="mb-4 pb-2 border-bottom text-secondary">
+                  <i class="bi bi-person-vcard me-2"></i>User Information
+                  <span class="badge bg-secondary ms-2 fs-6">Read-only</span>
+                </h5>
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="admin-form-group">
+                      <label class="admin-form-label small text-muted">First Name</label>
+                      <div class="form-control bg-white bg-opacity-75" id="user-first-name-display">-</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="admin-form-group">
+                      <label class="admin-form-label small text-muted">Last Name</label>
+                      <div class="form-control bg-white bg-opacity-75" id="user-last-name-display">-</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="admin-form-group mt-3">
+                  <label class="admin-form-label small text-muted">Username</label>
+                  <div class="form-control bg-white bg-opacity-75" id="user-username-display">-</div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                  <div class="col-md-6">
+                    <div class="admin-form-group">
+                      <label class="admin-form-label small text-muted">Birthday</label>
+                      <div class="form-control bg-white bg-opacity-75" id="user-birthday-display">-</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="admin-form-group">
+                      <label class="admin-form-label small text-muted">Gender</label>
+                      <div class="form-control bg-white bg-opacity-75" id="user-gender-display">-</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="admin-form-group mt-3">
+                  <label class="admin-form-label small text-muted">Phone Number</label>
+                  <div class="form-control bg-white bg-opacity-75" id="user-phone-display">-</div>
+                </div>
+
+                <div class="mt-4">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Personal information can only be modified by the user themselves through their profile page
+                  </div>
+                </div>
+
+                <!-- Hidden fields to store the values -->
+                <input type="hidden" id="user-first-name">
+                <input type="hidden" id="user-last-name">
+                <input type="hidden" id="user-email">
+                <input type="hidden" id="user-username">
+                <input type="hidden" id="user-birthday">
+                <input type="hidden" id="user-gender">
+                <input type="hidden" id="user-phone">
+                <input type="hidden" id="user-image-file">
               </div>
             </div>
-            
-            <!-- User Information Column (Read-only) -->
-            <div class="col-md-6 p-4 bg-light bg-opacity-50">
-              <h5 class="mb-4 pb-2 border-bottom text-secondary">
-                <i class="bi bi-person-vcard me-2"></i>User Information
-                <span class="badge bg-secondary ms-2 fs-6">Read-only</span>
-              </h5>
-              
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label small text-muted">First Name</label>
-                    <div class="form-control bg-white bg-opacity-75" id="user-first-name-display">-</div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label small text-muted">Last Name</label>
-                    <div class="form-control bg-white bg-opacity-75" id="user-last-name-display">-</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="admin-form-group mt-3">
-                <label class="admin-form-label small text-muted">Username</label>
-                <div class="form-control bg-white bg-opacity-75" id="user-username-display">-</div>
-              </div>
-              
-              <div class="row g-3 mt-1">
-                <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label small text-muted">Birthday</label>
-                    <div class="form-control bg-white bg-opacity-75" id="user-birthday-display">-</div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="admin-form-group">
-                    <label class="admin-form-label small text-muted">Gender</label>
-                    <div class="form-control bg-white bg-opacity-75" id="user-gender-display">-</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="admin-form-group mt-3">
-                <label class="admin-form-label small text-muted">Phone Number</label>
-                <div class="form-control bg-white bg-opacity-75" id="user-phone-display">-</div>
-              </div>
-              
-              <div class="mt-4">
-                <div class="alert alert-info">
-                  <i class="bi bi-info-circle me-2"></i>
-                  Personal information can only be modified by the user themselves through their profile page
-                </div>
-              </div>
-              
-              <!-- Hidden fields to store the values -->
-              <input type="hidden" id="user-first-name">
-              <input type="hidden" id="user-last-name">
-              <input type="hidden" id="user-email">
-              <input type="hidden" id="user-username">
-              <input type="hidden" id="user-birthday">
-              <input type="hidden" id="user-gender">
-              <input type="hidden" id="user-phone">
-              <input type="hidden" id="user-image-file">
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer bg-light">
-        <button type="button" class="admin-btn admin-btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x-circle me-1"></i>Cancel
-        </button>
-        <button type="button" class="admin-btn admin-btn-primary" onclick="saveUser()">
-          <i class="bi bi-check2-circle me-1"></i>Save Changes
-        </button>
+          </form>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="admin-btn admin-btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </button>
+          <button type="button" class="admin-btn admin-btn-primary" onclick="saveUser()">
+            <i class="bi bi-check2-circle me-1"></i>Save Changes
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Footer Placeholder -->
-<div id="footer-placeholder"></div>
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
 
-<!-- Toast container -->
-<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+  <!-- Toast container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- 直接在页面中内联定义关键服务，避免加载问题 -->
-<script>
-/**
- * API Service for Purely Handmade
- * 提供统一的API访问层，处理所有与服务器的通信
- */
-const ApiService = {
-  // 基础API URL
-  baseUrl: '/api',
-  
-  // 获取授权令牌
-  getAuthToken: function() {
-    return localStorage.getItem('authToken');
-  },
-  
-  // 获取带有授权信息的请求头
-  getAuthHeaders: function() {
-    const token = this.getAuthToken();
-    return token ? {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    } : {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    };
-  },
-  
-  // 处理API响应
-  handleResponse: async function(response) {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
-    
-    // 如果状态码不在2xx范围内，抛出错误
-    if (!response.ok) {
-      let errorData;
-      
-      try {
-        errorData = isJson ? await response.json() : await response.text();
-      } catch (error) {
-        errorData = 'Failed to parse error response';
-      }
-      
-      const error = new Error(
-        isJson && errorData.error 
-          ? errorData.error 
-          : 'API request failed'
-      );
-      
-      error.status = response.status;
-      error.statusText = response.statusText;
-      error.data = errorData;
-      
-      throw error;
-    }
-    
-    // 解析成功响应
-    return isJson ? response.json() : response.text();
-  },
-  
-  // 发送请求
-  request: async function(url, options = {}) {
-    const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
-    
-    // 默认选项
-    const defaultOptions = {
-      headers: this.getAuthHeaders(),
-      credentials: 'same-origin',
-    };
-    
-    // 合并选项
-    const fetchOptions = {
-      ...defaultOptions,
-      ...options,
-      headers: {
-        ...defaultOptions.headers,
-        ...options.headers,
+  <!-- 直接在页面中内联定义关键服务，避免加载问题 -->
+  <script>
+    /**
+     * API Service for Purely Handmade
+     * 提供统一的API访问层，处理所有与服务器的通信
+     */
+    const ApiService = {
+      // 基础API URL
+      baseUrl: '/~xzy2020c/PurelyHandmade/src/server/api',
+
+      // 获取授权令牌
+      getAuthToken: function () {
+        return localStorage.getItem('authToken');
       },
-    };
-    
-    // 调试日志
-    console.log(`🚀 发送API请求: ${options.method || 'GET'} ${fullUrl}`);
-    console.log('🔑 请求头:', JSON.stringify(fetchOptions.headers));
-    
-    try {
-      const response = await fetch(fullUrl, fetchOptions);
-      console.log(`📥 收到响应: ${response.status} ${response.statusText}`);
-      return await this.handleResponse(response);
-    } catch (error) {
-      console.error('❌ API请求失败:', error);
-      throw error;
-    }
-  },
-  
-  // GET请求
-  get: function(url, params = {}) {
-    // 构建查询字符串
-    const queryParams = new URLSearchParams();
-    Object.keys(params).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) {
-        queryParams.append(key, params[key]);
-      }
-    });
-    
-    const queryString = queryParams.toString();
-    const fullUrl = queryString ? `${url}?${queryString}` : url;
-    
-    return this.request(fullUrl, { method: 'GET' });
-  },
-  
-  // POST请求
-  post: function(url, data = {}) {
-    return this.request(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-  
-  // PUT请求
-  put: function(url, data = {}) {
-    return this.request(url, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-  
-  // DELETE请求
-  delete: function(url) {
-    return this.request(url, { method: 'DELETE' });
-  }
-};
 
-/**
- * Admin API Service for Purely Handmade
- * 提供管理员API访问层，处理与服务器的管理功能通信
- */
-const AdminApiService = {
-  // 获取所有用户
-  getAllUsers: function() {
-    return ApiService.get('/admin/users');
-  },
-  
-  // 获取用户详情
-  getUserById: function(userId) {
-    return ApiService.get(`/admin/users/detail?id=${userId}`);
-  },
-  
-  // 创建新用户
-  createUser: function(userData) {
-    return ApiService.post('/admin/users/create', userData);
-  },
-  
-  // 更新用户
-  updateUser: function(userId, userData) {
-    return ApiService.put(`/admin/users/update`, { id: userId, ...userData });
-  },
-  
-  // 禁用/启用用户
-  toggleUserStatus: function(userId, isEnabled) {
-    return ApiService.put(`/admin/users/status`, {
-      id: userId,
-      isEnabled: isEnabled
-    });
-  },
-  
-  // 删除用户
-  deleteUser: function(userId) {
-    return ApiService.delete(`/admin/users?id=${userId}`);
-  },
-  
-  // 获取所有产品
-  getAllProducts: function() {
-    return ApiService.get('/products');
-  },
-  
-  // 获取所有订单
-  getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
-  }
-};
-</script>
-
-<script src="/src/client/js/data-service.js"></script>
-<script src="/src/client/js/ui-helpers.js"></script>
-<script src="/src/client/js/common.js"></script>
-<script>
-  // Current filters
-  let currentFilters = {
-    role: '',
-    status: '',
-    search: ''
-  };
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    // 确保授权令牌存在
-    initApiAuth();
-    
-    // Rest of your existing code
-    loadNavbar();
-    loadFooter();
-    
-    // Set up image preview for user image
-    document.getElementById('user-image-file').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('user-img-preview').src = e.target.result;
+      // 获取带有授权信息的请求头
+      getAuthHeaders: function () {
+        const token = this.getAuthToken();
+        return token ? {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        } : {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         };
-        reader.readAsDataURL(file);
+      },
+
+      // 处理API响应
+      handleResponse: async function (response) {
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+
+        // 如果状态码不在2xx范围内，抛出错误
+        if (!response.ok) {
+          let errorData;
+
+          try {
+            errorData = isJson ? await response.json() : await response.text();
+          } catch (error) {
+            errorData = 'Failed to parse error response';
+          }
+
+          const error = new Error(
+            isJson && errorData.error
+              ? errorData.error
+              : 'API request failed'
+          );
+
+          error.status = response.status;
+          error.statusText = response.statusText;
+          error.data = errorData;
+
+          throw error;
+        }
+
+        // 解析成功响应
+        return isJson ? response.json() : response.text();
+      },
+
+      // 发送请求
+      request: async function (url, options = {}) {
+        const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
+
+        // 默认选项
+        const defaultOptions = {
+          headers: this.getAuthHeaders(),
+          credentials: 'same-origin',
+        };
+
+        // 合并选项
+        const fetchOptions = {
+          ...defaultOptions,
+          ...options,
+          headers: {
+            ...defaultOptions.headers,
+            ...options.headers,
+          },
+        };
+
+        // 调试日志
+        console.log(`🚀 发送API请求: ${options.method || 'GET'} ${fullUrl}`);
+        console.log('🔑 请求头:', JSON.stringify(fetchOptions.headers));
+
+        try {
+          const response = await fetch(fullUrl, fetchOptions);
+          console.log(`📥 收到响应: ${response.status} ${response.statusText}`);
+          return await this.handleResponse(response);
+        } catch (error) {
+          console.error('❌ API请求失败:', error);
+          throw error;
+        }
+      },
+
+      // GET请求
+      get: function (url, params = {}) {
+        // 构建查询字符串
+        const queryParams = new URLSearchParams();
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            queryParams.append(key, params[key]);
+          }
+        });
+
+        const queryString = queryParams.toString();
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
+
+        return this.request(fullUrl, { method: 'GET' });
+      },
+
+      // POST请求
+      post: function (url, data = {}) {
+        return this.request(url, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+      },
+
+      // PUT请求
+      put: function (url, data = {}) {
+        return this.request(url, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        });
+      },
+
+      // DELETE请求
+      delete: function (url) {
+        return this.request(url, { method: 'DELETE' });
       }
-    });
-    
-    // Check user permissions
-    checkAdminPermissions();
-    
-    // Set up search filter event
-    document.getElementById('filter-search').addEventListener('keyup', function(e) {
-      if (e.key === 'Enter') {
-        applyFilters();
+    };
+
+    /**
+     * Admin API Service for Purely Handmade
+     * 提供管理员API访问层，处理与服务器的管理功能通信
+     */
+    const AdminApiService = {
+      // 获取所有用户
+      getAllUsers: function () {
+        return ApiService.get('/admin/users');
+      },
+
+      // 获取用户详情
+      getUserById: function (userId) {
+        return ApiService.get(`/admin/users/detail?id=${userId}`);
+      },
+
+      // 创建新用户
+      createUser: function (userData) {
+        return ApiService.post('/admin/users/create', userData);
+      },
+
+      // 更新用户
+      updateUser: function (userId, userData) {
+        return ApiService.put(`/admin/users/update`, { id: userId, ...userData });
+      },
+
+      // 禁用/启用用户
+      toggleUserStatus: function (userId, isEnabled) {
+        return ApiService.put(`/admin/users/status`, {
+          id: userId,
+          isEnabled: isEnabled
+        });
+      },
+
+      // 删除用户
+      deleteUser: function (userId) {
+        return ApiService.delete(`/admin/users?id=${userId}`);
+      },
+
+      // 获取所有产品
+      getAllProducts: function () {
+        return ApiService.get('/products');
+      },
+
+      // 获取所有订单
+      getAllOrders: function () {
+        return ApiService.get('/orders?all=1');
       }
+    };
+  </script>
+
+  <script>
+    document.write(`
+      <script src="${CONFIG.getJsPath('common.js')}"><\/script>
+      <script src="${CONFIG.getJsPath('ui-helpers.js')}"><\/script>
+      <script src="${CONFIG.getJsPath('admin-auth.js')}"><\/script>
+    `);
+  </script>
+
+  <script>
+    // Current filters
+    let currentFilters = {
+      role: '',
+      status: '',
+      search: ''
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // 确保授权令牌存在
+      initApiAuth();
+
+      // Rest of your existing code
+      loadNavbar();
+      loadFooter();
+
+      // Set up image preview for user image
+      document.getElementById('user-image-file').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            document.getElementById('user-img-preview').src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Check user permissions
+      checkAdminPermissions();
+
+      // Set up search filter event
+      document.getElementById('filter-search').addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') {
+          applyFilters();
+        }
+      });
     });
-  });
-  
-  // Add this new function
-  function initApiAuth() {
-    console.log('初始化API授权');
-    
-    // 检查是否有授权令牌
-    const token = localStorage.getItem('authToken');
-    console.log('🔐 当前授权令牌:', token ? '存在' : '不存在');
-    
-    // 如果没有令牌，创建一个
-    if (!token) {
-      console.log('⚠️ 没有找到授权令牌，设置默认授权令牌');
-      localStorage.setItem('authToken', 'valid-admin-token');
-      
-      // 设置当前用户信息
-      const currentUser = {
-        id: 1,
-        username: 'admin',
-        isAdmin: true
-      };
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      console.log('✅ 已设置默认管理员用户:', currentUser);
-    } else {
-      console.log('✅ 已找到授权令牌, 长度:', token.length);
+
+    // Add this new function
+    function initApiAuth() {
+      console.log('初始化API授权');
+
+      // 检查是否有授权令牌
+      const token = localStorage.getItem('authToken');
+      console.log('🔐 当前授权令牌:', token ? '存在' : '不存在');
+
+      // 如果没有令牌，创建一个
+      if (!token) {
+        console.log('⚠️ 没有找到授权令牌，设置默认授权令牌');
+        localStorage.setItem('authToken', 'valid-admin-token');
+
+        // 设置当前用户信息
+        const currentUser = {
+          id: 1,
+          username: 'admin',
+          isAdmin: true
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        console.log('✅ 已设置默认管理员用户:', currentUser);
+      } else {
+        console.log('✅ 已找到授权令牌, 长度:', token.length);
+      }
     }
-  }
-  
-  /**
-   * 标准化用户数据格式，确保所有字段格式一致
-   * 这个函数处理各种可能的数据格式，使其符合页面期望的格式
-   */
-  function normalizeUserData(users) {
-    return users.map(user => {
-      // 处理名字：可能是单独的name字段或者firstName+lastName组合
-      let fullName = '';
-      if (user.name) {
-        fullName = user.name;
-      } else if (user.firstName || user.lastName) {
-        fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-      } else if (user.full_name) {
-        fullName = user.full_name;
-      }
-      
-      // 创建一个标准化的用户对象
-      const normalizedUser = {
-        id: user.id || Date.now().toString(),
-        name: fullName,
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        username: user.username || (user.email ? user.email.split('@')[0] : ''),
-        password: user.password || '', // 安全起见，通常不应返回密码，但保留原始数据
-        role: user.role || (user.isAdmin ? 'admin' : 'user'),
-        isAdmin: user.isAdmin !== undefined ? user.isAdmin : (user.role === 'admin'),
-        status: user.status || 'active',
-        bio: user.bio || '',
-        phone: user.phone || '',
-        address: user.address, // 保留地址字段但不设默认值
-        avatar: user.avatar || null,
-        birthday: user.birthday || '',
-        gender: user.gender || '',
-        createdAt: user.createdAt || user.created_at || new Date().toISOString(),
-        updatedAt: user.updatedAt || user.updated_at || user.createdAt || new Date().toISOString(),
-        lastLogin: user.lastLogin || user.last_login || null,
-        canOrder: user.canOrder !== undefined ? user.canOrder : true // 默认允许下单
-      };
-      
-      // 确保console中可见规范化后的用户数据，便于调试
-      console.log('Normalized user data:', normalizedUser);
-      
-      return normalizedUser;
-    });
-  }
-  
-  // User management functions
-  function loadUsers() {
-    const tableBody = document.getElementById('user-table-body');
-    const noUsers = document.getElementById('no-users-message');
-    
-    if (!tableBody || !noUsers) {
-      console.error('Required DOM elements not found');
-      return;
+
+    /**
+     * 标准化用户数据格式，确保所有字段格式一致
+     * 这个函数处理各种可能的数据格式，使其符合页面期望的格式
+     */
+    function normalizeUserData(users) {
+      return users.map(user => {
+        // 处理名字：可能是单独的name字段或者firstName+lastName组合
+        let fullName = '';
+        if (user.name) {
+          fullName = user.name;
+        } else if (user.firstName || user.lastName) {
+          fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        } else if (user.full_name) {
+          fullName = user.full_name;
+        }
+
+        // 创建一个标准化的用户对象
+        const normalizedUser = {
+          id: user.id || Date.now().toString(),
+          name: fullName,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          username: user.username || (user.email ? user.email.split('@')[0] : ''),
+          password: user.password || '', // 安全起见，通常不应返回密码，但保留原始数据
+          role: user.role || (user.isAdmin ? 'admin' : 'user'),
+          isAdmin: user.isAdmin !== undefined ? user.isAdmin : (user.role === 'admin'),
+          status: user.status || 'active',
+          bio: user.bio || '',
+          phone: user.phone || '',
+          address: user.address, // 保留地址字段但不设默认值
+          avatar: user.avatar || null,
+          birthday: user.birthday || '',
+          gender: user.gender || '',
+          createdAt: user.createdAt || user.created_at || new Date().toISOString(),
+          updatedAt: user.updatedAt || user.updated_at || user.createdAt || new Date().toISOString(),
+          lastLogin: user.lastLogin || user.last_login || null,
+          canOrder: user.canOrder !== undefined ? user.canOrder : true // 默认允许下单
+        };
+
+        // 确保console中可见规范化后的用户数据，便于调试
+        console.log('Normalized user data:', normalizedUser);
+
+        return normalizedUser;
+      });
     }
-    
-    try {
-      // Show loading state
-      tableBody.innerHTML = `
+
+    // User management functions
+    function loadUsers() {
+      const tableBody = document.getElementById('user-table-body');
+      const noUsers = document.getElementById('no-users-message');
+
+      if (!tableBody || !noUsers) {
+        console.error('Required DOM elements not found');
+        return;
+      }
+
+      try {
+        // Show loading state
+        tableBody.innerHTML = `
         <tr>
           <td colspan="7" class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
@@ -859,79 +882,79 @@ const AdminApiService = {
           </td>
         </tr>
       `;
-      
-      console.log('📡 发送API请求: 获取所有用户 - GET /admin/users');
-      
-      // Use the ApiService to fetch users from the database
-      AdminApiService.getAllUsers()
-        .then(response => {
-          if (!response.success) {
-            throw new Error('Failed to load users from API');
-          }
-          
-          // 正确处理API返回结构
-          let users = [];
-          if (response.data) {
-            if (Array.isArray(response.data)) {
-              users = response.data;
-            } else if (response.data.users && Array.isArray(response.data.users)) {
-              users = response.data.users;
-            } else {
-              console.error('API返回的users格式不正确:', response.data);
-              throw new Error('Invalid API response format');
+
+        console.log('📡 发送API请求: 获取所有用户 - GET /admin/users');
+
+        // Use the ApiService to fetch users from the database
+        AdminApiService.getAllUsers()
+          .then(response => {
+            if (!response.success) {
+              throw new Error('Failed to load users from API');
             }
-          }
-          
-          // Clear existing rows
-          tableBody.innerHTML = '';
-          
-          // Normalize and filter data
-          users = normalizeUserData(users);
-          users = filterUsers(users);
-          
-          // Check if we have users to display
-          if (users.length === 0) {
-            tableBody.parentElement.classList.add('d-none');
-            noUsers.classList.remove('d-none');
-            return;
-          }
-          
-          // Show table and hide empty state
-          tableBody.parentElement.classList.remove('d-none');
-          noUsers.classList.add('d-none');
-          
-          // Render users
-          users.forEach(user => {
-            // 使用标准化后的用户角色
-            let roleBadge;
-            if (user.role === 'admin') {
-              roleBadge = '<span class="badge user-role-admin">Admin</span>';
-            } else {
-              roleBadge = '<span class="badge user-role-user">User</span>';
+
+            // 正确处理API返回结构
+            let users = [];
+            if (response.data) {
+              if (Array.isArray(response.data)) {
+                users = response.data;
+              } else if (response.data.users && Array.isArray(response.data.users)) {
+                users = response.data.users;
+              } else {
+                console.error('API返回的users格式不正确:', response.data);
+                throw new Error('Invalid API response format');
+              }
             }
-            
-            // 使用标准化后的用户状态
-            let statusBadge;
-            if (user.status === 'inactive') {
-              statusBadge = '<span class="badge user-status-inactive">Inactive</span>';
-            } else {
-              statusBadge = '<span class="badge user-status-active">Active</span>';
+
+            // Clear existing rows
+            tableBody.innerHTML = '';
+
+            // Normalize and filter data
+            users = normalizeUserData(users);
+            users = filterUsers(users);
+
+            // Check if we have users to display
+            if (users.length === 0) {
+              tableBody.parentElement.classList.add('d-none');
+              noUsers.classList.remove('d-none');
+              return;
             }
-            
-            // 处理canOrder状态
-            let orderBadge;
-            if (user.canOrder === false) {
-              orderBadge = '<span class="badge bg-danger ms-1">No Orders</span>';
-            } else {
-              orderBadge = '<span class="badge bg-success ms-1">Can Order</span>';
-            }
-            
-            // Format dates
-            const joinedDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown';
-            const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never';
-            
-            const row = document.createElement('tr');
-            row.innerHTML = `
+
+            // Show table and hide empty state
+            tableBody.parentElement.classList.remove('d-none');
+            noUsers.classList.add('d-none');
+
+            // Render users
+            users.forEach(user => {
+              // 使用标准化后的用户角色
+              let roleBadge;
+              if (user.role === 'admin') {
+                roleBadge = '<span class="badge user-role-admin">Admin</span>';
+              } else {
+                roleBadge = '<span class="badge user-role-user">User</span>';
+              }
+
+              // 使用标准化后的用户状态
+              let statusBadge;
+              if (user.status === 'inactive') {
+                statusBadge = '<span class="badge user-status-inactive">Inactive</span>';
+              } else {
+                statusBadge = '<span class="badge user-status-active">Active</span>';
+              }
+
+              // 处理canOrder状态
+              let orderBadge;
+              if (user.canOrder === false) {
+                orderBadge = '<span class="badge bg-danger ms-1">No Orders</span>';
+              } else {
+                orderBadge = '<span class="badge bg-success ms-1">Can Order</span>';
+              }
+
+              // Format dates
+              const joinedDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown';
+              const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never';
+
+              const row = document.createElement('tr');
+              row.innerHTML = `
               <td>
                 <div class="d-flex align-items-center">
                   <div class="user-avatar me-3">
@@ -953,30 +976,30 @@ const AdminApiService = {
                   <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="editUserByEmail('${user.email}')" data-bs-toggle="tooltip" title="Edit User">
                     <i class="bi bi-pencil-square"></i>
                   </button>
-                  ${getCurrentUserId() && getCurrentUserId().toString() === user.id.toString() ? 
-                    `<button class="admin-btn admin-btn-secondary admin-btn-sm" disabled data-bs-toggle="tooltip" title="Cannot delete yourself">
+                  ${getCurrentUserId() && getCurrentUserId().toString() === user.id.toString() ?
+                  `<button class="admin-btn admin-btn-secondary admin-btn-sm" disabled data-bs-toggle="tooltip" title="Cannot delete yourself">
                       <i class="bi bi-trash"></i>
-                    </button>` : 
-                    `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
+                    </button>` :
+                  `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser('${user.id}')" data-bs-toggle="tooltip" title="Delete User">
                       <i class="bi bi-trash"></i>
                     </button>`
-                  }
+                }
                 </div>
               </td>
             `;
-            
-            tableBody.appendChild(row);
-          });
-          
-          // Initialize tooltips
-          const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-          tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
-        })
-        .catch(error => {
-          console.error('Failed to load users from API:', error);
-          
-          // Show error message in the table
-          tableBody.innerHTML = `
+
+              tableBody.appendChild(row);
+            });
+
+            // Initialize tooltips
+            const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltips.map(tooltip => new bootstrap.Tooltip(tooltip));
+          })
+          .catch(error => {
+            console.error('Failed to load users from API:', error);
+
+            // Show error message in the table
+            tableBody.innerHTML = `
             <tr>
               <td colspan="7" class="text-center py-4">
                 <div class="alert alert-danger mb-0">
@@ -986,148 +1009,148 @@ const AdminApiService = {
               </td>
             </tr>
           `;
-          
-          // Fallback to localStorage if API fails
-          showToast('API request failed. Using cached data instead.', 'warning');
-          
-          // Get users from localStorage as fallback
-          let users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Only proceed with localStorage data if we have users
-          if (users.length > 0) {
-            // Normalize and filter data
-            users = normalizeUserData(users);
-            users = filterUsers(users);
-            
-            // Clear error message
-            tableBody.innerHTML = '';
-            
-            // Show table and hide empty state
-            tableBody.parentElement.classList.remove('d-none');
-            noUsers.classList.add('d-none');
-            
-            // Rest of the rendering code...
-            // This is a fallback, so we're keeping the implementation minimal
-          }
-        });
-    } catch (error) {
-      console.error('Error in loadUsers function:', error);
-      showToast('An error occurred while loading users', 'danger');
+
+            // Fallback to localStorage if API fails
+            showToast('API request failed. Using cached data instead.', 'warning');
+
+            // Get users from localStorage as fallback
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Only proceed with localStorage data if we have users
+            if (users.length > 0) {
+              // Normalize and filter data
+              users = normalizeUserData(users);
+              users = filterUsers(users);
+
+              // Clear error message
+              tableBody.innerHTML = '';
+
+              // Show table and hide empty state
+              tableBody.parentElement.classList.remove('d-none');
+              noUsers.classList.add('d-none');
+
+              // Rest of the rendering code...
+              // This is a fallback, so we're keeping the implementation minimal
+            }
+          });
+      } catch (error) {
+        console.error('Error in loadUsers function:', error);
+        showToast('An error occurred while loading users', 'danger');
+      }
     }
-  }
 
-  function filterUsers(users) {
-    return users.filter(user => {
-      // 用户角色已经在normalizeUserData中标准化，不需要再转换
-      
-      // Apply role filter
-      if (currentFilters.role && user.role !== currentFilters.role) {
-        return false;
-      }
-      
-      // Apply status filter
-      if (currentFilters.status && user.status !== currentFilters.status) {
-        return false;
-      }
-      
-      // Apply search filter
-      if (currentFilters.search) {
-        const searchTerm = currentFilters.search.toLowerCase();
-        return (
-          (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-          (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-          (user.username && user.username.toLowerCase().includes(searchTerm))
-        );
-      }
-      
-      return true;
-    });
-  }
+    function filterUsers(users) {
+      return users.filter(user => {
+        // 用户角色已经在normalizeUserData中标准化，不需要再转换
 
-  function applyFilters() {
-    currentFilters = {
-      role: document.getElementById('filter-role').value,
-      status: document.getElementById('filter-status').value,
-      search: document.getElementById('filter-search').value.trim()
-    };
-    
-    loadUsers();
-  }
+        // Apply role filter
+        if (currentFilters.role && user.role !== currentFilters.role) {
+          return false;
+        }
 
-  function resetFilters() {
-    document.getElementById('filter-role').value = '';
-    document.getElementById('filter-status').value = '';
-    document.getElementById('filter-search').value = '';
-    
-    currentFilters = {
-      role: '',
-      status: '',
-      search: ''
-    };
-    
-    loadUsers();
-  }
+        // Apply status filter
+        if (currentFilters.status && user.status !== currentFilters.status) {
+          return false;
+        }
 
-  function updateUserStats() {
-    try {
-      console.log('📊 更新用户统计信息');
-      
-      // Check if stats elements exist
-      const totalElement = document.getElementById('total-users-count');
-      const activeElement = document.getElementById('active-users-count');
-      const adminElement = document.getElementById('admin-users-count');
-      
-      if (!totalElement || !activeElement || !adminElement) {
-        console.log('❓ 用户统计元素不存在，跳过更新');
-        return; // Exit if elements don't exist
-      }
-      
-      // Fetch users from API
-      AdminApiService.getAllUsers()
-        .then(response => {
-          if (!response.success) {
-            console.error('❌ 无法获取用户统计数据');
-            return;
-          }
-          
-          // 正确处理API返回结构
-          let users = [];
-          if (response.data) {
-            if (Array.isArray(response.data)) {
-              users = response.data;
-            } else if (response.data.users && Array.isArray(response.data.users)) {
-              users = response.data.users;
-            } else {
-              console.error('API返回的users格式不正确:', response.data);
+        // Apply search filter
+        if (currentFilters.search) {
+          const searchTerm = currentFilters.search.toLowerCase();
+          return (
+            (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+            (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+            (user.username && user.username.toLowerCase().includes(searchTerm))
+          );
+        }
+
+        return true;
+      });
+    }
+
+    function applyFilters() {
+      currentFilters = {
+        role: document.getElementById('filter-role').value,
+        status: document.getElementById('filter-status').value,
+        search: document.getElementById('filter-search').value.trim()
+      };
+
+      loadUsers();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-role').value = '';
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-search').value = '';
+
+      currentFilters = {
+        role: '',
+        status: '',
+        search: ''
+      };
+
+      loadUsers();
+    }
+
+    function updateUserStats() {
+      try {
+        console.log('📊 更新用户统计信息');
+
+        // Check if stats elements exist
+        const totalElement = document.getElementById('total-users-count');
+        const activeElement = document.getElementById('active-users-count');
+        const adminElement = document.getElementById('admin-users-count');
+
+        if (!totalElement || !activeElement || !adminElement) {
+          console.log('❓ 用户统计元素不存在，跳过更新');
+          return; // Exit if elements don't exist
+        }
+
+        // Fetch users from API
+        AdminApiService.getAllUsers()
+          .then(response => {
+            if (!response.success) {
+              console.error('❌ 无法获取用户统计数据');
               return;
             }
-          }
-          
-          // Update stats
-          const totalUsers = users.length;
-          const activeUsers = users.filter(user => user.status === 'active').length;
-          const adminUsers = users.filter(user => user.role === 'admin' || user.isAdmin === true).length;
-          
-          console.log(`📊 统计数据: 总用户=${totalUsers}, 活跃=${activeUsers}, 管理员=${adminUsers}`);
-          
-          // Update DOM elements
-          totalElement.textContent = totalUsers;
-          activeElement.textContent = activeUsers;
-          adminElement.textContent = adminUsers;
-        })
-        .catch(error => {
-          console.error('❌ 获取用户统计数据出错:', error);
-          // Error state handling
-        });
-    } catch (error) {
-      console.error('Error in updateUserStats:', error);
-    }
-  }
 
-  function resetUserForm() {
-    // Show an informational modal instead of the actual add user form
-    // since we're no longer allowing adding users directly
-    const modalContent = `
+            // 正确处理API返回结构
+            let users = [];
+            if (response.data) {
+              if (Array.isArray(response.data)) {
+                users = response.data;
+              } else if (response.data.users && Array.isArray(response.data.users)) {
+                users = response.data.users;
+              } else {
+                console.error('API返回的users格式不正确:', response.data);
+                return;
+              }
+            }
+
+            // Update stats
+            const totalUsers = users.length;
+            const activeUsers = users.filter(user => user.status === 'active').length;
+            const adminUsers = users.filter(user => user.role === 'admin' || user.isAdmin === true).length;
+
+            console.log(`📊 统计数据: 总用户=${totalUsers}, 活跃=${activeUsers}, 管理员=${adminUsers}`);
+
+            // Update DOM elements
+            totalElement.textContent = totalUsers;
+            activeElement.textContent = activeUsers;
+            adminElement.textContent = adminUsers;
+          })
+          .catch(error => {
+            console.error('❌ 获取用户统计数据出错:', error);
+            // Error state handling
+          });
+      } catch (error) {
+        console.error('Error in updateUserStats:', error);
+      }
+    }
+
+    function resetUserForm() {
+      // Show an informational modal instead of the actual add user form
+      // since we're no longer allowing adding users directly
+      const modalContent = `
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header bg-info text-white">
@@ -1146,7 +1169,7 @@ const AdminApiService = {
             </ul>
             <div class="alert alert-light border mt-3">
               <p class="mb-1"><strong>Registration URL:</strong></p>
-              <code>http://localhost:8000/src/client/views/auth/register.html</code>
+              <code>/~xzy2020c/PurelyHandmade/views/auth/register.html</code>
             </div>
           </div>
           <div class="modal-footer">
@@ -1155,357 +1178,357 @@ const AdminApiService = {
         </div>
       </div>
     `;
-    
-    // Create a temporary modal
-    const tempModal = document.createElement('div');
-    tempModal.className = 'modal fade';
-    tempModal.id = 'infoModal';
-    tempModal.setAttribute('tabindex', '-1');
-    tempModal.innerHTML = modalContent;
-    
-    // Add to body
-    document.body.appendChild(tempModal);
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(tempModal);
-    modal.show();
-    
-    // Remove when hidden
-    tempModal.addEventListener('hidden.bs.modal', function() {
-      document.body.removeChild(tempModal);
-    });
-  }
-  
-  function resetUserImage() {
-    // Reset the image to default placeholder
-    document.getElementById('user-image-file').value = '';
-    document.getElementById('user-img-preview').src = '/src/client/img/profile.png';
-  }
 
-  function editUser(userId) {
-    // First, get the user data
-    try {
-      console.log(`📡 获取用户详情 - GET /admin/users/detail?id=${userId}`);
-      
-      // Use API to get user by ID
-      AdminApiService.getUserById(userId)
-        .then(response => {
-          console.log('✅ 获取用户详情响应:', response);
-          
-          if (!response.success) {
-            throw new Error('Failed to fetch user data');
-          }
-          
-          // 正确处理API返回结构
-          let user = null;
-          if (response.data) {
-            if (typeof response.data === 'object' && !Array.isArray(response.data)) {
-              user = response.data;
-            } else if (response.data.user && typeof response.data.user === 'object') {
-              user = response.data.user;
-            } else {
-              console.error('API返回的user格式不正确:', response.data);
-              throw new Error('Invalid user data format');
+      // Create a temporary modal
+      const tempModal = document.createElement('div');
+      tempModal.className = 'modal fade';
+      tempModal.id = 'infoModal';
+      tempModal.setAttribute('tabindex', '-1');
+      tempModal.innerHTML = modalContent;
+
+      // Add to body
+      document.body.appendChild(tempModal);
+
+      // Show the modal
+      const modal = new bootstrap.Modal(tempModal);
+      modal.show();
+
+      // Remove when hidden
+      tempModal.addEventListener('hidden.bs.modal', function () {
+        document.body.removeChild(tempModal);
+      });
+    }
+
+    function resetUserImage() {
+      // Reset the image to default placeholder
+      document.getElementById('user-image-file').value = '';
+      document.getElementById('user-img-preview').src = '/~xzy2020c/PurelyHandmade/img/profile.png';
+    }
+
+    function editUser(userId) {
+      // First, get the user data
+      try {
+        console.log(`📡 获取用户详情 - GET /admin/users/detail?id=${userId}`);
+
+        // Use API to get user by ID
+        AdminApiService.getUserById(userId)
+          .then(response => {
+            console.log('✅ 获取用户详情响应:', response);
+
+            if (!response.success) {
+              throw new Error('Failed to fetch user data');
             }
-          }
-          
-          if (!user) {
-            throw new Error('User not found');
-          }
-          
-          populateEditForm(user);
-        })
-        .catch(error => {
-          console.error('❌ 获取用户详情出错:', error);
-          
-          // Fallback to localStorage if API fails
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const userToEdit = users.find(u => u.id.toString() === userId.toString());
-          
-          if (!userToEdit) {
-            showToast('User not found', 'danger');
-            return;
-          }
-          
-          populateEditForm(userToEdit);
-        });
-    } catch (error) {
-      console.error('Error in editUser function:', error);
-      showToast('An error occurred while trying to edit the user', 'danger');
-    }
-  }
 
-  async function saveUser() {
-    // Get form data
-    const userId = document.getElementById('user-id').value;
-    const firstName = document.getElementById('user-first-name').value.trim();
-    const lastName = document.getElementById('user-last-name').value.trim();
-    const email = document.getElementById('user-email').value.trim();
-    const username = document.getElementById('user-username').value.trim();
-    const password = document.getElementById('user-password').value;
-    const passwordConfirm = document.getElementById('user-password-confirm').value;
-    const role = document.getElementById('user-role').value;
-    const status = document.getElementById('user-status').value;
-    const canOrder = document.getElementById('user-can-order').value === 'true';
-    const bio = document.getElementById('user-bio').value.trim();
-    const birthday = document.getElementById('user-birthday').value;
-    const gender = document.getElementById('user-gender').value;
-    const phone = document.getElementById('user-phone').value.trim();
-    
-    // Basic validation
-    if (!email || !isValidEmail(email)) {
-      showToast('Please enter a valid email address', 'danger');
-      return;
-    }
-    
-    // Password validation for new users or password changes
-    if ((!userId && !password) || (password && password !== passwordConfirm)) {
-      showToast('Password fields do not match or are empty', 'danger');
-      return;
-    }
-    
-    // Prepare user data
-    const userData = {
-      firstName,
-      lastName,
-      email,
-      username,
-      role,
-      status,
-      canOrder,
-      bio,
-      birthday,
-      gender,
-      phone
-    };
-    
-    // Add password if provided
-    if (password) {
-      userData.password = password;
-    }
-    
-    console.log(`📡 ${userId ? '更新' : '创建'}用户数据:`, userData);
-    
-    try {
-      let response;
-      
-      if (userId) {
-        // Update existing user
-        response = await AdminApiService.updateUser(userId, userData);
-      } else {
-        // Create new user
-        response = await AdminApiService.createUser(userData);
+            // 正确处理API返回结构
+            let user = null;
+            if (response.data) {
+              if (typeof response.data === 'object' && !Array.isArray(response.data)) {
+                user = response.data;
+              } else if (response.data.user && typeof response.data.user === 'object') {
+                user = response.data.user;
+              } else {
+                console.error('API返回的user格式不正确:', response.data);
+                throw new Error('Invalid user data format');
+              }
+            }
+
+            if (!user) {
+              throw new Error('User not found');
+            }
+
+            populateEditForm(user);
+          })
+          .catch(error => {
+            console.error('❌ 获取用户详情出错:', error);
+
+            // Fallback to localStorage if API fails
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userToEdit = users.find(u => u.id.toString() === userId.toString());
+
+            if (!userToEdit) {
+              showToast('User not found', 'danger');
+              return;
+            }
+
+            populateEditForm(userToEdit);
+          });
+      } catch (error) {
+        console.error('Error in editUser function:', error);
+        showToast('An error occurred while trying to edit the user', 'danger');
       }
-      
-      console.log(`✅ ${userId ? '更新' : '创建'}用户响应:`, response);
-      
-      if (response && response.success) {
-        // Close modal and show success message
-        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
-        showToast(`User ${userId ? 'updated' : 'created'} successfully`, 'success');
-        
-        // Reload users and update stats
-        loadUsers();
-        updateUserStats();
-      } else {
-        // Show error message
-        const errorMsg = response && response.data ? response.data : 'Unknown error occurred';
-        showToast(`Failed to save user: ${errorMsg}`, 'danger');
+    }
+
+    async function saveUser() {
+      // Get form data
+      const userId = document.getElementById('user-id').value;
+      const firstName = document.getElementById('user-first-name').value.trim();
+      const lastName = document.getElementById('user-last-name').value.trim();
+      const email = document.getElementById('user-email').value.trim();
+      const username = document.getElementById('user-username').value.trim();
+      const password = document.getElementById('user-password').value;
+      const passwordConfirm = document.getElementById('user-password-confirm').value;
+      const role = document.getElementById('user-role').value;
+      const status = document.getElementById('user-status').value;
+      const canOrder = document.getElementById('user-can-order').value === 'true';
+      const bio = document.getElementById('user-bio').value.trim();
+      const birthday = document.getElementById('user-birthday').value;
+      const gender = document.getElementById('user-gender').value;
+      const phone = document.getElementById('user-phone').value.trim();
+
+      // Basic validation
+      if (!email || !isValidEmail(email)) {
+        showToast('Please enter a valid email address', 'danger');
+        return;
       }
-    } catch (error) {
-      console.error(`❌ ${userId ? '更新' : '创建'}用户出错:`, error);
-      showToast('An error occurred while saving the user', 'danger');
-      
-      // Fallback to localStorage if API fails
-      showToast('API request failed. Using localStorage fallback.', 'warning');
-      
-      // Get current users
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      // Normalize data to ensure consistent format
-      const normalizedUsers = normalizeUserData(users);
-      
-      // Prepare user data in the normalized format
-      const newUserData = {
-        id: userId || Date.now().toString(),
+
+      // Password validation for new users or password changes
+      if ((!userId && !password) || (password && password !== passwordConfirm)) {
+        showToast('Password fields do not match or are empty', 'danger');
+        return;
+      }
+
+      // Prepare user data
+      const userData = {
         firstName,
         lastName,
         email,
         username,
-        password: password || (userId ? users.find(u => u.id.toString() === userId.toString())?.password : ''),
         role,
-        isAdmin: role === 'admin',
         status,
         canOrder,
         bio,
         birthday,
         gender,
-        phone,
-        avatar: document.getElementById('user-img-preview').src,
-        createdAt: userId ? users.find(u => u.id.toString() === userId.toString())?.createdAt : new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        phone
       };
-      
-      if (userId) {
-        // Update existing user
-        const userIndex = normalizedUsers.findIndex(u => u.id.toString() === userId.toString());
-        if (userIndex !== -1) {
-          normalizedUsers[userIndex] = { ...normalizedUsers[userIndex], ...newUserData };
+
+      // Add password if provided
+      if (password) {
+        userData.password = password;
+      }
+
+      console.log(`📡 ${userId ? '更新' : '创建'}用户数据:`, userData);
+
+      try {
+        let response;
+
+        if (userId) {
+          // Update existing user
+          response = await AdminApiService.updateUser(userId, userData);
         } else {
+          // Create new user
+          response = await AdminApiService.createUser(userData);
+        }
+
+        console.log(`✅ ${userId ? '更新' : '创建'}用户响应:`, response);
+
+        if (response && response.success) {
+          // Close modal and show success message
+          bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+          showToast(`User ${userId ? 'updated' : 'created'} successfully`, 'success');
+
+          // Reload users and update stats
+          loadUsers();
+          updateUserStats();
+        } else {
+          // Show error message
+          const errorMsg = response && response.data ? response.data : 'Unknown error occurred';
+          showToast(`Failed to save user: ${errorMsg}`, 'danger');
+        }
+      } catch (error) {
+        console.error(`❌ ${userId ? '更新' : '创建'}用户出错:`, error);
+        showToast('An error occurred while saving the user', 'danger');
+
+        // Fallback to localStorage if API fails
+        showToast('API request failed. Using localStorage fallback.', 'warning');
+
+        // Get current users
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+        // Normalize data to ensure consistent format
+        const normalizedUsers = normalizeUserData(users);
+
+        // Prepare user data in the normalized format
+        const newUserData = {
+          id: userId || Date.now().toString(),
+          firstName,
+          lastName,
+          email,
+          username,
+          password: password || (userId ? users.find(u => u.id.toString() === userId.toString())?.password : ''),
+          role,
+          isAdmin: role === 'admin',
+          status,
+          canOrder,
+          bio,
+          birthday,
+          gender,
+          phone,
+          avatar: document.getElementById('user-img-preview').src,
+          createdAt: userId ? users.find(u => u.id.toString() === userId.toString())?.createdAt : new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        if (userId) {
+          // Update existing user
+          const userIndex = normalizedUsers.findIndex(u => u.id.toString() === userId.toString());
+          if (userIndex !== -1) {
+            normalizedUsers[userIndex] = { ...normalizedUsers[userIndex], ...newUserData };
+          } else {
+            normalizedUsers.push(newUserData);
+          }
+        } else {
+          // Add new user
           normalizedUsers.push(newUserData);
         }
-      } else {
-        // Add new user
-        normalizedUsers.push(newUserData);
-      }
-      
-      // Save to localStorage
-      localStorage.setItem('users', JSON.stringify(normalizedUsers));
-      
-      // Close modal and show success message
-      bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
-      showToast(`User ${userId ? 'updated' : 'created'} successfully in local storage`, 'success');
-      
-      // Reload users and update stats
-      loadUsers();
-      updateUserStats();
-    }
-  }
 
-  async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user?')) {
-      return;
-    }
-    
-    console.log(`📡 删除用户 - DELETE /admin/users?id=${userId}`);
-    
-    try {
-      // Use API to delete user
-      const response = await AdminApiService.deleteUser(userId);
-      
-      console.log('✅ 删除用户响应:', response);
-      
-      if (response.success) {
-        showToast('User deleted successfully', 'success');
+        // Save to localStorage
+        localStorage.setItem('users', JSON.stringify(normalizedUsers));
+
+        // Close modal and show success message
+        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+        showToast(`User ${userId ? 'updated' : 'created'} successfully in local storage`, 'success');
+
         // Reload users and update stats
         loadUsers();
         updateUserStats();
-      } else {
-        showToast(`Failed to delete user: ${response.data || 'Unknown error'}`, 'danger');
       }
-    } catch (error) {
-      console.error('❌ 删除用户出错:', error);
-      showToast('Error deleting user', 'danger');
-      
-      // Fallback to localStorage if API fails
-      showToast('API request failed. Using localStorage fallback.', 'warning');
-      
-      // Get current users
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const updatedUsers = users.filter(u => u.id.toString() !== userId.toString());
-      
-      if (users.length === updatedUsers.length) {
-        showToast('User not found or could not be deleted', 'danger');
+    }
+
+    async function deleteUser(userId) {
+      if (!confirm('Are you sure you want to delete this user?')) {
         return;
       }
-      
-      // Save updated users
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-      showToast('User deleted from local storage', 'success');
-      
-      // Reload users and update stats
-      loadUsers();
-      updateUserStats();
-    }
-  }
-  
-  function getCurrentUserId() {
-    // 获取当前用户并规范化
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-      const normalizedUser = normalizeUserData([currentUser])[0];
-      return normalizedUser.id;
-    }
-    return null;
-  }
-  
-  function isValidEmail(email) {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  }
-  
-  function checkAdminPermissions() {
-    // 检查用户是否为管理员
-    const token = localStorage.getItem('authToken');
-    console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
-    
-    if (!token) {
-      // 未登录，重定向到登录页面
-      console.log('❌ 未找到认证令牌，重定向到登录页面');
-      window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-      return;
-    }
-    
-    // 调用API验证用户权限
-    console.log('📡 发送API请求: /auth/profile');
-    ApiService.get('/auth/profile')
-      .then(response => {
-        console.log('✅ 收到profile响应:', response);
-        if (!response.success || !response.data.isAdmin) {
-          // 不是管理员，重定向到首页
-          console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
-          showToast('You do not have permission to access this area', 'danger');
-          setTimeout(() => {
-            window.location.href = '/src/client/views/index.html';
-          }, 2000);
-        } else {
-          // 加载用户数据
-          console.log('✅ 用户是管理员，加载用户数据');
+
+      console.log(`📡 删除用户 - DELETE /admin/users?id=${userId}`);
+
+      try {
+        // Use API to delete user
+        const response = await AdminApiService.deleteUser(userId);
+
+        console.log('✅ 删除用户响应:', response);
+
+        if (response.success) {
+          showToast('User deleted successfully', 'success');
+          // Reload users and update stats
           loadUsers();
           updateUserStats();
+        } else {
+          showToast(`Failed to delete user: ${response.data || 'Unknown error'}`, 'danger');
         }
-      })
-      .catch(error => {
-        console.error('❌ 检查管理员权限出错:', error);
-        // 验证失败，重定向到登录页面
-        showToast('Authentication error. Please login again.', 'danger');
-        setTimeout(() => {
-          window.location.href = '/src/client/views/auth/login.html?redirect=admin';
-        }, 2000);
-      });
-  }
-  
-  // Helper function to show toast notifications
-  function showToast(message, type = 'primary') {
-    const toastContainer = document.querySelector('.toast-container');
-    
-    // 根据消息类型选择图标
-    let icon = '';
-    let delay = 3000; // 默认3秒
-    
-    switch(type) {
-      case 'success':
-        icon = '<i class="bi bi-check-circle-fill me-2"></i>';
-        delay = 4000; // 成功消息显示更长时间
-        break;
-      case 'danger':
-        icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
-        delay = 5000; // 错误消息显示更长时间
-        break;
-      case 'warning':
-        icon = '<i class="bi bi-exclamation-circle-fill me-2"></i>';
-        break;
-      default:
-        icon = '<i class="bi bi-info-circle-fill me-2"></i>';
+      } catch (error) {
+        console.error('❌ 删除用户出错:', error);
+        showToast('Error deleting user', 'danger');
+
+        // Fallback to localStorage if API fails
+        showToast('API request failed. Using localStorage fallback.', 'warning');
+
+        // Get current users
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const updatedUsers = users.filter(u => u.id.toString() !== userId.toString());
+
+        if (users.length === updatedUsers.length) {
+          showToast('User not found or could not be deleted', 'danger');
+          return;
+        }
+
+        // Save updated users
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
+        showToast('User deleted from local storage', 'success');
+
+        // Reload users and update stats
+        loadUsers();
+        updateUserStats();
+      }
     }
-    
-    const toastElement = document.createElement('div');
-    toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
-    toastElement.setAttribute('role', 'alert');
-    toastElement.setAttribute('aria-live', 'assertive');
-    toastElement.setAttribute('aria-atomic', 'true');
-    
-    toastElement.innerHTML = `
+
+    function getCurrentUserId() {
+      // 获取当前用户并规范化
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        const normalizedUser = normalizeUserData([currentUser])[0];
+        return normalizedUser.id;
+      }
+      return null;
+    }
+
+    function isValidEmail(email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(email);
+    }
+
+    function checkAdminPermissions() {
+      // 检查用户是否为管理员
+      const token = localStorage.getItem('authToken');
+      console.log('🔐 检查管理员权限 - Token:', token ? '存在' : '不存在');
+
+      if (!token) {
+        // 未登录，重定向到登录页面
+        console.log('❌ 未找到认证令牌，重定向到登录页面');
+        window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=admin';
+        return;
+      }
+
+      // 调用API验证用户权限
+      console.log('📡 发送API请求: /auth/profile');
+      ApiService.get('/auth/profile')
+        .then(response => {
+          console.log('✅ 收到profile响应:', response);
+          if (!response.success || !response.data.isAdmin) {
+            // 不是管理员，重定向到首页
+            console.log('❌ 用户不是管理员，isAdmin =', response.data?.isAdmin);
+            showToast('You do not have permission to access this area', 'danger');
+            setTimeout(() => {
+              window.location.href = '/~xzy2020c/PurelyHandmade/views/index.html';
+            }, 2000);
+          } else {
+            // 加载用户数据
+            console.log('✅ 用户是管理员，加载用户数据');
+            loadUsers();
+            updateUserStats();
+          }
+        })
+        .catch(error => {
+          console.error('❌ 检查管理员权限出错:', error);
+          // 验证失败，重定向到登录页面
+          showToast('Authentication error. Please login again.', 'danger');
+          setTimeout(() => {
+            window.location.href = '/~xzy2020c/PurelyHandmade/views/auth/login.html?redirect=admin';
+          }, 2000);
+        });
+    }
+
+    // Helper function to show toast notifications
+    function showToast(message, type = 'primary') {
+      const toastContainer = document.querySelector('.toast-container');
+
+      // 根据消息类型选择图标
+      let icon = '';
+      let delay = 3000; // 默认3秒
+
+      switch (type) {
+        case 'success':
+          icon = '<i class="bi bi-check-circle-fill me-2"></i>';
+          delay = 4000; // 成功消息显示更长时间
+          break;
+        case 'danger':
+          icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
+          delay = 5000; // 错误消息显示更长时间
+          break;
+        case 'warning':
+          icon = '<i class="bi bi-exclamation-circle-fill me-2"></i>';
+          break;
+        default:
+          icon = '<i class="bi bi-info-circle-fill me-2"></i>';
+      }
+
+      const toastElement = document.createElement('div');
+      toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+      toastElement.setAttribute('role', 'alert');
+      toastElement.setAttribute('aria-live', 'assertive');
+      toastElement.setAttribute('aria-atomic', 'true');
+
+      toastElement.innerHTML = `
       <div class="d-flex">
         <div class="toast-body">
           ${icon}${message}
@@ -1513,59 +1536,60 @@ const AdminApiService = {
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     `;
-    
-    toastContainer.appendChild(toastElement);
-    
-    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: delay });
-    toast.show();
-    
-    toastElement.addEventListener('hidden.bs.toast', function() {
-      toastElement.remove();
-    });
-  }
-  
-  /**
-   * 通过用户邮箱查找并编辑用户
-   */
-  function editUserByEmail(email) {
-    console.log('🔍 通过邮箱查找用户:', email);
-    
-    // 使用API查找用户
-    AdminApiService.getAllUsers()
-      .then(response => {
-        console.log('✅ 获取用户列表响应:', response);
-        
-        if (response.success && response.data && response.data.length > 0) {
-          // 找到用户，调用编辑函数
-          const user = response.data.find(u => u.email === email);
+
+      toastContainer.appendChild(toastElement);
+
+      const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: delay });
+      toast.show();
+
+      toastElement.addEventListener('hidden.bs.toast', function () {
+        toastElement.remove();
+      });
+    }
+
+    /**
+     * 通过用户邮箱查找并编辑用户
+     */
+    function editUserByEmail(email) {
+      console.log('🔍 通过邮箱查找用户:', email);
+
+      // 使用API查找用户
+      AdminApiService.getAllUsers()
+        .then(response => {
+          console.log('✅ 获取用户列表响应:', response);
+
+          if (response.success && response.data && response.data.length > 0) {
+            // 找到用户，调用编辑函数
+            const user = response.data.find(u => u.email === email);
+            if (user) {
+              console.log('✅ 找到用户:', user);
+              editUser(user.id);
+            } else {
+              console.log('❌ 未找到该邮箱的用户');
+              showToast('User not found with that email', 'danger');
+            }
+          } else {
+            // API未找到用户
+            console.log('❌ API返回无用户数据');
+            showToast('User not found', 'danger');
+          }
+        })
+        .catch(error => {
+          console.error('❌ 查找用户出错:', error);
+          showToast('Error finding user', 'danger');
+
+          // Fallback to localStorage
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const user = users.find(u => u.email === email);
+
           if (user) {
-            console.log('✅ 找到用户:', user);
             editUser(user.id);
           } else {
-            console.log('❌ 未找到该邮箱的用户');
-            showToast('User not found with that email', 'danger');
+            showToast('User not found', 'danger');
           }
-        } else {
-          // API未找到用户
-          console.log('❌ API返回无用户数据');
-          showToast('User not found', 'danger');
-        }
-      })
-      .catch(error => {
-        console.error('❌ 查找用户出错:', error);
-        showToast('Error finding user', 'danger');
-        
-        // Fallback to localStorage
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.email === email);
-        
-        if (user) {
-          editUser(user.id);
-        } else {
-          showToast('User not found', 'danger');
-        }
-      });
-  }
-</script>
+        });
+    }
+  </script>
 </body>
+
 </html>

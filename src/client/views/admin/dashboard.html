@@ -1,44 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Purely Homemade</title>
+
+  <!-- Configuration file - must be loaded first -->
+  <script src="/~xzy2020c/PurelyHandmade/js/config.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="/src/client/css/global.css?v=1.0.1" rel="stylesheet">
-  <link href="/src/client/css/style.css?v=1.0.1" rel="stylesheet">
-  <link href="/src/client/css/navbar.css?v=1.0.1" rel="stylesheet">
-  <link href="/src/client/css/admin.css?v=1.0.1" rel="stylesheet">
-  
+
+  <script>
+    document.write(`
+      <link rel="stylesheet" href="${CONFIG.getCssPath('navbar.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('global.css')}">
+      <link rel="stylesheet" href="${CONFIG.getCssPath('admin.css')}">
+    `);
+  </script>
+
   <style>
     /* Custom dashboard styles */
     body {
       background-color: var(--background-color);
     }
-    
+
     .dashboard-card {
       transition: transform 0.3s, box-shadow 0.3s;
       height: 100%;
       background-color: var(--card-background);
     }
-    
+
     .dashboard-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    
+
     .dashboard-icon {
       font-size: 2.5rem;
       margin-bottom: 1rem;
       color: var(--accent-color);
     }
-    
+
     .stats-card {
       border-left: 4px solid var(--accent-color);
       background-color: var(--card-background);
     }
-    
+
     /* Style for action buttons */
     .action-buttons {
       display: flex;
@@ -46,13 +55,13 @@
       align-items: center;
       gap: 0.5rem;
     }
-    
+
     /* Admin button styles */
     .admin-btn-sm {
       padding: 0.25rem 0.5rem;
       font-size: 0.875rem;
     }
-    
+
     /* Data loading spinner */
     .loading-spinner {
       display: inline-block;
@@ -63,16 +72,18 @@
       border-top-color: var(--accent-color);
       animation: spin 1s ease-in-out infinite;
     }
-    
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
-    
+
     /* Loading state */
     .loading {
       position: relative;
     }
-    
+
     .loading::after {
       content: "";
       position: absolute;
@@ -86,7 +97,7 @@
       align-items: center;
       z-index: 10;
     }
-    
+
     /* Error message */
     .error-message {
       padding: 1rem;
@@ -96,7 +107,7 @@
       color: #dc3545;
       margin-bottom: 1rem;
     }
-    
+
     .loading-overlay {
       position: fixed;
       top: 0;
@@ -110,682 +121,556 @@
       z-index: 9999;
     }
   </style>
+
+  <script>
+    document.write(`
+    <script src="${CONFIG.getJsPath('data-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('api-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('admin-api-service.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('ui-helpers.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('common.js')}"><\/script>
+    <script src="${CONFIG.getJsPath('admin-auth.js')}"><\/script>
+  `);
+  </script>
 </head>
+
 <body>
 
-<!-- Navbar Placeholder -->
-<div id="navbar-placeholder"></div>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
 
-<div class="container-fluid">
-  <div class="row">
-    <!-- Sidebar -->
-    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-      <div class="position-sticky pt-3">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link active" href="dashboard.html">
-              <i class="bi bi-speedometer2 me-2"></i>
-              Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="products.html">
-              <i class="bi bi-box me-2"></i>
-              Products
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="categories.html">
-              <i class="bi bi-tags me-2"></i>
-              Categories
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="designers.html">
-              <i class="bi bi-palette me-2"></i>
-              Designers
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="orders.html">
-              <i class="bi bi-cart-check me-2"></i>
-              Orders
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="users.html">
-              <i class="bi bi-people me-2"></i>
-              Users
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="comments.html">
-              <i class="bi bi-chat-dots me-2"></i>
-              Reviews
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="reports.html">
-              <i class="bi bi-graph-up me-2"></i>
-              Reports
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="settings.html">
-              <i class="bi bi-gear me-2"></i>
-              Settings
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    
-    <!-- Main content -->
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Dashboard</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-          <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshData">
-              <i class="bi bi-arrow-clockwise"></i> Refresh
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="position-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="/~xzy2020c/PurelyHandmade/views/admin/dashboard.html">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/products.html">
+                <i class="bi bi-box me-2"></i>
+                Products
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/categories.html">
+                <i class="bi bi-tags me-2"></i>
+                Categories
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/designers.html">
+                <i class="bi bi-palette me-2"></i>
+                Designers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/orders.html">
+                <i class="bi bi-cart-check me-2"></i>
+                Orders
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/users.html">
+                <i class="bi bi-people me-2"></i>
+                Users
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/comments.html">
+                <i class="bi bi-chat-dots me-2"></i>
+                Reviews
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/reports.html">
+                <i class="bi bi-graph-up me-2"></i>
+                Reports
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/~xzy2020c/PurelyHandmade/views/admin/settings.html">
+                <i class="bi bi-gear me-2"></i>
+                Settings
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Main content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Dashboard</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshData">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download"></i> Export
+              </button>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+              <i class="bi bi-calendar3"></i>
+              This month
             </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary">
-              <i class="bi bi-download"></i> Export
-            </button>
           </div>
-          <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-            <i class="bi bi-calendar3"></i>
-            This month
-          </button>
         </div>
-      </div>
-      
-      <!-- Error message container -->
-      <div id="error-container" class="error-message d-none">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <span id="error-message">Unable to load data from API. Please try again later.</span>
-      </div>
-      
-      <!-- Stats Cards -->
-      <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
-        <div class="col">
-          <div class="card stats-card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Total Products</h6>
-                  <h3 class="card-title" id="total-products">
-                    <div class="loading-spinner"></div>
-                  </h3>
+
+        <!-- Error message container -->
+        <div id="error-container" class="error-message d-none">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <span id="error-message">Unable to load data from API. Please try again later.</span>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
+          <div class="col">
+            <div class="card stats-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-2 text-muted">Total Products</h6>
+                    <h3 class="card-title" id="total-products">
+                      <div class="loading-spinner"></div>
+                    </h3>
+                  </div>
+                  <i class="bi bi-box dashboard-icon"></i>
                 </div>
-                <i class="bi bi-box dashboard-icon"></i>
+                <p class="card-text"><small class="text-muted" id="products-change">Loading...</small></p>
               </div>
-              <p class="card-text"><small class="text-muted" id="products-change">Loading...</small></p>
             </div>
           </div>
-        </div>
-        
-        <div class="col">
-          <div class="card stats-card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
-                  <h3 class="card-title" id="total-orders">
-                    <div class="loading-spinner"></div>
-                  </h3>
+
+          <div class="col">
+            <div class="card stats-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                    <h3 class="card-title" id="total-orders">
+                      <div class="loading-spinner"></div>
+                    </h3>
+                  </div>
+                  <i class="bi bi-cart-check dashboard-icon"></i>
                 </div>
-                <i class="bi bi-cart-check dashboard-icon"></i>
+                <p class="card-text"><small class="text-muted" id="orders-change">Loading...</small></p>
               </div>
-              <p class="card-text"><small class="text-muted" id="orders-change">Loading...</small></p>
             </div>
           </div>
-        </div>
-        
-        <div class="col">
-          <div class="card stats-card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
-                  <h3 class="card-title" id="total-users">
-                    <div class="loading-spinner"></div>
-                  </h3>
+
+          <div class="col">
+            <div class="card stats-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
+                    <h3 class="card-title" id="total-users">
+                      <div class="loading-spinner"></div>
+                    </h3>
+                  </div>
+                  <i class="bi bi-people dashboard-icon"></i>
                 </div>
-                <i class="bi bi-people dashboard-icon"></i>
+                <p class="card-text"><small class="text-muted" id="users-change">Loading...</small></p>
               </div>
-              <p class="card-text"><small class="text-muted" id="users-change">Loading...</small></p>
             </div>
           </div>
-        </div>
-        
-        <div class="col">
-          <div class="card stats-card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="card-subtitle mb-2 text-muted">Revenue</h6>
-                  <h3 class="card-title" id="total-revenue">
-                    <div class="loading-spinner"></div>
-                  </h3>
+
+          <div class="col">
+            <div class="card stats-card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-subtitle mb-2 text-muted">Revenue</h6>
+                    <h3 class="card-title" id="total-revenue">
+                      <div class="loading-spinner"></div>
+                    </h3>
+                  </div>
+                  <i class="bi bi-graph-up-arrow dashboard-icon"></i>
                 </div>
-                <i class="bi bi-graph-up-arrow dashboard-icon"></i>
+                <p class="card-text"><small class="text-muted" id="revenue-change">Loading...</small></p>
               </div>
-              <p class="card-text"><small class="text-muted" id="revenue-change">Loading...</small></p>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Quick Links -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header">
-              Quick Actions
-            </div>
-            <div class="card-body">
-              <div class="row row-cols-1 row-cols-md-4 g-4">
-                <div class="col">
-                  <a href="products.html?action=new" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-plus-lg me-2"></i>Add Product
-                  </a>
-                </div>
-                <div class="col">
-                  <a href="orders.html" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-cart-check me-2"></i>View Orders
-                  </a>
-                </div>
-                <div class="col">
-                  <a href="reports.html" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-bar-chart me-2"></i>View Reports
-                  </a>
-                </div>
-                <div class="col">
-                  <a href="settings.html" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-gear me-2"></i>Settings
-                  </a>
+
+        <!-- Quick Links -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                Quick Actions
+              </div>
+              <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-4 g-4">
+                  <div class="col">
+                    <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/products.html?action=new"
+                      class="btn btn-outline-primary w-100">
+                      <i class="bi bi-plus-lg me-2"></i>Add Product
+                    </a>
+                  </div>
+                  <div class="col">
+                    <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/orders.html"
+                      class="btn btn-outline-primary w-100">
+                      <i class="bi bi-cart-check me-2"></i>View Orders
+                    </a>
+                  </div>
+                  <div class="col">
+                    <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/reports.html"
+                      class="btn btn-outline-primary w-100">
+                      <i class="bi bi-bar-chart me-2"></i>View Reports
+                    </a>
+                  </div>
+                  <div class="col">
+                    <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/settings.html"
+                      class="btn btn-outline-primary w-100">
+                      <i class="bi bi-gear me-2"></i>Settings
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Recent Orders -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header">
-              Recent Orders
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                      <th>Total</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="recent-orders-table">
-                    <tr>
-                      <td colspan="6" class="text-center">
-                        <div class="loading-spinner"></div>
-                        <p>Loading recent orders...</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+
+        <!-- Recent Orders -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                Recent Orders
               </div>
-            </div>
-            <div class="card-footer">
-              <a href="orders.html" class="btn btn-sm btn-outline-primary">View All Orders</a>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recent-orders-table">
+                      <tr>
+                        <td colspan="6" class="text-center">
+                          <div class="loading-spinner"></div>
+                          <p>Loading recent orders...</p>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer">
+                <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/orders.html"
+                  class="btn btn-sm btn-outline-primary">View All Orders</a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
-<!-- Footer -->
-<footer class="footer mt-auto py-3 bg-light">
-  <div class="container text-center">
-    <span class="text-muted">© 2023 Purely Homemade. All rights reserved.</span>
-  </div>
-</footer>
+  <!-- Footer -->
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container text-center">
+      <span class="text-muted">© 2023 Purely Homemade. All rights reserved.</span>
+    </div>
+  </footer>
 
-<!-- Bootstrap and other scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap and other scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- 直接在页面中内联定义关键服务，避免加载问题 -->
-<script>
-/**
- * API Service for Purely Handmade
- * 提供统一的API访问层，处理所有与服务器的通信
- */
-const ApiService = {
-  baseUrl: '/api',
-  
-  // 获取授权头
-  getAuthHeaders: function() {
-    // 从localStorage获取令牌
-    const token = localStorage.getItem('authToken');
-    
-    return token ? {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
-      'Content-Type': 'application/json'
-    };
-  },
-  
-  // 获取授权令牌
-  getAuthToken: function() {
-    const token = localStorage.getItem('authToken');
-    const tokenStatus = token ? 'Token found' : 'No token';
-    console.log('Auth token from localStorage: → ' + JSON.stringify(tokenStatus));
-    console.log('Getting auth token: → ' + JSON.stringify(tokenStatus));
-    return token;
-  },
-  
-  // 处理API响应
-  handleResponse: async function(response) {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
-    
-    // 如果状态码不在2xx范围内，抛出错误
-    if (!response.ok) {
-      let errorData;
-      
-      try {
-        errorData = isJson ? await response.json() : await response.text();
-      } catch (error) {
-        errorData = 'Failed to parse error response';
-      }
-      
-      const error = new Error(
-        isJson && errorData.error 
-          ? errorData.error 
-          : 'API request failed'
-      );
-      
-      error.status = response.status;
-      error.statusText = response.statusText;
-      error.data = errorData;
-      
-      throw error;
-    }
-    
-    // 解析成功响应
-    return isJson ? response.json() : response.text();
-  },
-  
-  // 发送请求
-  request: async function(url, options = {}) {
-    const fullUrl = url.startsWith('http') ? url : this.baseUrl + url;
-    
-    // 默认选项
-    const defaultOptions = {
-      headers: this.getAuthHeaders(),
-      credentials: 'same-origin',
-    };
-    
-    // 合并选项
-    const fetchOptions = {
-      ...defaultOptions,
-      ...options,
-      headers: {
-        ...defaultOptions.headers,
-        ...options.headers,
-      },
-    };
-    
-    try {
-      const response = await fetch(fullUrl, fetchOptions);
-      return await this.handleResponse(response);
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
-    }
-  },
-  
-  // GET请求
-  get: function(url, params = {}) {
-    // 构建查询字符串
-    const queryParams = new URLSearchParams();
-    Object.keys(params).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null) {
-        queryParams.append(key, params[key]);
-      }
-    });
-    
-    const queryString = queryParams.toString();
-    const fullUrl = queryString ? `${url}?${queryString}` : url;
-    
-    return this.request(fullUrl, { method: 'GET' });
-  },
-  
-  // POST请求
-  post: function(url, data = {}) {
-    return this.request(url, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-  
-  // PUT请求
-  put: function(url, data = {}) {
-    return this.request(url, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-  
-  // DELETE请求
-  delete: function(url) {
-    return this.request(url, { method: 'DELETE' });
-  }
-};
 
-/**
- * Admin API Service for Purely Handmade
- * 提供管理员API访问层，处理与服务器的管理功能通信
- */
-const AdminApiService = {
-  // 获取所有用户
-  getAllUsers: function() {
-    return ApiService.get('/auth/profile?all=1');
-  },
-  
-  // 获取所有产品
-  getAllProducts: function() {
-    return ApiService.get('/products');
-  },
-  
-  // 获取所有类别
-  getAllCategories: function() {
-    return ApiService.get('/categories');
-  },
-  
-  // 获取所有设计师
-  getAllDesigners: function() {
-    return ApiService.get('/designers');
-  },
-  
-  // 获取所有订单
-  getAllOrders: function() {
-    return ApiService.get('/orders?all=1');
-  },
-  
-  // 获取网站统计数据
-  getSiteStatistics: function() {
-    return ApiService.get('/admin/dashboard');
-  },
-  
-  // 获取订单详情
-  getOrderById: async function(orderId) {
-    console.log(`尝试获取订单详情 ID: ${orderId}`);
-    
-    // 使用订单列表API，但获取所有订单（对管理员有效）
-    return ApiService.get('/orders', { all: 1 }).then(response => {
-      if (response.success && response.data && response.data.orders) {
-        // 从订单列表中找到指定ID的订单
-        const foundOrder = response.data.orders.find(order => order.id == orderId);
-        
-        if (foundOrder) {
-          // 如果找到了，包装为成功响应格式
-          console.log(`✅ 在订单列表中找到了订单 #${orderId}`);
-          return {
-            success: true,
-            data: foundOrder
-          };
-        } else {
-          console.warn(`⚠️ 在API响应中找不到指定订单 #${orderId}`);
+  <script>
+    // Main page data loading function
+    function loadDashboardData(userData) {
+      console.log('🔄 loadDashboardData被调用，时间:', new Date().toISOString());
+      console.log('📊 加载仪表盘数据，用户:', userData ? `ID: ${userData.id}, 名称: ${userData.username || userData.firstName}` : '未知用户');
+      showLoadingState();
+
+      // Debug output before API calls
+      console.log('Starting API calls with admin user');
+
+      // 从API获取数据
+      function loadData() {
+        // 检查AdminApiService是否存在
+        if (typeof AdminApiService === 'undefined') {
+          console.error('AdminApiService is not defined. Make sure admin-api-service.js is loaded.');
+          showError('AdminApiService not defined. Check console for details.');
+          return Promise.resolve([
+            { success: true, data: { products: [], total: 0 } },
+            { success: true, data: { orders: [], total: 0 } },
+            { success: true, data: { users: [], total: 0 } },
+            { success: true, data: { products: { total: 0 }, orders: { total: 0 }, users: { total: 0 }, revenue: { total: 0 } } }
+          ]);
         }
+
+        // 检查用户是否已登录
+        const currentUser = DataService.getCurrentUser();
+        const authToken = localStorage.getItem('authToken');
+        if (!currentUser || !authToken) {
+          console.warn('User is not logged in or no auth token. Redirecting to login page.');
+          setTimeout(() => redirectToLogin(), 1000);
+          showError('您需要登录才能访问此页面。即将跳转到登录页面...');
+          return Promise.resolve([
+            { success: true, data: { products: [], total: 0 } },
+            { success: true, data: { orders: [], total: 0 } },
+            { success: true, data: { users: [], total: 0 } },
+            { success: true, data: { products: { total: 0 }, orders: { total: 0 }, users: { total: 0 }, revenue: { total: 0 } } }
+          ]);
+        }
+
+        if (!currentUser.isAdmin && currentUser.role !== 'admin') {
+          console.warn('User is not an admin. Showing unauthorized message.');
+          setTimeout(() => showUnauthorized(), 1000);
+          showError('您没有管理员权限。即将跳转到登录页面...');
+          return Promise.resolve([
+            { success: true, data: { products: [], total: 0 } },
+            { success: true, data: { orders: [], total: 0 } },
+            { success: true, data: { users: [], total: 0 } },
+            { success: true, data: { products: { total: 0 }, orders: { total: 0 }, users: { total: 0 }, revenue: { total: 0 } } }
+          ]);
+        }
+
+        // 先尝试使用API，即使没有令牌也尝试
+        return Promise.all([
+          AdminApiService.getAllProducts().catch(error => {
+            console.error('获取产品失败:', error);
+            if (error.status === 401) {
+              console.warn('Authentication failed (401). Redirecting to login.');
+              setTimeout(() => redirectToLogin(), 1000);
+              showError('您的登录已过期。即将跳转到登录页面...');
+            }
+            return { success: true, data: { products: [], total: 0 } };
+          }),
+          AdminApiService.getAllOrders().catch(error => {
+            console.error('获取订单失败:', error);
+            if (error.status === 401 && !window._authRedirecting) {
+              window._authRedirecting = true;
+              console.warn('Authentication failed (401). Redirecting to login.');
+              setTimeout(() => redirectToLogin(), 1000);
+              showError('您的登录已过期。即将跳转到登录页面...');
+            }
+            return { success: true, data: { orders: [], total: 0 } };
+          }),
+          AdminApiService.getAllUsers().catch(error => {
+            console.error('获取用户失败:', error);
+            return { success: true, data: { users: [], total: 0 } };
+          }),
+          AdminApiService.getSiteStatistics().catch(error => {
+            console.error('获取网站统计数据失败:', error);
+            return { success: true, data: { products: { total: 0 }, orders: { total: 0 }, users: { total: 0 }, revenue: { total: 0 } } };
+          })
+        ]);
       }
-      
-      // 如果没有找到订单或API请求失败，返回错误响应
-      return {
-        success: false,
-        message: '未找到指定的订单'
-      };
-    });
-  },
-};
-</script>
 
-<script src="/src/client/js/data-service.js"></script>
-<script src="/src/client/js/ui-helpers.js"></script>
-<script src="/src/client/js/admin-auth.js"></script>
+      // 加载数据并更新UI
+      loadData().then(([productsResponse, ordersResponse, usersResponse, statsResponse]) => {
+        // 检查是否有401错误导致的重定向
+        if (window._authRedirecting) {
+          console.log('Authentication redirection in progress, skipping UI updates');
+          return;
+        }
 
-<script>
-  // Main page data loading function
-  function loadDashboardData(userData) {
-    console.log('🔄 loadDashboardData被调用，时间:', new Date().toISOString());
-    console.log('📊 加载仪表盘数据，用户:', userData ? `ID: ${userData.id}, 名称: ${userData.username || userData.firstName}` : '未知用户');
-    showLoadingState();
-    
-    // Debug output before API calls
-    console.log('Starting API calls with admin user');
-    
-    // 从API获取数据
-    function loadData() {
-      // 先尝试使用API，即使没有令牌也尝试
-      return Promise.all([
-        AdminApiService.getAllProducts().catch(error => {
-          console.error('获取产品失败:', error);
-          return { success: true, data: { products: [], total: 0 } };
-        }),
-        AdminApiService.getAllOrders().catch(error => {
-          console.error('获取订单失败:', error);
-          return { success: true, data: { orders: [], total: 0 } };
-        }),
-        AdminApiService.getAllUsers().catch(error => {
-          console.error('获取用户失败:', error);
-          return { success: true, data: { users: [], total: 0 } };
-        }),
-        AdminApiService.getSiteStatistics().catch(error => {
-          console.error('获取网站统计数据失败:', error);
-          return { success: true, data: {} };
-        })
-      ]);
+        // 更新统计卡片
+        updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
+
+        // 提取用户数据用于订单表格
+        const userData = usersResponse && usersResponse.success ?
+          (Array.isArray(usersResponse.data) ? usersResponse.data :
+            (usersResponse.data?.users || [])) : [];
+
+        // 更新最近订单表格，同时传入订单数据和用户数据
+        updateRecentOrders(ordersResponse, userData);
+
+        hideLoadingState();
+      })
+        .catch(error => {
+          console.error('Error loading dashboard data:', error);
+          showError('Failed to load dashboard data. ' + (error.message || ''));
+          hideLoadingState();
+        });
     }
-    
-    // 加载数据并更新UI
-    loadData().then(([productsResponse, ordersResponse, usersResponse, statsResponse]) => {
-      // 更新统计卡片
-      updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
-      
-      // 提取用户数据用于订单表格
-      const userData = usersResponse && usersResponse.success ? 
-        (Array.isArray(usersResponse.data) ? usersResponse.data : 
-        (usersResponse.data?.users || [])) : [];
-      
-      // 更新最近订单表格，同时传入订单数据和用户数据
-      updateRecentOrders(ordersResponse, userData);
-      
-      hideLoadingState();
-    })
-    .catch(error => {
-      console.error('Error loading dashboard data:', error);
-      showError('Failed to load dashboard data. ' + (error.message || ''));
-      hideLoadingState();
+
+    // Initialize dashboard with authentication
+    AdminAuth.initAdminPage(loadDashboardData);
+
+    // Refresh button event
+    document.getElementById('refreshData').addEventListener('click', function () {
+      loadDashboardData();
     });
-  }
-  
-  // Initialize dashboard with authentication
-  AdminAuth.initAdminPage(loadDashboardData);
-  
-  // Refresh button event
-  document.getElementById('refreshData').addEventListener('click', function() {
-    loadDashboardData();
-  });
-  
-  // 更新统计卡片
-  function updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse) {
-    // 如果可用，优先使用统计API返回的数据
-    if (statsResponse && statsResponse.success && statsResponse.data) {
-      const stats = statsResponse.data;
-      
-      if (stats.products) {
-        document.getElementById('total-products').textContent = stats.products.total || 0;
-        document.getElementById('products-change').textContent = 'From API';
+
+    // 更新统计卡片
+    function updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse) {
+      // 如果可用，优先使用统计API返回的数据
+      if (statsResponse && statsResponse.success && statsResponse.data) {
+        const stats = statsResponse.data;
+
+        if (stats.products) {
+          document.getElementById('total-products').textContent = stats.products.total || 0;
+          document.getElementById('products-change').textContent = 'From API';
+        }
+
+        if (stats.orders) {
+          document.getElementById('total-orders').textContent = stats.orders.total || 0;
+          document.getElementById('orders-change').textContent = 'From API';
+        }
+
+        if (stats.revenue) {
+          document.getElementById('total-revenue').textContent = '$' + (stats.revenue.total || 0).toFixed(2);
+          document.getElementById('revenue-change').textContent = 'From all orders';
+        }
+
+        if (stats.users) {
+          document.getElementById('total-users').textContent = stats.users.total || 0;
+          document.getElementById('users-change').textContent = 'From API';
+        }
+
+        return;
       }
-      
-      if (stats.orders) {
-        document.getElementById('total-orders').textContent = stats.orders.total || 0;
-        document.getElementById('orders-change').textContent = 'From API';
+
+      // 回退到个别API响应
+      if (productsResponse && productsResponse.success) {
+        const productsData = productsResponse.data || {};
+        const products = productsData.products || [];
+        const total = productsData.total || products.length || 0;
+        document.getElementById('total-products').textContent = total;
+        document.getElementById('products-change').textContent = 'Updated just now';
       }
-      
-      if (stats.revenue) {
-        document.getElementById('total-revenue').textContent = '$' + (stats.revenue.total || 0).toFixed(2);
+
+      if (ordersResponse && ordersResponse.success) {
+        const ordersData = ordersResponse.data || {};
+        const orders = ordersData.orders || [];
+        const total = ordersData.total || orders.length || 0;
+        document.getElementById('total-orders').textContent = total;
+        document.getElementById('orders-change').textContent = 'Updated just now';
+
+        // 计算总收入
+        let revenue = 0;
+        if (orders && orders.length > 0) {
+          revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
+        }
+        document.getElementById('total-revenue').textContent = '$' + revenue.toFixed(2);
         document.getElementById('revenue-change').textContent = 'From all orders';
       }
-      
-      if (stats.users) {
-        document.getElementById('total-users').textContent = stats.users.total || 0;
-        document.getElementById('users-change').textContent = 'From API';
+
+      if (usersResponse && usersResponse.success) {
+        const usersData = usersResponse.data || {};
+        const users = usersData.users || [];
+        const total = usersData.total || users.length || 0;
+        document.getElementById('total-users').textContent = total;
+        document.getElementById('users-change').textContent = 'Updated just now';
       }
-      
-      return;
     }
-    
-    // 回退到个别API响应
-    if (productsResponse && productsResponse.success) {
-      const productsData = productsResponse.data || {};
-      const products = productsData.products || [];
-      const total = productsData.total || products.length || 0;
-      document.getElementById('total-products').textContent = total;
-      document.getElementById('products-change').textContent = 'Updated just now';
-    }
-    
-    if (ordersResponse && ordersResponse.success) {
-      const ordersData = ordersResponse.data || {};
-      const orders = ordersData.orders || [];
-      const total = ordersData.total || orders.length || 0;
-      document.getElementById('total-orders').textContent = total;
-      document.getElementById('orders-change').textContent = 'Updated just now';
-      
-      // 计算总收入
-      let revenue = 0;
-      if (orders && orders.length > 0) {
-        revenue = orders.reduce((total, order) => total + parseFloat(order.totalAmount || 0), 0);
-      }
-      document.getElementById('total-revenue').textContent = '$' + revenue.toFixed(2);
-      document.getElementById('revenue-change').textContent = 'From all orders';
-    }
-    
-    if (usersResponse && usersResponse.success) {
-      const usersData = usersResponse.data || {};
-      const users = usersData.users || [];
-      const total = usersData.total || users.length || 0;
-      document.getElementById('total-users').textContent = total;
-      document.getElementById('users-change').textContent = 'Updated just now';
-    }
-  }
-  
-  // Update recent orders table
-  function updateRecentOrders(response, userData) {
-    const tableBody = document.getElementById('recent-orders-table');
-    
-    if (!response || !response.success) {
-      tableBody.innerHTML = `
+
+    // Update recent orders table
+    function updateRecentOrders(response, userData) {
+      const tableBody = document.getElementById('recent-orders-table');
+
+      if (!response || !response.success) {
+        tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center">Failed to load orders data</td>
         </tr>
       `;
-      return;
-    }
-    
-    const data = response.data || {};
-    // 支持多种可能的API返回格式
-    const orders = data.orders || (Array.isArray(data) ? data : []);
-    
-    if (!orders.length) {
-      tableBody.innerHTML = `
+        return;
+      }
+
+      const data = response.data || {};
+      // 支持多种可能的API返回格式
+      const orders = data.orders || (Array.isArray(data) ? data : []);
+
+      if (!orders.length) {
+        tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="text-center">No recent orders found</td>
         </tr>
       `;
-      return;
-    }
-    
-    console.log(`📊 Dashboard: 获取到${orders.length}个订单`);
-    
-    // 按时间降序排序订单（最新的在前面）
-    const recentOrders = orders
-      .sort((a, b) => new Date(b.orderDate || b.createdAt) - new Date(a.orderDate || a.createdAt))
-      .slice(0, 5);
-    
-    // 直接渲染订单表格，不再重复请求用户数据
-    renderOrdersTable(recentOrders, userData);
-  }
-  
-  // 渲染订单表格的辅助函数
-  function renderOrdersTable(orders, userData) {
-    const tableBody = document.getElementById('recent-orders-table');
-    let html = '';
-    
-    // 创建用户ID到用户信息的映射
-    const userMap = {};
-    if (Array.isArray(userData)) {
-      userData.forEach(user => {
-        if (user && user.id) {
-          // 将ID转换为字符串作为键，避免类型不匹配问题
-          userMap[String(user.id)] = user;
-        }
-      });
-    }
-    
-    console.log(`🔍 找到${userData.length}个用户，创建映射: ${Object.keys(userMap).length}个键`);
-    
-    // 跟踪已渲染的订单ID，避免重复渲染
-    const renderedOrderIds = new Set();
-    
-    orders.forEach(order => {
-      // 避免重复渲染相同的订单
-      if (renderedOrderIds.has(order.id)) {
-        console.log(`⚠️ 跳过重复订单 #${order.id}`);
         return;
       }
-      renderedOrderIds.add(order.id);
-      
-      // Format date
-      const orderDate = new Date(order.orderDate || order.createdAt);
-      const formattedDate = orderDate.toLocaleDateString();
-      
-      // Status badge class
-      let statusClass = 'bg-secondary';
-      if (order.status === 'pending') statusClass = 'bg-warning text-dark';
-      if (order.status === 'processing') statusClass = 'bg-info text-dark';
-      if (order.status === 'shipped') statusClass = 'bg-primary';
-      if (order.status === 'delivered') statusClass = 'bg-success';
-      if (order.status === 'cancelled') statusClass = 'bg-danger';
-      
-      // Get username
-      let username = 'Guest';
-      // 尝试不同的格式，以适应不同的API响应结构
-      if (order.user) {
-        username = order.user.username || 
-                  `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() || 
-                  order.user.email || 'Guest';
-      } else if (order.userId && userMap[String(order.userId)]) {
-        // 从用户映射中获取用户信息，确保将userId转换为字符串
-        const user = userMap[String(order.userId)];
-        username = user.username || 
-                  `${user.firstName || ''} ${user.lastName || ''}`.trim() || 
-                  user.email || `User #${order.userId}`;
-      } else if (order.userId) {
-        username = `User #${order.userId}`;
+
+      console.log(`📊 Dashboard: 获取到${orders.length}个订单`);
+
+      // 按时间降序排序订单（最新的在前面）
+      const recentOrders = orders
+        .sort((a, b) => new Date(b.orderDate || b.createdAt) - new Date(a.orderDate || a.createdAt))
+        .slice(0, 5);
+
+      // 直接渲染订单表格，不再重复请求用户数据
+      renderOrdersTable(recentOrders, userData);
+    }
+
+    // 渲染订单表格的辅助函数
+    function renderOrdersTable(orders, userData) {
+      const tableBody = document.getElementById('recent-orders-table');
+      let html = '';
+
+      // 创建用户ID到用户信息的映射
+      const userMap = {};
+      if (Array.isArray(userData)) {
+        userData.forEach(user => {
+          if (user && user.id) {
+            // 将ID转换为字符串作为键，避免类型不匹配问题
+            userMap[String(user.id)] = user;
+          }
+        });
       }
-      
-      html += `
+
+      console.log(`🔍 找到${userData.length}个用户，创建映射: ${Object.keys(userMap).length}个键`);
+
+      // 跟踪已渲染的订单ID，避免重复渲染
+      const renderedOrderIds = new Set();
+
+      orders.forEach(order => {
+        // 避免重复渲染相同的订单
+        if (renderedOrderIds.has(order.id)) {
+          console.log(`⚠️ 跳过重复订单 #${order.id}`);
+          return;
+        }
+        renderedOrderIds.add(order.id);
+
+        // Format date
+        const orderDate = new Date(order.orderDate || order.createdAt);
+        const formattedDate = orderDate.toLocaleDateString();
+
+        // Status badge class
+        let statusClass = 'bg-secondary';
+        if (order.status === 'pending') statusClass = 'bg-warning text-dark';
+        if (order.status === 'processing') statusClass = 'bg-info text-dark';
+        if (order.status === 'shipped') statusClass = 'bg-primary';
+        if (order.status === 'delivered') statusClass = 'bg-success';
+        if (order.status === 'cancelled') statusClass = 'bg-danger';
+
+        // Get username
+        let username = 'Guest';
+        // 尝试不同的格式，以适应不同的API响应结构
+        if (order.user) {
+          username = order.user.username ||
+            `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim() ||
+            order.user.email || 'Guest';
+        } else if (order.userId && userMap[String(order.userId)]) {
+          // 从用户映射中获取用户信息，确保将userId转换为字符串
+          const user = userMap[String(order.userId)];
+          username = user.username ||
+            `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+            user.email || `User #${order.userId}`;
+        } else if (order.userId) {
+          username = `User #${order.userId}`;
+        }
+
+        html += `
         <tr>
           <td>#${order.id}</td>
           <td>${username}</td>
@@ -793,27 +678,27 @@ const AdminApiService = {
           <td><span class="badge ${statusClass}">${order.status}</span></td>
           <td>$${parseFloat(order.totalAmount || 0).toFixed(2)}</td>
           <td>
-            <a href="orders.html?id=${order.id}" class="btn btn-sm btn-outline-primary">View</a>
+            <a href="/~xzy2020c/PurelyHandmade/src/client/views/admin/orders.html?id=${order.id}" class="btn btn-sm btn-outline-primary">View</a>
           </td>
         </tr>
       `;
-    });
-    
-    tableBody.innerHTML = html;
-  }
-  
-  // Show loading state
-  function showLoadingState() {
-    document.getElementById('error-container').classList.add('d-none');
-    
-    // 添加加载指示器
-    const statsCards = document.querySelectorAll('.stats-value');
-    statsCards.forEach(card => {
-      card.innerHTML = '<div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
-    });
-    
-    const tableBody = document.getElementById('recent-orders-table');
-    tableBody.innerHTML = `
+      });
+
+      tableBody.innerHTML = html;
+    }
+
+    // Show loading state
+    function showLoadingState() {
+      document.getElementById('error-container').classList.add('d-none');
+
+      // 添加加载指示器
+      const statsCards = document.querySelectorAll('.stats-value');
+      statsCards.forEach(card => {
+        card.innerHTML = '<div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
+      });
+
+      const tableBody = document.getElementById('recent-orders-table');
+      tableBody.innerHTML = `
       <tr>
         <td colspan="6" class="text-center py-4">
           <div class="spinner-border text-primary" role="status">
@@ -823,100 +708,109 @@ const AdminApiService = {
         </td>
       </tr>
     `;
-  }
-  
-  // Hide loading state
-  function hideLoadingState() {
-    // Nothing to do here since we're replacing content directly
-  }
-  
-  // Show error message
-  function showError(message) {
-    const errorContainer = document.getElementById('error-container');
-    const errorMessage = document.getElementById('error-message');
-    
-    if (errorContainer && errorMessage) {
-      errorMessage.textContent = message;
-      errorContainer.classList.remove('d-none');
-    } else {
-      console.error('Error containers not found in DOM');
-      alert('Error: ' + message);
     }
-  }
 
-  function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-  
-  // 显示加载动画
-  function showLoading() {
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.innerHTML = `
+    // Hide loading state
+    function hideLoadingState() {
+      // Nothing to do here since we're replacing content directly
+    }
+
+    // Show error message
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+
+      if (errorContainer && errorMessage) {
+        errorMessage.textContent = message;
+        errorContainer.classList.remove('d-none');
+
+        // Scroll to the error container
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Add animation to catch attention
+        errorContainer.classList.add('animate__animated', 'animate__headShake');
+        setTimeout(() => {
+          errorContainer.classList.remove('animate__animated', 'animate__headShake');
+        }, 1000);
+      } else {
+        console.error('Error containers not found in DOM');
+        alert('Error: ' + message);
+      }
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // 显示加载动画
+    function showLoading() {
+      const overlay = document.createElement('div');
+      overlay.className = 'loading-overlay';
+      overlay.innerHTML = `
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     `;
-    document.body.appendChild(overlay);
-  }
-  
-  // 隐藏加载动画
-  function hideLoading() {
-    const overlay = document.querySelector('.loading-overlay');
-    if (overlay) {
-      overlay.remove();
+      document.body.appendChild(overlay);
     }
-  }
 
-  // 格式化货币
-  function formatCurrency(amount) {
-    return new Intl.NumberFormat('zh-CN', {
-      style: 'currency',
-      currency: 'CNY'
-    }).format(amount);
-  }
-  
-  // 查看订单详情
-  async function viewOrderDetails(orderId) {
-    try {
-      showLoading();
-      console.log(`查看订单详情: ${orderId}`);
-      
-      // 使用改进的API调用获取订单详情
-      const response = await AdminApiService.getOrderById(orderId);
-      
-      if (!response || !response.success) {
-        hideLoading();
-        console.error(`Error viewing order details:`, response);
-        throw new Error(`Failed to load order details: ${response?.message || 'Unknown error'}`);
+    // 隐藏加载动画
+    function hideLoading() {
+      const overlay = document.querySelector('.loading-overlay');
+      if (overlay) {
+        overlay.remove();
       }
-      
-      const order = response.data;
-      
-      // 尝试获取用户详情
-      let userData = { username: 'Unknown User' };
-      
+    }
+
+    // 格式化货币
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY'
+      }).format(amount);
+    }
+
+    // 查看订单详情
+    async function viewOrderDetails(orderId) {
       try {
-        const userResponse = await ApiService.get('/auth/profile', { id: order.userId });
-        if (userResponse.success && userResponse.data) {
-          userData = userResponse.data;
-        } else {
-          console.warn(`❌ 获取用户数据时出错:`, userResponse);
+        showLoading();
+        console.log(`查看订单详情: ${orderId}`);
+
+        // 使用改进的API调用获取订单详情
+        const response = await AdminApiService.getOrderById(orderId);
+
+        if (!response || !response.success) {
+          hideLoading();
+          console.error(`Error viewing order details:`, response);
+          throw new Error(`Failed to load order details: ${response?.message || 'Unknown error'}`);
         }
-      } catch (userError) {
-        console.error(`❌ 获取用户数据时出错:`, userError);
-      }
-      
-      // 格式化订单项
-      let orderItemsHTML = '';
-      if (order.items && order.items.length > 0) {
-        orderItemsHTML = order.items.map(item => `
+
+        const order = response.data;
+
+        // 尝试获取用户详情
+        let userData = { username: 'Unknown User' };
+
+        try {
+          const userResponse = await ApiService.get('/auth/profile', { id: order.userId });
+          if (userResponse.success && userResponse.data) {
+            userData = userResponse.data;
+          } else {
+            console.warn(`❌ 获取用户数据时出错:`, userResponse);
+          }
+        } catch (userError) {
+          console.error(`❌ 获取用户数据时出错:`, userError);
+        }
+
+        // 格式化订单项
+        let orderItemsHTML = '';
+        if (order.items && order.items.length > 0) {
+          orderItemsHTML = order.items.map(item => `
           <tr>
             <td>${item.name}</td>
             <td>${item.quantity}</td>
@@ -924,32 +818,32 @@ const AdminApiService = {
             <td>${formatCurrency(item.price * item.quantity)}</td>
           </tr>
         `).join('');
-      } else {
-        orderItemsHTML = `<tr><td colspan="4" class="text-center">No items found</td></tr>`;
-      }
-      
-      // 格式化配送地址
-      function formatShippingAddress(shipping) {
-        if (!shipping) return 'Not available';
-        
-        const parts = [];
-        if (shipping.fullName) parts.push(shipping.fullName);
-        if (shipping.streetAddress) parts.push(shipping.streetAddress);
-        if (shipping.city) parts.push(shipping.city);
-        if (shipping.state) parts.push(shipping.state);
-        if (shipping.country) parts.push(shipping.country);
-        if (shipping.zipCode) parts.push(shipping.zipCode);
-        if (shipping.phone) parts.push(`电话: ${shipping.phone}`);
-        
-        return parts.join('<br>') || 'Not available';
-      }
-      
-      hideLoading();
-      
-      // 显示订单详情对话框
-      Swal.fire({
-        title: `订单详情 #${order.id}`,
-        html: `
+        } else {
+          orderItemsHTML = `<tr><td colspan="4" class="text-center">No items found</td></tr>`;
+        }
+
+        // 格式化配送地址
+        function formatShippingAddress(shipping) {
+          if (!shipping) return 'Not available';
+
+          const parts = [];
+          if (shipping.fullName) parts.push(shipping.fullName);
+          if (shipping.streetAddress) parts.push(shipping.streetAddress);
+          if (shipping.city) parts.push(shipping.city);
+          if (shipping.state) parts.push(shipping.state);
+          if (shipping.country) parts.push(shipping.country);
+          if (shipping.zipCode) parts.push(shipping.zipCode);
+          if (shipping.phone) parts.push(`电话: ${shipping.phone}`);
+
+          return parts.join('<br>') || 'Not available';
+        }
+
+        hideLoading();
+
+        // 显示订单详情对话框
+        Swal.fire({
+          title: `订单详情 #${order.id}`,
+          html: `
           <div class="container-fluid">
             <div class="row">
               <div class="col-md-6">
@@ -993,146 +887,172 @@ const AdminApiService = {
             </div>
           </div>
         `,
-        width: '800px',
-        showCloseButton: true,
-        showConfirmButton: false
-      });
-    } catch (error) {
-      hideLoading();
-      console.error('Error viewing order details:', error);
-      Swal.fire({
-        title: '错误',
-        text: `查看订单详情时出错: ${error.message}`,
-        icon: 'error'
-      });
-    }
-  }
-  
-  // 获取订单状态显示名称
-  function getStatusDisplayName(status) {
-    const statusMap = {
-      'pending': '待处理',
-      'processing': '处理中',
-      'shipped': '已发货',
-      'delivered': '已送达',
-      'completed': '已完成',
-      'cancelled': '已取消'
-    };
-    return statusMap[status] || status;
-  }
-  
-  // 获取订单状态徽章样式
-  function getStatusBadgeClass(status) {
-    const statusClassMap = {
-      'pending': 'bg-warning text-dark',
-      'processing': 'bg-info text-dark',
-      'shipped': 'bg-primary',
-      'delivered': 'bg-success',
-      'completed': 'bg-success',
-      'cancelled': 'bg-danger'
-    };
-    return statusClassMap[status] || 'bg-secondary';
-  }
-
-  // 更新仪表盘统计数据
-  async function updateDashboardStats() {
-    try {
-      // 显示加载状态
-      showLoadingState();
-      
-      // 获取统计数据
-      const statsResponse = await AdminApiService.getSiteStatistics().catch(error => {
-        console.error('获取网站统计数据失败:', error);
-        return { success: true, data: {} };
-      });
-      
-      // 获取产品数据
-      const productsResponse = await AdminApiService.getAllProducts().catch(error => {
-        console.error('获取产品失败:', error);
-        return { success: true, data: { products: [], total: 0 } };
-      });
-      
-      // 获取订单数据
-      const ordersResponse = await AdminApiService.getAllOrders().catch(error => {
-        console.error('获取订单失败:', error);
-        return { success: true, data: { orders: [], total: 0 } };
-      });
-      
-      // 获取用户数据
-      const usersResponse = await AdminApiService.getAllUsers().catch(error => {
-        console.error('获取用户失败:', error);
-        return { success: true, data: { users: [], total: 0 } };
-      });
-      
-      // 更新统计卡片
-      updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
-      
-      // 隐藏加载状态
-      hideLoadingState();
-      
-      return { productsResponse, ordersResponse, usersResponse, statsResponse };
-    } catch (error) {
-      console.error('Error updating dashboard stats:', error);
-      // 隐藏加载状态
-      hideLoadingState();
-      return null;
-    }
-  }
-  
-  // 更新最近订单
-  async function updateRecentOrders() {
-    try {
-      const recentOrdersContainer = document.getElementById('recent-orders-table');
-      if (!recentOrdersContainer) {
-        console.error('Recent orders container not found');
-        return;
+          width: '800px',
+          showCloseButton: true,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        hideLoading();
+        console.error('Error viewing order details:', error);
+        Swal.fire({
+          title: '错误',
+          text: `查看订单详情时出错: ${error.message}`,
+          icon: 'error'
+        });
       }
-      
-      const response = await ApiService.get('/orders', { all: 1 });
-      
-      if (response.success && response.data && response.data.orders) {
-        // 按照日期降序排序，确保最近的订单排在前面
-        const orders = response.data.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        
-        // 只显示前5个订单
-        const recentOrders = orders.slice(0, 5);
-        
-        if (recentOrders.length > 0) {
-          // 使用空数组作为用户数据的占位符，因为我们不需要它
-          renderOrdersTable(recentOrders, []);
-        } else {
-          recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">No recent orders</td></tr>';
+    }
+
+    // 获取订单状态显示名称
+    function getStatusDisplayName(status) {
+      const statusMap = {
+        'pending': '待处理',
+        'processing': '处理中',
+        'shipped': '已发货',
+        'delivered': '已送达',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+      return statusMap[status] || status;
+    }
+
+    // 获取订单状态徽章样式
+    function getStatusBadgeClass(status) {
+      const statusClassMap = {
+        'pending': 'bg-warning text-dark',
+        'processing': 'bg-info text-dark',
+        'shipped': 'bg-primary',
+        'delivered': 'bg-success',
+        'completed': 'bg-success',
+        'cancelled': 'bg-danger'
+      };
+      return statusClassMap[status] || 'bg-secondary';
+    }
+
+    // 更新仪表盘统计数据
+    async function updateDashboardStats() {
+      try {
+        // 显示加载状态
+        showLoadingState();
+
+        // 获取统计数据
+        const statsResponse = await AdminApiService.getSiteStatistics().catch(error => {
+          console.error('获取网站统计数据失败:', error);
+          return { success: true, data: {} };
+        });
+
+        // 获取产品数据
+        const productsResponse = await AdminApiService.getAllProducts().catch(error => {
+          console.error('获取产品失败:', error);
+          return { success: true, data: { products: [], total: 0 } };
+        });
+
+        // 获取订单数据
+        const ordersResponse = await AdminApiService.getAllOrders().catch(error => {
+          console.error('获取订单失败:', error);
+          return { success: true, data: { orders: [], total: 0 } };
+        });
+
+        // 获取用户数据
+        const usersResponse = await AdminApiService.getAllUsers().catch(error => {
+          console.error('获取用户失败:', error);
+          return { success: true, data: { users: [], total: 0 } };
+        });
+
+        // 更新统计卡片
+        updateStatistics(productsResponse, ordersResponse, usersResponse, statsResponse);
+
+        // 隐藏加载状态
+        hideLoadingState();
+
+        return { productsResponse, ordersResponse, usersResponse, statsResponse };
+      } catch (error) {
+        console.error('Error updating dashboard stats:', error);
+        // 隐藏加载状态
+        hideLoadingState();
+        return null;
+      }
+    }
+
+    // 更新最近订单
+    async function updateRecentOrders() {
+      try {
+        const recentOrdersContainer = document.getElementById('recent-orders-table');
+        if (!recentOrdersContainer) {
+          console.error('Recent orders container not found');
+          return;
         }
-      } else {
-        recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Failed to load recent orders</td></tr>';
-      }
-    } catch (error) {
-      console.error('Error loading recent orders:', error);
-      const recentOrdersContainer = document.getElementById('recent-orders-table');
-      if (recentOrdersContainer) {
-        recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Error loading recent orders</td></tr>';
-      }
-    }
-  }
 
-  // 页面加载完成后执行
-  document.addEventListener('DOMContentLoaded', async function() {
-    try {
-      // 获取面板统计数据
-      await updateDashboardStats();
-      
-      // 更新最近订单
-      await updateRecentOrders();
-      
-      // 定时刷新数据（每5分钟）
-      setInterval(async function() {
-        await updateDashboardStats();
-        await updateRecentOrders();
-      }, 5 * 60 * 1000);
-    } catch (error) {
-      console.error('DOMContentLoaded error:', error);
+        const response = await ApiService.get('/orders', { all: 1 });
+
+        if (response.success && response.data && response.data.orders) {
+          // 按照日期降序排序，确保最近的订单排在前面
+          const orders = response.data.orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+          // 只显示前5个订单
+          const recentOrders = orders.slice(0, 5);
+
+          if (recentOrders.length > 0) {
+            // 使用空数组作为用户数据的占位符，因为我们不需要它
+            renderOrdersTable(recentOrders, []);
+          } else {
+            recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">No recent orders</td></tr>';
+          }
+        } else {
+          recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Failed to load recent orders</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error loading recent orders:', error);
+        const recentOrdersContainer = document.getElementById('recent-orders-table');
+        if (recentOrdersContainer) {
+          recentOrdersContainer.innerHTML = '<tr><td colspan="6" class="text-center">Error loading recent orders</td></tr>';
+        }
+      }
     }
-  });
-</script>
+
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', async function () {
+      try {
+        // 获取面板统计数据
+        await updateDashboardStats();
+
+        // 更新最近订单
+        await updateRecentOrders();
+
+        // 定时刷新数据（每5分钟）
+        setInterval(async function () {
+          await updateDashboardStats();
+          await updateRecentOrders();
+        }, 5 * 60 * 1000);
+      } catch (error) {
+        console.error('DOMContentLoaded error:', error);
+      }
+    });
+
+    /**
+     * 重定向到登录页面
+     * Redirect to login page
+     */
+    function redirectToLogin() {
+      window.location.href = '/~xzy2020c/PurelyHandmade/src/client/views/auth/login.html?redirect=admin';
+    }
+
+    /**
+     * 显示无权限错误消息
+     * Display unauthorized error message
+     * @param {string} message - 要显示的错误消息
+     */
+    function showUnauthorized(message = '您需要管理员权限才能访问此页面') {
+      document.body.innerHTML = `
+      <div class="container mt-5">
+        <div class="alert alert-warning text-center p-5">
+          <h4><i class="bi bi-exclamation-triangle me-2"></i>需要授权</h4>
+          <p class="mb-4">${message}</p>
+          <a href="/~xzy2020c/PurelyHandmade/src/client/views/auth/login.html?redirect=admin" class="btn btn-primary">登录管理员账户</a>
+        </div>
+      </div>
+    `;
+    }
+  </script>
 </body>
-</html> 
+
+</html>
