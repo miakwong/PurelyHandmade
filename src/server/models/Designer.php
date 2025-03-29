@@ -5,7 +5,7 @@ use Utils\Database;
 
 class Designer {
     private $db;
-    private $table = 'Designer';
+    public $table = 'Designer';
     
     public function __construct($db) {
         $this->db = $db;

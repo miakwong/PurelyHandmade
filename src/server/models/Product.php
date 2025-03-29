@@ -5,7 +5,7 @@ use Utils\Database;
 
 class Product {
     private $db;
-    private $table = 'Product';
+    public $table = 'Product';
     
     public function __construct($db) {
         $this->db = $db;

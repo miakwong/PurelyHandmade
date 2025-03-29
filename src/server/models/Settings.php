@@ -5,7 +5,7 @@ use Utils\Database;
 
 class Settings {
     private $db;
-    private $table = '`Settings`';
+    public $table = '`Settings`';
     
     public function __construct($db) {
         $this->db = $db;

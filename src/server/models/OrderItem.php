@@ -5,7 +5,7 @@ use Utils\Database;
 
 class OrderItem {
     private $db;
-    private $table = 'OrderItem';
+    public $table = 'OrderItem';
     
     public function __construct($db) {
         $this->db = $db;
@@ -41,17 +41,19 @@ class OrderItem {
     }
     
     public function getTopSellingProducts($limit = 5) {
+        $limit = (int) $limit;  // Ensure limit is an integer, revent SQL injection
+
         $sql = "SELECT p.id, p.name, p.slug, p.image, SUM(oi.quantity) as total_sold 
-                FROM $this->table oi
-                JOIN Product p ON oi.productId = p.id
-                JOIN `Order` o ON oi.orderId = o.id
+                FROM {$this->table} oi
+                LEFT JOIN Product p ON oi.productId = p.id
+                LEFT JOIN `Order` o ON oi.orderId = o.id
                 WHERE o.status != 'cancelled'
                 GROUP BY p.id
                 ORDER BY total_sold DESC
-                LIMIT :limit";
-        
-        return $this->db->fetchAll($sql, ['limit' => $limit]);
-    }
+                LIMIT $limit";
+
+return $this->db->fetchAll($sql);
+}
     
     public function getProductSalesData($productId) {
         $sql = "SELECT SUM(oi.quantity) as total_sold, SUM(oi.quantity * oi.price) as total_revenue 

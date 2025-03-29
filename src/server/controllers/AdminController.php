@@ -7,14 +7,16 @@ use Models\Order;
 use Models\OrderItem;
 use Utils\Database;
 use Utils\Logger;
+use Utils\Response;
 
 class AdminController {
     private $db;
-    private $user;
-    private $product;
-    private $order;
-    private $orderItem;
+    public $user;
+    public $product;
+    public $order;
+    public $orderItem;
     private $logger;
+    private $response;
     
     public function __construct() {
         $this->db = new Database();
@@ -24,9 +26,17 @@ class AdminController {
         $this->order = new Order($this->db);
         $this->orderItem = new OrderItem($this->db);
         $this->logger = new Logger('admin.log');
+        $this->response = new Response();
     }
     
     public function getUsers($filters = [], $page = 1, $limit = 20) {
+        $limit = (int) $limit; // Ensure limit is an integer to prevent SQL injection
+        $page = (int) $page; // Ensure page is an integer to prevent SQL injection
+        $offset = ($page - 1) * $limit;
+        $filters['limit'] = $limit;
+        $filters['offset'] = $offset;
+        $filters['order'] = 'createdAt DESC';   
+
         try {
             return [
                 'success' => true,
@@ -43,6 +53,21 @@ class AdminController {
     }
     
     public function updateUser($id, $data) {
+        $id = (int) $id; // Ensure ID is an integer to prevent SQL injection
+        $data = array_map('trim', $data); // Trim all input data
+        $data = array_map('htmlspecialchars', $data); // Sanitize input data
+        $data['updatedAt'] = date('Y-m-d H:i:s'); // Update timestamp
+        $data['isAdmin'] = isset($data['isAdmin']) ? (int) $data['isAdmin'] : 0; // Ensure isAdmin is an integer
+        $data['status'] = isset($data['status']) ? (int) $data['status'] : 0; // Ensure status is an integer
+        $data['role'] = isset($data['role']) ? htmlspecialchars($data['role']) : 'user'; // Sanitize role input
+        $data['username'] = isset($data['username']) ? htmlspecialchars($data['username']) : ''; // Sanitize username input
+        $data['email'] = isset($data['email']) ? htmlspecialchars($data['email']) : ''; // Sanitize email input
+        $data['password'] = isset($data['password']) ? password_hash($data['password'], PASSWORD_BCRYPT) : null; // Hash password if provided
+        $data['password'] = $data['password'] ? $data['password'] : null; // Set password to null if not provided
+        $data['updatedAt'] = date('Y-m-d H:i:s'); // Update timestamp
+        $data['isAdmin'] = isset($data['isAdmin']) ? (int) $data['isAdmin'] : 0; // Ensure isAdmin is an integer
+        $data['status'] = isset($data['status']) ? (int) $data['status'] : 0; // Ensure status is an integer
+        $data['role'] = isset($data['role']) ? htmlspecialchars($data['role']) : 'user'; // Sanitize role input
         try {
             // Check if user exists
             $existingUser = $this->user->findById($id);
@@ -86,6 +111,7 @@ class AdminController {
      * @return array 结果数组
      */
     public function getUserById($id) {
+        $id = (int) $id; // Ensure ID is an integer to prevent SQL injection
         try {
             // 查找用户
             $user = $this->user->findById($id);
@@ -124,6 +150,8 @@ class AdminController {
      * @return array 结果数组
      */
     public function deleteUser($id) {
+        $id = (int) $id; // Ensure ID is an integer to prevent SQL injection
+
         try {
             // 检查用户是否存在
             $existingUser = $this->user->findById($id);
@@ -137,7 +165,7 @@ class AdminController {
             // 检查是否为最后一个管理员
             if ($existingUser['isAdmin'] == 1) {
                 // 获取管理员数量
-                $adminCountSql = "SELECT COUNT(*) as count FROM User WHERE isAdmin = 1";
+                $adminCountSql = "SELECT COUNT(*) as count FROM {$this->user->table} WHERE isAdmin = 1";
                 $result = $this->db->fetch($adminCountSql);
                 $adminCount = $result['count'] ?? 0;
                 
@@ -168,64 +196,101 @@ class AdminController {
         }
     }
     
-    public function getDashboardData() {
+    /**
+     * 获取仪表盘统计数据
+     * 
+     * @param string $period 时间段 (all, month, week, day)
+     * @return array 统计数据
+     */
+    public function getDashboardStatistics($period = 'all') {
+        $period = strtolower($period); // Convert to lowercase for consistency
+        $validPeriods = ['all', 'month', 'week', 'day'];
+
         try {
-            // Get user stats
-            $userSql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM User";
+            $userSql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active FROM {$this->user->table}";
             $userStats = $this->db->fetch($userSql);
-            
-            // Get product stats
-            $productSql = "SELECT COUNT(*) as total, SUM(CASE WHEN featured = 1 THEN 1 ELSE 0 END) as featured FROM Product";
+
+            $this->logger->info('Step 1: Fetching user stats');
+            $userStats = $this->db->fetch($userSql);
+
+            $productSql = "SELECT COUNT(*) as total, SUM(CASE WHEN featured = 1 THEN 1 ELSE 0 END) as featured FROM {$this->product->table}";
             $productStats = $this->db->fetch($productSql);
-            
-            // Get order stats
+
+            $this->logger->info('Step 2: Fetching product stats');
+            $productStats = $this->db->fetch($productSql);
+
             $orderStats = $this->order->getOrderStats();
-            
-            // Get monthly revenue
+
+            $this->logger->info('Step 3: Fetching order stats');
+            $orderStats = $this->order->getOrderStats();
+
             $monthlySql = "SELECT 
                               DATE_FORMAT(orderDate, '%Y-%m') as month, 
                               SUM(totalAmount) as revenue
-                          FROM `Order` 
+                          FROM {$this->order->table} 
                           WHERE status != 'cancelled'
                           GROUP BY month
                           ORDER BY month DESC
                           LIMIT 12";
             $monthlyRevenue = $this->db->fetchAll($monthlySql);
-            
-            // Get top selling products
+
+            $this->logger->info('Step 4: Fetching monthly revenue');
+            $monthlyRevenue = $this->db->fetchAll($monthlySql);
+
             $topProducts = $this->orderItem->getTopSellingProducts(5);
-            
+            $this->logger->info('Step 5: Fetching top products');
+            $topProducts = $this->orderItem->getTopSellingProducts(5);  
+
+            $stats = [
+                'total_users' => $this->getTotalUsers(),
+                'total_orders' => $this->getTotalOrders(),
+                'total_products' => $this->getTotalProducts(),
+                'recent_orders' => $this->getRecentOrders(),
+                'recent_users' => $this->getRecentUsers(),
+                'users' => $userStats,
+                'products' => $productStats,
+                'orders' => [
+                    'total' => $orderStats['total'] ?? 0,
+                    'pending' => $orderStats['pending'] ?? 0,
+                    'processing' => $orderStats['processing'] ?? 0,
+                    'shipped' => $orderStats['shipped'] ?? 0,
+                    'delivered' => $orderStats['delivered'] ?? 0,
+                    'cancelled' => $orderStats['cancelled'] ?? 0
+                ],
+                'revenue' => [
+                    'total' => $orderStats['revenue'] ?? 0,
+                    'monthly' => $monthlyRevenue
+                ],
+                'topSellingProducts' => $topProducts
+            ];
+
             return [
                 'success' => true,
-                'data' => [
-                    'users' => $userStats,
-                    'products' => $productStats,
-                    'orders' => [
-                        'total' => $orderStats['total'] ?? 0,
-                        'pending' => $orderStats['pending'] ?? 0,
-                        'processing' => $orderStats['processing'] ?? 0,
-                        'shipped' => $orderStats['shipped'] ?? 0,
-                        'delivered' => $orderStats['delivered'] ?? 0,
-                        'cancelled' => $orderStats['cancelled'] ?? 0
-                    ],
-                    'revenue' => [
-                        'total' => $orderStats['revenue'] ?? 0,
-                        'monthly' => $monthlyRevenue
-                    ],
-                    'topSellingProducts' => $topProducts
-                ]
+                'data' => $stats
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Admin get dashboard data failed', Logger::formatException($e));
-            
+            $this->logger->error('Error getting dashboard statistics', Logger::formatException($e));
             return [
                 'success' => false,
-                'message' => 'Failed to get dashboard data: ' . $e->getMessage()
+                'message' => '获取统计信息失败'
             ];
         }
     }
     
+    /**
+     * 获取报告数据
+     * 
+     * @param string $type 报告类型 (sales, products, customers)
+     * @param string $period 时间段 (monthly, yearly)
+     * @param string|null $startDate 开始日期
+     * @param string|null $endDate 结束日期
+     * @return array 报告数据
+     */
     public function getReportData($type, $period = 'monthly', $startDate = null, $endDate = null) {
+        $type = strtolower($type); // Convert to lowercase for consistency
+        $validTypes = ['sales', 'products', 'customers'];
+        $validPeriods = ['daily', 'weekly', 'monthly', 'yearly'];
+
         try {
             // Set default dates if not provided
             if ($startDate === null) {
@@ -259,8 +324,8 @@ class AdminController {
                             COUNT(DISTINCT o.id) as order_count,
                             SUM(o.totalAmount) as revenue,
                             SUM(oi.quantity) as items_sold
-                        FROM `Order` o
-                        JOIN OrderItem oi ON o.id = oi.orderId
+                        FROM {$this->order->table} o
+                        JOIN {$this->orderItem->table} oi ON o.id = oi.orderId
                         WHERE o.status != 'cancelled'
                         AND o.orderDate BETWEEN :startDate AND :endDate
                         GROUP BY $groupBy
@@ -295,9 +360,9 @@ class AdminController {
                             SUM(oi.quantity * oi.price) as revenue,
                             c.name as category,
                             d.name as designer
-                        FROM Product p
-                        LEFT JOIN OrderItem oi ON p.id = oi.productId
-                        LEFT JOIN `Order` o ON oi.orderId = o.id
+                        FROM {$this->product->table} p
+                        LEFT JOIN {$this->orderItem->table} oi ON p.id = oi.productId
+                        LEFT JOIN {$this->order->table} o ON oi.orderId = o.id
                         LEFT JOIN Category c ON p.categoryId = c.id
                         LEFT JOIN Designer d ON p.designerId = d.id
                         WHERE (o.orderDate BETWEEN :startDate AND :endDate OR o.id IS NULL)
@@ -332,8 +397,8 @@ class AdminController {
                             COUNT(DISTINCT o.id) as order_count,
                             SUM(o.totalAmount) as total_spent,
                             MAX(o.orderDate) as last_order_date
-                        FROM User u
-                        LEFT JOIN `Order` o ON u.id = o.userId
+                        FROM {$this->user->table} u
+                        LEFT JOIN {$this->order->table} o ON u.id = o.userId
                         WHERE (o.orderDate BETWEEN :startDate AND :endDate OR o.id IS NULL)
                         AND (o.status != 'cancelled' OR o.status IS NULL)
                         GROUP BY u.id
@@ -388,6 +453,16 @@ class AdminController {
     }
     
     public function getSettings($group = null) {
+        $group = $group ? htmlspecialchars($group) : null; // Sanitize group input
+        $group = strtolower($group); // Convert to lowercase for consistency
+        $validGroups = ['general', 'payment', 'shipping', 'email', 'social', 'seo'];
+        if ($group && !in_array($group, $validGroups)) {
+            return [
+                'success' => false,
+                'message' => 'Invalid group specified'
+            ];
+        }
+        // Fetch settings from the database
         try {
             $sql = "SELECT * FROM Setting";
             $params = [];
@@ -433,6 +508,16 @@ class AdminController {
     }
     
     public function updateSettings($data) {
+        // Validate input data
+        if (!is_array($data) || empty($data)) {
+            return [
+                'success' => false,
+                'message' => 'Invalid input data'
+            ];
+        }
+        // Sanitize input data
+        $data = array_map('trim', $data); // Trim all input data
+        $data = array_map('htmlspecialchars', $data); // Sanitize input data
         try {
             $this->db->beginTransaction();
             
@@ -487,61 +572,131 @@ class AdminController {
         }
     }
     
+
     /**
-     * 获取仪表盘统计数据
-     * Get dashboard statistics
-     * 
-     * @param string $period 时间段 (all, month, week, day)
-     * @return array 统计数据
+     * 获取所有用户
+     * @param array $filters 过滤条件
+     * @return array
      */
-    public function getDashboardStatistics($period = 'all') {
+    public function getAllUsers($filters = []) {
         try {
-            // 使用现有的getDashboardData方法
-            $dashboardData = $this->getDashboardData();
+            $sql = "SELECT id, username, email, role, isAdmin, status, createdAt 
+                    FROM {$this->user->table} 
+                    WHERE 1=1";
             
-            // 如果getDashboardData出错，直接返回错误
-            if (!$dashboardData['success']) {
-                return $dashboardData;
+            if (!empty($filters['status'])) {
+                $sql .= " AND status = :status";
             }
             
-            // 基于时间段过滤数据
-            $data = $dashboardData['data'];
-            
-            // 如果需要特定时间段的数据
-            if ($period != 'all') {
-                $startDate = null;
-                
-                switch($period) {
-                    case 'day':
-                        $startDate = date('Y-m-d');
-                        break;
-                    case 'week':
-                        $startDate = date('Y-m-d', strtotime('-7 days'));
-                        break;
-                    case 'month':
-                        $startDate = date('Y-m-d', strtotime('-30 days'));
-                        break;
-                    default:
-                        // 默认不过滤
-                        break;
-                }
-                
-                // 如果设置了开始日期，可以在这里添加代码，根据开始日期过滤数据
-                // 目前简单地返回所有数据，因为getDashboardData里没有实现时间过滤
+            if (!empty($filters['role'])) {
+                $sql .= " AND role = :role";
             }
+            
+            $sql .= " ORDER BY createdAt DESC";
+            
+            $users = $this->db->query($sql, $filters)->fetchAll();
             
             return [
                 'success' => true,
-                'message' => 'Dashboard statistics retrieved successfully',
-                'data' => $data
+                'data' => $users
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Admin get dashboard statistics failed', Logger::formatException($e));
-            
+            $this->logger->error('Error getting all users', Logger::formatException($e));
             return [
                 'success' => false,
-                'message' => 'Failed to get dashboard statistics: ' . $e->getMessage()
+                'message' => '获取用户列表失败'
             ];
         }
     }
-} 
+
+    /**
+     * 获取所有订单
+     * @param array $filters 过滤条件
+     * @return array
+     */
+    public function getAllOrders($filters = []) {
+        try {
+            $sql = "SELECT o.*, u.username as customer_name 
+                    FROM {$this->order->table}  o 
+                    LEFT JOIN {$this->user->table} u ON o.userId = u.id 
+                    WHERE 1=1";
+            
+            if (!empty($filters['status'])) {
+                $sql .= " AND o.status = :status";
+            }
+            
+            $sql .= " ORDER BY o.createdAt DESC";
+            
+            $orders = $this->db->query($sql, $filters)->fetchAll();
+            
+            return [
+                'success' => true,
+                'data' => $orders
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error getting all orders', Logger::formatException($e));
+            return [
+                'success' => false,
+                'message' => '获取订单列表失败'
+            ];
+        }
+    }
+
+    /**
+     * 更新订单状态
+     * @param int $orderId 订单ID
+     * @param string $status 新状态
+     * @return array
+     */
+    public function updateOrderStatus($orderId, $status) {
+        try {
+            $sql = "UPDATE orders SET status = :status WHERE id = :id";
+            $this->db->query($sql, [
+                'id' => $orderId,
+                'status' => $status
+            ]);
+            
+            return [
+                'success' => true,
+                'message' => '订单状态更新成功'
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Error updating order status', Logger::formatException($e));
+            return [
+                'success' => false,
+                'message' => '更新订单状态失败'
+            ];
+        }
+    }
+
+    // 私有辅助方法
+    private function getTotalUsers() {
+        return $this->db->query("SELECT COUNT(*) as total FROM {$this->user->table}")->fetch()['total'];
+    }
+
+    private function getTotalOrders() {
+        return $this->db->query("SELECT COUNT(*) as total FROM {$this->order->table} ")->fetch()['total'];
+    }
+
+    private function getTotalProducts() {
+        return $this->db->query("SELECT COUNT(*) as total FROM {$this->product->table}")->fetch()['total'];
+    }
+
+    private function getRecentOrders($limit = 5) {
+        return $this->db->query(
+            "SELECT o.*, u.username as customer_name 
+             FROM {$this->order->table}  o 
+             LEFT JOIN {$this->user->table}  u ON o.userId = u.id 
+             ORDER BY o.createdAt DESC 
+             LIMIT :limit",
+            ['limit' => $limit]
+        )->fetchAll();
+    }
+
+    private function getRecentUsers($limit = 5) {
+        return $this->db->query(
+            "SELECT * FROM {$this->user->table} ORDER BY createdAt DESC LIMIT :limit",
+            ['limit' => $limit]
+        )->fetchAll();
+    }
+}

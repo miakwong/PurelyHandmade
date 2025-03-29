@@ -5,7 +5,7 @@ use Utils\Database;
 
 class Order {
     private $db;
-    private $table = '`Order`';
+    public $table = 'Order';
     
     public function __construct($db) {
         $this->db = $db;

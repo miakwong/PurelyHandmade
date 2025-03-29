@@ -7,6 +7,16 @@ RewriteEngine On
 # Set base URL (if in a subdirectory)
 RewriteBase /~xzy2020c/PurelyHandmade/
 
+# Allow all methods
+<LimitExcept GET POST PUT DELETE OPTIONS>
+    Order deny,allow
+    Deny from all
+</LimitExcept>
+
+# Handle OPTIONS requests for CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
 # Handle API requests first
 RewriteCond %{REQUEST_URI} ^/~xzy2020c/PurelyHandmade/api [NC]
 
@@ -31,7 +41,6 @@ RewriteRule ^api/auth/check_username$ src/server/api/auth/check_username.php [QS
 RewriteRule ^api/auth/check_email$ src/server/api/auth/check_email.php [QSA,L]
 RewriteRule ^api/auth/logout$ src/server/api/auth/logout.php [QSA,L]
 
-
 # Handle subdirectory API files (e.g., /api/designers/featured)
 RewriteRule ^api/([^/]+)/([^/]+)$ src/server/api/$1/$2.php [QSA,L]
 
@@ -41,8 +50,14 @@ RewriteRule ^api/designers/detail$ src/server/api/designers/detail.php [QSA,L]
 # Handle specific product detail requests (e.g., /api/products/detail?id=123)
 RewriteRule ^api/products/detail$ src/server/api/products/detail.php [QSA,L]
 
-# Handle main directory API files (e.g., /api/products)
-RewriteRule ^api/([^/]+)$ src/server/api/$1/index.php [QSA,L]
+# Handle product update requests
+RewriteRule ^api/products/update$ src/server/api/products/update.php [QSA,L]
+
+# Handle product create requests
+RewriteRule ^api/products/create$ src/server/api/products/create.php [QSA,L]
+
+# Handle product delete requests
+RewriteRule ^api/products/delete$ src/server/api/products/delete.php [QSA,L]
 
 # Frontend resource routing rules
 # Example URLs:
@@ -117,4 +132,11 @@ DirectoryIndex src/client/html/index.html
 # Enable CORS for API requests
 Header set Access-Control-Allow-Origin "*"
 Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-Header set Access-Control-Allow-Headers "Content-Type, Authorization" 
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Allow PUT and DELETE methods for API endpoints
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Allow from all
+    Require all granted
+</FilesMatch> 
